@@ -1,4 +1,4 @@
-package com.nextfaze.databind;
+package com.nextfaze.databind.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -6,6 +6,11 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
+import com.nextfaze.databind.Data;
+import com.nextfaze.databind.DataObserver;
+import com.nextfaze.databind.ErrorObserver;
+import com.nextfaze.databind.LoadingObserver;
+import com.nextfaze.databind.R;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -14,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.Nullable;
 
 /**
- * A container view that, when hooked up to an {@link Data}, will automatically show/hide internal views based
+ * A container view that, when hooked up to an {@link com.nextfaze.databind.Data}, will automatically show/hide internal views based
  * on loading/empty state of the adapter. Each {@link DataLayout} should contain at least a {@link AdapterView} of some
  * kind, an empty view, and a loading view. Each of these must be referenced by custom attributes for the auto layout to
  * be able to manage them.
