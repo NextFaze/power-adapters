@@ -19,10 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.Nullable;
 
 /**
- * A container view that, when hooked up to an {@link com.nextfaze.databind.Data}, will automatically show/hide internal views based
- * on loading/empty state of the adapter. Each {@link DataLayout} should contain at least a {@link AdapterView} of some
- * kind, an empty view, and a loading view. Each of these must be referenced by custom attributes for the auto layout to
- * be able to manage them.
+ * A container view that, when hooked up to an {@link Data}, will automatically show/hide internal views based
+ * on loading/empty/error state of the adapter. Each {@link DataLayout} should contain at least a {@link AdapterView} of some
+ * kind, an empty view, and a loading view. Each of these must be referenced by custom attributes for the auto layout
+ * to be able to manage them.
  */
 @Slf4j
 @Accessors(prefix = "m")
@@ -136,6 +136,11 @@ public class DataLayout extends RelativeLayout {
         updateShown();
     }
 
+    /**
+     * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
+     * view visibility accordingly.
+     * @param data The data instance to observe, which may be {@link null} to cease observing anything.
+     */
     public void setData(@Nullable Data<?> data) {
         if (data != mData) {
             mData = data;

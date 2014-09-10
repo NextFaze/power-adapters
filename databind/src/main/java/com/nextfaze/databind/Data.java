@@ -2,6 +2,22 @@ package com.nextfaze.databind;
 
 import lombok.NonNull;
 
+/**
+ * Provides access to an asynchronously loaded data source.
+ * <p>
+ * A {@code Data} instance may be in a loading state, which it broadcasts to interested observers so they can present
+ * loading indicators.
+ * </p>
+ * <p>
+ * It also broadcasts errors it encounters while loading.
+ * </p>
+ * <p>
+ * It may also be in a shown or hidden state. When hidden, the data may opt to release any internal resources. This way
+ * the user does not need to necessarily free them manually. It's not recommended that resources be
+ * free immediately upon being hidden, however, because often it is only hidden temporarily. Release them after a delay
+ * instead.
+ * </p>
+ */
 public interface Data<T> {
     @NonNull
     T get(int position);

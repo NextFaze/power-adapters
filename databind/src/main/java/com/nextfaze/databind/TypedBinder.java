@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
+/** A "type safe" binder implementation that performs the casts for you. */
 public abstract class TypedBinder<T, V extends View> implements Binder {
 
     private final int mItemLayoutResource;
