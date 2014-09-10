@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/databind/databind.iml" filepath="$PROJECT_DIR$/databind/databind.iml" />
+      <module fileurl="file://$PROJECT_DIR$/databind-android.iml" filepath="$PROJECT_DIR$/databind-android.iml" />
+    </modules>
+  </component>
+</project>
+
