@@ -56,7 +56,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
     protected abstract List<? extends T> loadData() throws Exception;
 
     @Override
-    protected void onShown() {
+    protected final void onShown() {
         // Data not loaded. Start loading it now.
         if (mData == null) {
             loadDataIfAppropriate();
@@ -64,7 +64,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
     }
 
     @Override
-    protected void onHidden() {
+    protected final void onHidden() {
         // Cancel any existing data loads, since we no longer care now we're hidden.
         if (mTask != null) {
             mTask.cancel();
@@ -73,7 +73,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
     }
 
     @Override
-    protected void onHideTimeout() {
+    protected final void onHideTimeout() {
         mData = null;
     }
 
