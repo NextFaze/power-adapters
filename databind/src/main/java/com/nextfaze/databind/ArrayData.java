@@ -1,7 +1,6 @@
 package com.nextfaze.databind;
 
 import com.nextfaze.concurrent.Task;
-import lombok.Delegate;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -11,34 +10,7 @@ import java.util.List;
 
 // TODO: Make thread-safe.
 @Accessors(prefix = "m")
-public abstract class ArrayData<T> implements Data<T> {
-
-    @Delegate
-    @NonNull
-    @SuppressWarnings("deprecation")
-    private final DataHelper mHelper = new DataHelper() {
-        @Override
-        void onShown() {
-            // Data not loaded. Start loading it now.
-            if (mData == null) {
-                loadDataIfAppropriate();
-            }
-        }
-
-        @Override
-        void onHidden() {
-            // Cancel any existing data loads, since we no longer care now we're hidden.
-            if (mTask != null) {
-                mTask.cancel();
-                mTask = null;
-            }
-        }
-
-        @Override
-        void onHideTimeout() {
-            mData = null;
-        }
-    };
+public abstract class ArrayData<T> extends AbstractData<T> {
 
     @Nullable
     private ArrayList<T> mData;
@@ -83,10 +55,32 @@ public abstract class ArrayData<T> implements Data<T> {
     @NonNull
     protected abstract List<? extends T> loadData() throws Exception;
 
+    @Override
+    protected void onShown() {
+        // Data not loaded. Start loading it now.
+        if (mData == null) {
+            loadDataIfAppropriate();
+        }
+    }
+
+    @Override
+    protected void onHidden() {
+        // Cancel any existing data loads, since we no longer care now we're hidden.
+        if (mTask != null) {
+            mTask.cancel();
+            mTask = null;
+        }
+    }
+
+    @Override
+    protected void onHideTimeout() {
+        mData = null;
+    }
+
     private void loadDataIfAppropriate() {
         // We only start loading the data if it's not already loading, and we're shown.
         // If we're not shown we don't care about the data.
-        if (mTask == null && mHelper.isShown()) {
+        if (mTask == null && isShown()) {
             mTask = new Task<List<? extends T>>() {
                 @Override
                 protected List<? extends T> call() throws Throwable {
@@ -96,21 +90,21 @@ public abstract class ArrayData<T> implements Data<T> {
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     mData = new ArrayList<T>(data);
-                    mHelper.notifyChanged();
+                    notifyChanged();
                 }
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
-                    mHelper.notifyError(e);
+                    notifyError(e);
                 }
 
                 @Override
                 protected void onFinally() throws Throwable {
                     mTask = null;
-                    mHelper.notifyLoadingChanged();
+                    notifyLoadingChanged();
                 }
             };
-            mHelper.notifyLoadingChanged();
+            notifyLoadingChanged();
             mTask.execute();
         }
     }
