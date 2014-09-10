@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+apply from: '../nextfaze.gradle'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion '20.0.0'
+
+    defaultConfig {
+        minSdkVersion 10
+        targetSdkVersion 20
+    }
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.5'
+    compile 'com.nextfaze:concurrent:+'
+    compile 'com.google.code.findbugs:jsr305:2.0.3'
+    provided 'org.projectlombok:lombok:1.14.6'
+}
