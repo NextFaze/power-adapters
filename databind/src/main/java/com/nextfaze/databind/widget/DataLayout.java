@@ -6,8 +6,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import com.nextfaze.databind.Data;
 import com.nextfaze.databind.DataObserver;
+import com.nextfaze.databind.ErrorFormatter;
 import com.nextfaze.databind.ErrorObserver;
 import com.nextfaze.databind.LoadingObserver;
 import com.nextfaze.databind.R;
@@ -45,6 +47,7 @@ public class DataLayout extends RelativeLayout {
         @Override
         public void onLoadingChange() {
             mThrowable = null;
+            updateErrorView();
             updateViews();
         }
     };
@@ -54,6 +57,7 @@ public class DataLayout extends RelativeLayout {
         @Override
         public void onError(@NonNull Throwable e) {
             mThrowable = e;
+            updateErrorView();
             updateViews();
         }
     };
@@ -78,6 +82,10 @@ public class DataLayout extends RelativeLayout {
     @Getter
     @Nullable
     private Data<?> mData;
+
+    @Getter
+    @Nullable
+    private ErrorFormatter mErrorFormatter = ErrorFormatter.DEFAULT;
 
     @Nullable
     private Data<?> mRegisteredData;
@@ -157,6 +165,13 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    public void setErrorFormatter(@Nullable ErrorFormatter errorFormatter) {
+        if (errorFormatter != mErrorFormatter) {
+            mErrorFormatter = errorFormatter;
+            updateErrorView();
+        }
+    }
+
     private void updateShown() {
         boolean shown = isThisViewShown();
         if (shown != mShown) {
@@ -205,8 +220,8 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateViews() {
-        // TODO: Error view.
         if (mData == null) {
+            // No data, show empty.
             hide(mAdapterView);
             show(mEmptyView);
             hide(mLoadingView);
@@ -214,23 +229,52 @@ public class DataLayout extends RelativeLayout {
         } else {
             if (mData.isEmpty()) {
                 if (mData.isLoading()) {
+                    // Empty, but loading, so show loading.
                     hide(mAdapterView);
                     hide(mEmptyView);
                     show(mLoadingView);
                     hide(mErrorView);
                 } else {
-                    hide(mAdapterView);
-                    show(mEmptyView);
-                    hide(mLoadingView);
-                    hide(mErrorView);
+                    if (mThrowable == null) {
+                        // Empty, not loading, no error, so show empty.
+                        hide(mAdapterView);
+                        show(mEmptyView);
+                        hide(mLoadingView);
+                        hide(mErrorView);
+                    } else {
+                        // Empty, not loading, but has an error, so show error.
+                        hide(mAdapterView);
+                        hide(mEmptyView);
+                        hide(mLoadingView);
+                        show(mErrorView);
+                    }
                 }
             } else {
+                // Not empty, show adapter view.
                 show(mAdapterView);
                 hide(mEmptyView);
                 hide(mLoadingView);
                 hide(mErrorView);
             }
         }
+    }
+
+    private void updateErrorView() {
+        if (mErrorView instanceof TextView) {
+            TextView errorView = (TextView) mErrorView;
+            errorView.setText(getErrorMessage());
+        }
+    }
+
+    @Nullable
+    private String getErrorMessage() {
+        if (mErrorFormatter == null) {
+            return null;
+        }
+        if (mThrowable == null) {
+            return null;
+        }
+        return mErrorFormatter.format(getContext(), mThrowable);
     }
 
     private static void show(@Nullable View v) {
