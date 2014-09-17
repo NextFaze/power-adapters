@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.nextfaze.databind.widget.DataLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/data_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:adapterView="@+id/list"
+        app:emptyView="@+id/empty"
+        app:loadingView="@+id/loading"
+        app:errorView="@+id/error">
+
+    <!-- List -->
+
+    <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    <!-- Empty -->
+
+    <TextView
+            android:id="@+id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+    <!-- Loading -->
+
+    <ProgressBar
+            style="@android:style/Widget.Holo.ProgressBar"
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+    <!-- Error -->
+
+    <TextView
+            android:id="@+id/error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="#ffff0000"
+            android:textStyle="italic"/>
+
+</com.nextfaze.databind.widget.DataLayout>
