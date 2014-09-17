@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/databind" />
+            <option value="$PROJECT_DIR$/databind-sample" />
           </set>
         </option>
       </GradleProjectSettings>
