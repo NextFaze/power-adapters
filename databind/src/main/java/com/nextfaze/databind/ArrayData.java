@@ -113,14 +113,14 @@ public abstract class ArrayData<T> extends AbstractData<T> {
                 }
 
                 @Override
-                protected void onFailure(@NonNull Throwable e) throws Throwable {
-                    notifyError(e);
+                protected void onWorkEnded() throws Throwable {
+                    mTask = null;
+                    notifyLoadingChanged();
                 }
 
                 @Override
-                protected void onFinally() throws Throwable {
-                    mTask = null;
-                    notifyLoadingChanged();
+                protected void onFailure(@NonNull Throwable e) throws Throwable {
+                    notifyError(e);
                 }
             };
             notifyLoadingChanged();
