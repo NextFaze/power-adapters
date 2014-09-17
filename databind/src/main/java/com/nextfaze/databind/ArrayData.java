@@ -47,6 +47,25 @@ public abstract class ArrayData<T> extends AbstractData<T> {
         invalidate();
     }
 
+    public final boolean add(@NonNull T t) {
+        if (mData == null) {
+            mData = new ArrayList<T>();
+        }
+        if (mData.add(t)) {
+            notifyChanged();
+            return true;
+        }
+        return false;
+    }
+
+    public final boolean remove(@NonNull T t) {
+        if (mData != null && mData.remove(t)) {
+            notifyChanged();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public final boolean isLoading() {
         return mTask != null;
