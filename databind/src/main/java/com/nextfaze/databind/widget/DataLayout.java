@@ -144,6 +144,18 @@ public class DataLayout extends RelativeLayout {
         updateShown();
     }
 
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        updateShown();
+    }
+
+    @Override
+    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        updateShown();
+    }
+
     /**
      * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
      * view visibility accordingly.
