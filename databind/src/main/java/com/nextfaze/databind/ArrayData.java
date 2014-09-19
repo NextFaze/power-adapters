@@ -109,17 +109,21 @@ public abstract class ArrayData<T> extends AbstractData<T> {
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     mData = new ArrayList<T>(data);
+                    mTask = null;
+                    notifyLoadingChanged();
                     notifyChanged();
                 }
 
                 @Override
-                protected void onWorkEnded() throws Throwable {
+                protected void onCanceled() throws Throwable {
                     mTask = null;
                     notifyLoadingChanged();
                 }
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
+                    mTask = null;
+                    notifyLoadingChanged();
                     notifyError(e);
                 }
             };
