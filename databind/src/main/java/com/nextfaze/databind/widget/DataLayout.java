@@ -204,7 +204,7 @@ public class DataLayout extends RelativeLayout {
 
     private boolean isThisViewShown() {
         // TODO: Can we use View.isShown()?
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE;
+        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE;
     }
 
     private void updateDataRegistration() {

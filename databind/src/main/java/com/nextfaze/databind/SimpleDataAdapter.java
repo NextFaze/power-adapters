@@ -18,23 +18,21 @@ public abstract class SimpleDataAdapter<T> extends BaseAdapter {
     @Getter
     private final int mItemLayoutResource;
 
-    @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
-        @Override
-        public void onChange() {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onInvalidated() {
-            notifyDataSetInvalidated();
-        }
-    };
-
     public SimpleDataAdapter(@NonNull Data<T> data, int itemLayoutResource) {
         mData = data;
         mItemLayoutResource = itemLayoutResource;
-        mData.registerDataObserver(mDataObserver);
+        DataObserver dataObserver = new DataObserver() {
+            @Override
+            public void onChange() {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onInvalidated() {
+                notifyDataSetInvalidated();
+            }
+        };
+        mData.registerDataObserver(dataObserver);
     }
 
     @Override

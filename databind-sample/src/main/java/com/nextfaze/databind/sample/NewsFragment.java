@@ -1,6 +1,7 @@
 package com.nextfaze.databind.sample;
 
 import android.app.Fragment;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,11 +11,14 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.nextfaze.databind.ArrayData;
+import com.nextfaze.databind.Binder;
 import com.nextfaze.databind.Data;
-import com.nextfaze.databind.SimpleDataAdapter;
+import com.nextfaze.databind.DataAdapterBuilder;
+import com.nextfaze.databind.TypedBinder;
 import com.nextfaze.databind.widget.DataLayout;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewsFragment extends Fragment {
@@ -23,22 +27,41 @@ public class NewsFragment extends Fragment {
     private final NewsService mNewsService = new NewsService();
 
     @NonNull
-    private final Data<NewsItem> mData = new ArrayData<NewsItem>() {
+    private final Data<Object> mData = new ArrayData<Object>() {
         @NonNull
         @Override
-        protected List<? extends NewsItem> loadData() throws Exception {
-            return mNewsService.getNews();
+        protected List<Object> loadData() throws Exception {
+            ArrayList<Object> data = new ArrayList<>();
+            data.add(new NewsSection("Latest News"));
+            data.addAll(mNewsService.getNews());
+            data.add(new NewsSection("Yesterdays News"));
+            data.addAll(mNewsService.getNews());
+            return data;
         }
     };
 
     @NonNull
-    private final ListAdapter mAdapter = new SimpleDataAdapter<NewsItem>(mData, android.R.layout.simple_list_item_1) {
+    private final Binder mNewsItemBinder = new TypedBinder<NewsItem, TextView>(android.R.layout.simple_list_item_1) {
         @Override
-        protected void bindView(@NonNull NewsItem newsItem, @NonNull View v, int position) {
-            TextView textView = (TextView) v;
+        protected void bind(@NonNull NewsItem newsItem, @NonNull TextView textView, int position) {
             textView.setText(newsItem.getTitle());
         }
     };
+
+    @NonNull
+    private final Binder mNewsSectionBinder = new TypedBinder<NewsSection, TextView>(android.R.layout.simple_list_item_1, false) {
+        @Override
+        protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, int position) {
+            textView.setTypeface(Typeface.DEFAULT_BOLD);
+            textView.setText(newsSection.getTitle());
+        }
+    };
+
+    @NonNull
+    private final ListAdapter mAdapter = new DataAdapterBuilder(mData)
+            .bind(NewsItem.class, mNewsItemBinder)
+            .bind(NewsSection.class, mNewsSectionBinder)
+            .build();
 
     @NonNull
     private DataLayout mDataLayout;

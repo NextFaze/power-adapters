@@ -28,6 +28,8 @@ public interface Data<T> {
 
     boolean isLoading();
 
+    void close();
+
     void notifyShown();
 
     void notifyHidden();
