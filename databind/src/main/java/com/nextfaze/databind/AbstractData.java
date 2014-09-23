@@ -2,10 +2,12 @@ package com.nextfaze.databind;
 
 import android.os.Handler;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import static android.os.Looper.getMainLooper;
 
 // TODO: Make thread-safe.
+@Slf4j
 public abstract class AbstractData<T> implements Data<T> {
 
     private static final long HIDE_TIMEOUT_DELAY = 3000;
@@ -85,6 +87,18 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public boolean isLoading() {
         return mLoading;
+    }
+
+    @Override
+    public void close() {
+        try {
+            onClose();
+        } catch (Exception e) {
+            log.error("Error closing data", e);
+        }
+    }
+
+    protected void onClose() throws Exception {
     }
 
     protected void setLoading(boolean loading) {

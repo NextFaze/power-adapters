@@ -14,9 +14,9 @@ public class NewsService {
 
     @NonNull
     List<NewsItem> getNews() throws Exception {
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         ArrayList<NewsItem> newsItems = new ArrayList<>();
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 10; ++i) {
             newsItems.add(new NewsItem(format("News Item #%s", i)));
         }
         if (RANDOM.nextInt(3) == 0) {
