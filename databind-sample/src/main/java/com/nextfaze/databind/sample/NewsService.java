@@ -20,7 +20,7 @@ public class NewsService {
             newsItems.add(new NewsItem(format("News Item #%s", i)));
         }
         if (RANDOM.nextInt(3) == 0) {
-            throw new RuntimeException("Randomly induced failure");
+//            throw new RuntimeException("Randomly induced failure");
         }
         return newsItems;
     }
