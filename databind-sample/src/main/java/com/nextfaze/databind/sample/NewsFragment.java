@@ -3,6 +3,7 @@ package com.nextfaze.databind.sample;
 import android.app.Fragment;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
-import com.nextfaze.databind.Data;
 import com.nextfaze.databind.DataAdapterBuilder;
+import com.nextfaze.databind.LoadingAdapter;
 import com.nextfaze.databind.TypedBinder;
 import com.nextfaze.databind.widget.DataLayout;
 import lombok.NonNull;
@@ -21,13 +22,18 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.os.Looper.getMainLooper;
+
 public class NewsFragment extends Fragment {
+
+    @NonNull
+    private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
     private final NewsService mNewsService = new NewsService();
 
     @NonNull
-    private final Data<Object> mData = new ArrayData<Object>() {
+    private final ArrayData<?> mData = new ArrayData<Object>() {
         @NonNull
         @Override
         protected List<Object> loadData() throws Exception {
@@ -64,6 +70,9 @@ public class NewsFragment extends Fragment {
             .build();
 
     @NonNull
+    private final ListAdapter mLoadingAdapter = new LoadingAdapter(mData, mAdapter, R.layout.loading_item);
+
+    @NonNull
     private DataLayout mDataLayout;
 
     @NonNull
@@ -88,6 +97,12 @@ public class NewsFragment extends Fragment {
         mDataLayout = (DataLayout) view.findViewById(R.id.data_layout);
         mListView = (ListView) view.findViewById(R.id.list);
         mDataLayout.setData(mData);
-        mListView.setAdapter(mAdapter);
+        mListView.setAdapter(mLoadingAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mData.invalidate();
     }
 }
