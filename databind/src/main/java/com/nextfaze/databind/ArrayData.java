@@ -12,6 +12,8 @@ import java.util.List;
 @Accessors(prefix = "m")
 public abstract class ArrayData<T> extends AbstractData<T> {
 
+    private static final long HIDDEN_DURATION_INVALIDATE_THRESHOLD = 10 * 1000;
+
     @Nullable
     private ArrayList<T> mData;
 
@@ -78,12 +80,16 @@ public abstract class ArrayData<T> extends AbstractData<T> {
     protected abstract List<? extends T> loadData() throws Exception;
 
     @Override
-    protected final void onShown() {
+    protected final void onShown(long millisHidden) {
+        // Mark as dirty if we were hidden for long enough.
+        if (millisHidden >= HIDDEN_DURATION_INVALIDATE_THRESHOLD) {
+            mDirty = true;
+        }
         loadDataIfAppropriate();
     }
 
     @Override
-    protected final void onHidden() {
+    protected final void onHidden(long millisShown) {
         // Cancel any existing data loads, since we no longer care now we're hidden.
         if (mTask != null) {
             mTask.cancel();

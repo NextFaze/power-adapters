@@ -1,6 +1,7 @@
 package com.nextfaze.databind;
 
 import android.os.Handler;
+import android.os.SystemClock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +35,8 @@ public abstract class AbstractData<T> implements Data<T> {
 
     private boolean mLoading;
     private boolean mShown;
+    private long mShowTime;
+    private long mHideTime;
 
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
@@ -68,8 +71,9 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public void notifyShown() {
         if (!mShown) {
+            mShowTime = SystemClock.elapsedRealtime();
             mShown = true;
-            onShown();
+            onShown(SystemClock.elapsedRealtime() - mHideTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
         }
     }
@@ -77,8 +81,9 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public void notifyHidden() {
         if (mShown) {
+            mHideTime = SystemClock.elapsedRealtime();
             mShown = false;
-            onHidden();
+            onHidden(SystemClock.elapsedRealtime() - mShowTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
             mHandler.postDelayed(mHideTimeoutRunnable, HIDE_TIMEOUT_DELAY);
         }
@@ -128,10 +133,10 @@ public abstract class AbstractData<T> implements Data<T> {
         mErrorObservers.notifyError(e);
     }
 
-    protected void onShown() {
+    protected void onShown(long millisHidden) {
     }
 
-    protected void onHidden() {
+    protected void onHidden(long millisShown) {
     }
 
     protected void onHideTimeout() {
