@@ -69,6 +69,11 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return size() <= 0;
+    }
+
+    @Override
     public void notifyShown() {
         if (!mShown) {
             mShowTime = SystemClock.elapsedRealtime();
