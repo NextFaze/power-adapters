@@ -93,11 +93,6 @@ public abstract class ArrayData<T> extends AbstractData<T> {
         }
     }
 
-    @Override
-    protected final void onHideTimeout() {
-        mData = null;
-    }
-
     private void loadDataIfAppropriate() {
         // We only start loading the data if it's not already loading, and we're shown.
         // If we're not shown we don't care about the data.

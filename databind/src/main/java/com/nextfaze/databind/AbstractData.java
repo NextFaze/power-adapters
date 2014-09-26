@@ -1,6 +1,7 @@
 package com.nextfaze.databind;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -123,19 +124,39 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     protected void notifyChanged() {
-        mDataObservers.notifyDataChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyDataChanged();
+            }
+        });
     }
 
     protected void notifyInvalidated() {
-        mDataObservers.notifyDataInvalidated();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyDataInvalidated();
+            }
+        });
     }
 
     protected void notifyLoadingChanged() {
-        mLoadingObservers.notifyLoadingChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLoadingObservers.notifyLoadingChanged();
+            }
+        });
     }
 
-    protected void notifyError(@NonNull Throwable e) {
-        mErrorObservers.notifyError(e);
+    protected void notifyError(@NonNull final Throwable e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mErrorObservers.notifyError(e);
+            }
+        });
     }
 
     protected void onShown(long millisHidden) {
@@ -145,5 +166,13 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     protected void onHideTimeout() {
+    }
+
+    protected void runOnUiThread(@NonNull Runnable runnable) {
+        if (Looper.myLooper() == mHandler.getLooper()) {
+            runnable.run();
+        } else {
+            mHandler.post(runnable);
+        }
     }
 }

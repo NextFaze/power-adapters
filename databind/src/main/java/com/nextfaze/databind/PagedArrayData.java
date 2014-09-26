@@ -1,19 +1,23 @@
 package com.nextfaze.databind;
 
 import android.util.SparseArray;
-import com.nextfaze.concurrent.Task;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
+import java.io.InterruptedIOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Thread.currentThread;
 
 @Slf4j
 @Accessors(prefix = "m")
@@ -24,22 +28,27 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     private static final int UNKNOWN = -1;
     private static final int ROWS_PER_REQUEST_MIN = 1;
     private static final int ROWS_PER_REQUEST_MAX = MAX_VALUE;
+    private static final long HIDDEN_DURATION_INVALIDATE_THRESHOLD = 10 * 1000;
+    private static final String THREAD_NAME = PagedArrayData.class.getSimpleName() + " Thread";
 
-    /** The backing storage. May contain safely contains holes. */
+    /** The backing storage. May contain safely contain holes. */
     @NonNull
     private final SparseArray<T> mData = new SparseArray<T>();
 
-    /** References the current async load task. */
-    @Nullable
-    private Task<?> mTask;
+    @NonNull
+    private final Lock mLock = new ReentrantLock();
+
+    @NonNull
+    private final Condition mLoad = mLock.newCondition();
 
     /** The number of rows to be requested. */
+    @Getter
     private final int mRowsPerRequest;
 
-    @Getter
-    private int mTotal = UNKNOWN;
+    @Nullable
+    private Thread mThread;
 
-    private int mLastLoadedIndex;
+    private volatile boolean mLoading;
 
     protected PagedArrayData() {
         this(ROWS_PER_REQUEST_DEFAULT);
@@ -54,7 +63,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     public final T get(int position) {
         // Requested end of data? Time to load more.
         if (position >= mData.size() - 1) {
-            loadAsNeeded();
+            proceed();
         }
         return mData.get(position);
     }
@@ -66,94 +75,144 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     @Override
     public final boolean isLoading() {
-        return mTask != null;
+        return mLoading;
     }
 
     public final void clear() {
-        mTotal = UNKNOWN;
-        mLastLoadedIndex = 0;
+        stopLoadThread();
+        startLoadThreadIfNecessary();
         mData.clear();
         notifyChanged();
     }
 
-    // TODO: "Load next" method, to hook up to buttons.
+    public final void loadNext() {
+        proceed();
+    }
 
     @NonNull
     protected abstract Page<T> load(int offset, int count) throws Exception;
 
     @Override
     protected void onShown(long millisHidden) {
-        // TODO: If hidden for too long, invalidate entire range.
-        loadAsNeeded();
+        if (millisHidden >= HIDDEN_DURATION_INVALIDATE_THRESHOLD) {
+            mData.clear();
+            stopLoadThread();
+        }
+        startLoadThreadIfNecessary();
     }
 
     @Override
     protected void onHidden(long millisShown) {
         // TODO: Cancel after a delay.
-        if (mTask != null) {
-            mTask.cancel(true);
-            mTask = null;
+        stopLoadThread();
+    }
+
+    private void startLoadThreadIfNecessary() {
+        if (mThread == null) {
+            mThread = new Thread(THREAD_NAME) {
+                @Override
+                public void run() {
+                    try {
+                        loadLoop();
+                    } catch (InterruptedException e) {
+                        // Normal thread termination.
+                    }
+                }
+            };
+            mThread.start();
         }
     }
 
-    private void loadAsNeeded() {
-        int remaining;
-        if (mTotal != UNKNOWN) {
-            remaining = mTotal - mLastLoadedIndex;
-        } else {
-            remaining = MAX_VALUE;
+    private void stopLoadThread() {
+        if (mThread != null) {
+            mThread.interrupt();
+            mThread = null;
         }
+    }
 
-        final int offset = mLastLoadedIndex;
-        final int count = min(mRowsPerRequest, remaining);
+    /** Loads each page until full range has been loading, halting in between pages until instructed to proceed. */
+    private void loadLoop() throws InterruptedException {
+        int lastLoadedIndex = 0;
+        int total = UNKNOWN;
 
-        // TODO: Replace with a Thread that lives as long as we're shown, and loads pages in a loop until finished or cleared.
+        // Loop until full range loaded.
+        while (total == UNKNOWN || lastLoadedIndex < total) {
+            // Thread interruptions terminate the loop.
+            if (currentThread().isInterrupted()) {
+                throw new InterruptedException();
+            }
+            try {
+                // Calculate page to be loaded next.
+                int remaining = total != UNKNOWN ? total - lastLoadedIndex : MAX_VALUE;
+                int offset = lastLoadedIndex;
+                int count = min(mRowsPerRequest, remaining);
 
-        if (mTask == null && isShown() && count > 0) {
-            mTask = new Task<Page<T>>() {
-                @Override
-                @NonNull
-                public Page<T> call() throws Exception {
-                    return load(offset, count);
-                }
+                mLoading = true;
+                notifyChanged();
 
-                @Override
-                protected void onSuccess(@NonNull Page<T> page) throws Exception {
-                    mTotal = page.getTotal();
-                    mLastLoadedIndex = page.getOffset() + page.getCount();
-                    store(page);
+                final Page<T> page;
+                try {
+                    // Load next page.
+                    page = load(offset, count);
+                } finally {
+                    mLoading = false;
                     notifyChanged();
                 }
 
-                @Override
-                protected void onCanceled() throws Throwable {
-                    mTask = null;
-                    notifyLoadingChanged();
-                }
+                total = page.getTotal();
+                lastLoadedIndex += page.getCount();
 
-                @Override
-                protected void onFailure(@NonNull Throwable e) throws Throwable {
-                    mTask = null;
-                    notifyLoadingChanged();
-                    notifyError(e);
-                }
-            };
-            notifyLoadingChanged();
-            mTask.execute();
+                // Store page and notify users of change.
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        store(page);
+                        notifyChanged();
+                    }
+                });
+            } catch (InterruptedException e) {
+                // Normal thread interruption.
+                throw new InterruptedException();
+            } catch (InterruptedIOException e) {
+                // Normal thread interruption from blocking I/O.
+                throw new InterruptedException();
+            } catch (Throwable e) {
+                log.error("Error loading page", e);
+                notifyError(e);
+            }
+
+            // Block until instructed to continue, even if an error occurred.
+            // In this case, loading must be explicitly resumed.
+            block();
         }
     }
 
-    private boolean store(@NonNull Page<T> page) {
-        boolean changed = false;
+    private void block() throws InterruptedException {
+        mLock.lock();
+        try {
+            mLoad.await();
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private void proceed() {
+        mLock.lock();
+        try {
+            mLoad.signal();
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    private void store(@NonNull Page<T> page) {
         List<T> list = page.getContents();
         int size = list.size();
         for (int i = 0; i < size && i < page.getCount(); ++i) {
             T item = list.get(i);
             int position = page.getOffset() + i;
-            changed |= mData.get(position) != null;
             mData.put(position, item);
         }
-        return changed;
     }
 
     private static int clamp(int v, int min, int max) {
