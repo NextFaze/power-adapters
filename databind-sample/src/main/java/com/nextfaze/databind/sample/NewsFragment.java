@@ -3,7 +3,6 @@ package com.nextfaze.databind.sample;
 import android.app.Fragment;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +12,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
+import com.nextfaze.databind.Data;
 import com.nextfaze.databind.DataAdapterBuilder;
 import com.nextfaze.databind.LoadingAdapter;
+import com.nextfaze.databind.PagedArrayData;
 import com.nextfaze.databind.TypedBinder;
 import com.nextfaze.databind.widget.DataLayout;
 import lombok.NonNull;
@@ -22,18 +23,13 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.os.Looper.getMainLooper;
-
 public class NewsFragment extends Fragment {
-
-    @NonNull
-    private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
     private final NewsService mNewsService = new NewsService();
 
     @NonNull
-    private final ArrayData<?> mData = new ArrayData<Object>() {
+    private final ArrayData<?> mData2 = new ArrayData<Object>() {
         @NonNull
         @Override
         protected List<Object> loadData() throws Exception {
@@ -43,6 +39,17 @@ public class NewsFragment extends Fragment {
             data.add(new NewsSection("Yesterdays News"));
             data.addAll(mNewsService.getNews());
             return data;
+        }
+    };
+
+    @NonNull
+    private final Data<?> mData = new PagedArrayData<Object>() {
+        @NonNull
+        @Override
+        protected Page<Object> load(int offset, int count) throws Exception {
+            ArrayList<Object> data = new ArrayList<>();
+            data.addAll(mNewsService.getNews(offset, count));
+            return new Page<Object>(data, offset, count, 50);
         }
     };
 
@@ -98,11 +105,5 @@ public class NewsFragment extends Fragment {
         mListView = (ListView) view.findViewById(R.id.list);
         mDataLayout.setData(mData);
         mListView.setAdapter(mLoadingAdapter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mData.invalidate();
     }
 }
