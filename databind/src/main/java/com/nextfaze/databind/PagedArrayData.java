@@ -27,7 +27,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     /** The backing storage. May contain safely contains holes. */
     @NonNull
-    private final SparseArray<T> mData = new SparseArray<>();
+    private final SparseArray<T> mData = new SparseArray<T>();
 
     /** References the current async load task. */
     @Nullable
@@ -107,6 +107,8 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
         final int offset = mLastLoadedIndex;
         final int count = min(mRowsPerRequest, remaining);
 
+        // TODO: Replace with a Thread that lives as long as we're shown, and loads pages in a loop until finished or cleared.
+
         if (mTask == null && isShown() && count > 0) {
             mTask = new Task<Page<T>>() {
                 @Override
@@ -178,7 +180,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
         @NonNull
         public static <T> Page<T> emptyResult() {
-            return new Page<>(Collections.<T>emptyList(), 0, 0, 0);
+            return new Page<T>(Collections.<T>emptyList(), 0, 0, 0);
         }
     }
 }
