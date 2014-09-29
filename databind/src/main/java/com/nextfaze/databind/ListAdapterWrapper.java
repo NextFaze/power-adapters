@@ -7,7 +7,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
-public class ListAdapterWrapper extends BaseAdapter {
+public class ListAdapterWrapper extends BaseAdapter implements DisposableListAdapter {
 
     @NonNull
     protected final ListAdapter mAdapter;
@@ -30,6 +30,7 @@ public class ListAdapterWrapper extends BaseAdapter {
         mAdapter.registerDataSetObserver(mDataSetObserver);
     }
 
+    @Override
     public void dispose() {
         mAdapter.unregisterDataSetObserver(mDataSetObserver);
     }
