@@ -12,20 +12,39 @@ import lombok.experimental.Accessors;
 public class EmptyAdapter extends ListAdapterWrapper {
 
     @NonNull
+    private final Data<?> mData;
+
+    @NonNull
+    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
+        @Override
+        public void onLoadingChange() {
+            notifyDataSetChanged();
+        }
+    };
+
+    @NonNull
     private final View mEmptyView;
 
     @Getter
     @Setter
     private boolean mEmptyItemEnabled;
 
-    public EmptyAdapter(@NonNull ListAdapter adapter, @NonNull View emptyView) {
+    public EmptyAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @NonNull View emptyView) {
         super(adapter);
         mEmptyView = emptyView;
+        mData = data;
+        mData.registerLoadingObserver(mLoadingObserver);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
     @Override
     public int getCount() {
-        if (mAdapter.isEmpty()) {
+        if (shouldShowEmptyItem()) {
             return mAdapter.getCount() + 1;
         }
         return mAdapter.getCount();
@@ -39,7 +58,7 @@ public class EmptyAdapter extends ListAdapterWrapper {
 
     @Override
     public int getItemViewType(int position) {
-        if (mAdapter.isEmpty() && isEmptyItem(position)) {
+        if (shouldShowEmptyItem() && isEmptyItem(position)) {
             return getEmptyViewType();
         }
         return super.getItemViewType(position);
@@ -55,10 +74,14 @@ public class EmptyAdapter extends ListAdapterWrapper {
 
     @Override
     public boolean isEnabled(int position) {
-        if (mAdapter.isEmpty() && isEmptyItem(position)) {
+        if (shouldShowEmptyItem() && isEmptyItem(position)) {
             return mEmptyItemEnabled;
         }
         return super.isEnabled(position);
+    }
+
+    private boolean shouldShowEmptyItem() {
+        return !mData.isLoading() && mAdapter.isEmpty();
     }
 
     private boolean isEmptyItem(int position) {

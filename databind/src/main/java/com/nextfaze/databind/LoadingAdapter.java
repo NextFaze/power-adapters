@@ -4,12 +4,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 /**
  * Wraps an existing {@link ListAdapter} and displays a loading indicator while the supplied {@link Data} is in the
  * loading state.
  */
+@Accessors(prefix = "m")
 public class LoadingAdapter extends ListAdapterWrapper {
 
     @NonNull
@@ -24,6 +28,10 @@ public class LoadingAdapter extends ListAdapterWrapper {
     };
 
     private final int mLoadingItemResource;
+
+    @Getter
+    @Setter
+    private boolean mLoadingItemEnabled;
 
     public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, int loadingItemResource) {
         super(adapter);
@@ -73,6 +81,14 @@ public class LoadingAdapter extends ListAdapterWrapper {
             return convertView;
         }
         return super.getView(position, convertView, parent);
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        if (shouldShowLoadingItem() && isLoadingItem(position)) {
+            return mLoadingItemEnabled;
+        }
+        return super.isEnabled(position);
     }
 
     @NonNull
