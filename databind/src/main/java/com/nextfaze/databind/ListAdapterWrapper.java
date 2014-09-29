@@ -7,13 +7,31 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
-public class ListAdapterWrapper implements ListAdapter {
+public class ListAdapterWrapper extends BaseAdapter {
 
     @NonNull
     protected final ListAdapter mAdapter;
 
+    @NonNull
+    private final DataSetObserver mDataSetObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onInvalidated() {
+            notifyDataSetInvalidated();
+        }
+    };
+
     public ListAdapterWrapper(@NonNull ListAdapter adapter) {
         mAdapter = adapter;
+        mAdapter.registerDataSetObserver(mDataSetObserver);
+    }
+
+    public void dispose() {
+        mAdapter.unregisterDataSetObserver(mDataSetObserver);
     }
 
     @Override
@@ -34,16 +52,6 @@ public class ListAdapterWrapper implements ListAdapter {
     @Override
     public boolean isEnabled(int position) {
         return mAdapter.isEnabled(position);
-    }
-
-    @Override
-    public void registerDataSetObserver(@NonNull DataSetObserver observer) {
-        mAdapter.registerDataSetObserver(observer);
-    }
-
-    @Override
-    public void unregisterDataSetObserver(@NonNull DataSetObserver observer) {
-        mAdapter.unregisterDataSetObserver(observer);
     }
 
     @Override
@@ -74,17 +82,5 @@ public class ListAdapterWrapper implements ListAdapter {
     @Override
     public int getViewTypeCount() {
         return mAdapter.getViewTypeCount();
-    }
-
-    public void notifyDataSetChanged() {
-        if (mAdapter instanceof BaseAdapter) {
-            ((BaseAdapter) mAdapter).notifyDataSetChanged();
-        }
-    }
-
-    public void notifyDataSetInvalidated() {
-        if (mAdapter instanceof BaseAdapter) {
-            ((BaseAdapter) mAdapter).notifyDataSetInvalidated();
-        }
     }
 }
