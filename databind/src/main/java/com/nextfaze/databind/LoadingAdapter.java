@@ -15,18 +15,27 @@ public class LoadingAdapter extends ListAdapterWrapper {
     @NonNull
     private final Data<?> mData;
 
-    private final int mLoadingItemResourceId;
+    @NonNull
+    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
+        @Override
+        public void onLoadingChange() {
+            notifyDataSetChanged();
+        }
+    };
 
-    public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, int loadingItemResourceId) {
+    private final int mLoadingItemResource;
+
+    public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, int loadingItemResource) {
         super(adapter);
-        mLoadingItemResourceId = loadingItemResourceId;
+        mLoadingItemResource = loadingItemResource;
         mData = data;
-        mData.registerLoadingObserver(new LoadingObserver() {
-            @Override
-            public void onLoadingChange() {
-                notifyDataSetChanged();
-            }
-        });
+        mData.registerLoadingObserver(mLoadingObserver);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
     @Override
@@ -68,7 +77,7 @@ public class LoadingAdapter extends ListAdapterWrapper {
 
     @NonNull
     protected View newLoadingView(@NonNull ViewGroup parent) {
-        return getLayoutInflater(parent).inflate(mLoadingItemResourceId, parent, false);
+        return getLayoutInflater(parent).inflate(mLoadingItemResource, parent, false);
     }
 
     private boolean shouldShowLoadingItem() {
