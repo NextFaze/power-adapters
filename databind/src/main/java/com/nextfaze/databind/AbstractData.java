@@ -1,8 +1,11 @@
 package com.nextfaze.databind;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import static android.os.Looper.getMainLooper;
@@ -11,7 +14,7 @@ import static android.os.Looper.getMainLooper;
 @Slf4j
 public abstract class AbstractData<T> implements Data<T> {
 
-    private static final long HIDE_TIMEOUT_DELAY = 3000;
+    private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
 
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
@@ -33,10 +36,13 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     };
 
-    private boolean mLoading;
     private boolean mShown;
     private long mShowTime;
     private long mHideTime;
+
+    @Getter
+    @Setter
+    private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
@@ -69,6 +75,11 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return size() <= 0;
+    }
+
+    @Override
     public void notifyShown() {
         if (!mShown) {
             mShowTime = SystemClock.elapsedRealtime();
@@ -85,13 +96,8 @@ public abstract class AbstractData<T> implements Data<T> {
             mShown = false;
             onHidden(SystemClock.elapsedRealtime() - mShowTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
-            mHandler.postDelayed(mHideTimeoutRunnable, HIDE_TIMEOUT_DELAY);
+            mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
         }
-    }
-
-    @Override
-    public boolean isLoading() {
-        return mLoading;
     }
 
     @Override
@@ -106,31 +112,44 @@ public abstract class AbstractData<T> implements Data<T> {
     protected void onClose() throws Exception {
     }
 
-    protected void setLoading(boolean loading) {
-        if (loading != mLoading) {
-            mLoading = loading;
-            notifyLoadingChanged();
-        }
-    }
-
     protected boolean isShown() {
         return mShown;
     }
 
     protected void notifyChanged() {
-        mDataObservers.notifyDataChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyDataChanged();
+            }
+        });
     }
 
     protected void notifyInvalidated() {
-        mDataObservers.notifyDataInvalidated();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyDataInvalidated();
+            }
+        });
     }
 
     protected void notifyLoadingChanged() {
-        mLoadingObservers.notifyLoadingChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLoadingObservers.notifyLoadingChanged();
+            }
+        });
     }
 
-    protected void notifyError(@NonNull Throwable e) {
-        mErrorObservers.notifyError(e);
+    protected void notifyError(@NonNull final Throwable e) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mErrorObservers.notifyError(e);
+            }
+        });
     }
 
     protected void onShown(long millisHidden) {
@@ -140,5 +159,13 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     protected void onHideTimeout() {
+    }
+
+    protected void runOnUiThread(@NonNull Runnable runnable) {
+        if (Looper.myLooper() == mHandler.getLooper()) {
+            runnable.run();
+        } else {
+            mHandler.post(runnable);
+        }
     }
 }

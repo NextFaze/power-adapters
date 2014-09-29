@@ -30,11 +30,6 @@ public abstract class ArrayData<T> extends AbstractData<T> {
         return mData != null ? mData.size() : 0;
     }
 
-    @Override
-    public final boolean isEmpty() {
-        return size() == 0;
-    }
-
     @NonNull
     @Override
     public final T get(int position) {
@@ -90,16 +85,14 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     @Override
     protected final void onHidden(long millisShown) {
-        // Cancel any existing data loads, since we no longer care now we're hidden.
+    }
+
+    @Override
+    protected void onHideTimeout() {
         if (mTask != null) {
             mTask.cancel();
             mTask = null;
         }
-    }
-
-    @Override
-    protected final void onHideTimeout() {
-        mData = null;
     }
 
     private void loadDataIfAppropriate() {
