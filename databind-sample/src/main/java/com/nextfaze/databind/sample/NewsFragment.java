@@ -5,6 +5,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -12,7 +15,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
-import com.nextfaze.databind.Data;
 import com.nextfaze.databind.DataAdapterBuilder;
 import com.nextfaze.databind.LoadingAdapter;
 import com.nextfaze.databind.PagedArrayData;
@@ -43,7 +45,7 @@ public class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final Data<?> mData = new PagedArrayData<Object>() {
+    private final PagedArrayData<?> mData = new PagedArrayData<Object>() {
         @NonNull
         @Override
         protected Page<Object> load(int offset, int count) throws Exception {
@@ -90,6 +92,13 @@ public class NewsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         // Retain Fragment instance to preserve data avoid reloading the data between config changes.
         setRetainInstance(true);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mData.close();
     }
 
     @Nullable
@@ -105,5 +114,17 @@ public class NewsFragment extends Fragment {
         mListView = (ListView) view.findViewById(R.id.list);
         mDataLayout.setData(mData);
         mListView.setAdapter(mLoadingAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.add("Clear").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mData.clear();
+                return true;
+            }
+        });
     }
 }

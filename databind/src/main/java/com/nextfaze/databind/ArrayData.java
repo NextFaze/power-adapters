@@ -85,8 +85,10 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     @Override
     protected final void onHidden(long millisShown) {
-        // TODO: Cancel after a delay.
-        // Cancel any existing data loads, since we no longer care now we're hidden.
+    }
+
+    @Override
+    protected void onHideTimeout() {
         if (mTask != null) {
             mTask.cancel();
             mTask = null;

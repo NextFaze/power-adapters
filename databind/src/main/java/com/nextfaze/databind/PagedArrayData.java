@@ -25,6 +25,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     public static final int ROWS_PER_REQUEST_DEFAULT = 20;
 
+    private static final boolean DEBUG_LOGGING = false;
     private static final int UNKNOWN = -1;
     private static final int ROWS_PER_REQUEST_MIN = 1;
     private static final int ROWS_PER_REQUEST_MAX = MAX_VALUE;
@@ -48,7 +49,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     @Nullable
     private Thread mThread;
 
-    private volatile boolean mLoading;
+    private boolean mLoading;
 
     protected PagedArrayData() {
         this(ROWS_PER_REQUEST_DEFAULT);
@@ -79,10 +80,9 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     }
 
     public final void clear() {
+        clearDataAndNotify();
         stopLoadThread();
-        startLoadThreadIfNecessary();
-        mData.clear();
-        notifyChanged();
+        startLoadThreadIfNeeded();
     }
 
     public final void loadNext() {
@@ -94,21 +94,39 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     @Override
     protected void onShown(long millisHidden) {
+        log("onShown: hidden for {} ms", millisHidden);
         if (millisHidden >= HIDDEN_DURATION_INVALIDATE_THRESHOLD) {
-            mData.clear();
+            clearDataAndNotify();
             stopLoadThread();
         }
-        startLoadThreadIfNecessary();
+        startLoadThreadIfNeeded();
     }
 
     @Override
     protected void onHidden(long millisShown) {
-        // TODO: Cancel after a delay.
+        log("onHidden: shown for {} ms", millisShown);
+    }
+
+    @Override
+    protected void onHideTimeout() {
+        log("onHideTimeout");
+        clearDataAndNotify();
         stopLoadThread();
     }
 
-    private void startLoadThreadIfNecessary() {
-        if (mThread == null) {
+    @Override
+    protected void onClose() throws Exception {
+        stopLoadThread();
+    }
+
+    private void clearDataAndNotify() {
+        mData.clear();
+        notifyChanged();
+    }
+
+    private void startLoadThreadIfNeeded() {
+        if (mThread == null && isShown()) {
+            log("starting load thread...");
             mThread = new Thread(THREAD_NAME) {
                 @Override
                 public void run() {
@@ -116,6 +134,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
                         loadLoop();
                     } catch (InterruptedException e) {
                         // Normal thread termination.
+                        log("Thread: InterruptedException (normal termination)");
                     }
                 }
             };
@@ -125,6 +144,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     private void stopLoadThread() {
         if (mThread != null) {
+            log("stopping load thread...");
             mThread.interrupt();
             mThread = null;
         }
@@ -132,6 +152,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     /** Loads each page until full range has been loading, halting in between pages until instructed to proceed. */
     private void loadLoop() throws InterruptedException {
+        log("Start load loop");
         int lastLoadedIndex = 0;
         int total = UNKNOWN;
 
@@ -147,16 +168,14 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
                 int offset = lastLoadedIndex;
                 int count = min(mRowsPerRequest, remaining);
 
-                mLoading = true;
-                notifyChanged();
-
+                setLoading(true);
                 final Page<T> page;
                 try {
+                    log("load: offset = {}, count = {}", offset, count);
                     // Load next page.
                     page = load(offset, count);
                 } finally {
-                    mLoading = false;
-                    notifyChanged();
+                    setLoading(false);
                 }
 
                 total = page.getTotal();
@@ -171,9 +190,11 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
                     }
                 });
             } catch (InterruptedException e) {
+                log("loadLoop: InterruptedException");
                 // Normal thread interruption.
                 throw new InterruptedException();
             } catch (InterruptedIOException e) {
+                log("loadLoop: InterruptedIOException");
                 // Normal thread interruption from blocking I/O.
                 throw new InterruptedException();
             } catch (Throwable e) {
@@ -185,6 +206,16 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
             // In this case, loading must be explicitly resumed.
             block();
         }
+    }
+
+    private void setLoading(final boolean loading) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLoading = loading;
+                notifyLoadingChanged();
+            }
+        });
     }
 
     private void block() throws InterruptedException {
@@ -217,6 +248,12 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     private static int clamp(int v, int min, int max) {
         return max(min(max, v), min);
+    }
+
+    private static void log(@NonNull String format, @NonNull Object... msg) {
+        if (DEBUG_LOGGING) {
+            log.info(format, msg);
+        }
     }
 
     @Getter
