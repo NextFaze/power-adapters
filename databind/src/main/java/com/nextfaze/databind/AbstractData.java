@@ -3,7 +3,9 @@ package com.nextfaze.databind;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import static android.os.Looper.getMainLooper;
@@ -12,7 +14,7 @@ import static android.os.Looper.getMainLooper;
 @Slf4j
 public abstract class AbstractData<T> implements Data<T> {
 
-    private static final long HIDE_TIMEOUT_DELAY = 3000;
+    private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
 
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
@@ -34,10 +36,13 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     };
 
-    private boolean mLoading;
     private boolean mShown;
     private long mShowTime;
     private long mHideTime;
+
+    @Getter
+    @Setter
+    private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
@@ -91,13 +96,8 @@ public abstract class AbstractData<T> implements Data<T> {
             mShown = false;
             onHidden(SystemClock.elapsedRealtime() - mShowTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
-            mHandler.postDelayed(mHideTimeoutRunnable, HIDE_TIMEOUT_DELAY);
+            mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
         }
-    }
-
-    @Override
-    public boolean isLoading() {
-        return mLoading;
     }
 
     @Override
@@ -110,13 +110,6 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     protected void onClose() throws Exception {
-    }
-
-    protected void setLoading(boolean loading) {
-        if (loading != mLoading) {
-            mLoading = loading;
-            notifyLoadingChanged();
-        }
     }
 
     protected boolean isShown() {
