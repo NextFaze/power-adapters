@@ -275,7 +275,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
         }
 
         @NonNull
-        public static <T> Page<T> emptyResult() {
+        public static <T> Page<T> emptyPage() {
             return new Page<T>(Collections.<T>emptyList(), 0, 0, 0);
         }
     }
