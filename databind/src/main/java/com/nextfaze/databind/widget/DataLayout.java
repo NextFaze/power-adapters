@@ -8,10 +8,7 @@ import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.nextfaze.databind.Data;
-import com.nextfaze.databind.DataObserver;
 import com.nextfaze.databind.ErrorFormatter;
-import com.nextfaze.databind.ErrorObserver;
-import com.nextfaze.databind.LoadingObserver;
 import com.nextfaze.databind.R;
 import lombok.Getter;
 import lombok.NonNull;
@@ -21,10 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.Nullable;
 
 /**
- * A container view that, when hooked up to an {@link Data}, will automatically show/hide internal views based
- * on loading/empty/error state of the adapter. Each {@link DataLayout} should contain at least a {@link AdapterView} of some
- * kind, an empty view, and a loading view. Each of these must be referenced by custom attributes for the auto layout
- * to be able to manage them.
+ * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide internal views based
+ * on loading/empty/error state of the data. Each {@link DataLayout} should contain an {@link AdapterView} of some
+ * kind (although this is not mandatory), an empty view, a loading view, and an error view. Each of these must be
+ * referenced by custom attributes for the layout to be able to manage them.
+ * @author Ben Tilbrook
  */
 @Slf4j
 @Accessors(prefix = "m")
@@ -52,13 +50,13 @@ public class DataLayout extends RelativeLayout {
         }
     };
 
-    private final int mAdapterViewId;
+    private final int mContentViewId;
     private final int mEmptyViewId;
     private final int mLoadingViewId;
     private final int mErrorViewId;
 
     @Nullable
-    private AdapterView<?> mAdapterView;
+    private View mContentView;
 
     @Nullable
     private View mEmptyView;
@@ -95,7 +93,7 @@ public class DataLayout extends RelativeLayout {
     public DataLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DataLayout, defStyle, 0);
-        mAdapterViewId = a.getResourceId(R.styleable.DataLayout_adapterView, -1);
+        mContentViewId = a.getResourceId(R.styleable.DataLayout_contentView, -1);
         mEmptyViewId = a.getResourceId(R.styleable.DataLayout_emptyView, -1);
         mLoadingViewId = a.getResourceId(R.styleable.DataLayout_loadingView, -1);
         mErrorViewId = a.getResourceId(R.styleable.DataLayout_errorView, -1);
@@ -104,7 +102,7 @@ public class DataLayout extends RelativeLayout {
 
     @Override
     protected void onFinishInflate() {
-        mAdapterView = (AdapterView<?>) findViewById(mAdapterViewId);
+        mContentView = findViewById(mContentViewId);
         mEmptyView = findViewById(mEmptyViewId);
         mLoadingView = findViewById(mLoadingViewId);
         mErrorView = findViewById(mErrorViewId);
@@ -196,7 +194,7 @@ public class DataLayout extends RelativeLayout {
     private void updateViews() {
         if (mData == null) {
             // No data, show empty.
-            hide(mAdapterView);
+            hide(mContentView);
             show(mEmptyView);
             hide(mLoadingView);
             hide(mErrorView);
@@ -204,20 +202,20 @@ public class DataLayout extends RelativeLayout {
             if (mData.isEmpty()) {
                 if (mData.isLoading()) {
                     // Empty, but loading, so show loading.
-                    hide(mAdapterView);
+                    hide(mContentView);
                     hide(mEmptyView);
                     show(mLoadingView);
                     hide(mErrorView);
                 } else {
                     if (mThrowable == null) {
                         // Empty, not loading, no error, so show empty.
-                        hide(mAdapterView);
+                        hide(mContentView);
                         show(mEmptyView);
                         hide(mLoadingView);
                         hide(mErrorView);
                     } else {
                         // Empty, not loading, but has an error, so show error.
-                        hide(mAdapterView);
+                        hide(mContentView);
                         hide(mEmptyView);
                         hide(mLoadingView);
                         show(mErrorView);
@@ -225,7 +223,7 @@ public class DataLayout extends RelativeLayout {
                 }
             } else {
                 // Not empty, show adapter view.
-                show(mAdapterView);
+                show(mContentView);
                 hide(mEmptyView);
                 hide(mLoadingView);
                 hide(mErrorView);

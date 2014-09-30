@@ -110,8 +110,8 @@ public class NewsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mDataLayout = (DataLayout) view.findViewById(R.id.data_layout);
-        mListView = (ListView) view.findViewById(R.id.list);
+        mDataLayout = (DataLayout) view.findViewById(R.id.news_fragment_data_layout);
+        mListView = (ListView) view.findViewById(R.id.news_fragment_list);
         mDataLayout.setData(mData);
         mListView.setAdapter(mLoadingAdapter);
     }
