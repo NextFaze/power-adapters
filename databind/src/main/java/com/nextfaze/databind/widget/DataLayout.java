@@ -31,29 +31,19 @@ import javax.annotation.Nullable;
 public class DataLayout extends RelativeLayout {
 
     @NonNull
-    private final DataObserver mDataSetObserver = new DataObserver() {
+    private final DataWatcher mDataWatcher = new DataWatcher() {
         @Override
         public void onChange() {
             updateViews();
         }
 
         @Override
-        public void onInvalidated() {
-        }
-    };
-
-    @NonNull
-    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
-        @Override
         public void onLoadingChange() {
             mThrowable = null;
             updateErrorView();
             updateViews();
         }
-    };
 
-    @NonNull
-    private final ErrorObserver mErrorObserver = new ErrorObserver() {
         @Override
         public void onError(@NonNull Throwable e) {
             mThrowable = e;
@@ -83,15 +73,12 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private Data<?> mData;
 
+    @Nullable
+    private Throwable mThrowable;
+
     @Getter
     @Nullable
     private ErrorFormatter mErrorFormatter = ErrorFormatter.DEFAULT;
-
-    @Nullable
-    private Data<?> mRegisteredData;
-
-    @Nullable
-    private Throwable mThrowable;
 
     private boolean mAttachedToWindow;
     private boolean mShown;
@@ -162,9 +149,9 @@ public class DataLayout extends RelativeLayout {
      * @param data The data instance to observe, which may be {@link null} to cease observing anything.
      */
     public void setData(@Nullable Data<?> data) {
+        mDataWatcher.setData(data);
         if (data != mData) {
             mData = data;
-            updateDataRegistration();
             updateViews();
             // We may already be showing, so notify new data.
             if (data != null) {
@@ -186,9 +173,9 @@ public class DataLayout extends RelativeLayout {
 
     private void updateShown() {
         boolean shown = isThisViewShown();
+        mDataWatcher.setShown(shown);
         if (shown != mShown) {
             mShown = shown;
-            updateDataRegistration();
             updateViews();
             if (shown) {
                 if (mData != null) {
@@ -203,32 +190,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     private boolean isThisViewShown() {
-        // TODO: Can we use View.isShown()?
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE;
-    }
-
-    private void updateDataRegistration() {
-        if (mShown) {
-            changeRegisteredData(mData);
-        } else {
-            changeRegisteredData(null);
-        }
-    }
-
-    private void changeRegisteredData(@Nullable Data<?> data) {
-        if (data != mRegisteredData) {
-            if (mRegisteredData != null) {
-                mRegisteredData.unregisterDataObserver(mDataSetObserver);
-                mRegisteredData.unregisterLoadingObserver(mLoadingObserver);
-                mRegisteredData.unregisterErrorObserver(mErrorObserver);
-            }
-            mRegisteredData = data;
-            if (mRegisteredData != null) {
-                mRegisteredData.registerDataObserver(mDataSetObserver);
-                mRegisteredData.registerLoadingObserver(mLoadingObserver);
-                mRegisteredData.registerErrorObserver(mErrorObserver);
-            }
-        }
     }
 
     private void updateViews() {
