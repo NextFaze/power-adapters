@@ -6,12 +6,14 @@ import android.os.SystemClock;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import static android.os.Looper.getMainLooper;
 
 // TODO: Make thread-safe.
 @Slf4j
+@Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
 
     private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
