@@ -3,35 +3,37 @@
 <com.nextfaze.databind.widget.DataLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/data_layout"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/news_fragment_data_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:adapterView="@+id/list"
-        app:emptyView="@+id/empty"
-        app:loadingView="@+id/loading"
-        app:errorView="@+id/error">
+        app:contentView="@+id/news_fragment_list"
+        app:emptyView="@+id/news_fragment_empty"
+        app:loadingView="@+id/news_fragment_loading"
+        app:errorView="@+id/news_fragment_error">
 
     <!-- List -->
 
     <ListView
-            android:id="@+id/list"
+            android:id="@+id/news_fragment_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
     <!-- Empty -->
 
     <TextView
-            android:id="@+id/empty"
+            android:id="@+id/news_fragment_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="No news today!"/>
+            android:text="No news today!"
+            tools:ignore="HardcodedText"/>
 
     <!-- Loading -->
 
     <ProgressBar
             style="@android:style/Widget.Holo.ProgressBar"
-            android:id="@+id/loading"
+            android:id="@+id/news_fragment_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"/>
@@ -39,7 +41,7 @@
     <!-- Error -->
 
     <TextView
-            android:id="@+id/error"
+            android:id="@+id/news_fragment_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

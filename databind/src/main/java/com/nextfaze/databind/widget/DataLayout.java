@@ -8,10 +8,7 @@ import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.nextfaze.databind.Data;
-import com.nextfaze.databind.DataObserver;
 import com.nextfaze.databind.ErrorFormatter;
-import com.nextfaze.databind.ErrorObserver;
-import com.nextfaze.databind.LoadingObserver;
 import com.nextfaze.databind.R;
 import lombok.Getter;
 import lombok.NonNull;
@@ -21,39 +18,30 @@ import lombok.extern.slf4j.Slf4j;
 import javax.annotation.Nullable;
 
 /**
- * A container view that, when hooked up to an {@link Data}, will automatically show/hide internal views based
- * on loading/empty/error state of the adapter. Each {@link DataLayout} should contain at least a {@link AdapterView} of some
- * kind, an empty view, and a loading view. Each of these must be referenced by custom attributes for the auto layout
- * to be able to manage them.
+ * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide internal views based
+ * on loading/empty/error state of the data. Each {@link DataLayout} should contain an {@link AdapterView} of some
+ * kind (although this is not mandatory), an empty view, a loading view, and an error view. Each of these must be
+ * referenced by custom attributes for the layout to be able to manage them.
+ * @author Ben Tilbrook
  */
 @Slf4j
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
 
     @NonNull
-    private final DataObserver mDataSetObserver = new DataObserver() {
+    private final DataWatcher mDataWatcher = new DataWatcher() {
         @Override
         public void onChange() {
             updateViews();
         }
 
         @Override
-        public void onInvalidated() {
-        }
-    };
-
-    @NonNull
-    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
-        @Override
         public void onLoadingChange() {
             mThrowable = null;
             updateErrorView();
             updateViews();
         }
-    };
 
-    @NonNull
-    private final ErrorObserver mErrorObserver = new ErrorObserver() {
         @Override
         public void onError(@NonNull Throwable e) {
             mThrowable = e;
@@ -62,13 +50,13 @@ public class DataLayout extends RelativeLayout {
         }
     };
 
-    private final int mAdapterViewId;
+    private final int mContentViewId;
     private final int mEmptyViewId;
     private final int mLoadingViewId;
     private final int mErrorViewId;
 
     @Nullable
-    private AdapterView<?> mAdapterView;
+    private View mContentView;
 
     @Nullable
     private View mEmptyView;
@@ -83,15 +71,12 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private Data<?> mData;
 
+    @Nullable
+    private Throwable mThrowable;
+
     @Getter
     @Nullable
     private ErrorFormatter mErrorFormatter = ErrorFormatter.DEFAULT;
-
-    @Nullable
-    private Data<?> mRegisteredData;
-
-    @Nullable
-    private Throwable mThrowable;
 
     private boolean mAttachedToWindow;
     private boolean mShown;
@@ -108,7 +93,7 @@ public class DataLayout extends RelativeLayout {
     public DataLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DataLayout, defStyle, 0);
-        mAdapterViewId = a.getResourceId(R.styleable.DataLayout_adapterView, -1);
+        mContentViewId = a.getResourceId(R.styleable.DataLayout_contentView, -1);
         mEmptyViewId = a.getResourceId(R.styleable.DataLayout_emptyView, -1);
         mLoadingViewId = a.getResourceId(R.styleable.DataLayout_loadingView, -1);
         mErrorViewId = a.getResourceId(R.styleable.DataLayout_errorView, -1);
@@ -117,7 +102,7 @@ public class DataLayout extends RelativeLayout {
 
     @Override
     protected void onFinishInflate() {
-        mAdapterView = (AdapterView<?>) findViewById(mAdapterViewId);
+        mContentView = findViewById(mContentViewId);
         mEmptyView = findViewById(mEmptyViewId);
         mLoadingView = findViewById(mLoadingViewId);
         mErrorView = findViewById(mErrorViewId);
@@ -162,9 +147,9 @@ public class DataLayout extends RelativeLayout {
      * @param data The data instance to observe, which may be {@link null} to cease observing anything.
      */
     public void setData(@Nullable Data<?> data) {
+        mDataWatcher.setData(data);
         if (data != mData) {
             mData = data;
-            updateDataRegistration();
             updateViews();
             // We may already be showing, so notify new data.
             if (data != null) {
@@ -186,9 +171,9 @@ public class DataLayout extends RelativeLayout {
 
     private void updateShown() {
         boolean shown = isThisViewShown();
+        mDataWatcher.setShown(shown);
         if (shown != mShown) {
             mShown = shown;
-            updateDataRegistration();
             updateViews();
             if (shown) {
                 if (mData != null) {
@@ -203,38 +188,13 @@ public class DataLayout extends RelativeLayout {
     }
 
     private boolean isThisViewShown() {
-        // TODO: Can we use View.isShown()?
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE;
-    }
-
-    private void updateDataRegistration() {
-        if (mShown) {
-            changeRegisteredData(mData);
-        } else {
-            changeRegisteredData(null);
-        }
-    }
-
-    private void changeRegisteredData(@Nullable Data<?> data) {
-        if (data != mRegisteredData) {
-            if (mRegisteredData != null) {
-                mRegisteredData.unregisterDataObserver(mDataSetObserver);
-                mRegisteredData.unregisterLoadingObserver(mLoadingObserver);
-                mRegisteredData.unregisterErrorObserver(mErrorObserver);
-            }
-            mRegisteredData = data;
-            if (mRegisteredData != null) {
-                mRegisteredData.registerDataObserver(mDataSetObserver);
-                mRegisteredData.registerLoadingObserver(mLoadingObserver);
-                mRegisteredData.registerErrorObserver(mErrorObserver);
-            }
-        }
     }
 
     private void updateViews() {
         if (mData == null) {
             // No data, show empty.
-            hide(mAdapterView);
+            hide(mContentView);
             show(mEmptyView);
             hide(mLoadingView);
             hide(mErrorView);
@@ -242,20 +202,20 @@ public class DataLayout extends RelativeLayout {
             if (mData.isEmpty()) {
                 if (mData.isLoading()) {
                     // Empty, but loading, so show loading.
-                    hide(mAdapterView);
+                    hide(mContentView);
                     hide(mEmptyView);
                     show(mLoadingView);
                     hide(mErrorView);
                 } else {
                     if (mThrowable == null) {
                         // Empty, not loading, no error, so show empty.
-                        hide(mAdapterView);
+                        hide(mContentView);
                         show(mEmptyView);
                         hide(mLoadingView);
                         hide(mErrorView);
                     } else {
                         // Empty, not loading, but has an error, so show error.
-                        hide(mAdapterView);
+                        hide(mContentView);
                         hide(mEmptyView);
                         hide(mLoadingView);
                         show(mErrorView);
@@ -263,7 +223,7 @@ public class DataLayout extends RelativeLayout {
                 }
             } else {
                 // Not empty, show adapter view.
-                show(mAdapterView);
+                show(mContentView);
                 hide(mEmptyView);
                 hide(mLoadingView);
                 hide(mErrorView);
