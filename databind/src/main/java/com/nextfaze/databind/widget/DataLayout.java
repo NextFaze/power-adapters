@@ -81,6 +81,9 @@ public class DataLayout extends RelativeLayout {
     private boolean mAttachedToWindow;
     private boolean mShown;
 
+    /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
+    private boolean mInflated;
+
     @SuppressWarnings("UnusedDeclaration")
     public DataLayout(Context context) {
         this(context, null);
@@ -102,6 +105,7 @@ public class DataLayout extends RelativeLayout {
 
     @Override
     protected void onFinishInflate() {
+        mInflated = true;
         mContentView = findViewById(mContentViewId);
         mEmptyView = findViewById(mEmptyViewId);
         mLoadingView = findViewById(mLoadingViewId);
@@ -132,13 +136,17 @@ public class DataLayout extends RelativeLayout {
     @Override
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
-        updateShown();
+        if (mInflated) {
+            updateShown();
+        }
     }
 
     @Override
     protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        updateShown();
+        if (mInflated) {
+            updateShown();
+        }
     }
 
     /**
