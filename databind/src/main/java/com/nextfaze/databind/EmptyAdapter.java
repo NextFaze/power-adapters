@@ -81,7 +81,7 @@ public class EmptyAdapter extends ListAdapterWrapper {
     }
 
     private boolean shouldShowEmptyItem() {
-        return !mData.isLoading() && mAdapter.isEmpty();
+        return !mData.isLoading() && mData.isEmpty();
     }
 
     private boolean isEmptyItem(int position) {
