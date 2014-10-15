@@ -79,7 +79,7 @@ public class NewsFragment extends Fragment {
             .build();
 
     @NonNull
-    private final ListAdapter mLoadingAdapter = new LoadingAdapter(mData, mAdapter, R.layout.loading_item);
+    private final ListAdapter mLoadingAdapter = LoadingAdapter.create(mData, mAdapter, R.layout.loading_item);
 
     @NonNull
     private DataLayout mDataLayout;
