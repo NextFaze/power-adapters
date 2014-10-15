@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
  * loading state.
  */
 @Accessors(prefix = "m")
-public class LoadingAdapter extends ListAdapterWrapper {
+public abstract class LoadingAdapter extends ListAdapterWrapper {
 
     @NonNull
     private final Data<?> mData;
@@ -27,15 +27,38 @@ public class LoadingAdapter extends ListAdapterWrapper {
         }
     };
 
-    private final int mLoadingItemResource;
-
     @Getter
     @Setter
     private boolean mLoadingItemEnabled;
 
-    public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, int loadingItemResource) {
+    @NonNull
+    public static LoadingAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, final int loadingItemResource) {
+        return new LoadingAdapter(data, adapter) {
+            @NonNull
+            @Override
+            protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
+                                          int position,
+                                          @NonNull ViewGroup parent) {
+                return layoutInflater.inflate(loadingItemResource, parent, false);
+            }
+        };
+    }
+
+    @NonNull
+    public static LoadingAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, @NonNull final View loadingView) {
+        return new LoadingAdapter(data, adapter) {
+            @NonNull
+            @Override
+            protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
+                                          int position,
+                                          @NonNull ViewGroup parent) {
+                return loadingView;
+            }
+        };
+    }
+
+    public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
         super(adapter);
-        mLoadingItemResource = loadingItemResource;
         mData = data;
         mData.registerLoadingObserver(mLoadingObserver);
     }
@@ -76,7 +99,7 @@ public class LoadingAdapter extends ListAdapterWrapper {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (getItemViewType(position) == getLoadingViewType()) {
             if (convertView == null) {
-                convertView = newLoadingView(parent);
+                convertView = newLoadingView(getLayoutInflater(parent), position, parent);
             }
             return convertView;
         }
@@ -92,9 +115,9 @@ public class LoadingAdapter extends ListAdapterWrapper {
     }
 
     @NonNull
-    protected View newLoadingView(@NonNull ViewGroup parent) {
-        return getLayoutInflater(parent).inflate(mLoadingItemResource, parent, false);
-    }
+    protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater,
+                                           int position,
+                                           @NonNull ViewGroup parent);
 
     private boolean shouldShowLoadingItem() {
         return mData.isLoading();
@@ -106,7 +129,7 @@ public class LoadingAdapter extends ListAdapterWrapper {
     }
 
     @NonNull
-    private LayoutInflater getLayoutInflater(@NonNull View v) {
+    private static LayoutInflater getLayoutInflater(@NonNull View v) {
         return LayoutInflater.from(v.getContext());
     }
 }

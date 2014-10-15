@@ -1,5 +1,6 @@
 package com.nextfaze.databind;
 
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -9,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Accessors(prefix = "m")
-public class EmptyAdapter extends ListAdapterWrapper {
+public abstract class EmptyAdapter extends ListAdapterWrapper {
 
     @NonNull
     private final Data<?> mData;
@@ -22,16 +23,38 @@ public class EmptyAdapter extends ListAdapterWrapper {
         }
     };
 
-    @NonNull
-    private final View mEmptyView;
-
     @Getter
     @Setter
     private boolean mEmptyItemEnabled;
 
-    public EmptyAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @NonNull View emptyView) {
+    @NonNull
+    public static EmptyAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, final int emptyItemResource) {
+        return new EmptyAdapter(data, adapter) {
+            @NonNull
+            @Override
+            protected View newEmptyView(@NonNull LayoutInflater layoutInflater,
+                                        int position,
+                                        @NonNull ViewGroup parent) {
+                return layoutInflater.inflate(emptyItemResource, parent, false);
+            }
+        };
+    }
+
+    @NonNull
+    public static EmptyAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, @NonNull final View emptyView) {
+        return new EmptyAdapter(data, adapter) {
+            @NonNull
+            @Override
+            protected View newEmptyView(@NonNull LayoutInflater layoutInflater,
+                                        int position,
+                                        @NonNull ViewGroup parent) {
+                return emptyView;
+            }
+        };
+    }
+
+    public EmptyAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
         super(adapter);
-        mEmptyView = emptyView;
         mData = data;
         mData.registerLoadingObserver(mLoadingObserver);
     }
@@ -67,7 +90,10 @@ public class EmptyAdapter extends ListAdapterWrapper {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (getItemViewType(position) == getEmptyViewType()) {
-            return mEmptyView;
+            if (convertView == null) {
+                convertView = newEmptyView(getLayoutInflater(parent), position, parent);
+            }
+            return convertView;
         }
         return super.getView(position, convertView, parent);
     }
@@ -80,6 +106,9 @@ public class EmptyAdapter extends ListAdapterWrapper {
         return super.isEnabled(position);
     }
 
+    @NonNull
+    protected abstract View newEmptyView(@NonNull LayoutInflater layoutInflater, int position, @NonNull ViewGroup parent);
+
     private boolean shouldShowEmptyItem() {
         return !mData.isLoading() && mData.isEmpty();
     }
@@ -90,5 +119,10 @@ public class EmptyAdapter extends ListAdapterWrapper {
 
     private int getEmptyViewType() {
         return super.getViewTypeCount();
+    }
+
+    @NonNull
+    private static LayoutInflater getLayoutInflater(@NonNull View v) {
+        return LayoutInflater.from(v.getContext());
     }
 }
