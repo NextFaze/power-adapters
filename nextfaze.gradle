@@ -23,7 +23,7 @@ project.ext.getDeployVersion = {
 }
 
 project.ext.getUrl = {
-    artifactoryContextUrl = "http://artifactory.nextfaze.com:8081/artifactory/"
+    def artifactoryContextUrl = "http://artifactory.nextfaze.com:8081/artifactory/"
     return project.ext.release ?
             "${artifactoryContextUrl}libs-release-local/" :
             "${artifactoryContextUrl}libs-snapshot-local/";

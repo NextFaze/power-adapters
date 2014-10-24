@@ -100,6 +100,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
+            mDirty = false;
             mTask = new Task<List<? extends T>>() {
                 @Override
                 protected List<? extends T> call() throws Throwable {
@@ -109,7 +110,6 @@ public abstract class ArrayData<T> extends AbstractData<T> {
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     mData = new ArrayList<T>(data);
-                    mDirty = false;
                     mTask = null;
                     notifyLoadingChanged();
                     notifyChanged();
@@ -126,6 +126,11 @@ public abstract class ArrayData<T> extends AbstractData<T> {
                     mTask = null;
                     notifyLoadingChanged();
                     notifyError(e);
+                }
+
+                @Override
+                protected void onFinally() throws Throwable {
+                    loadDataIfAppropriate();
                 }
             };
             notifyLoadingChanged();
