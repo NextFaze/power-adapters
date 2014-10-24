@@ -25,14 +25,24 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         }
     };
 
+    private final boolean mDisposeWrappedAdapter;
+
     public ListAdapterWrapper(@NonNull ListAdapter adapter) {
+        this(adapter, true);
+    }
+
+    public ListAdapterWrapper(@NonNull ListAdapter adapter, boolean disposeWrappedAdapter) {
         mAdapter = adapter;
+        mDisposeWrappedAdapter = disposeWrappedAdapter;
         mAdapter.registerDataSetObserver(mDataSetObserver);
     }
 
     @Override
     public void dispose() {
         mAdapter.unregisterDataSetObserver(mDataSetObserver);
+        if (mDisposeWrappedAdapter && mAdapter instanceof DisposableListAdapter) {
+            ((DisposableListAdapter) mAdapter).dispose();
+        }
     }
 
     @Override
