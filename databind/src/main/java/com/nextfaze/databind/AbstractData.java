@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Iterator;
+
 import static android.os.Looper.getMainLooper;
 
 // TODO: Make thread-safe.
@@ -109,6 +111,29 @@ public abstract class AbstractData<T> implements Data<T> {
         } catch (Exception e) {
             log.error("Error closing data", e);
         }
+    }
+
+    @Override
+    public final Iterator<T> iterator() {
+        return new Iterator<T>() {
+
+            private int mPosition;
+
+            @Override
+            public boolean hasNext() {
+                return mPosition < size();
+            }
+
+            @Override
+            public T next() {
+                return get(mPosition++);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     protected void onClose() throws Exception {

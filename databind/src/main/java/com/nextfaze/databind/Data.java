@@ -18,7 +18,7 @@ import lombok.NonNull;
  * instead.
  * </p>
  */
-public interface Data<T> {
+public interface Data<T> extends Iterable<T> {
     @NonNull
     T get(int position);
 
