@@ -72,7 +72,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
     }
 
     @NonNull
-    protected abstract List<? extends T> loadData() throws Exception;
+    protected abstract List<? extends T> loadData() throws Throwable;
 
     @Override
     protected final void onShown(long millisHidden) {
