@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.0'
+        classpath 'com.android.tools.build:gradle:0.14.0'
         classpath 'org.robolectric:robolectric-gradle-plugin:0.13.+'
     }
 }
@@ -14,5 +14,5 @@ allprojects {
     }
 
     group = 'com.nextfaze'
-    version = '1.4.1'
+    version = '1.4.2'
 }

@@ -37,7 +37,11 @@ public class DataLayout extends RelativeLayout {
 
         @Override
         public void onLoadingChange() {
-            mThrowable = null;
+            Data<?> data = getData();
+            if (data != null && data.isLoading()) {
+                // Loading has started again, so clear error status.
+                mThrowable = null;
+            }
             updateErrorView();
             updateViews();
         }
