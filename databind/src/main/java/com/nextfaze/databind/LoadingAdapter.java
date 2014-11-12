@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
@@ -20,6 +19,14 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     private final Data<?> mData;
 
     @NonNull
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
+        @Override
+        public void onChange() {
+            notifyDataSetChanged();
+        }
+    };
+
+    @NonNull
     private final LoadingObserver mLoadingObserver = new LoadingObserver() {
         @Override
         public void onLoadingChange() {
@@ -28,8 +35,10 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     };
 
     @Getter
-    @Setter
     private boolean mLoadingItemEnabled;
+
+    @Getter
+    private boolean mOnlyShowIfEmpty;
 
     @NonNull
     public static LoadingAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, final int loadingItemResource) {
@@ -60,13 +69,29 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
         super(adapter);
         mData = data;
+        mData.registerDataObserver(mDataObserver);
         mData.registerLoadingObserver(mLoadingObserver);
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        mData.unregisterDataObserver(mDataObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
+    }
+
+    public void setLoadingItemEnabled(boolean loadingItemEnabled) {
+        if (loadingItemEnabled != mLoadingItemEnabled) {
+            mLoadingItemEnabled = loadingItemEnabled;
+            notifyDataSetChanged();
+        }
+    }
+
+    public void setOnlyShowIfEmpty(boolean onlyShowIfEmpty) {
+        if (onlyShowIfEmpty != mOnlyShowIfEmpty) {
+            mOnlyShowIfEmpty = onlyShowIfEmpty;
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -120,6 +145,9 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
                                            @NonNull ViewGroup parent);
 
     private boolean shouldShowLoadingItem() {
+        if (mOnlyShowIfEmpty) {
+            return mData.isLoading() && mData.isEmpty();
+        }
         return mData.isLoading();
     }
 
