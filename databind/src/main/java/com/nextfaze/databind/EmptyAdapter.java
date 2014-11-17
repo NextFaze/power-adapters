@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Accessors(prefix = "m")
@@ -24,8 +23,10 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
     };
 
     @Getter
-    @Setter
     private boolean mEmptyItemEnabled;
+
+    @Getter
+    private boolean mShowIfLoading;
 
     @NonNull
     public static EmptyAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, final int emptyItemResource) {
@@ -53,7 +54,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         };
     }
 
-    public EmptyAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
+    private EmptyAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
         super(adapter);
         mData = data;
         mData.registerLoadingObserver(mLoadingObserver);
@@ -63,6 +64,20 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
     public void dispose() {
         super.dispose();
         mData.unregisterLoadingObserver(mLoadingObserver);
+    }
+
+    public void setEmptyItemEnabled(boolean emptyItemEnabled) {
+        if (emptyItemEnabled != mEmptyItemEnabled) {
+            mEmptyItemEnabled = emptyItemEnabled;
+            notifyDataSetChanged();
+        }
+    }
+
+    public void setShowIfLoading(boolean showIfLoading) {
+        if (showIfLoading != mShowIfLoading) {
+            mShowIfLoading = showIfLoading;
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -110,6 +125,9 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
     protected abstract View newEmptyView(@NonNull LayoutInflater layoutInflater, int position, @NonNull ViewGroup parent);
 
     private boolean shouldShowEmptyItem() {
+        if (mShowIfLoading) {
+            return mData.isEmpty();
+        }
         return !mData.isLoading() && mData.isEmpty();
     }
 
