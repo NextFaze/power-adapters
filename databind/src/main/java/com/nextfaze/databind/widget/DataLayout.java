@@ -206,7 +206,9 @@ public class DataLayout extends RelativeLayout {
     private void updateViews() {
         if (mData == null) {
             // No data, show empty.
-            hide(mContentView);
+            if (mEmptyView != null) {
+                hide(mContentView);
+            }
             show(mEmptyView);
             hide(mLoadingView);
             hide(mErrorView);
@@ -214,20 +216,26 @@ public class DataLayout extends RelativeLayout {
             if (mData.isEmpty()) {
                 if (mData.isLoading()) {
                     // Empty, but loading, so show loading.
-                    hide(mContentView);
+                    if (mLoadingView != null) {
+                        hide(mContentView);
+                    }
                     hide(mEmptyView);
                     show(mLoadingView);
                     hide(mErrorView);
                 } else {
                     if (mThrowable == null) {
                         // Empty, not loading, no error, so show empty.
-                        hide(mContentView);
+                        if (mEmptyView != null) {
+                            hide(mContentView);
+                        }
                         show(mEmptyView);
                         hide(mLoadingView);
                         hide(mErrorView);
                     } else {
                         // Empty, not loading, but has an error, so show error.
-                        hide(mContentView);
+                        if (mErrorView != null) {
+                            hide(mContentView);
+                        }
                         hide(mEmptyView);
                         hide(mLoadingView);
                         show(mErrorView);
