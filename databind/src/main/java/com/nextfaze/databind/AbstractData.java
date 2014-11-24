@@ -33,6 +33,9 @@ public abstract class AbstractData<T> implements Data<T> {
     private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
+    private final CoalescingPoster mPoster = new CoalescingPoster(mHandler);
+
+    @NonNull
     private final Runnable mHideTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -192,7 +195,7 @@ public abstract class AbstractData<T> implements Data<T> {
         if (Looper.myLooper() == mHandler.getLooper()) {
             runnable.run();
         } else {
-            mHandler.post(runnable);
+            mPoster.post(runnable);
         }
     }
 }
