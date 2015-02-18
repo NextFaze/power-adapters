@@ -1,50 +1,19 @@
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
 apply from: '../nextfaze.gradle'
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion '20.0.0'
+    compileSdkVersion 21
+    buildToolsVersion '21.1.2'
 
     defaultConfig {
-        minSdkVersion 10
-        targetSdkVersion 20
-    }
-}
-
-robolectric {
-    // configure the set of classes for JUnit tests
-    include '**/databind/*Test.class'
-    exclude '**/espresso/**/*.class'
-
-    // configure max heap size of the test JVM
-    maxHeapSize = '2048m'
-
-    // configure the test JVM arguments
-    jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-
-    // Specify max number of processes (default is 1)
-//    maxParallelForks = 4
-
-    // Specify max number of test classes to execute in a test process
-    // before restarting the process (default is unlimited)
-//    forkEvery = 150
-
-    // configure whether failing tests should fail the build
-    ignoreFailures false
-
-    // use afterTest to listen to the test execution results
-    afterTest { descriptor, result ->
-        println "Executing test for {$descriptor.name} with result: ${result.resultType}"
+        minSdkVersion 14
+        targetSdkVersion 21
     }
 }
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.5'
     compile 'com.nextfaze:concurrent:1.0.4'
-    compile 'com.google.code.findbugs:jsr305:2.0.3'
+    provided 'com.google.code.findbugs:jsr305:2.0.3'
     provided 'org.projectlombok:lombok:1.14.6'
-
-    androidTestCompile 'junit:junit:4.8.2'
-    androidTestCompile 'org.robolectric:robolectric:2.3'
 }

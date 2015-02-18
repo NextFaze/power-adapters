@@ -76,6 +76,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     @Override
     protected final void onShown(long millisHidden) {
+        // TODO: If an error occurred, we always want to invalidate the data.
         // Mark as dirty if we were hidden for long enough.
         if (millisHidden >= HIDDEN_DURATION_INVALIDATE_THRESHOLD) {
             mDirty = true;
@@ -101,6 +102,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
             mDirty = false;
+            // TODO: Replace use of Task, so we stop depending on NextFaze Concurrent library.
             mTask = new Task<List<? extends T>>() {
                 @Override
                 protected List<? extends T> call() throws Throwable {
