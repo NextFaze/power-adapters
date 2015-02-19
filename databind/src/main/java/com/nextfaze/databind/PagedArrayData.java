@@ -1,10 +1,10 @@
 package com.nextfaze.databind;
 
 import android.util.SparseArray;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.InterruptedIOException;
@@ -19,7 +19,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Thread.currentThread;
 
-@Slf4j
 @Accessors(prefix = "m")
 public abstract class PagedArrayData<T> extends AbstractData<T> {
 
@@ -32,6 +31,8 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     private static final long HIDDEN_DURATION_INVALIDATE_THRESHOLD = 10 * 1000;
     private static final String THREAD_NAME = PagedArrayData.class.getSimpleName() + " Thread";
 
+    private static final Logger LOG = LoggerFactory.getLogger(PagedArrayData.class);
+
     /** The backing storage. May contain safely contain holes. */
     @NonNull
     private final SparseArray<T> mData = new SparseArray<T>();
@@ -43,7 +44,6 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     private final Condition mLoad = mLock.newCondition();
 
     /** The number of rows to be requested. */
-    @Getter
     private final int mRowsPerRequest;
 
     @Nullable
@@ -57,6 +57,10 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     protected PagedArrayData(int rowsPerRequest) {
         mRowsPerRequest = clamp(rowsPerRequest, ROWS_PER_REQUEST_MIN, ROWS_PER_REQUEST_MAX);
+    }
+
+    public int getRowsPerRequest() {
+        return mRowsPerRequest;
     }
 
     @NonNull
@@ -127,6 +131,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
     private void startLoadThreadIfNeeded() {
         if (mThread == null && isShown()) {
             log("starting load thread...");
+            setLoading(true);
             mThread = new Thread(THREAD_NAME) {
                 @Override
                 public void run() {
@@ -198,7 +203,7 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
                 // Normal thread interruption from blocking I/O.
                 throw new InterruptedException();
             } catch (Throwable e) {
-                log.error("Error loading page", e);
+                LOG.error("Error loading page", e);
                 notifyError(e);
             }
 
@@ -252,11 +257,10 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
 
     private static void log(@NonNull String format, @NonNull Object... msg) {
         if (DEBUG_LOGGING) {
-            log.info(format, msg);
+            LOG.info(format, msg);
         }
     }
 
-    @Getter
     @Accessors(prefix = "m")
     public static final class Page<T> {
 
@@ -277,6 +281,23 @@ public abstract class PagedArrayData<T> extends AbstractData<T> {
         @NonNull
         public static <T> Page<T> emptyPage() {
             return new Page<T>(Collections.<T>emptyList(), 0, 0, 0);
+        }
+
+        @NonNull
+        public List<T> getContents() {
+            return mContents;
+        }
+
+        public int getOffset() {
+            return mOffset;
+        }
+
+        public int getCount() {
+            return mCount;
+        }
+
+        public int getTotal() {
+            return mTotal;
         }
     }
 }

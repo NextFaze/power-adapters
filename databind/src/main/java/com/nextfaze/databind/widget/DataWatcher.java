@@ -4,7 +4,6 @@ import com.nextfaze.databind.Data;
 import com.nextfaze.databind.DataObserver;
 import com.nextfaze.databind.ErrorObserver;
 import com.nextfaze.databind.LoadingObserver;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -13,7 +12,6 @@ import javax.annotation.Nullable;
 @Accessors(prefix = "m")
 class DataWatcher implements DataObserver, LoadingObserver, ErrorObserver {
 
-    @Getter
     @Nullable
     private Data<?> mData;
 
@@ -51,6 +49,11 @@ class DataWatcher implements DataObserver, LoadingObserver, ErrorObserver {
                 mDataRegistered.registerErrorObserver(this);
             }
         }
+    }
+
+    @Nullable
+    Data<?> getData() {
+        return mData;
     }
 
     @Override

@@ -3,20 +3,20 @@ package com.nextfaze.databind;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
 import static android.os.Looper.getMainLooper;
 
 // TODO: Make thread-safe.
-@Slf4j
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractData.class);
 
     private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
 
@@ -44,8 +44,6 @@ public abstract class AbstractData<T> implements Data<T> {
     private long mShowTime;
     private long mHideTime;
 
-    @Getter
-    @Setter
     private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
     @Override
@@ -109,7 +107,7 @@ public abstract class AbstractData<T> implements Data<T> {
         try {
             onClose();
         } catch (Exception e) {
-            log.error("Error closing data", e);
+            LOG.error("Error closing data", e);
         }
     }
 
@@ -194,5 +192,13 @@ public abstract class AbstractData<T> implements Data<T> {
         } else {
             mHandler.post(runnable);
         }
+    }
+
+    public final long getHideTimeout() {
+        return mHideTimeout;
+    }
+
+    public final void setHideTimeout(long hideTimeout) {
+        mHideTimeout = hideTimeout;
     }
 }

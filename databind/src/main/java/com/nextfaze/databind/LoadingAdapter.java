@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -34,10 +33,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         }
     };
 
-    @Getter
     private boolean mLoadingItemEnabled;
-
-    @Getter
     private boolean mOnlyShowIfEmpty;
 
     @NonNull
@@ -80,18 +76,26 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
-    public void setLoadingItemEnabled(boolean loadingItemEnabled) {
+    public final void setLoadingItemEnabled(boolean loadingItemEnabled) {
         if (loadingItemEnabled != mLoadingItemEnabled) {
             mLoadingItemEnabled = loadingItemEnabled;
             notifyDataSetChanged();
         }
     }
 
-    public void setOnlyShowIfEmpty(boolean onlyShowIfEmpty) {
+    public final boolean isLoadingItemEnabled() {
+        return mLoadingItemEnabled;
+    }
+
+    public final void setOnlyShowIfEmpty(boolean onlyShowIfEmpty) {
         if (onlyShowIfEmpty != mOnlyShowIfEmpty) {
             mOnlyShowIfEmpty = onlyShowIfEmpty;
             notifyDataSetChanged();
         }
+    }
+
+    public final boolean isOnlyShowIfEmpty() {
+        return mOnlyShowIfEmpty;
     }
 
     @Override
