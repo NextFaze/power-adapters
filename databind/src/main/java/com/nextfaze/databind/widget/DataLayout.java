@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
 import android.util.AttributeSet;
@@ -38,6 +40,8 @@ import static android.os.SystemClock.elapsedRealtime;
 public class DataLayout extends RelativeLayout {
 
     private static final String TAG = DataLayout.class.getSimpleName();
+    private static final String KEY_SUPER_STATE = "superState";
+    private static final String KEY_ERROR_MESSAGE = "errorMessage";
 
     @NonNull
     private final DataWatcher mDataWatcher = new DataWatcher() {
@@ -51,7 +55,7 @@ public class DataLayout extends RelativeLayout {
             Data<?> data = getData();
             if (data != null && data.isLoading()) {
                 // Loading has started again, so clear error status.
-                mThrowable = null;
+                mErrorMessage = null;
             }
             updateErrorView();
             updateViews();
@@ -59,7 +63,7 @@ public class DataLayout extends RelativeLayout {
 
         @Override
         public void onError(@NonNull Throwable e) {
-            mThrowable = e;
+            mErrorMessage = formatErrorMessage(e);
             updateErrorView();
             updateViews();
         }
@@ -101,9 +105,9 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private Data<?> mData;
 
-    /** The current error {@link Throwable}, if any. */
+    /** The current error message, if any. */
     @Nullable
-    private Throwable mThrowable;
+    private String mErrorMessage;
 
     /** Formats error messages to be displayed in the error view. */
     @Nullable
@@ -158,6 +162,26 @@ public class DataLayout extends RelativeLayout {
         mLoadingView = findViewById(mLoadingViewId);
         mErrorView = findViewById(mErrorViewId);
         updateViews();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            Parcelable superState = bundle.getParcelable(KEY_SUPER_STATE);
+            super.onRestoreInstanceState(superState);
+            mErrorMessage = bundle.getString(KEY_ERROR_MESSAGE);
+        }
+        updateViews();
+        updateErrorView();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_SUPER_STATE, super.onSaveInstanceState());
+        bundle.putString(KEY_ERROR_MESSAGE, mErrorMessage);
+        return bundle;
     }
 
     @Override
@@ -297,9 +321,14 @@ public class DataLayout extends RelativeLayout {
             if (mEmptyView != null) {
                 hide(mContentView, animated);
             }
-            show(mEmptyView, animated);
+            if (mErrorMessage == null) {
+                show(mEmptyView, animated);
+                hide(mErrorView, animated);
+            } else {
+                hide(mEmptyView, animated);
+                show(mErrorView, animated);
+            }
             hide(mLoadingView, animated);
-            hide(mErrorView, animated);
         } else {
             if (mData.isEmpty()) {
                 if (mData.isLoading()) {
@@ -311,13 +340,12 @@ public class DataLayout extends RelativeLayout {
                     show(mLoadingView, animated);
                     hide(mErrorView, animated);
                 } else {
-                    if (mThrowable == null) {
+                    if (mErrorMessage == null) {
                         // Empty, not loading, no error, so show empty.
                         if (mEmptyView != null) {
                             hide(mContentView, animated);
                         }
                         show(mEmptyView, animated);
-                        hide(mLoadingView, animated);
                         hide(mErrorView, animated);
                     } else {
                         // Empty, not loading, but has an error, so show error.
@@ -325,9 +353,9 @@ public class DataLayout extends RelativeLayout {
                             hide(mContentView, animated);
                         }
                         hide(mEmptyView, animated);
-                        hide(mLoadingView, animated);
                         show(mErrorView, animated);
                     }
+                    hide(mLoadingView, animated);
                 }
             } else {
                 // Not empty, show adapter view.
@@ -342,19 +370,16 @@ public class DataLayout extends RelativeLayout {
     private void updateErrorView() {
         if (mErrorView instanceof TextView) {
             TextView errorView = (TextView) mErrorView;
-            errorView.setText(getErrorMessage());
+            errorView.setText(mErrorMessage);
         }
     }
 
     @Nullable
-    private String getErrorMessage() {
+    private String formatErrorMessage(@NonNull Throwable e) {
         if (mErrorFormatter == null) {
             return null;
         }
-        if (mThrowable == null) {
-            return null;
-        }
-        return mErrorFormatter.format(getContext(), mThrowable);
+        return mErrorFormatter.format(getContext(), e);
     }
 
     private void show(@Nullable View v, boolean animated) {
