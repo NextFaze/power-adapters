@@ -224,19 +224,24 @@ public class DataLayout extends RelativeLayout {
     /**
      * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
      * view visibility accordingly.
-     * @param data The data instance to observe, which may be {@code null} to cease observing anything.
+     * @param newData The data instance to observe, which may be {@code null} to cease observing anything.
      */
-    public final void setData(@Nullable Data<?> data) {
-        mDataWatcher.setData(data);
-        if (data != mData) {
-            mData = data;
+    public final void setData(@Nullable Data<?> newData) {
+        Data<?> oldData = mData;
+        mDataWatcher.setData(newData);
+        if (newData != oldData) {
+            mData = newData;
             updateViews();
+            // Old data needs to be notified it's no longer shown.
+            if (oldData != null) {
+                oldData.notifyHidden();
+            }
             // We may already be showing, so notify new data.
-            if (data != null) {
+            if (newData != null) {
                 if (mShown) {
-                    data.notifyShown();
+                    newData.notifyShown();
                 } else {
-                    data.notifyHidden();
+                    newData.notifyHidden();
                 }
             }
         }
