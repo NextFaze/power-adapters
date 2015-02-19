@@ -96,6 +96,7 @@ public final class NewsFragment extends Fragment {
     @NonNull
     private final ListAdapter mSimpleAdapter = new DataAdapterBuilder(mSimpleData)
             .bind(NewsItem.class, mNewsItemBinder)
+            .bind(NewsSection.class, mNewsSectionBinder)
             .build();
 
     @NonNull
