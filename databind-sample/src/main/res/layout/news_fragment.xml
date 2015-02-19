@@ -23,13 +23,13 @@
                 android:layout_height="wrap_content"
                 android:text="Simple"/>
 
-        <!-- Paged -->
+        <!-- Incremental -->
 
         <RadioButton
-                android:id="@+id/news_fragment_button_paged"
+                android:id="@+id/news_fragment_button_incremental"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Paged"/>
+                android:text="Incremental"/>
 
     </RadioGroup>
 

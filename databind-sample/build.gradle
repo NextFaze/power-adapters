@@ -23,6 +23,7 @@ dependencies {
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.google.guava:guava:18.0'
     compile project(':databind')
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     provided 'org.projectlombok:lombok:1.14.2'

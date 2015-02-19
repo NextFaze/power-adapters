@@ -21,8 +21,8 @@ import com.nextfaze.databind.Binder;
 import com.nextfaze.databind.DataAdapterBuilder;
 import com.nextfaze.databind.DisposableListAdapter;
 import com.nextfaze.databind.ErrorFormatter;
+import com.nextfaze.databind.IncrementalArrayData;
 import com.nextfaze.databind.LoadingAdapter;
-import com.nextfaze.databind.PagedArrayData;
 import com.nextfaze.databind.TypedBinder;
 import com.nextfaze.databind.widget.DataLayout;
 import lombok.NonNull;
@@ -51,13 +51,27 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final PagedArrayData<?> mPagedData = new PagedArrayData<Object>() {
-        @NonNull
+    private final IncrementalArrayData<?> mIncrementalData = new IncrementalArrayData<Object>() {
+
+        private static final int TOTAL = 50;
+        private static final int INCREMENT = 10;
+
+        private volatile int mOffset;
+
+        @Nullable
         @Override
-        protected Page<Object> load(int offset, int count) throws Exception {
-            ArrayList<Object> data = new ArrayList<>();
-            data.addAll(mNewsService.getNews(offset, count));
-            return new Page<>(data, offset, count, 50);
+        protected List<?> load() throws Throwable {
+            int offset = mOffset;
+            if (offset >= TOTAL) {
+                return null;
+            }
+            mOffset = offset + INCREMENT;
+            return mNewsService.getNews(offset, INCREMENT);
+        }
+
+        @Override
+        protected void onInvalidate() {
+            mOffset = 0;
         }
     };
 
@@ -79,7 +93,7 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final ListAdapter mDataAdapter = new DataAdapterBuilder(mPagedData)
+    private final ListAdapter mDataAdapter = new DataAdapterBuilder(mIncrementalData)
             .bind(NewsItem.class, mNewsItemBinder)
             .bind(NewsSection.class, mNewsSectionBinder)
             .build();
@@ -108,6 +122,8 @@ public final class NewsFragment extends Fragment {
         // Retain Fragment instance to preserve data avoid reloading the data between config changes.
         setRetainInstance(true);
         setHasOptionsMenu(true);
+        // Start pre-loading sooner.
+        mIncrementalData.setLookAheadRowCount(10);
     }
 
     @Override
@@ -115,7 +131,7 @@ public final class NewsFragment extends Fragment {
         super.onDestroy();
         // Must dispose of data instances when finished with them.
         mSimpleData.close();
-        mPagedData.close();
+        mIncrementalData.close();
     }
 
     @Nullable
@@ -158,14 +174,14 @@ public final class NewsFragment extends Fragment {
         showSimple();
     }
 
-    @OnClick(R.id.news_fragment_button_paged)
-    void onPagedClick() {
-        showPaged();
+    @OnClick(R.id.news_fragment_button_incremental)
+    void onIncrementalClick() {
+        showIncremental();
     }
 
     private void onClearAllClick() {
         mSimpleData.clear();
-        mPagedData.clear();
+        mIncrementalData.clear();
     }
 
     private void showSimple() {
@@ -173,12 +189,12 @@ public final class NewsFragment extends Fragment {
         mListView.setAdapter(mDataAdapter);
     }
 
-    private void showPaged() {
-        mDataLayout.setData(mPagedData);
+    private void showIncremental() {
+        mDataLayout.setData(mIncrementalData);
         if (mLoadingAdapter != null) {
             mLoadingAdapter.dispose();
         }
-        mLoadingAdapter = LoadingAdapter.create(mPagedData, mDataAdapter, R.layout.loading_item);
+        mLoadingAdapter = LoadingAdapter.create(mIncrementalData, mDataAdapter, R.layout.loading_item);
         mListView.setAdapter(mLoadingAdapter);
     }
 }
