@@ -41,9 +41,12 @@ public final class DataAdapterBuilder {
             @Override
             public Binder getBinder(@NonNull Object item, int position) {
                 Class<?> itemClass = item.getClass();
-                Binder binder = mBinders.get(itemClass);
+                Binder binder;
+                while ((binder = mBinders.get(itemClass)) == null && itemClass != null) {
+                    itemClass = itemClass.getSuperclass();
+                }
                 if (binder == null) {
-                    throw new IllegalStateException("No binder found for item class " + itemClass);
+                    throw new IllegalStateException("No binder found for item class hierarchy " + item.getClass());
                 }
                 return binder;
             }
