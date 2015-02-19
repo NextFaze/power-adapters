@@ -132,8 +132,10 @@ public final class NewsFragment extends Fragment {
         // Retain Fragment instance to preserve data avoid reloading the data between config changes.
         setRetainInstance(true);
         setHasOptionsMenu(true);
-        // Start pre-loading sooner.
+        // Start pre-loading as user approaches end of loaded content.
         mIncrementalData.setLookAheadRowCount(10);
+        // Reload data if hidden for a short time.
+        mSimpleData.setAutoInvalidateDelay(3000);
     }
 
     @Override

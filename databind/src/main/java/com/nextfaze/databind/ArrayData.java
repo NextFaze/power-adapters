@@ -1,8 +1,12 @@
 package com.nextfaze.databind;
 
 import com.nextfaze.concurrent.Task;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -12,13 +16,18 @@ import java.util.List;
 @Accessors(prefix = "m")
 public abstract class ArrayData<T> extends AbstractData<T> {
 
-    private static final long HIDDEN_DURATION_INVALIDATE_THRESHOLD = 10 * 1000;
+    private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
     @Nullable
     private ArrayList<T> mData;
 
     @Nullable
     private Task<?> mTask;
+
+    /** Automatically invalidate contents if data is hidden for the specified duration. */
+    @Getter
+    @Setter
+    private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
     private boolean mDirty = true;
 
@@ -76,9 +85,9 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     @Override
     protected final void onShown(long millisHidden) {
-        // TODO: If an error occurred, we always want to invalidate the data.
-        // Mark as dirty if we were hidden for long enough.
-        if (millisHidden >= HIDDEN_DURATION_INVALIDATE_THRESHOLD) {
+        // TODO: If an error occurred, we always want to invalidate the data?
+        if (millisHidden >= mAutoInvalidateDelay) {
+            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
             mDirty = true;
         }
         loadDataIfAppropriate();

@@ -19,8 +19,7 @@ class NewsService {
         for (int i = 0; i < 10; ++i) {
             newsItems.add(new NewsItem(format("News Item #%s", i)));
         }
-//        if (RANDOM.nextInt(3) == 0) {
-        if (true) {
+        if (RANDOM.nextInt(3) == 0) {
             throw new RuntimeException("Random failure");
         }
         return newsItems;

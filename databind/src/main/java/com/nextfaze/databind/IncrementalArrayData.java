@@ -108,7 +108,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
         }
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-            // We've been hidden for too long, so mark as dirty.
             mDirty = true;
         }
         if (mDirty) {
