@@ -1,10 +1,8 @@
 package com.nextfaze.databind.sample;
 
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
-@Getter
 @Accessors(prefix = "m")
 public final class NewsItem {
 
@@ -13,6 +11,11 @@ public final class NewsItem {
 
     public NewsItem(@NonNull String title) {
         mTitle = title;
+    }
+
+    @NonNull
+    public String getTitle() {
+        return mTitle;
     }
 
     @Override

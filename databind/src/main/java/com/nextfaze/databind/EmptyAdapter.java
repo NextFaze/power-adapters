@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -22,10 +21,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         }
     };
 
-    @Getter
     private boolean mEmptyItemEnabled;
-
-    @Getter
     private boolean mShowIfLoading;
 
     @NonNull
@@ -66,18 +62,36 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
-    public void setEmptyItemEnabled(boolean emptyItemEnabled) {
+    /**
+     * Sets whether the empty item should be enabled in the list, allowing it to be clicked or not.
+     * @param emptyItemEnabled {@code true} to make it enabled, otherwise {@code false} to make it disabled.
+     * @see ListAdapter#isEnabled(int)
+     */
+    public final void setEmptyItemEnabled(boolean emptyItemEnabled) {
         if (emptyItemEnabled != mEmptyItemEnabled) {
             mEmptyItemEnabled = emptyItemEnabled;
             notifyDataSetChanged();
         }
     }
 
-    public void setShowIfLoading(boolean showIfLoading) {
+    /**
+     * Returns if the empty item is enabled.
+     * @see #setEmptyItemEnabled(boolean)
+     * @return {@code true} if it's enabled, otherwise {@code false}.
+     */
+    public final boolean isEmptyItemEnabled() {
+        return mEmptyItemEnabled;
+    }
+
+    public final void setShowIfLoading(boolean showIfLoading) {
         if (showIfLoading != mShowIfLoading) {
             mShowIfLoading = showIfLoading;
             notifyDataSetChanged();
         }
+    }
+
+    public final boolean isShowIfLoading() {
+        return mShowIfLoading;
     }
 
     @Override

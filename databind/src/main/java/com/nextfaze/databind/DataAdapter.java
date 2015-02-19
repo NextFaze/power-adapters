@@ -1,14 +1,12 @@
 package com.nextfaze.databind;
 
 import android.widget.BaseAdapter;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 @Accessors(prefix = "m")
 public abstract class DataAdapter<T> extends BaseAdapter implements DisposableListAdapter {
 
-    @Getter
     @NonNull
     private final Data<T> mData;
 
@@ -30,8 +28,13 @@ public abstract class DataAdapter<T> extends BaseAdapter implements DisposableLi
         mData.registerDataObserver(mDataObserver);
     }
 
+    @NonNull
+    public final Data<T> getData() {
+        return mData;
+    }
+
     @Override
-    public void dispose() {
+    public final void dispose() {
         mData.unregisterDataObserver(mDataObserver);
     }
 
