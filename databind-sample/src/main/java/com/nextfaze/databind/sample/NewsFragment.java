@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -19,7 +21,6 @@ import butterknife.OnClick;
 import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
 import com.nextfaze.databind.DataAdapterBuilder;
-import com.nextfaze.databind.DisposableListAdapter;
 import com.nextfaze.databind.ErrorFormatter;
 import com.nextfaze.databind.IncrementalArrayData;
 import com.nextfaze.databind.LoadingAdapter;
@@ -93,10 +94,19 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final ListAdapter mDataAdapter = new DataAdapterBuilder(mIncrementalData)
+    private final ListAdapter mSimpleAdapter = new DataAdapterBuilder(mSimpleData)
             .bind(NewsItem.class, mNewsItemBinder)
-            .bind(NewsSection.class, mNewsSectionBinder)
             .build();
+
+    @NonNull
+    private final ListAdapter mIncrementalAdapter = LoadingAdapter.create(
+            mIncrementalData,
+            new DataAdapterBuilder(mIncrementalData)
+                    .bind(NewsItem.class, mNewsItemBinder)
+                    .bind(NewsSection.class, mNewsSectionBinder)
+                    .build(),
+            R.layout.loading_item
+    );
 
     @NonNull
     private final ErrorFormatter mErrorFormatter = new ErrorFormatter() {
@@ -107,14 +117,14 @@ public final class NewsFragment extends Fragment {
         }
     };
 
+    @InjectView(R.id.news_fragment_radio_group)
+    RadioGroup mRadioGroup;
+
     @InjectView(R.id.news_fragment_data_layout)
     DataLayout mDataLayout;
 
     @InjectView(R.id.news_fragment_list)
     ListView mListView;
-
-    @Nullable
-    private DisposableListAdapter mLoadingAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -145,16 +155,18 @@ public final class NewsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.inject(this, view);
         mDataLayout.setErrorFormatter(mErrorFormatter);
-        showSimple();
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        showCheckedRadioButton(mRadioGroup.getCheckedRadioButtonId());
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Must dispose any DisposableListAdapter instances.
-        if (mLoadingAdapter != null) {
-            mLoadingAdapter.dispose();
-        }
+        ButterKnife.reset(this);
     }
 
     @Override
@@ -179,22 +191,30 @@ public final class NewsFragment extends Fragment {
         showIncremental();
     }
 
-    private void onClearAllClick() {
+    void onClearAllClick() {
         mSimpleData.clear();
         mIncrementalData.clear();
     }
 
-    private void showSimple() {
-        mDataLayout.setData(mSimpleData);
-        mListView.setAdapter(mDataAdapter);
+    private void showCheckedRadioButton(@IdRes int checkedId) {
+        switch (checkedId) {
+            case R.id.news_fragment_button_simple:
+                showSimple();
+                break;
+
+            case R.id.news_fragment_button_incremental:
+                showIncremental();
+                break;
+        }
     }
 
-    private void showIncremental() {
+    void showSimple() {
+        mDataLayout.setData(mSimpleData);
+        mListView.setAdapter(mSimpleAdapter);
+    }
+
+    void showIncremental() {
         mDataLayout.setData(mIncrementalData);
-        if (mLoadingAdapter != null) {
-            mLoadingAdapter.dispose();
-        }
-        mLoadingAdapter = LoadingAdapter.create(mIncrementalData, mDataAdapter, R.layout.loading_item);
-        mListView.setAdapter(mLoadingAdapter);
+        mListView.setAdapter(mIncrementalAdapter);
     }
 }

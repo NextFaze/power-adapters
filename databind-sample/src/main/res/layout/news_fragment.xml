@@ -10,7 +10,7 @@
 
     <!-- Buttons -->
 
-    <RadioGroup android:id="@+id/news_fragment_radio_button"
+    <RadioGroup android:id="@+id/news_fragment_radio_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checkedButton="@+id/news_fragment_button_simple">
