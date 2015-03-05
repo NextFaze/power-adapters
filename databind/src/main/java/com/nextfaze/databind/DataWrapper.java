@@ -31,19 +31,29 @@ public class DataWrapper<T> extends AbstractData<T> {
         }
     };
 
+    private final boolean mCloseInnerData;
+
     public DataWrapper(@NonNull Data<T> data) {
+        this(data, true);
+    }
+
+    public DataWrapper(@NonNull Data<T> data, boolean closeInnerData) {
         mData = data;
+        mCloseInnerData = closeInnerData;
         mData.registerDataObserver(mDataObserver);
         mData.registerLoadingObserver(mLoadingObserver);
         mData.registerErrorObserver(mErrorObserver);
     }
 
+    /** Subclasses must make super call. */
     @Override
     protected void onClose() throws Exception {
         mData.unregisterDataObserver(mDataObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
         mData.unregisterErrorObserver(mErrorObserver);
-        mData.close();
+        if (mCloseInnerData) {
+            mData.close();
+        }
     }
 
     @NonNull
