@@ -1,146 +1,125 @@
 package com.nextfaze.databind;
 
+import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nullable;
+
+import static com.nextfaze.databind.AdapterUtils.layoutInflater;
+
 /**
- * Wraps an existing {@link ListAdapter} and displays a loading indicator while the supplied {@link Data} is in the
- * loading state.
+ * Wraps an existing {@link ListAdapter} and displays a loading indicator while loading. Also supports checking a
+ * {@link Data} instance for the loading state. The loading indicator is shown at the end of the adapter.
  */
 @Accessors(prefix = "m")
 public abstract class LoadingAdapter extends ListAdapterWrapper {
 
-    @NonNull
-    private final Data<?> mData;
-
-    @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
-        @Override
-        public void onChange() {
-            notifyDataSetChanged();
-        }
-    };
-
-    @NonNull
-    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
-        @Override
-        public void onLoadingChange() {
-            notifyDataSetChanged();
-        }
-    };
-
-    private boolean mLoadingItemEnabled;
-    private boolean mOnlyShowIfEmpty;
-
-    @NonNull
-    public static LoadingAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, final int loadingItemResource) {
-        return new LoadingAdapter(data, adapter) {
-            @NonNull
-            @Override
-            protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
-                                          int position,
-                                          @NonNull ViewGroup parent) {
-                return layoutInflater.inflate(loadingItemResource, parent, false);
-            }
-        };
-    }
-
-    @NonNull
-    public static LoadingAdapter create(@NonNull Data<?> data, @NonNull ListAdapter adapter, @NonNull final View loadingView) {
-        return new LoadingAdapter(data, adapter) {
-            @NonNull
-            @Override
-            protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
-                                          int position,
-                                          @NonNull ViewGroup parent) {
-                return loadingView;
-            }
-        };
-    }
-
-    public LoadingAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
+    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter) */
+    protected LoadingAdapter(@NonNull ListAdapter adapter) {
         super(adapter);
-        mData = data;
-        mData.registerDataObserver(mDataObserver);
-        mData.registerLoadingObserver(mLoadingObserver);
+    }
+
+    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
+    protected LoadingAdapter(@NonNull ListAdapter adapter, boolean takeOwnership) {
+        super(adapter, takeOwnership);
+    }
+
+    /**
+     * Override this to indicate the current loading state. Invoke {@link #notifyLoadingChanged()} if the state
+     * changes.
+     * @return {@code true} if currently loading, otherwise {@code false}.
+     */
+    protected abstract boolean isLoading();
+
+    protected abstract boolean isLoadingItemVisible();
+
+    /**
+     * Determines whether the loading item should be enabled in the list, allowing it to be clicked or not.
+     * <p/>
+     * Returns {@code false} by default.
+     * @return {@code true} if the loading item should be enabled, otherwise {@code false}.
+     * @see ListAdapter#isEnabled(int)
+     */
+    protected boolean isLoadingItemEnabled() {
+        return false;
+    }
+
+    /** Call this to notify the loading adapter that the value of {@link #isLoading()} has changed. */
+    protected final void notifyLoadingChanged() {
+        notifyDataSetChanged();
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
-        mData.unregisterDataObserver(mDataObserver);
-        mData.unregisterLoadingObserver(mLoadingObserver);
-    }
-
-    public final void setLoadingItemEnabled(boolean loadingItemEnabled) {
-        if (loadingItemEnabled != mLoadingItemEnabled) {
-            mLoadingItemEnabled = loadingItemEnabled;
-            notifyDataSetChanged();
-        }
-    }
-
-    public final boolean isLoadingItemEnabled() {
-        return mLoadingItemEnabled;
-    }
-
-    public final void setOnlyShowIfEmpty(boolean onlyShowIfEmpty) {
-        if (onlyShowIfEmpty != mOnlyShowIfEmpty) {
-            mOnlyShowIfEmpty = onlyShowIfEmpty;
-            notifyDataSetChanged();
-        }
-    }
-
-    public final boolean isOnlyShowIfEmpty() {
-        return mOnlyShowIfEmpty;
-    }
-
-    @Override
-    public int getCount() {
-        if (shouldShowLoadingItem()) {
+    public final int getCount() {
+        if (isLoadingItemVisible()) {
             return mAdapter.getCount() + 1;
         }
         return mAdapter.getCount();
     }
 
     @Override
-    public int getViewTypeCount() {
+    public final int getViewTypeCount() {
         // Fixed amount of view types: whatever the underlying adapter wants, plus our loading item.
         return super.getViewTypeCount() + 1;
+    }
+
+    @Override
+    public final int getItemViewType(int position) {
+        if (isLoadingItemVisible() && isLoadingItem(position)) {
+            return getLoadingViewType();
+        }
+        return super.getItemViewType(outerToInnerPosition(position));
+    }
+
+    @Override
+    public final View getView(int position, View convertView, ViewGroup parent) {
+        if (getItemViewType(position) == getLoadingViewType()) {
+            if (convertView == null) {
+                convertView = newLoadingView(layoutInflater(parent), position, parent);
+            }
+            return convertView;
+        }
+        return super.getView(outerToInnerPosition(position), convertView, parent);
+    }
+
+    @Override
+    public final boolean isEnabled(int position) {
+        if (isLoadingItemVisible() && isLoadingItem(position)) {
+            return isLoadingItemEnabled();
+        }
+        return super.isEnabled(outerToInnerPosition(position));
+    }
+
+    @Override
+    public final long getItemId(int position) {
+        if (isLoadingItemVisible() && isLoadingItem(position)) {
+            return -1;
+        }
+        return super.getItemId(outerToInnerPosition(position));
+    }
+
+    @Override
+    public final Object getItem(int position) {
+        if (isLoadingItemVisible() && isLoadingItem(position)) {
+            return null;
+        }
+        return super.getItem(outerToInnerPosition(position));
     }
 
     private int getLoadingViewType() {
         return super.getViewTypeCount();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (shouldShowLoadingItem() && isLoadingItem(position)) {
-            return getLoadingViewType();
-        }
-        return super.getItemViewType(position);
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (getItemViewType(position) == getLoadingViewType()) {
-            if (convertView == null) {
-                convertView = newLoadingView(getLayoutInflater(parent), position, parent);
-            }
-            return convertView;
-        }
-        return super.getView(position, convertView, parent);
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        if (shouldShowLoadingItem() && isLoadingItem(position)) {
-            return mLoadingItemEnabled;
-        }
-        return super.isEnabled(position);
+    /** Translate a position from our coordinate space to the wrapped adapters coordinate space. */
+    private int outerToInnerPosition(int position) {
+        // No translation necessary for loading adapter, because the item appears at the end.
+        return position;
     }
 
     @NonNull
@@ -148,20 +127,148 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
                                            int position,
                                            @NonNull ViewGroup parent);
 
-    private boolean shouldShowLoadingItem() {
-        if (mOnlyShowIfEmpty) {
-            return mData.isLoading() && mData.isEmpty();
-        }
-        return mData.isLoading();
-    }
-
     private boolean isLoadingItem(int position) {
-        // Last item in the list.
+        // Loading item is the last item in the list.
         return position == getCount() - 1;
     }
 
-    @NonNull
-    private static LayoutInflater getLayoutInflater(@NonNull View v) {
-        return LayoutInflater.from(v.getContext());
+    public static final class Builder {
+
+        @NonNull
+        private final ListAdapter mAdapter;
+
+        @NonNull
+        private final Data<?> mData;
+
+        @Nullable
+        private Item mLoadingItem;
+
+        private boolean mOnlyShowIfEmpty;
+        private boolean mLoadingItemEnabled;
+        private boolean mTakeOwnership = true;
+
+        public Builder(@NonNull ListAdapter adapter, @NonNull Data<?> data) {
+            mAdapter = adapter;
+            mData = data;
+        }
+
+        @NonNull
+        public Builder loadingItemResource(@LayoutRes int loadingItemResource) {
+            mLoadingItem = new Item(loadingItemResource);
+            return this;
+        }
+
+        @NonNull
+        public Builder loadingItemView(@NonNull View loadingItemView) {
+            mLoadingItem = new Item(loadingItemView);
+            return this;
+        }
+
+        /** @see #isLoadingItemEnabled() */
+        @NonNull
+        public Builder loadingItemEnabled(boolean loadingItemEnabled) {
+            mLoadingItemEnabled = loadingItemEnabled;
+            return this;
+        }
+
+        /** If {@code true}, loading item is only shown while {@link Adapter#isEmpty()} is {@code true}. */
+        @NonNull
+        public Builder onlyShowIfEmpty(boolean onlyShowIfEmpty) {
+            mOnlyShowIfEmpty = onlyShowIfEmpty;
+            return this;
+        }
+
+        /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
+        @NonNull
+        public Builder takeOwnership(boolean takeOwnership) {
+            mTakeOwnership = takeOwnership;
+            return this;
+        }
+
+        @NonNull
+        public LoadingAdapter build() {
+            if (mLoadingItem == null) {
+                throw new IllegalStateException("No loading item specified");
+            }
+            return new DataLoadingAdapter(mAdapter, mData, mLoadingItem, mLoadingItemEnabled,
+                    mOnlyShowIfEmpty, mTakeOwnership);
+        }
+    }
+
+    private static final class DataLoadingAdapter extends LoadingAdapter {
+
+        @NonNull
+        private final Data<?> mData;
+
+        @NonNull
+        private final DataObserver mDataObserver = new DataObserver() {
+            @Override
+            public void onChange() {
+                notifyDataSetChanged();
+            }
+        };
+
+        @NonNull
+        private final LoadingObserver mLoadingObserver = new LoadingObserver() {
+            @Override
+            public void onLoadingChange() {
+                notifyLoadingChanged();
+            }
+        };
+
+        @NonNull
+        private final Item mLoadingItem;
+
+        private final boolean mLoadingItemEnabled;
+        private final boolean mOnlyShowIfEmpty;
+
+        DataLoadingAdapter(@NonNull ListAdapter adapter,
+                           @NonNull Data<?> data,
+                           @NonNull Item loadingItem,
+                           boolean loadingItemEnabled,
+                           boolean onlyShowIfEmpty,
+                           boolean takeOwnership) {
+            super(adapter, takeOwnership);
+            mData = data;
+            mLoadingItem = loadingItem;
+            mLoadingItemEnabled = loadingItemEnabled;
+            mOnlyShowIfEmpty = onlyShowIfEmpty;
+            mData.registerDataObserver(mDataObserver);
+            mData.registerLoadingObserver(mLoadingObserver);
+        }
+
+        @Override
+        public void dispose() {
+            mData.unregisterDataObserver(mDataObserver);
+            mData.unregisterLoadingObserver(mLoadingObserver);
+            super.dispose();
+        }
+
+        @Override
+        protected boolean isLoading() {
+            return mData.isLoading();
+        }
+
+        @NonNull
+        @Override
+        protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
+                                      int position,
+                                      @NonNull ViewGroup parent) {
+            return mLoadingItem.get(layoutInflater, parent);
+        }
+
+        @Override
+        protected boolean isLoadingItemVisible() {
+            boolean loading = isLoading();
+            if (mOnlyShowIfEmpty) {
+                return loading && isEmpty();
+            }
+            return loading;
+        }
+
+        @Override
+        protected boolean isLoadingItemEnabled() {
+            return mLoadingItemEnabled;
+        }
     }
 }

@@ -31,15 +31,15 @@ public class DataWrapper<T> extends AbstractData<T> {
         }
     };
 
-    private final boolean mCloseInnerData;
+    private final boolean mTakeOwnership;
 
     public DataWrapper(@NonNull Data<T> data) {
         this(data, true);
     }
 
-    public DataWrapper(@NonNull Data<T> data, boolean closeInnerData) {
+    public DataWrapper(@NonNull Data<T> data, boolean takeOwnership) {
         mData = data;
-        mCloseInnerData = closeInnerData;
+        mTakeOwnership = takeOwnership;
         mData.registerDataObserver(mDataObserver);
         mData.registerLoadingObserver(mLoadingObserver);
         mData.registerErrorObserver(mErrorObserver);
@@ -51,7 +51,7 @@ public class DataWrapper<T> extends AbstractData<T> {
         mData.unregisterDataObserver(mDataObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
         mData.unregisterErrorObserver(mErrorObserver);
-        if (mCloseInnerData) {
+        if (mTakeOwnership) {
             mData.close();
         }
     }
