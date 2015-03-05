@@ -37,7 +37,14 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
      */
     protected abstract boolean isLoading();
 
-    protected abstract boolean isLoadingItemVisible();
+    /**
+     * Override this to indicate if the loading item should be shown in the current state. By default returns {@link
+     * #isLoading()}.
+     * @return {@code true} to show the loading item in the current state.
+     */
+    protected boolean isLoadingItemVisible() {
+        return isLoading();
+    }
 
     /**
      * Determines whether the loading item should be enabled in the list, allowing it to be clicked or not.
@@ -259,11 +266,11 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
 
         @Override
         protected boolean isLoadingItemVisible() {
-            boolean loading = isLoading();
+            boolean visible = super.isLoadingItemVisible();
             if (mOnlyShowIfEmpty) {
-                return loading && isEmpty();
+                return visible && isEmpty();
             }
-            return loading;
+            return visible;
         }
 
         @Override

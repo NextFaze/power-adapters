@@ -101,16 +101,15 @@ public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
 
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = layoutInflater(parent);
         if (isHeaderView(position)) {
             if (convertView == null) {
-                convertView = getHeaderView(layoutInflater, parent, headerViewIndex(position));
+                convertView = getHeaderView(layoutInflater(parent), parent, headerViewIndex(position));
             }
             return convertView;
         }
         if (isFooterView(position)) {
             if (convertView == null) {
-                convertView = getFooterView(layoutInflater, parent, footerViewIndex(position));
+                convertView = getFooterView(layoutInflater(parent), parent, footerViewIndex(position));
             }
             return convertView;
         }

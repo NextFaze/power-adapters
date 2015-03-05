@@ -146,6 +146,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
             return this;
         }
 
+        /** If {@code true}, empty item will be shown even while {@link Data} is loading. Defaults to {@code false}. */
         @NonNull
         public Builder showIfLoading(boolean showIfLoading) {
             mShowIfLoading = showIfLoading;

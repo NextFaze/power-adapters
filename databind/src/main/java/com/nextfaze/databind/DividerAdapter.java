@@ -8,6 +8,8 @@ import android.widget.ListAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+import static com.nextfaze.databind.AdapterUtils.layoutInflater;
+
 @Accessors(prefix = "m")
 public final class DividerAdapter extends ListAdapterWrapper {
 
@@ -86,19 +88,19 @@ public final class DividerAdapter extends ListAdapterWrapper {
     public final View getView(int position, View convertView, ViewGroup parent) {
         if (isInnerDivider(position)) {
             if (convertView == null) {
-                convertView = newInnerDividerView(getLayoutInflater(parent), parent);
+                convertView = newInnerDividerView(layoutInflater(parent), parent);
             }
             return convertView;
         }
         if (isLeadingDivider(position)) {
             if (convertView == null) {
-                convertView = newLeadingDividerView(getLayoutInflater(parent), parent);
+                convertView = newLeadingDividerView(layoutInflater(parent), parent);
             }
             return convertView;
         }
         if (isTrailingDivider(position)) {
             if (convertView == null) {
-                convertView = newTrailingDividerView(getLayoutInflater(parent), parent);
+                convertView = newTrailingDividerView(layoutInflater(parent), parent);
             }
             return convertView;
         }
@@ -188,11 +190,6 @@ public final class DividerAdapter extends ListAdapterWrapper {
         return position / 2;
     }
 
-    @NonNull
-    private static LayoutInflater getLayoutInflater(@NonNull View v) {
-        return LayoutInflater.from(v.getContext());
-    }
-
     public static final class Builder {
 
         @NonNull
@@ -208,33 +205,39 @@ public final class DividerAdapter extends ListAdapterWrapper {
             mAdapter = adapter;
         }
 
+        /** Indicates if any dividers were configured in this builder. */
         public boolean isEmpty() {
             return mLeadingItemResource <= 0 && mTrailingItemResource <= 0 && mInnerItemResource <= 0;
         }
 
+        /** Sets layout resource of the divider that appears BEFORE the wrapped adapters items. */
         @NonNull
         public Builder leadingItemResource(@LayoutRes int itemResource) {
             mLeadingItemResource = itemResource;
             return this;
         }
 
+        /** Sets layout resource of the divider that appears AFTER the wrapped adapters items. */
         @NonNull
         public Builder trailingItemResource(@LayoutRes int itemResource) {
             mTrailingItemResource = itemResource;
             return this;
         }
 
+        /** Sets the layout resource of the divider that appears between all of the wrapped adapters items. */
         @NonNull
         public Builder innerItemResource(@LayoutRes int itemResource) {
             mInnerItemResource = itemResource;
             return this;
         }
 
+        /** Sets layout resource of the divider that appears BEFORE and AFTER the wrapped adapters items. */
         @NonNull
         public Builder outerItemResource(@LayoutRes int itemResource) {
             return leadingItemResource(itemResource).trailingItemResource(itemResource);
         }
 
+        /** If {@code true}, a single divider may be shown if the wrapped adapter is empty. Defaults to {@code true}. */
         @NonNull
         public Builder showDividerIfEmpty(boolean showDividerIfEmpty) {
             mShowDividerIfEmpty = showDividerIfEmpty;
