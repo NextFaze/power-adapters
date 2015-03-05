@@ -61,10 +61,6 @@ class DataWatcher implements DataObserver, LoadingObserver, ErrorObserver {
     }
 
     @Override
-    public void onInvalidated() {
-    }
-
-    @Override
     public void onError(@NonNull Throwable e) {
     }
 

@@ -16,11 +16,6 @@ public abstract class DataAdapter<T> extends BaseAdapter implements DisposableLi
         public void onChange() {
             notifyDataSetChanged();
         }
-
-        @Override
-        public void onInvalidated() {
-            notifyDataSetInvalidated();
-        }
     };
 
     public DataAdapter(@NonNull Data<T> data) {

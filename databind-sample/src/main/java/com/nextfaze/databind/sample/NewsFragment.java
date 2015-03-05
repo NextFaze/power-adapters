@@ -22,6 +22,7 @@ import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
 import com.nextfaze.databind.DataAdapterBuilder;
 import com.nextfaze.databind.ErrorFormatter;
+import com.nextfaze.databind.HeaderFooterAdapter;
 import com.nextfaze.databind.IncrementalArrayData;
 import com.nextfaze.databind.LoadingAdapter;
 import com.nextfaze.databind.TypedBinder;
@@ -94,19 +95,22 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final ListAdapter mSimpleAdapter = new DataAdapterBuilder(mSimpleData)
-            .bind(NewsItem.class, mNewsItemBinder)
+    private final ListAdapter mSimpleAdapter = new HeaderFooterAdapter.Builder(
+            new DataAdapterBuilder(mSimpleData)
+                    .bind(NewsItem.class, mNewsItemBinder)
+                    .bind(NewsSection.class, mNewsSectionBinder)
+                    .build())
+            .headerResource(R.layout.news_header_item)
             .build();
 
     @NonNull
-    private final ListAdapter mIncrementalAdapter = LoadingAdapter.create(
-            mIncrementalData,
+    private final ListAdapter mIncrementalAdapter = new LoadingAdapter.Builder(
             new DataAdapterBuilder(mIncrementalData)
                     .bind(NewsItem.class, mNewsItemBinder)
                     .bind(NewsSection.class, mNewsSectionBinder)
-                    .build(),
-            R.layout.loading_item
-    );
+                    .build(), mIncrementalData)
+            .loadingItemResource(R.layout.loading_item)
+            .build();
 
     @NonNull
     private final ErrorFormatter mErrorFormatter = new ErrorFormatter() {

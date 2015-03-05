@@ -16,7 +16,7 @@ import static android.os.Looper.getMainLooper;
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractData.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractData.class);
 
     private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
 
@@ -110,7 +110,7 @@ public abstract class AbstractData<T> implements Data<T> {
         try {
             onClose();
         } catch (Exception e) {
-            LOG.error("Error closing data", e);
+            log.error("Error closing data", e);
         }
     }
 
@@ -144,20 +144,11 @@ public abstract class AbstractData<T> implements Data<T> {
         return mShown;
     }
 
-    protected void notifyChanged() {
+    protected void notifyDataChanged() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mDataObservers.notifyDataChanged();
-            }
-        });
-    }
-
-    protected void notifyInvalidated() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyDataInvalidated();
             }
         });
     }
