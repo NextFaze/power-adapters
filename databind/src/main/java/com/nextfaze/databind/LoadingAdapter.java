@@ -18,7 +18,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     private final Data<?> mData;
 
     @NonNull
-    private final DataObserver mDataObserver = new SimpleDataObserver() {
+    private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChange() {
             notifyDataSetChanged();

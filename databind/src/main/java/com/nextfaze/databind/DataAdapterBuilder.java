@@ -73,11 +73,6 @@ public final class DataAdapterBuilder {
             public void onChange() {
                 notifyDataSetChanged();
             }
-
-            @Override
-            public void onInvalidated() {
-                notifyDataSetInvalidated();
-            }
         };
 
         private DataAdapter(@NonNull Data<?> data,

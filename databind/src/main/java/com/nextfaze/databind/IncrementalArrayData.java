@@ -165,7 +165,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
         if (size() > 0) {
             clearItems();
             onInvalidate();
-            notifyChanged();
+            notifyDataChanged();
         }
     }
 
@@ -223,7 +223,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
                         @Override
                         public void run() {
                             append(items);
-                            notifyChanged();
+                            notifyDataChanged();
                         }
                     });
                 }

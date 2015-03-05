@@ -61,7 +61,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
             mData = new ArrayList<T>();
         }
         if (mData.add(t)) {
-            notifyChanged();
+            notifyDataChanged();
             return true;
         }
         return false;
@@ -69,7 +69,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     public final boolean remove(@NonNull T t) {
         if (mData != null && mData.remove(t)) {
-            notifyChanged();
+            notifyDataChanged();
             return true;
         }
         return false;
@@ -123,7 +123,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
                     mData = new ArrayList<T>(data);
                     mTask = null;
                     notifyLoadingChanged();
-                    notifyChanged();
+                    notifyDataChanged();
                 }
 
                 @Override

@@ -23,10 +23,4 @@ final class DataObservers {
             dataObserver.onChange();
         }
     }
-
-    void notifyDataInvalidated() {
-        for (DataObserver dataObserver : mObservers) {
-            dataObserver.onInvalidated();
-        }
-    }
 }
