@@ -118,7 +118,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         private boolean mShowIfLoading;
         private boolean mTakeOwnership = true;
 
-        public Builder(@NonNull Data<?> data, @NonNull ListAdapter adapter) {
+        public Builder(@NonNull ListAdapter adapter, @NonNull Data<?> data) {
             mData = data;
             mAdapter = adapter;
         }
