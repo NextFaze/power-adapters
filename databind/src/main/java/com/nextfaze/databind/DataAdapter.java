@@ -40,7 +40,7 @@ public abstract class DataAdapter<T> extends BaseAdapter implements DisposableLi
 
     @Override
     public final T getItem(int position) {
-        return mData.get(position);
+        return mData.get(position, Data.FLAG_PRESENTATION);
     }
 
     @Override

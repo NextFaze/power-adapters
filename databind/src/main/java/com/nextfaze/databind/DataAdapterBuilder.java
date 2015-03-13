@@ -102,7 +102,7 @@ public final class DataAdapterBuilder {
 
         @Override
         public Object getItem(int position) {
-            return mData.get(position);
+            return mData.get(position, Data.FLAG_PRESENTATION);
         }
 
         @Override

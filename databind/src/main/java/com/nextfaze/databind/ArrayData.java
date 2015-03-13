@@ -41,7 +41,7 @@ public abstract class ArrayData<T> extends AbstractData<T> {
 
     @NonNull
     @Override
-    public final T get(int position) {
+    public final T get(int position, int flags) {
         //noinspection ConstantConditions
         return mData.get(position);
     }

@@ -12,6 +12,10 @@ import java.util.Iterator;
 
 import static android.os.Looper.getMainLooper;
 
+/**
+ * Skeleton {@link Data} implementation that provides listener management, hide timeout functionality, shown/hidden
+ * state tracking, and other sensible default method implementations.
+ */
 // TODO: Make thread-safe.
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
@@ -77,6 +81,12 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
         mErrorObservers.unregister(errorObserver);
+    }
+
+    @NonNull
+    @Override
+    public final T get(int position) {
+        return get(position, 0);
     }
 
     @Override

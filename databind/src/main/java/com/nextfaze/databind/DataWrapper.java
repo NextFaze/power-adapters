@@ -58,8 +58,8 @@ public class DataWrapper<T> extends AbstractData<T> {
 
     @NonNull
     @Override
-    public T get(int position) {
-        return mData.get(position);
+    public T get(int position, int flags) {
+        return mData.get(position, flags);
     }
 
     @Override
