@@ -53,92 +53,114 @@
         <codeStyleSettings language="XML">
           <arrangement>
             <rules>
-              <rule>
-                <match>
-                  <NAME>xmlns:.*</NAME>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>style</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>layout</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:id</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:layout_width</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:layout_height</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:layout_weight</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:layout_margin*</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:layout_*</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:orientation</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-              </rule>
-              <rule>
-                <match>
-                  <AND>
-                    <NAME>android:*</NAME>
-                    <XML_ATTRIBUTE />
-                  </AND>
-                </match>
-                <order>BY_NAME</order>
-              </rule>
+              <section>
+                <rule>
+                  <match>
+                    <NAME>xmlns:.*</NAME>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>style</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>layout</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:id</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:layout_width</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:layout_height</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:layout_weight</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:layout_margin*</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:layout_*</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:orientation</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>android:*</NAME>
+                      <XML_ATTRIBUTE />
+                    </AND>
+                  </match>
+                  <order>BY_NAME</order>
+                </rule>
+              </section>
             </rules>
           </arrangement>
         </codeStyleSettings>
@@ -147,4 +169,3 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
 </project>
-

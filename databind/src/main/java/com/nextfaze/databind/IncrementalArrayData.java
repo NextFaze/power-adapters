@@ -66,9 +66,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
 
     @NonNull
     @Override
-    public final T get(int position) {
+    public final T get(int position, int flags) {
         // Requested end of data? Time to load more.
-        if (position >= size() - mLookAheadRowCount) {
+        if ((flags & FLAG_PRESENTATION) != 0 && position >= size() - mLookAheadRowCount) {
             proceed();
         }
         return getItem(position);
