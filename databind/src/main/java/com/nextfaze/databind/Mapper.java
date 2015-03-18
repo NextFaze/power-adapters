@@ -18,5 +18,5 @@ public interface Mapper {
 
     /** Return a collection containing all of the possible binders this mapper could respond with. */
     @NonNull
-    Collection<Binder> getAllBinders();
+    Collection<? extends Binder> getAllBinders();
 }

@@ -54,7 +54,7 @@ public final class DataAdapterBuilder {
 
             @NonNull
             @Override
-            public Collection<Binder> getAllBinders() {
+            public Collection<? extends Binder> getAllBinders() {
                 return mBinders.values();
             }
         });
