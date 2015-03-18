@@ -13,6 +13,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public final class DataAdapterBuilder {
 
     @NonNull
@@ -36,7 +37,7 @@ public final class DataAdapterBuilder {
         if (mBinders.isEmpty()) {
             throw new IllegalStateException("Must have at least one binder defined");
         }
-        return new DataAdapter(mData, mBinders.values(), new Mapper() {
+        return new DataAdapter(mData, new Mapper() {
             @NonNull
             @Override
             public Binder getBinder(@NonNull Object item, int position) {
@@ -50,9 +51,16 @@ public final class DataAdapterBuilder {
                 }
                 return binder;
             }
+
+            @NonNull
+            @Override
+            public Collection<? extends Binder> getAllBinders() {
+                return mBinders.values();
+            }
         });
     }
 
+    @Deprecated
     final class DataAdapter extends BaseAdapter {
 
         @NonNull
@@ -75,10 +83,8 @@ public final class DataAdapterBuilder {
             }
         };
 
-        private DataAdapter(@NonNull Data<?> data,
-                            @NonNull Collection<Binder> binders,
-                            @NonNull Mapper mapper) {
-            mBinders = new ArrayList<Binder>(binders);
+        private DataAdapter(@NonNull Data<?> data, @NonNull Mapper mapper) {
+            mBinders = new ArrayList<Binder>(mapper.getAllBinders());
             mMapper = mapper;
             mData = data;
             mData.registerDataObserver(mDataObserver);
