@@ -100,7 +100,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
     }
 
     @Override
-    protected void onShown(long millisHidden) {
+    protected final void onShown(long millisHidden) {
         log.trace("Shown after being hidden for {} ms", millisHidden);
         if (mError) {
             // Last attempt to load a page failed, so try again now we've become visible again.
@@ -119,7 +119,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
     }
 
     @Override
-    protected void onClose() throws Exception {
+    protected final void onClose() throws Exception {
         stopThread();
     }
 

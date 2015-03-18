@@ -5,7 +5,7 @@ import lombok.NonNull;
 public class DataWrapper<T> extends AbstractData<T> {
 
     @NonNull
-    private final Data<T> mData;
+    private final Data<? extends T> mData;
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
@@ -33,11 +33,11 @@ public class DataWrapper<T> extends AbstractData<T> {
 
     private final boolean mTakeOwnership;
 
-    public DataWrapper(@NonNull Data<T> data) {
+    public DataWrapper(@NonNull Data<? extends T> data) {
         this(data, true);
     }
 
-    public DataWrapper(@NonNull Data<T> data, boolean takeOwnership) {
+    public DataWrapper(@NonNull Data<? extends T> data, boolean takeOwnership) {
         mData = data;
         mTakeOwnership = takeOwnership;
         mData.registerDataObserver(mDataObserver);
