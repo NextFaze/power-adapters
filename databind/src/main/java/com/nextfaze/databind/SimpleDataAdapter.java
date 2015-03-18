@@ -1,5 +1,6 @@
 package com.nextfaze.databind;
 
+import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +10,15 @@ import lombok.experimental.Accessors;
 @Accessors(prefix = "m")
 public abstract class SimpleDataAdapter<T> extends DataAdapter<T> {
 
+    @LayoutRes
     private final int mItemLayoutResource;
 
-    public SimpleDataAdapter(@NonNull Data<T> data, int itemLayoutResource) {
+    public SimpleDataAdapter(@NonNull Data<T> data, @LayoutRes int itemLayoutResource) {
         super(data);
         mItemLayoutResource = itemLayoutResource;
     }
 
+    @LayoutRes
     public final int getItemLayoutResource() {
         return mItemLayoutResource;
     }
