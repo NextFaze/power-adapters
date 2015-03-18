@@ -3,6 +3,8 @@ package com.nextfaze.databind;
 import android.view.View;
 import lombok.NonNull;
 
+import java.util.Collection;
+
 /** Used to determine which {@link Binder} should be used to bind a data item to a {@link View}. */
 public interface Mapper {
     /**
@@ -13,4 +15,8 @@ public interface Mapper {
      */
     @NonNull
     Binder getBinder(@NonNull Object item, int position);
+
+    /** Return a collection containing all of the possible binders this mapper could respond with. */
+    @NonNull
+    Collection<Binder> getAllBinders();
 }

@@ -7,7 +7,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.IdentityHashMap;
 
 @Accessors(prefix = "m")
@@ -23,21 +22,16 @@ public final class BindingAdapter extends ListAdapterWrapper {
     private final Mapper mMapper;
 
     /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter) */
-    public BindingAdapter(@NonNull ListAdapter adapter,
-                          @NonNull Collection<Binder> binders,
-                          @NonNull Mapper mapper) {
+    public BindingAdapter(@NonNull ListAdapter adapter, @NonNull Mapper mapper) {
         super(adapter);
-        mBinders = new ArrayList<Binder>(binders);
+        mBinders = new ArrayList<Binder>(mapper.getAllBinders());
         mMapper = mapper;
     }
 
     /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-    public BindingAdapter(@NonNull ListAdapter adapter,
-                          @NonNull ArrayList<Binder> binders,
-                          @NonNull Mapper mapper,
-                          boolean takeOwnership) {
+    public BindingAdapter(@NonNull ListAdapter adapter, @NonNull Mapper mapper, boolean takeOwnership) {
         super(adapter, takeOwnership);
-        mBinders = new ArrayList<Binder>(binders);
+        mBinders = new ArrayList<Binder>(mapper.getAllBinders());
         mMapper = mapper;
     }
 
