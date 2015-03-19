@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -19,8 +21,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
+/**
+ * Mutable {@link Data} implementation backed by an {@link ArrayList}, which is loaded incrementally until the source
+ * has no more data. Cannot contain {@code null} elements. Not thread-safe.
+ * @param <T> The type of element this data contains.
+ */
 @Accessors(prefix = "m")
-public abstract class IncrementalArrayData<T> extends AbstractData<T> {
+public abstract class IncrementalArrayData<T> extends AbstractData<T> implements MutableData<T> {
 
     private static final Logger log = LoggerFactory.getLogger(IncrementalArrayData.class);
 
@@ -64,6 +71,142 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
         mThreadFactory = threadFactory;
     }
 
+    @Override
+    public final int size() {
+        return mData.size();
+    }
+
+    @Override
+    public final boolean isEmpty() {
+        return mData.isEmpty();
+    }
+
+    @Override
+    public final boolean contains(Object object) {
+        return mData.contains(object);
+    }
+
+    @Override
+    public final int indexOf(Object object) {
+        return mData.indexOf(object);
+    }
+
+    @Override
+    public final int lastIndexOf(Object object) {
+        return mData.lastIndexOf(object);
+    }
+
+    @Override
+    public final T remove(int index) {
+        T removed = mData.remove(index);
+        notifyDataChanged();
+        return removed;
+    }
+
+    @Override
+    public final boolean add(@NonNull T t) {
+        if (mData.add(t)) {
+            notifyDataChanged();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public final void add(int index, T object) {
+        mData.add(index, object);
+        notifyDataChanged();
+    }
+
+    @Override
+    public final boolean addAll(Collection<? extends T> collection) {
+        boolean changed = mData.addAll(collection);
+        if (changed) {
+            notifyDataChanged();
+        }
+        return changed;
+    }
+
+    @Override
+    public final boolean addAll(int index, Collection<? extends T> collection) {
+        boolean changed = mData.addAll(index, collection);
+        if (changed) {
+            notifyDataChanged();
+        }
+        return changed;
+    }
+
+    @Override
+    public final boolean remove(@NonNull Object obj) {
+        if (mData.remove(obj)) {
+            notifyDataChanged();
+            return true;
+        }
+        return false;
+    }
+
+    // TODO: Notify of change if modified from iterator.
+
+    @NonNull
+    @Override
+    public final ListIterator<T> listIterator() {
+        return mData.listIterator();
+    }
+
+    @NonNull
+    @Override
+    public final ListIterator<T> listIterator(int location) {
+        return mData.listIterator(location);
+    }
+
+    @NonNull
+    @Override
+    public final List<T> subList(int start, int end) {
+        return mData.subList(start, end);
+    }
+
+    @Override
+    public final boolean containsAll(@NonNull Collection<?> collection) {
+        return mData.containsAll(collection);
+    }
+
+    @Override
+    public final boolean removeAll(@NonNull Collection<?> collection) {
+        boolean removed = mData.removeAll(collection);
+        if (removed) {
+            notifyDataChanged();
+        }
+        return removed;
+    }
+
+    @Override
+    public final boolean retainAll(@NonNull Collection<?> collection) {
+        boolean changed = mData.retainAll(collection);
+        if (changed) {
+            notifyDataChanged();
+        }
+        return changed;
+    }
+
+    @Override
+    public final T set(int index, T object) {
+        T t = mData.set(index, object);
+        notifyDataChanged();
+        return t;
+    }
+
+    @NonNull
+    @Override
+    public final Object[] toArray() {
+        return mData.toArray();
+    }
+
+    @NonNull
+    @Override
+    public final <T> T[] toArray(@NonNull T[] contents) {
+        return mData.toArray(contents);
+    }
+
     @NonNull
     @Override
     public final T get(int position, int flags) {
@@ -71,7 +214,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
         if ((flags & FLAG_PRESENTATION) != 0 && position >= size() - mLookAheadRowCount) {
             proceed();
         }
-        return getItem(position);
+        return mData.get(position);
+    }
+
+    /** Clears the contents, and starts loading again if data is currently shown. */
+    @Override
+    public final void clear() {
+        clearDataAndNotify();
+        stopThread();
+        startThreadIfNeeded();
     }
 
     @Override
@@ -80,15 +231,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
     }
 
     /** Flags the data to be cleared and reloaded next time it is "shown". */
+    @Deprecated
     public final void invalidateDeferred() {
         mDirty = true;
     }
 
-    /** Clears the contents, and starts loading again if data is currently shown. */
-    public final void clear() {
-        clearDataAndNotify();
-        stopThread();
-        startThreadIfNeeded();
+    /** Flags the data to be cleared and reloaded next time it is "shown". */
+    @Override
+    public void invalidate() {
+        invalidateDeferred();
     }
 
     public final void loadNext() {
@@ -135,35 +286,17 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
     protected void onInvalidate() {
     }
 
-    private void append(@NonNull List<? extends T> list) {
+    private void appendNonNullElements(@NonNull List<? extends T> list) {
         for (T t : list) {
             if (t != null) {
-                appendItem(t);
+                mData.add(t);
             }
         }
     }
 
-    private void appendItem(@NonNull T t) {
-        mData.add(t);
-    }
-
-    @NonNull
-    private T getItem(int position) {
-        return mData.get(position);
-    }
-
-    private void clearItems() {
-        mData.clear();
-    }
-
-    @Override
-    public final int size() {
-        return mData.size();
-    }
-
     private void clearDataAndNotify() {
         if (size() > 0) {
-            clearItems();
+            mData.clear();
             onInvalidate();
             notifyDataChanged();
         }
@@ -222,7 +355,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            append(items);
+                            appendNonNullElements(items);
                             notifyDataChanged();
                         }
                     });
