@@ -42,7 +42,7 @@ public final class NewsFragment extends Fragment {
     private final ArrayData<?> mSimpleData = new ArrayData<Object>() {
         @NonNull
         @Override
-        protected List<Object> loadData() throws Exception {
+        protected List<Object> load() throws Exception {
             ArrayList<Object> data = new ArrayList<>();
             data.add(new NewsSection("Latest News"));
             data.addAll(mNewsService.getNewsFlaky());
