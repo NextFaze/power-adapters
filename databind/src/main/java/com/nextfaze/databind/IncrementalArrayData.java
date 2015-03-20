@@ -71,6 +71,12 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         mThreadFactory = threadFactory;
     }
 
+    /** Subclasses must call through to super. */
+    @Override
+    protected void onClose() throws Exception {
+        stopThread();
+    }
+
     @Override
     public final int size() {
         return mData.size();
@@ -267,11 +273,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             stopThread();
         }
         startThreadIfNeeded();
-    }
-
-    @Override
-    protected final void onClose() throws Exception {
-        stopThread();
     }
 
     /**
