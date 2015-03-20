@@ -298,9 +298,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private void clearDataAndNotify() {
         if (size() > 0) {
             mData.clear();
-            onInvalidate();
             notifyDataChanged();
         }
+        onInvalidate();
     }
 
     private void startThreadIfNeeded() {
