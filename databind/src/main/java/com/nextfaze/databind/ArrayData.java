@@ -40,6 +40,15 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     protected ArrayData() {
     }
 
+    /** Subclasses must call through to super. */
+    @Override
+    protected void onClose() throws Exception {
+        if (mTask != null) {
+            mTask.cancel();
+            mTask = null;
+        }
+    }
+
     @Override
     public final int size() {
         return mData.size();
