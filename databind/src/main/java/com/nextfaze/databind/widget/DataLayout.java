@@ -216,7 +216,7 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (mInflated && visibility == VISIBLE) {
+        if (mInflated) {
             updateShown();
         }
     }
@@ -292,7 +292,7 @@ public class DataLayout extends RelativeLayout {
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
     private boolean isThisViewShown() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE;
+        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown();
     }
 
     /** Returns whether now is an appropriate time to perform animations. */
