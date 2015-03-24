@@ -15,23 +15,22 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import com.nextfaze.databind.ArrayData;
 import com.nextfaze.databind.Binder;
-import com.nextfaze.databind.DataAdapterBuilder;
+import com.nextfaze.databind.BindingAdapter;
 import com.nextfaze.databind.ErrorFormatter;
 import com.nextfaze.databind.HeaderFooterAdapter;
-import com.nextfaze.databind.IncrementalArrayData;
 import com.nextfaze.databind.LoadingAdapter;
+import com.nextfaze.databind.Mapper;
+import com.nextfaze.databind.PolymorphicMapper;
 import com.nextfaze.databind.TypedBinder;
 import com.nextfaze.databind.widget.DataLayout;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class NewsFragment extends Fragment {
 
@@ -39,49 +38,22 @@ public final class NewsFragment extends Fragment {
     private final NewsService mNewsService = new NewsService();
 
     @NonNull
-    private final ArrayData<?> mSimpleData = new ArrayData<Object>() {
-        @NonNull
-        @Override
-        protected List<Object> load() throws Exception {
-            ArrayList<Object> data = new ArrayList<>();
-            data.add(new NewsSection("Latest News"));
-            data.addAll(mNewsService.getNewsFlaky());
-            data.add(new NewsSection("Yesterdays News"));
-            data.addAll(mNewsService.getNewsFlaky());
-            return data;
-        }
-    };
+    private final NewsSimpleData mSimpleData = new NewsSimpleData(mNewsService);
 
     @NonNull
-    private final IncrementalArrayData<?> mIncrementalData = new IncrementalArrayData<Object>() {
-
-        private static final int TOTAL = 50;
-        private static final int INCREMENT = 10;
-
-        private volatile int mOffset;
-
-        @Nullable
-        @Override
-        protected List<?> load() throws Throwable {
-            int offset = mOffset;
-            if (offset >= TOTAL) {
-                return null;
-            }
-            mOffset = offset + INCREMENT;
-            return mNewsService.getNews(offset, INCREMENT);
-        }
-
-        @Override
-        protected void onInvalidate() {
-            mOffset = 0;
-        }
-    };
+    private final NewsIncrementalData mIncrementalData = new NewsIncrementalData(mNewsService);
 
     @NonNull
     private final Binder mNewsItemBinder = new TypedBinder<NewsItem, TextView>(android.R.layout.simple_list_item_1) {
         @Override
-        protected void bind(@NonNull NewsItem newsItem, @NonNull TextView textView, int position) {
+        protected void bind(@NonNull final NewsItem newsItem, @NonNull TextView textView, int position) {
             textView.setText(newsItem.getTitle());
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onNewsItemClick(newsItem);
+                }
+            });
         }
     };
 
@@ -95,31 +67,20 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final ListAdapter mSimpleAdapter = new HeaderFooterAdapter.Builder(
-            new DataAdapterBuilder(mSimpleData)
-                    .bind(NewsItem.class, mNewsItemBinder)
-                    .bind(NewsSection.class, mNewsSectionBinder)
-                    .build())
+    private final Mapper mMapper = new PolymorphicMapper.Builder()
+            .bind(NewsItem.class, mNewsItemBinder)
+            .bind(NewsSection.class, mNewsSectionBinder)
+            .build();
+
+    @NonNull
+    private final ListAdapter mSimpleAdapter = new HeaderFooterAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mSimpleData), mMapper))
             .headerResource(R.layout.news_header_item)
             .build();
 
     @NonNull
-    private final ListAdapter mIncrementalAdapter = new LoadingAdapter.Builder(
-            new DataAdapterBuilder(mIncrementalData)
-                    .bind(NewsItem.class, mNewsItemBinder)
-                    .bind(NewsSection.class, mNewsSectionBinder)
-                    .build(), mIncrementalData)
+    private final ListAdapter mIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mIncrementalData), mMapper), mIncrementalData)
             .loadingItemResource(R.layout.loading_item)
             .build();
-
-    @NonNull
-    private final ErrorFormatter mErrorFormatter = new ErrorFormatter() {
-        @Nullable
-        @Override
-        public String format(@NonNull Context context, @NonNull Throwable e) {
-            return "Error: " + e.getMessage();
-        }
-    };
 
     @InjectView(R.id.news_fragment_radio_group)
     RadioGroup mRadioGroup;
@@ -160,7 +121,13 @@ public final class NewsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.inject(this, view);
-        mDataLayout.setErrorFormatter(mErrorFormatter);
+        mDataLayout.setErrorFormatter(new ErrorFormatter() {
+            @Nullable
+            @Override
+            public String format(@NonNull Context context, @NonNull Throwable e) {
+                return "Failed to load news: " + e.getMessage();
+            }
+        });
     }
 
     @Override
@@ -202,6 +169,10 @@ public final class NewsFragment extends Fragment {
         mIncrementalData.clear();
     }
 
+    private void onNewsItemClick(@NonNull NewsItem newsItem) {
+        Toast.makeText(getActivity(), "News item clicked: " + newsItem, Toast.LENGTH_SHORT).show();
+    }
+
     private void showCheckedRadioButton(@IdRes int checkedId) {
         switch (checkedId) {
             case R.id.news_fragment_button_simple:
@@ -223,4 +194,5 @@ public final class NewsFragment extends Fragment {
         mDataLayout.setData(mIncrementalData);
         mListView.setAdapter(mIncrementalAdapter);
     }
+
 }
