@@ -97,6 +97,7 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         return mAdapter.isEnabled(position);
     }
 
+    @Nullable
     @Override
     public Object getItem(int position) {
         return mAdapter.getItem(position);
@@ -122,6 +123,7 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         return mAdapter.getItemViewType(position);
     }
 
+    /** Subclasses must always return the sum of the super call and any additional view types they provide. */
     @Override
     public int getViewTypeCount() {
         return mAdapter.getViewTypeCount();

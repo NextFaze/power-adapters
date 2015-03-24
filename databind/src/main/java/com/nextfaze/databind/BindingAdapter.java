@@ -38,34 +38,59 @@ public final class BindingAdapter extends ListAdapterWrapper {
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        if (convertView == null) {
-            convertView = binder.newView(parent);
+        // Mappers can only handle non-null items.
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                // Invoke the binder to handle view creation and reuse.
+                if (convertView == null) {
+                    convertView = binder.newView(parent);
+                }
+                binder.bindView(item, convertView, position);
+                return convertView;
+            }
         }
-        binder.bindView(item, convertView, position);
-        return convertView;
+        // Fall back to inner adapter if we can't bind this item ourselves.
+        return super.getView(position, convertView, parent);
     }
 
     @Override
     public final boolean isEnabled(int position) {
-        return mMapper.getBinder(getItem(position), position).isEnabled(position);
+        Object item = getItem(position);
+        // Mappers can only handle non-null items.
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                return binder.isEnabled(position);
+            }
+        }
+        // Fall back to inner adapter if we can't handle this item.
+        return super.isEnabled(position);
     }
 
     @Override
     public final int getViewTypeCount() {
-        return mBinders.size();
+        return super.getViewTypeCount() + mBinders.size();
     }
 
     @Override
     public final int getItemViewType(int position) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        // Cache index of each binder to avoid linear search each time.
-        Integer index = mIndexes.get(binder);
-        if (index == null) {
-            index = mBinders.indexOf(binder);
-            mIndexes.put(binder, index);
+        // Mappers can only handle non-null items.
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                // Cache index of each binder to avoid linear search each time.
+                Integer index = mIndexes.get(binder);
+                if (index == null) {
+                    index = mBinders.indexOf(binder);
+                    mIndexes.put(binder, index);
+                }
+                // Offset type by inner type count, otherwise we could get collisions.
+                return super.getViewTypeCount() + index;
+            }
         }
-        return index;
+        // Fall back to inner adapter if we can't bind this item ourselves.
+        return super.getItemViewType(position);
     }
 }

@@ -4,6 +4,7 @@ import android.widget.BaseAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+/** Presents the contents of a {@link Data} instance, and responds to change events. */
 @Accessors(prefix = "m")
 public abstract class DataAdapter<T> extends BaseAdapter implements DisposableListAdapter {
 
@@ -43,6 +44,7 @@ public abstract class DataAdapter<T> extends BaseAdapter implements DisposableLi
         return mData.get(position, Data.FLAG_PRESENTATION);
     }
 
+    /** By default, simply returns the position, since a data item does not intrinsically have a {@code long} ID. */
     @Override
     public long getItemId(int position) {
         return position;
