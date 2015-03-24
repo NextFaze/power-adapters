@@ -2,6 +2,7 @@ package com.nextfaze.databind;
 
 import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 public class MapperWrapper implements Mapper {
@@ -13,7 +14,7 @@ public class MapperWrapper implements Mapper {
         mMapper = mapper;
     }
 
-    @NonNull
+    @Nullable
     @Override
     public Binder getBinder(@NonNull Object item, int position) {
         return mMapper.getBinder(item, position);
