@@ -7,7 +7,7 @@ import java.util.Collection;
 public class MapperWrapper implements Mapper {
 
     @NonNull
-    private final Mapper mMapper;
+    protected final Mapper mMapper;
 
     public MapperWrapper(@NonNull Mapper mapper) {
         mMapper = mapper;

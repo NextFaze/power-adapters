@@ -1,16 +1,17 @@
 package com.nextfaze.databind;
 
 import android.support.annotation.LayoutRes;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.nextfaze.databind.AdapterUtils.layoutInflater;
 import static java.util.Collections.unmodifiableCollection;
 
 @Accessors(prefix = "m")
@@ -23,23 +24,22 @@ public final class PolymorphicMapper implements Mapper {
         mBinders.putAll(binders);
     }
 
-    @NonNull
+    @Nullable
     @Override
     public Binder getBinder(@NonNull Object item, int position) {
         Class<?> itemClass = item.getClass();
+        // Traverse item class hierarchy looking for a binder.
         Binder binder;
         while ((binder = mBinders.get(itemClass)) == null && itemClass != null) {
             itemClass = itemClass.getSuperclass();
         }
-        if (binder == null) {
-            throw new IllegalStateException("No binder found for item class hierarchy " + item.getClass());
-        }
+        // Return null if no binder found.
         return binder;
     }
 
     @NonNull
     @Override
-    public Collection<Binder> getAllBinders() {
+    public Collection<? extends Binder> getAllBinders() {
         return unmodifiableCollection(mBinders.values());
     }
 
@@ -49,8 +49,7 @@ public final class PolymorphicMapper implements Mapper {
             @NonNull
             @Override
             public View newView(@NonNull ViewGroup viewGroup) {
-                return LayoutInflater.from(viewGroup.getContext())
-                        .inflate(overrideItemLayoutResource, viewGroup, false);
+                return layoutInflater(viewGroup).inflate(overrideItemLayoutResource, viewGroup, false);
             }
         };
     }

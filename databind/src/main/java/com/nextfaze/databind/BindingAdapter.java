@@ -38,9 +38,11 @@ public final class BindingAdapter extends ListAdapterWrapper {
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
         Object item = getItem(position);
+        // Mappers can only handle non-null items.
         if (item != null) {
             Binder binder = mMapper.getBinder(item, position);
             if (binder != null) {
+                // Invoke the binder to handle view creation and reuse.
                 if (convertView == null) {
                     convertView = binder.newView(parent);
                 }
@@ -48,29 +50,33 @@ public final class BindingAdapter extends ListAdapterWrapper {
                 return convertView;
             }
         }
-        return mAdapter.getView(position, convertView, parent);
+        // Fall back to inner adapter if we can't bind this item ourselves.
+        return super.getView(position, convertView, parent);
     }
 
     @Override
     public final boolean isEnabled(int position) {
         Object item = getItem(position);
+        // Mappers can only handle non-null items.
         if (item != null) {
             Binder binder = mMapper.getBinder(item, position);
             if (binder != null) {
                 return binder.isEnabled(position);
             }
         }
-        return mAdapter.isEnabled(position);
+        // Fall back to inner adapter if we can't handle this item.
+        return super.isEnabled(position);
     }
 
     @Override
     public final int getViewTypeCount() {
-        return mBinders.size();
+        return super.getViewTypeCount() + mBinders.size();
     }
 
     @Override
     public final int getItemViewType(int position) {
         Object item = getItem(position);
+        // Mappers can only handle non-null items.
         if (item != null) {
             Binder binder = mMapper.getBinder(item, position);
             if (binder != null) {
@@ -80,9 +86,11 @@ public final class BindingAdapter extends ListAdapterWrapper {
                     index = mBinders.indexOf(binder);
                     mIndexes.put(binder, index);
                 }
-                return index;
+                // Offset type by inner type count, otherwise we could get collisions.
+                return super.getViewTypeCount() + index;
             }
         }
-        return mAdapter.getItemViewType(position);
+        // Fall back to inner adapter if we can't bind this item ourselves.
+        return super.getItemViewType(position);
     }
 }
