@@ -97,6 +97,7 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         return mAdapter.isEnabled(position);
     }
 
+    @Nullable
     @Override
     public Object getItem(int position) {
         return mAdapter.getItem(position);

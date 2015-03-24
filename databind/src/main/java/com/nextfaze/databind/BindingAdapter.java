@@ -38,17 +38,29 @@ public final class BindingAdapter extends ListAdapterWrapper {
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        if (convertView == null) {
-            convertView = binder.newView(parent);
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                if (convertView == null) {
+                    convertView = binder.newView(parent);
+                }
+                binder.bindView(item, convertView, position);
+                return convertView;
+            }
         }
-        binder.bindView(item, convertView, position);
-        return convertView;
+        return mAdapter.getView(position, convertView, parent);
     }
 
     @Override
     public final boolean isEnabled(int position) {
-        return mMapper.getBinder(getItem(position), position).isEnabled(position);
+        Object item = getItem(position);
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                return binder.isEnabled(position);
+            }
+        }
+        return mAdapter.isEnabled(position);
     }
 
     @Override
@@ -59,13 +71,18 @@ public final class BindingAdapter extends ListAdapterWrapper {
     @Override
     public final int getItemViewType(int position) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        // Cache index of each binder to avoid linear search each time.
-        Integer index = mIndexes.get(binder);
-        if (index == null) {
-            index = mBinders.indexOf(binder);
-            mIndexes.put(binder, index);
+        if (item != null) {
+            Binder binder = mMapper.getBinder(item, position);
+            if (binder != null) {
+                // Cache index of each binder to avoid linear search each time.
+                Integer index = mIndexes.get(binder);
+                if (index == null) {
+                    index = mBinders.indexOf(binder);
+                    mIndexes.put(binder, index);
+                }
+                return index;
+            }
         }
-        return index;
+        return mAdapter.getItemViewType(position);
     }
 }
