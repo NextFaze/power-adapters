@@ -195,6 +195,7 @@ public class DataLayout extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAttachedToWindow = false;
+        updateShown();
     }
 
     @Override
