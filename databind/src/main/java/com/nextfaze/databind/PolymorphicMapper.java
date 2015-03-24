@@ -77,9 +77,6 @@ public final class PolymorphicMapper implements Mapper {
 
         @NonNull
         public PolymorphicMapper build() {
-            if (mBinders.isEmpty()) {
-                throw new IllegalStateException("Must have at least one binder defined");
-            }
             return new PolymorphicMapper(mBinders);
         }
     }
