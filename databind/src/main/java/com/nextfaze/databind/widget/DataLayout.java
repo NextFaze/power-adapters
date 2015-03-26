@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.nextfaze.databind.Data;
 import com.nextfaze.databind.ErrorFormatter;
 import com.nextfaze.databind.R;
+import com.nextfaze.databind.util.DataWatcher;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -39,19 +40,18 @@ import static android.os.SystemClock.elapsedRealtime;
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
 
-    private static final String TAG = DataLayout.class.getSimpleName();
     private static final String KEY_SUPER_STATE = "superState";
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
 
     @NonNull
     private final DataWatcher mDataWatcher = new DataWatcher() {
         @Override
-        public void onChange() {
+        public void onDataChange() {
             updateViews();
         }
 
         @Override
-        public void onLoadingChange() {
+        public void onDataLoadingChange() {
             Data<?> data = getData();
             if (data != null && data.isLoading()) {
                 // Loading has started again, so clear error status.
@@ -62,7 +62,7 @@ public class DataLayout extends RelativeLayout {
         }
 
         @Override
-        public void onError(@NonNull Throwable e) {
+        public void onDataError(@NonNull Throwable e) {
             mErrorMessage = formatErrorMessage(e);
             updateErrorView();
             updateViews();
@@ -270,7 +270,7 @@ public class DataLayout extends RelativeLayout {
 
     private void updateShown() {
         boolean shown = isThisViewShown();
-        mDataWatcher.setShown(shown);
+        mDataWatcher.setEnabled(shown);
         if (shown != mShown) {
             mShown = shown;
             if (shown) {

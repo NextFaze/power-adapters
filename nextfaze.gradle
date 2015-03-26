@@ -3,7 +3,7 @@ apply plugin: 'maven'
 allprojects {
     repositories {
         maven {
-            url 'http://artifactory.nextfaze.com:8081/artifactory/libs-release'
+            url 'http://maven.nextfaze.com/libs-release'
             credentials {
                 username nextfazeArtifactoryUser
                 password nextfazeArtifactoryPassword
@@ -23,7 +23,7 @@ project.ext.getDeployVersion = {
 }
 
 project.ext.getUrl = {
-    def artifactoryContextUrl = "http://artifactory.nextfaze.com:8081/artifactory/"
+    def artifactoryContextUrl = "http://maven.nextfaze.com/"
     return project.ext.release ?
             "${artifactoryContextUrl}libs-release-local/" :
             "${artifactoryContextUrl}libs-snapshot-local/";
