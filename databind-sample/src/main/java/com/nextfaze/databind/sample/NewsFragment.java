@@ -152,6 +152,13 @@ public final class NewsFragment extends Fragment {
                 return true;
             }
         });
+        menu.add("Invalidate All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                onInvalidateAllClick();
+                return true;
+            }
+        });
     }
 
     @OnClick(R.id.news_fragment_button_simple)
@@ -167,6 +174,11 @@ public final class NewsFragment extends Fragment {
     void onClearAllClick() {
         mSimpleData.clear();
         mIncrementalData.clear();
+    }
+
+    void onInvalidateAllClick() {
+        mSimpleData.invalidate();
+        mIncrementalData.invalidate();
     }
 
     private void onNewsItemClick(@NonNull NewsItem newsItem) {
