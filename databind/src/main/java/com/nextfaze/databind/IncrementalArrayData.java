@@ -237,15 +237,17 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     /** Flags the data to be cleared and reloaded next time it is "shown". */
-    @Deprecated
     public final void invalidateDeferred() {
         mDirty = true;
     }
 
-    /** Flags the data to be cleared and reloaded next time it is "shown". */
+    /** Starts loading data from the beginning, but does not clear existing data until first increment has loaded. */
     @Override
     public void invalidate() {
-        invalidateDeferred();
+        mDirty = true;
+        onInvalidate();
+        stopThread();
+        startThreadIfNeeded();
     }
 
     public final void loadNext() {
@@ -288,11 +290,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void appendNonNullElements(@NonNull List<? extends T> list) {
+        if (mDirty) {
+            mData.clear();
+        }
         for (T t : list) {
             if (t != null) {
                 mData.add(t);
             }
         }
+        mDirty = false;
     }
 
     private void clearDataAndNotify() {
@@ -306,17 +312,11 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private void startThreadIfNeeded() {
         if (mThread == null && isShown()) {
             log.trace("Starting thread");
-            mDirty = false;
             setLoading(true);
             mThread = mThreadFactory.newThread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        loadLoop();
-                    } catch (InterruptedException e) {
-                        // Normal thread termination.
-                        log.trace("Thread terminated normally with an InterruptedException");
-                    }
+                    runLoadLoop();
                 }
             });
             mThread.start();
@@ -328,6 +328,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             log.trace("Stopping thread");
             mThread.interrupt();
             mThread = null;
+        }
+    }
+
+    private void runLoadLoop() {
+        try {
+            loadLoop();
+        } catch (InterruptedException e) {
+            // Normal thread termination.
+            log.trace("Thread terminated normally with an InterruptedException");
         }
     }
 
