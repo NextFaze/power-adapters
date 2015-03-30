@@ -10,7 +10,7 @@ public interface ErrorFormatter {
     String format(@NonNull Context context, @NonNull Throwable e);
 
     /** Uses {@link Throwable#toString()} to render an error. */
-    public static final ErrorFormatter DEFAULT = new ErrorFormatter() {
+    ErrorFormatter DEFAULT = new ErrorFormatter() {
         @Nullable
         @Override
         public String format(@NonNull Context context, @NonNull Throwable e) {
