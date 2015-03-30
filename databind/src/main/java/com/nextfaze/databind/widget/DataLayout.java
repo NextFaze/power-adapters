@@ -113,6 +113,9 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private ErrorFormatter mErrorFormatter = ErrorFormatter.DEFAULT;
 
+    @NonNull
+    private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.DEFAULT;
+
     /** Animator used to show views. */
     @Nullable
     private Animator mAnimatorIn;
@@ -268,6 +271,18 @@ public class DataLayout extends RelativeLayout {
         return mErrorFormatter;
     }
 
+    @NonNull
+    public final VisibilityPolicy getVisibilityPolicy() {
+        return mVisibilityPolicy;
+    }
+
+    public final void setVisibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
+        if (visibilityPolicy != mVisibilityPolicy) {
+            mVisibilityPolicy = visibilityPolicy;
+            updateViews();
+        }
+    }
+
     private void updateShown() {
         boolean shown = isThisViewShown();
         mDataWatcher.setEnabled(shown);
@@ -322,53 +337,81 @@ public class DataLayout extends RelativeLayout {
 
     private void updateViews() {
         boolean animated = shouldAnimate();
-        if (mData == null) {
-            // No data, show empty.
-            if (mEmptyView != null) {
-                hide(mContentView, animated);
+        setShow(mContentView, animated);
+        setShow(mLoadingView, animated);
+        setShow(mEmptyView, animated);
+        setShow(mErrorView, animated);
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean shouldShow(@NonNull View v) {
+        if (v == mContentView) {
+            if (shouldShowContents()) {
+                return true;
             }
-            if (mErrorMessage == null) {
-                show(mEmptyView, animated);
-                hide(mErrorView, animated);
-            } else {
-                hide(mEmptyView, animated);
-                show(mErrorView, animated);
+            if (mEmptyView == null && shouldShowEmpty()) {
+                return true;
             }
-            hide(mLoadingView, animated);
-        } else {
-            if (mData.isEmpty()) {
-                if (mData.isLoading()) {
-                    // Empty, but loading, so show loading.
-                    if (mLoadingView != null) {
-                        hide(mContentView, animated);
-                    }
-                    hide(mEmptyView, animated);
-                    show(mLoadingView, animated);
-                    hide(mErrorView, animated);
-                } else {
-                    if (mErrorMessage == null) {
-                        // Empty, not loading, no error, so show empty.
-                        if (mEmptyView != null) {
-                            hide(mContentView, animated);
-                        }
-                        show(mEmptyView, animated);
-                        hide(mErrorView, animated);
-                    } else {
-                        // Empty, not loading, but has an error, so show error.
-                        if (mErrorView != null) {
-                            hide(mContentView, animated);
-                        }
-                        hide(mEmptyView, animated);
-                        show(mErrorView, animated);
-                    }
-                    hide(mLoadingView, animated);
-                }
+            if (mLoadingView == null && shouldShowLoading()) {
+                return true;
+            }
+            if (mErrorView == null && shouldShowError()) {
+                return true;
+            }
+        }
+        if (v == mLoadingView) {
+            return shouldShowLoading();
+        }
+        if (v == mEmptyView) {
+            return shouldShowEmpty();
+        }
+        if (v == mErrorView) {
+            return shouldShowError();
+        }
+        return false;
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean shouldShowContents() {
+        return mData != null && !mData.isEmpty();
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean shouldShowLoading() {
+        if (mData != null && !mData.isEmpty()) {
+            return false;
+        }
+        return mData != null && mData.isLoading();
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean shouldShowError() {
+        if (mData != null && !mData.isEmpty()) {
+            return false;
+        }
+        if (mData != null && mData.isLoading()) {
+            return false;
+        }
+        return mErrorMessage != null;
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    private boolean shouldShowEmpty() {
+        if (shouldShowLoading()) {
+            return false;
+        }
+        if (shouldShowError()) {
+            return false;
+        }
+        return mData == null || mData.isEmpty();
+    }
+
+    private void setShow(@Nullable View v, boolean animated) {
+        if (v != null) {
+            if (mVisibilityPolicy.shouldShow(this, v)) {
+                show(v, animated);
             } else {
-                // Not empty, show adapter view.
-                show(mContentView, animated);
-                hide(mEmptyView, animated);
-                hide(mLoadingView, animated);
-                hide(mErrorView, animated);
+                hide(v, animated);
             }
         }
     }
@@ -388,18 +431,20 @@ public class DataLayout extends RelativeLayout {
         return mErrorFormatter.format(getContext(), e);
     }
 
-    private void show(@Nullable View v, boolean animated) {
+    private boolean show(@Nullable View v, boolean animated) {
         if (v == null) {
-            return;
+            return false;
         }
         animateIn(v, !animated);
+        return true;
     }
 
-    private void hide(@Nullable View v, boolean animated) {
+    private boolean hide(@Nullable View v, boolean animated) {
         if (v == null) {
-            return;
+            return false;
         }
         animateOut(v, !animated);
+        return true;
     }
 
     private void animateIn(@NonNull View v, boolean immediately) {
@@ -523,5 +568,21 @@ public class DataLayout extends RelativeLayout {
     @NonNull
     private static String name(@NonNull View v) {
         return v.getResources().getResourceEntryName(v.getId());
+    }
+
+    /** Allows control of visibility of each {@link DataLayout} component. */
+    public interface VisibilityPolicy {
+
+        /**
+         * @see DataLayout#shouldShow(View)
+         */
+        VisibilityPolicy DEFAULT = new VisibilityPolicy() {
+            @Override
+            public boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v) {
+                return dataLayout.shouldShow(v);
+            }
+        };
+
+        boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
     }
 }
