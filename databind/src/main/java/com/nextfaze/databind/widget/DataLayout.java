@@ -271,12 +271,12 @@ public class DataLayout extends RelativeLayout {
         return mErrorFormatter;
     }
 
-    @Nullable
+    @NonNull
     public final VisibilityPolicy getVisibilityPolicy() {
         return mVisibilityPolicy;
     }
 
-    public final void setVisibilityPolicy(@Nullable VisibilityPolicy visibilityPolicy) {
+    public final void setVisibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
         if (visibilityPolicy != mVisibilityPolicy) {
             mVisibilityPolicy = visibilityPolicy;
             updateViews();
