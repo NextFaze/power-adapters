@@ -181,11 +181,11 @@ public final class NewsFragment extends Fragment {
         mIncrementalData.invalidate();
     }
 
-    private void onNewsItemClick(@NonNull NewsItem newsItem) {
-        Toast.makeText(getActivity(), "News item clicked: " + newsItem, Toast.LENGTH_SHORT).show();
+    void onNewsItemClick(@NonNull NewsItem newsItem) {
+        showToast("News item clicked: " + newsItem);
     }
 
-    private void showCheckedRadioButton(@IdRes int checkedId) {
+    void showCheckedRadioButton(@IdRes int checkedId) {
         switch (checkedId) {
             case R.id.news_fragment_button_simple:
                 showSimple();
@@ -207,4 +207,7 @@ public final class NewsFragment extends Fragment {
         mListView.setAdapter(mIncrementalAdapter);
     }
 
+    void showToast(@NonNull String msg) {
+        Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+    }
 }

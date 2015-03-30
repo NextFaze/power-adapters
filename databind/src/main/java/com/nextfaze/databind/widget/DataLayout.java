@@ -1,12 +1,15 @@
 package com.nextfaze.databind.widget;
 
-import android.animation.LayoutTransition;
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -113,6 +116,14 @@ public class DataLayout extends RelativeLayout {
     @NonNull
     private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.DEFAULT;
 
+    /** Animator used to show views. */
+    @Nullable
+    private Animator mAnimatorIn;
+
+    /** Animator used to hide views. */
+    @Nullable
+    private Animator mAnimatorOut;
+
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
@@ -124,6 +135,9 @@ public class DataLayout extends RelativeLayout {
 
     /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
     private boolean mInflated;
+
+    /** Indicates animations will run as inner views show and hide. */
+    private boolean mAnimationEnabled = true;
 
     @SuppressWarnings("UnusedDeclaration")
     public DataLayout(Context context) {
@@ -141,14 +155,10 @@ public class DataLayout extends RelativeLayout {
         mEmptyViewId = a.getResourceId(R.styleable.DataLayout_emptyView, -1);
         mLoadingViewId = a.getResourceId(R.styleable.DataLayout_loadingView, -1);
         mErrorViewId = a.getResourceId(R.styleable.DataLayout_errorView, -1);
+        mAnimatorIn = loadAnimator(context, a, R.styleable.DataLayout_animatorIn, R.animator.data_layout_default_in);
+        mAnimatorOut = loadAnimator(context, a, R.styleable.DataLayout_animatorOut, R.animator.data_layout_default_out);
+        mAnimationEnabled = a.getBoolean(R.styleable.DataLayout_animationsEnabled, mAnimationEnabled);
         a.recycle();
-
-        LayoutTransition transition = new LayoutTransition();
-        transition.setStartDelay(LayoutTransition.APPEARING, 0);
-        transition.setStartDelay(LayoutTransition.DISAPPEARING, 0);
-        transition.setStartDelay(LayoutTransition.CHANGE_APPEARING, 0);
-        transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
-        setLayoutTransition(transition);
     }
 
     @Override
@@ -275,6 +285,16 @@ public class DataLayout extends RelativeLayout {
             mVisibilityPolicy = visibilityPolicy;
             updateViews();
         }
+    }
+
+    /** Indicates whether animations will run on child views. */
+    public final boolean isAnimationEnabled() {
+        return mAnimationEnabled;
+    }
+
+    /** Controls whether animations will run on child views. {@code true} by default. */
+    public final void setAnimationEnabled(boolean animationEnabled) {
+        mAnimationEnabled = animationEnabled;
     }
 
     @Nullable
@@ -465,7 +485,7 @@ public class DataLayout extends RelativeLayout {
         if (v == null) {
             return false;
         }
-        v.setVisibility(VISIBLE);
+        animateIn(v, !animated);
         return true;
     }
 
@@ -473,8 +493,137 @@ public class DataLayout extends RelativeLayout {
         if (v == null) {
             return false;
         }
-        v.setVisibility(GONE);
+        animateOut(v, !animated);
         return true;
+    }
+
+    private void animateIn(@NonNull View v, boolean immediately) {
+        if (isAnimatingIn(v)) {
+            return;
+        }
+        v.setVisibility(VISIBLE);
+        if (mAnimationEnabled) {
+            Animator animator = createAnimatorIn();
+            if (animator != null) {
+                setAnimatingIn(v, true);
+                animator.addListener(animateInListener(v));
+                animate(v, animator, immediately);
+            }
+        }
+    }
+
+    private void animateOut(@NonNull View v, boolean immediately) {
+        if (isAnimatingOut(v)) {
+            return;
+        }
+        v.setVisibility(INVISIBLE);
+        if (mAnimationEnabled) {
+            Animator animator = createAnimatorOut();
+            if (animator != null) {
+                setAnimatingOut(v, true);
+                animator.addListener(animateOutListener(v));
+                animate(v, animator, immediately);
+            }
+        }
+    }
+
+    private void animate(@NonNull View v, @NonNull Animator animator, boolean immediately) {
+        cancelAnimator(v);
+        setAnimator(v, animator);
+        animator.addListener(animateOutListener(v));
+        if (immediately) {
+            animator.setDuration(0);
+        }
+        animator.setTarget(v);
+        animator.start();
+    }
+
+    @Nullable
+    private Animator createAnimatorIn() {
+        return mAnimatorIn != null ? mAnimatorIn.clone() : null;
+    }
+
+    @Nullable
+    private Animator createAnimatorOut() {
+        return mAnimatorOut != null ? mAnimatorOut.clone() : null;
+    }
+
+    private static boolean isAnimating(@NonNull View v) {
+        Animator animator = getAnimator(v);
+        return animator != null && animator.isRunning();
+    }
+
+    private static void cancelAnimator(@NonNull View v) {
+        Animator animator = getAnimator(v);
+        if (animator != null) {
+            animator.cancel();
+            setAnimator(v, null);
+        }
+    }
+
+    private static void setAnimator(@NonNull View v, @Nullable Animator animator) {
+        v.setTag(R.id.data_layout_animator, animator);
+    }
+
+    @Nullable
+    private static Animator getAnimator(@NonNull View v) {
+        return (Animator) v.getTag(R.id.data_layout_animator);
+    }
+
+    private static boolean isAnimatingIn(@NonNull View v) {
+        return getFlag(v, R.id.data_layout_animating_in);
+    }
+
+    private static void setAnimatingIn(@NonNull View v, boolean animatingIn) {
+        v.setTag(R.id.data_layout_animating_in, animatingIn);
+    }
+
+    private static boolean isAnimatingOut(@NonNull View v) {
+        return getFlag(v, R.id.data_layout_animating_out);
+    }
+
+    private static void setAnimatingOut(@NonNull View v, boolean animatingOut) {
+        v.setTag(R.id.data_layout_animating_out, animatingOut);
+    }
+
+    private static boolean getFlag(@NonNull View v, @IdRes int tagId) {
+        Boolean b = (Boolean) v.getTag(tagId);
+        return b != null && b;
+    }
+
+    @NonNull
+    private static Animator.AnimatorListener animateInListener(@NonNull final View v) {
+        return new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setAnimator(v, null);
+                setAnimatingIn(v, false);
+            }
+        };
+    }
+
+    @NonNull
+    private static Animator.AnimatorListener animateOutListener(@NonNull final View v) {
+        return new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setAnimator(v, null);
+                setAnimatingOut(v, false);
+            }
+        };
+    }
+
+    @Nullable
+    private static Animator loadAnimator(@NonNull Context context,
+                                         @NonNull TypedArray typedArray,
+                                         int index,
+                                         @AnimatorRes int defaultValue) {
+        return AnimatorInflater.loadAnimator(context, typedArray.getResourceId(index, defaultValue));
+    }
+
+    @NonNull
+    private static String name(@NonNull View v) {
+        return v.getResources().getResourceEntryName(v.getId());
     }
 
     /** Allows control of visibility of each {@link DataLayout} component. */
