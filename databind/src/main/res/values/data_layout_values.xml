@@ -8,6 +8,9 @@
         <attr name="emptyView" format="reference"/>
         <attr name="loadingView" format="reference"/>
         <attr name="errorView" format="reference"/>
+        <attr name="animatorIn" format="reference"/>
+        <attr name="animatorOut" format="reference"/>
+        <attr name="animationsEnabled" format="boolean"/>
     </declare-styleable>
 
     <!-- IDs -->
