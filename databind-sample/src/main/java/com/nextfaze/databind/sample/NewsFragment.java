@@ -106,7 +106,7 @@ public final class NewsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Must dispose of data instances when finished with them.
+        // Should dispose of data instances when finished with them.
         mSimpleData.close();
         mIncrementalData.close();
     }

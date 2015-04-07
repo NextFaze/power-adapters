@@ -217,7 +217,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final T get(int position, int flags) {
         // Requested end of data? Time to load more.
-        if ((flags & FLAG_PRESENTATION) != 0 && position >= size() - mLookAheadRowCount) {
+        if ((flags & FLAG_PRESENTATION) != 0 && position >= size() - 1 - mLookAheadRowCount) {
             proceed();
         }
         return mData.get(position);
@@ -243,7 +243,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     /** Starts loading data from the beginning, but does not clear existing data until first increment has loaded. */
     @Override
-    public void invalidate() {
+    public final void invalidate() {
         mDirty = true;
         onInvalidate();
         stopThread();
@@ -275,6 +275,18 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             stopThread();
         }
         startThreadIfNeeded();
+    }
+
+    @Override
+    protected final void onHidden(long millisShown) {
+        log.trace("Hidden after being shown for {} ms", millisShown);
+    }
+
+    @Override
+    protected void onHideTimeout() {
+        log.trace("Hide timeout elapsed ({} ms); clearing and stopping thread", getHideTimeout());
+        clearDataAndNotify();
+        stopThread();
     }
 
     /**
