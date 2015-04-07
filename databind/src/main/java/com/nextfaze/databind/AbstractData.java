@@ -2,7 +2,6 @@ package com.nextfaze.databind;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
@@ -11,12 +10,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 
 import static android.os.Looper.getMainLooper;
+import static android.os.SystemClock.elapsedRealtime;
 
 /**
- * Skeleton {@link Data} implementation that provides listener management, hide timeout functionality, shown/hidden
+ * Skeleton {@link Data} implementation that provides observer management, hide timeout functionality, shown/hidden
  * state tracking, and other sensible default method implementations.
  */
-// TODO: Make thread-safe.
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
 
@@ -43,7 +42,7 @@ public abstract class AbstractData<T> implements Data<T> {
     private final Runnable mHideTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            onHideTimeout();
+            dispatchHideTimeout();
         }
     };
 
@@ -53,6 +52,21 @@ public abstract class AbstractData<T> implements Data<T> {
 
     private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
+    /** @see #setHideTimeout(long) */
+    public final long getHideTimeout() {
+        return mHideTimeout;
+    }
+
+    /**
+     * Set the number of milliseconds before {@link #onHideTimeout()} is called after being hidden. The value is {@code
+     * 3} seconds by default. A negative value disables the hide timeout callback.
+     * @param hideTimeout The hide timeout in milliseconds.
+     */
+    public final void setHideTimeout(long hideTimeout) {
+        mHideTimeout = hideTimeout;
+    }
+
+    //region Observer Registration
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
         mDataObservers.register(dataObserver);
@@ -82,6 +96,7 @@ public abstract class AbstractData<T> implements Data<T> {
     public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
         mErrorObservers.unregister(errorObserver);
     }
+    //endregion
 
     @NonNull
     @Override
@@ -94,66 +109,50 @@ public abstract class AbstractData<T> implements Data<T> {
         return size() <= 0;
     }
 
+    /** Subclasses overriding this method should always make super call. */
     @Override
     public void notifyShown() {
         if (!mShown) {
-            mShowTime = SystemClock.elapsedRealtime();
+            mShowTime = elapsedRealtime();
             mShown = true;
-            onShown(SystemClock.elapsedRealtime() - mHideTime);
+            dispatchShown(elapsedRealtime() - mHideTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
         }
     }
 
+    /** Subclasses overriding this method should always make super call. */
     @Override
     public void notifyHidden() {
         if (mShown) {
-            mHideTime = SystemClock.elapsedRealtime();
+            mHideTime = elapsedRealtime();
             mShown = false;
-            onHidden(SystemClock.elapsedRealtime() - mShowTime);
+            dispatchHidden(elapsedRealtime() - mShowTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
-            mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
+            if (mHideTimeout >= 0) {
+                mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
+            }
         }
     }
 
+    /** Subclasses overriding this method should always make super call. */
     @Override
     public void close() {
-        try {
-            onClose();
-        } catch (Exception e) {
-            log.error("Error closing data", e);
-        }
+        dispatchClose();
     }
 
     @Override
-    public final Iterator<T> iterator() {
-        return new Iterator<T>() {
-
-            private int mPosition;
-
-            @Override
-            public boolean hasNext() {
-                return mPosition < size();
-            }
-
-            @Override
-            public T next() {
-                return get(mPosition++);
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+    public Iterator<T> iterator() {
+        return new DataIterator<>(this);
     }
 
-    protected void onClose() throws Exception {
+    protected void onClose() throws Throwable {
     }
 
     protected boolean isShown() {
         return mShown;
     }
 
+    /** Dispatch a data change notification on the UI thread. */
     protected void notifyDataChanged() {
         runOnUiThread(new Runnable() {
             @Override
@@ -163,6 +162,7 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
+    /** Dispatch a loading change notification on the UI thread. */
     protected void notifyLoadingChanged() {
         runOnUiThread(new Runnable() {
             @Override
@@ -172,6 +172,7 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
+    /** Dispatch an error notification on the UI thread. */
     protected void notifyError(@NonNull final Throwable e) {
         runOnUiThread(new Runnable() {
             @Override
@@ -181,12 +182,18 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
+    /** Called when the data enters the shown state. */
     protected void onShown(long millisHidden) {
     }
 
+    /** Called when the data enters the hidden state. */
     protected void onHidden(long millisShown) {
     }
 
+    /**
+     * Called when the hide timeout duration has elapsed.
+     * @see #setHideTimeout(long)
+     */
     protected void onHideTimeout() {
     }
 
@@ -198,11 +205,35 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     }
 
-    public final long getHideTimeout() {
-        return mHideTimeout;
+    private void dispatchShown(long millisHidden) {
+        try {
+            onShown(millisHidden);
+        } catch (Throwable e) {
+            log.error("Error during shown callback", e);
+        }
     }
 
-    public final void setHideTimeout(long hideTimeout) {
-        mHideTimeout = hideTimeout;
+    private void dispatchHidden(long millisShown) {
+        try {
+            onHidden(millisShown);
+        } catch (Throwable e) {
+            log.error("Error during hidden callback", e);
+        }
+    }
+
+    private void dispatchHideTimeout() {
+        try {
+            onHideTimeout();
+        } catch (Throwable e) {
+            log.error("Error during hide timeout callback", e);
+        }
+    }
+
+    private void dispatchClose() {
+        try {
+            onClose();
+        } catch (Throwable e) {
+            log.error("Error during close callback", e);
+        }
     }
 }
