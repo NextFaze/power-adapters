@@ -42,11 +42,14 @@ public abstract class AbstractData<T> implements Data<T> {
     private final Runnable mHideTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            dispatchHideTimeout();
+            if (!mClosed) {
+                dispatchHideTimeout();
+            }
         }
     };
 
     private boolean mShown;
+    private boolean mClosed;
     private long mShowTime;
     private long mHideTime;
 
@@ -128,7 +131,7 @@ public abstract class AbstractData<T> implements Data<T> {
             mShown = false;
             dispatchHidden(elapsedRealtime() - mShowTime);
             mHandler.removeCallbacks(mHideTimeoutRunnable);
-            if (mHideTimeout >= 0) {
+            if (mHideTimeout >= 0 && !mClosed) {
                 mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
             }
         }
@@ -137,7 +140,11 @@ public abstract class AbstractData<T> implements Data<T> {
     /** Subclasses overriding this method should always make super call. */
     @Override
     public void close() {
-        dispatchClose();
+        if (!mClosed) {
+            mHandler.removeCallbacks(mHideTimeoutRunnable);
+            mClosed = true;
+            dispatchClose();
+        }
     }
 
     @Override
