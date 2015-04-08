@@ -47,7 +47,7 @@ public class DataWrapper<T> extends AbstractData<T> {
 
     /** Subclasses must make super call. */
     @Override
-    protected void onClose() throws Exception {
+    protected void onClose() throws Throwable {
         mData.unregisterDataObserver(mDataObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
         mData.unregisterErrorObserver(mErrorObserver);

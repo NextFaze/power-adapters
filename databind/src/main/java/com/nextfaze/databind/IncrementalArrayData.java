@@ -73,7 +73,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     /** Subclasses must call through to super. */
     @Override
-    protected void onClose() throws Exception {
+    protected void onClose() throws Throwable {
         stopThread();
     }
 

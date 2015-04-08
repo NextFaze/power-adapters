@@ -21,7 +21,9 @@ public abstract class AbstractData<T> implements Data<T> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractData.class);
 
-    private static final long HIDE_TIMEOUT_DEFAULT = 3 * 1000;
+    public static final long NEVER = -1;
+
+    private static final long HIDE_TIMEOUT_DEFAULT = NEVER;
 
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
@@ -61,8 +63,8 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     /**
-     * Set the number of milliseconds before {@link #onHideTimeout()} is called after being hidden. The value is {@code
-     * 3} seconds by default. A negative value disables the hide timeout callback.
+     * Set the number of milliseconds before {@link #onHideTimeout()} is called after being hidden. This feature is
+     * disabled by default. A negative value or {@link #NEVER} disables the hide timeout callback.
      * @param hideTimeout The hide timeout in milliseconds.
      */
     public final void setHideTimeout(long hideTimeout) {
