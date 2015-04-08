@@ -16,7 +16,5 @@
     <!-- IDs -->
 
     <item name="data_layout_animator" type="id"/>
-    <item name="data_layout_animating_in" type="id"/>
-    <item name="data_layout_animating_out" type="id"/>
 
 </resources>

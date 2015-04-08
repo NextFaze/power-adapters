@@ -23,6 +23,8 @@ import com.nextfaze.databind.R;
 import com.nextfaze.databind.util.DataWatcher;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +41,8 @@ import static android.os.SystemClock.elapsedRealtime;
  */
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(DataLayout.class);
 
     private static final String KEY_SUPER_STATE = "superState";
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
@@ -124,6 +128,9 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private Animator mAnimatorOut;
 
+    @Nullable
+    private View mVisibleView;
+
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
@@ -165,9 +172,13 @@ public class DataLayout extends RelativeLayout {
     protected void onFinishInflate() {
         mInflated = true;
         mContentView = findViewById(mContentViewId);
+        mContentView.setVisibility(INVISIBLE);
         mEmptyView = findViewById(mEmptyViewId);
+        mEmptyView.setVisibility(INVISIBLE);
         mLoadingView = findViewById(mLoadingViewId);
+        mLoadingView.setVisibility(INVISIBLE);
         mErrorView = findViewById(mErrorViewId);
+        mErrorView.setVisibility(INVISIBLE);
         updateViews();
     }
 
@@ -375,6 +386,9 @@ public class DataLayout extends RelativeLayout {
 
     /** Returns whether now is an appropriate time to perform animations. */
     private boolean shouldAnimate() {
+        if (!mAnimationEnabled) {
+            return false;
+        }
         Display display = currentDisplay();
         if (display == null) {
             return false;
@@ -398,14 +412,20 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateViews() {
-        onlyShow(viewToBeShown(), shouldAnimate());
+        changeView(viewToBeShown(), shouldAnimate());
     }
 
-    private void onlyShow(@Nullable View v, boolean animated) {
-        setShown(mContentView, v == mContentView, animated);
-        setShown(mLoadingView, v == mLoadingView, animated);
-        setShown(mEmptyView, v == mEmptyView, animated);
-        setShown(mErrorView, v == mErrorView, animated);
+    private void changeView(@Nullable View newView, boolean animated) {
+        View oldView = mVisibleView;
+        if (newView != oldView) {
+            mVisibleView = newView;
+            if (oldView != null) {
+                animateOut(oldView, !animated);
+            }
+            if (newView != null) {
+                animateIn(newView, !animated);
+            }
+        }
     }
 
     @Nullable
@@ -473,64 +493,49 @@ public class DataLayout extends RelativeLayout {
         return mErrorFormatter.format(getContext(), e);
     }
 
-    private void setShown(@Nullable View v, boolean shown, boolean animated) {
-        if (shown) {
-            show(v, animated);
-        } else {
-            hide(v, animated);
-        }
-    }
-
-    private boolean show(@Nullable View v, boolean animated) {
-        if (v == null) {
-            return false;
-        }
-        animateIn(v, !animated);
-        return true;
-    }
-
-    private boolean hide(@Nullable View v, boolean animated) {
-        if (v == null) {
-            return false;
-        }
-        animateOut(v, !animated);
-        return true;
-    }
-
-    private void animateIn(@NonNull View v, boolean immediately) {
-        if (isAnimatingIn(v)) {
-            return;
-        }
+    private void animateIn(@NonNull final View v, boolean immediately) {
         v.setVisibility(VISIBLE);
-        if (mAnimationEnabled) {
-            Animator animator = createAnimatorIn();
-            if (animator != null) {
-                setAnimatingIn(v, true);
-                animator.addListener(animateInListener(v));
-                animate(v, animator, immediately);
-            }
+        Animator animator = createAnimatorIn();
+        if (animator != null) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onAnimateInEnd(v);
+                }
+            });
+            animate(v, animator, immediately);
         }
     }
 
-    private void animateOut(@NonNull View v, boolean immediately) {
-        if (isAnimatingOut(v)) {
-            return;
+    private static void onAnimateInEnd(@NonNull View v) {
+        setAnimator(v, null);
+    }
+
+    private void animateOut(@NonNull final View v, boolean immediately) {
+        Animator animator = createAnimatorOut();
+        if (animator != null) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onAnimateOutEnd(animation, v);
+                }
+            });
+            animate(v, animator, immediately);
         }
-        v.setVisibility(INVISIBLE);
-        if (mAnimationEnabled) {
-            Animator animator = createAnimatorOut();
-            if (animator != null) {
-                setAnimatingOut(v, true);
-                animator.addListener(animateOutListener(v));
-                animate(v, animator, immediately);
-            }
+    }
+
+    private static void onAnimateOutEnd(Animator animation, @NonNull View v) {
+        // Check the animator here to prevent canceled animations from unintentionally hiding the view.
+        // Animations that are canceled will have had their animator reassigned, and this check won't pass.
+        if (getAnimator(v) == animation) {
+            v.setVisibility(INVISIBLE);
         }
+        setAnimator(v, null);
     }
 
     private void animate(@NonNull View v, @NonNull Animator animator, boolean immediately) {
         cancelAnimator(v);
         setAnimator(v, animator);
-        animator.addListener(animateOutListener(v));
         if (immediately) {
             animator.setDuration(0);
         }
@@ -548,16 +553,12 @@ public class DataLayout extends RelativeLayout {
         return mAnimatorOut != null ? mAnimatorOut.clone() : null;
     }
 
-    private static boolean isAnimating(@NonNull View v) {
-        Animator animator = getAnimator(v);
-        return animator != null && animator.isRunning();
-    }
-
     private static void cancelAnimator(@NonNull View v) {
         Animator animator = getAnimator(v);
         if (animator != null) {
-            animator.cancel();
+            // Must reassign animator before cancel.
             setAnimator(v, null);
+            animator.cancel();
         }
     }
 
@@ -568,49 +569,6 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private static Animator getAnimator(@NonNull View v) {
         return (Animator) v.getTag(R.id.data_layout_animator);
-    }
-
-    private static boolean isAnimatingIn(@NonNull View v) {
-        return getFlag(v, R.id.data_layout_animating_in);
-    }
-
-    private static void setAnimatingIn(@NonNull View v, boolean animatingIn) {
-        v.setTag(R.id.data_layout_animating_in, animatingIn);
-    }
-
-    private static boolean isAnimatingOut(@NonNull View v) {
-        return getFlag(v, R.id.data_layout_animating_out);
-    }
-
-    private static void setAnimatingOut(@NonNull View v, boolean animatingOut) {
-        v.setTag(R.id.data_layout_animating_out, animatingOut);
-    }
-
-    private static boolean getFlag(@NonNull View v, @IdRes int tagId) {
-        Boolean b = (Boolean) v.getTag(tagId);
-        return b != null && b;
-    }
-
-    @NonNull
-    private static Animator.AnimatorListener animateInListener(@NonNull final View v) {
-        return new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                setAnimator(v, null);
-                setAnimatingIn(v, false);
-            }
-        };
-    }
-
-    @NonNull
-    private static Animator.AnimatorListener animateOutListener(@NonNull final View v) {
-        return new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                setAnimator(v, null);
-                setAnimatingOut(v, false);
-            }
-        };
     }
 
     @Nullable
