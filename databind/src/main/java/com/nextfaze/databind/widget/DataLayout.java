@@ -240,6 +240,12 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        updateShown();
+    }
+
     /**
      * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
      * view visibility accordingly.
@@ -381,7 +387,7 @@ public class DataLayout extends RelativeLayout {
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
     private boolean isThisViewShown() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown();
+        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() && isEnabled();
     }
 
     /** Returns whether now is an appropriate time to perform animations. */
