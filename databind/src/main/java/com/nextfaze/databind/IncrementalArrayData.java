@@ -299,12 +299,17 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Nullable
     protected abstract List<? extends T> load() throws Throwable;
 
-    /** Called when data is invalidated or cleared. May happen on any thread. */
+    /** Called prior to elements being cleared. Always called from the UI thread. */
+    protected void onClear() {
+    }
+
+    /** Called when data is invalidated or cleared. Always called from the UI thread. */
     protected void onInvalidate() {
     }
 
     private void appendNonNullElements(@NonNull List<? extends T> list) {
         if (mDirty) {
+            onClear();
             mData.clear();
         }
         for (T t : list) {
@@ -317,6 +322,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     private void clearDataAndNotify() {
         if (size() > 0) {
+            onClear();
             mData.clear();
             notifyDataChanged();
         }
