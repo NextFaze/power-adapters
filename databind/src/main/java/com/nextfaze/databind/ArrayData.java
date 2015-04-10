@@ -47,6 +47,8 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
             mTask.cancel();
             mTask = null;
         }
+        mData.clear();
+        mData.trimToSize();
     }
 
     @Override

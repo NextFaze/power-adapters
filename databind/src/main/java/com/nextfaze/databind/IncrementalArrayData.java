@@ -75,6 +75,8 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     protected void onClose() throws Throwable {
         stopThread();
+        mData.clear();
+        mData.trimToSize();
     }
 
     @Override
