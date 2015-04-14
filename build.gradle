@@ -13,5 +13,5 @@ allprojects {
     }
 
     group = 'com.nextfaze'
-    version = '1.6.19'
+    version = '1.6.20'
 }
