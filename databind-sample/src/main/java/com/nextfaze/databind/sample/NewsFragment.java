@@ -159,6 +159,13 @@ public final class NewsFragment extends Fragment {
                 return true;
             }
         });
+        menu.add("Invalidate incremental Deferred").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                onInvalidateIncrementalDeferredClick();
+                return true;
+            }
+        });
     }
 
     @OnClick(R.id.news_fragment_button_simple)
@@ -179,6 +186,10 @@ public final class NewsFragment extends Fragment {
     void onInvalidateAllClick() {
         mSimpleData.invalidate();
         mIncrementalData.invalidate();
+    }
+
+    void onInvalidateIncrementalDeferredClick() {
+        mIncrementalData.invalidateDeferred();
     }
 
     void onNewsItemClick(@NonNull NewsItem newsItem) {
