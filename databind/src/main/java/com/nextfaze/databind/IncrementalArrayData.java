@@ -275,6 +275,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             // Data is dirty, so reload everything.
             clearDataAndNotify();
             stopThread();
+            mDirty = false;
         }
         startThreadIfNeeded();
     }
@@ -308,16 +309,11 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void appendNonNullElements(@NonNull List<? extends T> list) {
-        if (mDirty) {
-            onClear();
-            mData.clear();
-        }
         for (T t : list) {
             if (t != null) {
                 mData.add(t);
             }
         }
-        mDirty = false;
     }
 
     private void clearDataAndNotify() {
@@ -363,6 +359,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     /** Loads each page until full range has been loading, halting in between pages until instructed to proceed. */
     private void loadLoop() throws InterruptedException {
         log.trace("Start load loop");
+        boolean firstItem = true;
         boolean hasMore = true;
 
         // Loop until all loaded.
@@ -382,9 +379,17 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
                 // Store items and notify of change.
                 if (items != null && !items.isEmpty()) {
+                    // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading
+                    final boolean needToClear = firstItem;
+                    firstItem = false;
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if (needToClear && size() > 0) {
+                                onClear();
+                                mData.clear();
+                            }
                             appendNonNullElements(items);
                             notifyDataChanged();
                         }
