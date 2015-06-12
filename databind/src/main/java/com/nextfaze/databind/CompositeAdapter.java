@@ -101,6 +101,9 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
 
     @NonNull
     private DisposableListAdapter adapter(int position) {
+        if (position >= getCount()) {
+            throw new ArrayIndexOutOfBoundsException("index: " + position + ", total size: " + getCount());
+        }
         int positionOffset = 0;
         int itemViewTypeOffset = 0;
         for (DisposableListAdapter adapter : mAdapters) {
