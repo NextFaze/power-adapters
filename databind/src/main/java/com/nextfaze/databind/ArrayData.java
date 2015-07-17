@@ -210,6 +210,11 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         return mTask != null;
     }
 
+    @Override
+    public final boolean isMoreAvailable() {
+        return mDirty;
+    }
+
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
 
@@ -240,7 +245,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
-            mDirty = false;
             // TODO: Replace use of Task, so we stop depending on NextFaze Concurrent library.
             mTask = new Task<List<? extends T>>() {
                 @Override
@@ -269,6 +273,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
+                    mDirty = false;
                     mTask = null;
                     notifyLoadingChanged();
                     notifyError(e);

@@ -24,11 +24,16 @@ final class NewsIncrementalData extends IncrementalArrayData<Object> {
     @Override
     protected List<?> load() throws Throwable {
         int offset = mOffset;
-        if (offset >= TOTAL) {
+        if (!isMoreAvailable()) {
             return null;
         }
         mOffset = offset + INCREMENT;
         return mNewsService.getNews(offset, INCREMENT);
+    }
+
+    @Override
+    public boolean isMoreAvailable() {
+        return mOffset < TOTAL;
     }
 
     @Override

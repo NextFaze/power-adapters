@@ -73,6 +73,11 @@ public class DataWrapper<T> extends AbstractData<T> {
     }
 
     @Override
+    public boolean isMoreAvailable() {
+        return mData.isMoreAvailable();
+    }
+
+    @Override
     public boolean isEmpty() {
         return mData.isEmpty();
     }
