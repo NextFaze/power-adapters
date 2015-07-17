@@ -1,0 +1,115 @@
+/***************************************************************************************************
+ *
+ * A helpful artifactory deploy script.
+ *
+ * Version: 1.2.2
+ *
+ * Last Updated: May 4th 2015 @ ~15:56
+ *
+ * Change Log:
+ *      1.0: Initial implementation
+ *      1.1: Add sources task
+ *      1.2: Add artifactorySnapshot usage
+ *      1.2.1: Fix artifactorySnapshot references
+ *      1.2.2: Fix artifactorySnapshot recognition and sources task
+ *
+ ***************************************************************************************************
+ *
+ * Usage:
+ *
+ * > Include in build script:
+ *
+        apply from: 'nextfazeArtifactory.gradle'
+ *
+ *
+ * > Set GROUP by setting project.group;
+ *   e.g. group = 'com.nextfaze'
+ *
+ *
+ * > Set ARTIFACT_ID by setting rootProject.name in root settings.gradle file;
+ *   e.g. rootProject.name = 'slf4j-log4j-android'
+ *   (this also fixes the changing .iml file name when inside a different folder name)
+ *
+ *
+ * > Set VERSION by setting project.version;
+ *   e.g. version = '0.2.2'
+ *
+ *
+ * > Deploy to artifactory by running 'uploadArchives' task;
+ *
+        ./gradlew clean uploadArchives
+ *
+ *
+ * > To use deployed library in project:
+ *
+        compile 'GROUP:ARTIFACT_ID:VERSION'
+ *
+ *
+ * > For android libraries:
+ *   [specify aar artifact - this requires setting transitive=true for dependency resolution]
+ *
+        // e.g. 'com.nextfaze:slf4j-log4j-android:0.2.2@aar'
+        compile ('GROUP:ARTIFACT_ID:VERSION@aar') {
+            transitive=true
+        }
+ *
+ *
+ * > To deploy snapshot builds, set property 'artifactorySnapshot' to true:
+ *
+        // can also be set in gradle.properties etc as just artifactorySnapshot=true
+        project.ext.artifactorySnapshot = true
+ *
+ **************************************************************************************************/
+
+apply plugin: 'maven'
+
+allprojects {
+    project.ext.artifactorySnapshot = project.hasProperty('artifactorySnapshot') ? project.property('artifactorySnapshot').toBoolean() : false
+}
+
+if (!project.hasProperty('artifactoryUser')) artifactoryUser = ''
+if (!project.hasProperty('artifactoryPassword')) artifactoryPassword = ''
+if (!project.hasProperty('artifactoryContextUrl')) artifactoryContextUrl = 'http://maven.nextfaze.com/'
+
+project.ext.getDeployVersion = {
+    return project.ext.artifactorySnapshot ? project.version + '-SNAPSHOT' : project.version;
+}
+
+project.ext.getArtifactoryUrl = {
+    return project.ext.artifactorySnapshot ?
+            "${artifactoryContextUrl}libs-snapshot-local/" :
+            "${artifactoryContextUrl}libs-release-local/";
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: project.ext.getArtifactoryUrl()) {
+                authentication(userName: "${artifactoryUser}", password: "${artifactoryPassword}")
+            }
+            pom.project {
+                version = project.ext.getDeployVersion();
+                artifactId = rootProject.name
+                groupId = project.group
+                description = "POM was created from mavenDeployer"
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+
+    if (project.hasProperty('android')) {
+        android.sourceSetsContainer.main.java.srcDirs.each { src ->
+            from src
+        }
+    } else {
+        from sourceSets.main.allSource
+    }
+
+}
+
+artifacts {
+    archives sourcesJar
+}
