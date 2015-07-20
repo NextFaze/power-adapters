@@ -24,9 +24,14 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
+    /** The backing array of non-null elements. */
     @NonNull
     private final ArrayList<T> mData = new ArrayList<>();
 
+    /**
+     * Presence of this task indicates loading state. Changes to this field must be accompanied by {@link
+     * #notifyLoadingChanged()}.
+     */
     @Nullable
     private Task<?> mTask;
 
@@ -35,13 +40,20 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Setter
     private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
+    /** Indicates the currently loaded data is invalid and needs to be reloaded next opportunity. */
     private boolean mDirty = true;
+
+    /** @see #available() */
     private int mAvailable = Integer.MAX_VALUE;
 
     protected ArrayData() {
     }
 
-    /** Subclasses must call through to super. */
+    /**
+     * Subclasses must call through to super.
+     * @see #close()
+     * @see #onClose()
+     */
     @Override
     protected void onClose() throws Throwable {
         if (mTask != null) {
@@ -267,6 +279,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                     setAvailable(0);
                     notifyLoadingChanged();
                     notifyDataChanged();
+                    loadDataIfAppropriate();
                 }
 
                 @Override
@@ -277,16 +290,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
-                    // TODO: Remain dirty. Should reload next opportunity if this load failed.
-                    mDirty = false;
                     mTask = null;
                     notifyLoadingChanged();
                     notifyError(e);
-                }
-
-                @Override
-                protected void onFinally() throws Throwable {
-                    loadDataIfAppropriate();
                 }
             };
             notifyLoadingChanged();
