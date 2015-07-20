@@ -8,7 +8,7 @@ import java.util.List;
 
 final class NewsIncrementalData extends IncrementalArrayData<Object> {
 
-    private static final int TOTAL = 50;
+    private static final int TOTAL = 20;
     private static final int INCREMENT = 10;
 
     @NonNull
@@ -24,16 +24,11 @@ final class NewsIncrementalData extends IncrementalArrayData<Object> {
     @Override
     protected List<?> load() throws Throwable {
         int offset = mOffset;
-        if (!isMoreAvailable()) {
+        if (mOffset >= TOTAL) {
             return null;
         }
         mOffset = offset + INCREMENT;
         return mNewsService.getNews(offset, INCREMENT);
-    }
-
-    @Override
-    public boolean isMoreAvailable() {
-        return mOffset < TOTAL;
     }
 
     @Override

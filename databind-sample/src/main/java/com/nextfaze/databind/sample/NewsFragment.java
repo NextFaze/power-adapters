@@ -41,7 +41,10 @@ public final class NewsFragment extends Fragment {
     private final NewsSimpleData mSimpleData = new NewsSimpleData(mNewsService);
 
     @NonNull
-    private final NewsIncrementalData mIncrementalData = new NewsIncrementalData(mNewsService);
+    private final NewsIncrementalData mAutoIncrementalData = new NewsIncrementalData(mNewsService);
+
+    @NonNull
+    private final NewsIncrementalData mManualIncrementalData = new NewsIncrementalData(mNewsService);
 
     @NonNull
     private final Binder mNewsItemBinder = new TypedBinder<NewsItem, TextView>(android.R.layout.simple_list_item_1) {
@@ -78,9 +81,17 @@ public final class NewsFragment extends Fragment {
             .build();
 
     @NonNull
-    private final ListAdapter mIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mIncrementalData), mMapper), mIncrementalData)
+    private final ListAdapter mAutoIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mAutoIncrementalData), mMapper), mAutoIncrementalData)
             .loadingItemResource(R.layout.loading_item)
             .build();
+
+    @NonNull
+    private final ListAdapter mManualIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mManualIncrementalData), mMapper), mManualIncrementalData)
+            .loadingItemResource(R.layout.loading_item)
+            .build();
+
+    @NonNull
+    private final LoadNextAdapter mLoadNextAdapter = new LoadNextAdapter(mManualIncrementalData, mManualIncrementalAdapter, R.layout.load_next_item);
 
     @InjectView(R.id.news_fragment_radio_group)
     RadioGroup mRadioGroup;
@@ -98,7 +109,9 @@ public final class NewsFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
         // Start pre-loading as user approaches end of loaded content.
-        mIncrementalData.setLookAheadRowCount(10);
+        mAutoIncrementalData.setLookAheadRowCount(10);
+        // Never pre-load; let the user click 'load next' instead.
+        mManualIncrementalData.setLookAheadRowCount(-1);
         // Reload data if hidden for a short time.
         mSimpleData.setAutoInvalidateDelay(3000);
     }
@@ -108,7 +121,8 @@ public final class NewsFragment extends Fragment {
         super.onDestroy();
         // Should dispose of data instances when finished with them.
         mSimpleData.close();
-        mIncrementalData.close();
+        mAutoIncrementalData.close();
+        mManualIncrementalData.close();
     }
 
     @Nullable
@@ -121,6 +135,12 @@ public final class NewsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.inject(this, view);
+        mLoadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
+            @Override
+            public void onClick() {
+                onLoadNextClick();
+            }
+        });
         mDataLayout.setErrorFormatter(new ErrorFormatter() {
             @Nullable
             @Override
@@ -159,7 +179,7 @@ public final class NewsFragment extends Fragment {
                 return true;
             }
         });
-        menu.add("Invalidate incremental Deferred").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.add("Deferred Invalidate Incremental").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 onInvalidateIncrementalDeferredClick();
@@ -173,27 +193,39 @@ public final class NewsFragment extends Fragment {
         showSimple();
     }
 
-    @OnClick(R.id.news_fragment_button_incremental)
-    void onIncrementalClick() {
-        showIncremental();
+    @OnClick(R.id.news_fragment_button_auto_incremental)
+    void onAutoIncrementalClick() {
+        showAutoIncremental();
+    }
+
+    @OnClick(R.id.news_fragment_button_manual_incremental)
+    void onManualIncrementalClick() {
+        showManualIncremental();
     }
 
     void onClearAllClick() {
         mSimpleData.clear();
-        mIncrementalData.clear();
+        mAutoIncrementalData.clear();
+        mManualIncrementalData.clear();
     }
 
     void onInvalidateAllClick() {
         mSimpleData.invalidate();
-        mIncrementalData.invalidate();
+        mAutoIncrementalData.invalidate();
+        mManualIncrementalData.invalidate();
     }
 
     void onInvalidateIncrementalDeferredClick() {
-        mIncrementalData.invalidateDeferred();
+        mAutoIncrementalData.invalidateDeferred();
+        mManualIncrementalData.invalidateDeferred();
     }
 
     void onNewsItemClick(@NonNull NewsItem newsItem) {
         showToast("News item clicked: " + newsItem);
+    }
+
+    void onLoadNextClick() {
+        mManualIncrementalData.loadNext();
     }
 
     void showCheckedRadioButton(@IdRes int checkedId) {
@@ -202,8 +234,12 @@ public final class NewsFragment extends Fragment {
                 showSimple();
                 break;
 
-            case R.id.news_fragment_button_incremental:
-                showIncremental();
+            case R.id.news_fragment_button_auto_incremental:
+                showAutoIncremental();
+                break;
+
+            case R.id.news_fragment_button_manual_incremental:
+                showManualIncremental();
                 break;
         }
     }
@@ -213,9 +249,14 @@ public final class NewsFragment extends Fragment {
         mListView.setAdapter(mSimpleAdapter);
     }
 
-    void showIncremental() {
-        mDataLayout.setData(mIncrementalData);
-        mListView.setAdapter(mIncrementalAdapter);
+    void showAutoIncremental() {
+        mDataLayout.setData(mAutoIncrementalData);
+        mListView.setAdapter(mAutoIncrementalAdapter);
+    }
+
+    void showManualIncremental() {
+        mDataLayout.setData(mManualIncrementalData);
+        mListView.setAdapter(mLoadNextAdapter);
     }
 
     void showToast(@NonNull String msg) {

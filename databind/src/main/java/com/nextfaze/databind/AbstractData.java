@@ -29,6 +29,9 @@ public abstract class AbstractData<T> implements Data<T> {
     private final DataObservers mDataObservers = new DataObservers();
 
     @NonNull
+    private final AvailableObservers mAvailableObservers = new AvailableObservers();
+
+    @NonNull
     private final LoadingObservers mLoadingObservers = new LoadingObservers();
 
     @NonNull
@@ -83,6 +86,16 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     @Override
+    public void registerAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        mAvailableObservers.register(availableObserver);
+    }
+
+    @Override
+    public void unregisterAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        mAvailableObservers.unregister(availableObserver);
+    }
+
+    @Override
     public void registerLoadingObserver(@NonNull LoadingObserver loadingObserver) {
         mLoadingObservers.register(loadingObserver);
     }
@@ -107,6 +120,15 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public final T get(int position) {
         return get(position, 0);
+    }
+
+    /**
+     * Returns {@link #UNKNOWN} by default.
+     * @see Data#available()
+     */
+    @Override
+    public int available() {
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -167,6 +189,16 @@ public abstract class AbstractData<T> implements Data<T> {
             @Override
             public void run() {
                 mDataObservers.notifyDataChanged();
+            }
+        });
+    }
+
+    /** Dispatch a available change notification on the UI thread. */
+    protected void notifyAvailableChanged() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAvailableObservers.notifyAvailableChanged();
             }
         });
     }

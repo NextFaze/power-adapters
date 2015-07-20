@@ -36,6 +36,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
     private boolean mDirty = true;
+    private int mAvailable = Integer.MAX_VALUE;
 
     protected ArrayData() {
     }
@@ -81,13 +82,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         T removed = mData.remove(index);
         notifyDataChanged();
         return removed;
-    }
-
-    @Override
-    public final void clear() {
-        mData.clear();
-        notifyDataChanged();
-        invalidate();
     }
 
     @Override
@@ -201,6 +195,15 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         return mData.get(position);
     }
 
+    @Override
+    public final void clear() {
+        mData.clear();
+        setAvailable(Integer.MAX_VALUE);
+        notifyDataChanged();
+        invalidate();
+    }
+
+    /** Marks the existing loaded elements as dirty, such that they will be reloaded as soon as data is next shown. */
     public final void invalidate() {
         mDirty = true;
         loadDataIfAppropriate();
@@ -212,8 +215,8 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final boolean isMoreAvailable() {
-        return mDirty;
+    public final int available() {
+        return mAvailable;
     }
 
     @NonNull
@@ -221,7 +224,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     protected final void onShown(long millisHidden) {
-        // TODO: If an error occurred, we always want to invalidate the data?
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
             mDirty = true;
@@ -262,6 +264,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                         }
                     }
                     mTask = null;
+                    setAvailable(0);
                     notifyLoadingChanged();
                     notifyDataChanged();
                 }
@@ -274,6 +277,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
+                    // TODO: Remain dirty. Should reload next opportunity if this load failed.
                     mDirty = false;
                     mTask = null;
                     notifyLoadingChanged();
@@ -288,5 +292,17 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
             notifyLoadingChanged();
             mTask.execute();
         }
+    }
+
+    private void setAvailable(final int available) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mAvailable != available) {
+                    mAvailable = available;
+                    notifyAvailableChanged();
+                }
+            }
+        });
     }
 }

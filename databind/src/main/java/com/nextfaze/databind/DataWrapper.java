@@ -68,13 +68,13 @@ public class DataWrapper<T> extends AbstractData<T> {
     }
 
     @Override
-    public boolean isLoading() {
-        return mData.isLoading();
+    public int available() {
+        return mData.available();
     }
 
     @Override
-    public boolean isMoreAvailable() {
-        return mData.isMoreAvailable();
+    public boolean isLoading() {
+        return mData.isLoading();
     }
 
     @Override

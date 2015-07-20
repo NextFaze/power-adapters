@@ -18,7 +18,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -61,6 +60,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private volatile boolean mError;
 
     private boolean mLoading;
+    private int mAvailable = Integer.MAX_VALUE;
     private boolean mDirty = true;
 
     protected IncrementalArrayData() {
@@ -219,6 +219,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final T get(int position, int flags) {
         // Requested end of data? Time to load more.
+        // The presence of the presentation flag indicates this is a good time to continue loading elements.
         if ((flags & FLAG_PRESENTATION) != 0 && position >= size() - 1 - mLookAheadRowCount) {
             proceed();
         }
@@ -233,12 +234,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         startThreadIfNeeded();
     }
 
-    @Override
-    public final boolean isLoading() {
-        return mLoading;
-    }
-
-    /** Flags the data to be cleared and reloaded next time it is "shown". */
+    /** Flags the data to be cleared and reloaded next time it is shown. */
     public final void invalidateDeferred() {
         mDirty = true;
     }
@@ -247,6 +243,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final void invalidate() {
         mDirty = true;
+        setAvailable(Integer.MAX_VALUE);
         onInvalidate();
         stopThread();
         startThreadIfNeeded();
@@ -257,14 +254,24 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     public final void setLookAheadRowCount(int lookAheadRowCount) {
-        mLookAheadRowCount = max(0, lookAheadRowCount);
+        mLookAheadRowCount = lookAheadRowCount;
+    }
+
+    @Override
+    public final boolean isLoading() {
+        return mLoading;
+    }
+
+    @Override
+    public final int available() {
+        return mAvailable;
     }
 
     @Override
     protected final void onShown(long millisHidden) {
         log.trace("Shown after being hidden for {} ms", millisHidden);
         if (mError) {
-            // Last attempt to load a page failed, so try again now we've become visible again.
+            // Last attempt to load an increment failed, so try again now we've become visible again.
             proceed();
         }
         if (millisHidden >= mAutoInvalidateDelay) {
@@ -292,6 +299,8 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         stopThread();
     }
 
+    // TODO: Refactor load() so subclasses can communicate if the last non-null increment is the final one, to avoid a final redundant request.
+
     /**
      * Load the next set of items.
      * @return A list containing the next set of items to be appended, or {@code null} if there are no more items.
@@ -317,7 +326,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void clearDataAndNotify() {
-        if (size() > 0) {
+        if (mData.size() > 0) {
             onClear();
             mData.clear();
             notifyDataChanged();
@@ -356,7 +365,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    /** Loads each page until full range has been loading, halting in between pages until instructed to proceed. */
+    /** Loads each increment until full range has been loading, halting in between increment until instructed to proceed. */
     private void loadLoop() throws InterruptedException {
         log.trace("Start load loop");
         boolean firstItem = true;
@@ -371,25 +380,26 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             try {
                 setLoading(true);
 
-                log.trace("Loading next chunk of items");
+                log.trace("Loading next increment");
 
-                // Load next items.
+                // Load next increment of items.
                 final List<? extends T> items = load();
                 hasMore = items != null;
+                setAvailable(hasMore ? Integer.MAX_VALUE : 0);
 
-                // Store items and notify of change.
                 if (items != null && !items.isEmpty()) {
-                    // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading
+                    // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading.
                     final boolean needToClear = firstItem;
                     firstItem = false;
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (needToClear && size() > 0) {
+                            if (needToClear && mData.size() > 0) {
                                 onClear();
                                 mData.clear();
                             }
+                            // Store items and notify of change.
                             appendNonNullElements(items);
                             notifyDataChanged();
                         }
@@ -418,6 +428,18 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                 if (mLoading != loading) {
                     mLoading = loading;
                     notifyLoadingChanged();
+                }
+            }
+        });
+    }
+
+    private void setAvailable(final int available) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mAvailable != available) {
+                    mAvailable = available;
+                    notifyAvailableChanged();
                 }
             }
         });

@@ -27,7 +27,7 @@ class NewsService {
 
     @NonNull
     List<NewsItem> getNews(int offset, int count) throws Exception {
-        Thread.sleep(3000);
+        Thread.sleep(2000);
         ArrayList<NewsItem> newsItems = new ArrayList<>();
         for (int i = offset; i < offset + count; ++i) {
             newsItems.add(new NewsItem(format("News Item #%s", i)));
