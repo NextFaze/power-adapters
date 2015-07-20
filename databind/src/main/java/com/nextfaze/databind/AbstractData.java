@@ -176,9 +176,19 @@ public abstract class AbstractData<T> implements Data<T> {
         return new DataIterator<>(this);
     }
 
+    /**
+     * Called when this instance is closed. Only one invocation is ever mad per-instance. Any exceptions are caught by
+     * the caller. Subclasses must call through to super.
+     * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
+     */
     protected void onClose() throws Throwable {
     }
 
+    /**
+     * Indicates if this instance is in a shown state, ie, {@link #notifyShown()} was called without any subsequent
+     * {@link #notifyHidden()} call.
+     * @return {@code true} is this data instance is in the shown state.
+     */
     protected boolean isShown() {
         return mShown;
     }
@@ -238,6 +248,7 @@ public abstract class AbstractData<T> implements Data<T> {
     protected void onHideTimeout() {
     }
 
+    /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
     protected void runOnUiThread(@NonNull Runnable runnable) {
         if (Looper.myLooper() == mHandler.getLooper()) {
             runnable.run();
