@@ -86,6 +86,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final void clear() {
         mData.clear();
+        notifyDataChanged();
         invalidate();
     }
 
