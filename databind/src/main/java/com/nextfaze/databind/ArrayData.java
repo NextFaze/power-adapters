@@ -277,6 +277,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
+                    mDirty = false;
                     mData.clear();
                     for (T t : data) {
                         if (t != null) {
