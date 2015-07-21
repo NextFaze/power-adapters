@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-apply from: '../nextfazeArtifactory.gradle'
+apply from: '../nextfaze.gradle'
 
 android {
     compileSdkVersion 21
