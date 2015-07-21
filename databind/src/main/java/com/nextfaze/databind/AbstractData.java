@@ -29,6 +29,9 @@ public abstract class AbstractData<T> implements Data<T> {
     private final DataObservers mDataObservers = new DataObservers();
 
     @NonNull
+    private final AvailableObservers mAvailableObservers = new AvailableObservers();
+
+    @NonNull
     private final LoadingObservers mLoadingObservers = new LoadingObservers();
 
     @NonNull
@@ -83,6 +86,16 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     @Override
+    public void registerAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        mAvailableObservers.register(availableObserver);
+    }
+
+    @Override
+    public void unregisterAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        mAvailableObservers.unregister(availableObserver);
+    }
+
+    @Override
     public void registerLoadingObserver(@NonNull LoadingObserver loadingObserver) {
         mLoadingObservers.register(loadingObserver);
     }
@@ -107,6 +120,15 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public final T get(int position) {
         return get(position, 0);
+    }
+
+    /**
+     * Returns {@link #UNKNOWN} by default.
+     * @see Data#available()
+     */
+    @Override
+    public int available() {
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -154,9 +176,19 @@ public abstract class AbstractData<T> implements Data<T> {
         return new DataIterator<>(this);
     }
 
+    /**
+     * Called when this instance is closed. Only one invocation is ever mad per-instance. Any exceptions are caught by
+     * the caller. Subclasses must call through to super.
+     * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
+     */
     protected void onClose() throws Throwable {
     }
 
+    /**
+     * Indicates if this instance is in a shown state, ie, {@link #notifyShown()} was called without any subsequent
+     * {@link #notifyHidden()} call.
+     * @return {@code true} is this data instance is in the shown state.
+     */
     protected boolean isShown() {
         return mShown;
     }
@@ -167,6 +199,16 @@ public abstract class AbstractData<T> implements Data<T> {
             @Override
             public void run() {
                 mDataObservers.notifyDataChanged();
+            }
+        });
+    }
+
+    /** Dispatch a available change notification on the UI thread. */
+    protected void notifyAvailableChanged() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAvailableObservers.notifyAvailableChanged();
             }
         });
     }
@@ -206,6 +248,7 @@ public abstract class AbstractData<T> implements Data<T> {
     protected void onHideTimeout() {
     }
 
+    /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
     protected void runOnUiThread(@NonNull Runnable runnable) {
         if (Looper.myLooper() == mHandler.getLooper()) {
             runnable.run();

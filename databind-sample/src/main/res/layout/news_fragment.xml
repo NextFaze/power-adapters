@@ -23,13 +23,21 @@
                 android:layout_height="wrap_content"
                 android:text="Simple"/>
 
-        <!-- Incremental -->
+        <!-- Auto Incremental -->
 
         <RadioButton
-                android:id="@+id/news_fragment_button_incremental"
+                android:id="@+id/news_fragment_button_auto_incremental"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Incremental"/>
+                android:text="Auto Incremental"/>
+
+        <!-- Manual Incremental -->
+
+        <RadioButton
+                android:id="@+id/news_fragment_button_manual_incremental"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manual Incremental"/>
 
     </RadioGroup>
 

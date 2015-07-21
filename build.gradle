@@ -1,17 +1,29 @@
 buildscript {
     repositories {
-        jcenter()
+        maven {
+            url 'http://maven.nextfaze.com/libs-release'
+            credentials {
+                username nextfazeArtifactoryUser
+                password nextfazeArtifactoryPassword
+            }
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
+        maven {
+            url 'http://maven.nextfaze.com/libs-release'
+            credentials {
+                username nextfazeArtifactoryUser
+                password nextfazeArtifactoryPassword
+            }
+        }
     }
 
     group = 'com.nextfaze'
-    version = '1.6.20'
+    version = '1.7.0'
 }

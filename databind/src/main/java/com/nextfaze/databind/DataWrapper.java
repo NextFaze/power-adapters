@@ -68,6 +68,11 @@ public class DataWrapper<T> extends AbstractData<T> {
     }
 
     @Override
+    public int available() {
+        return mData.available();
+    }
+
+    @Override
     public boolean isLoading() {
         return mData.isLoading();
     }

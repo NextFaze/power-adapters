@@ -1,9 +1,7 @@
 package com.nextfaze.databind;
 
 import com.nextfaze.concurrent.Task;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +22,36 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
+    /** The backing array of non-null elements. */
     @NonNull
     private final ArrayList<T> mData = new ArrayList<>();
 
+    /**
+     * Presence of this task indicates loading state. Changes to this field must be accompanied by {@link
+     * #notifyLoadingChanged()}.
+     */
     @Nullable
     private Task<?> mTask;
 
+    // TODO: It makes more sense to auto invalidate after X millis since last load, rather than duration hidden.
+
     /** Automatically invalidate contents if data is hidden for the specified duration. */
-    @Getter
-    @Setter
     private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
+    /** Indicates the currently loaded data is invalid and needs to be reloaded next opportunity. */
     private boolean mDirty = true;
+
+    /** @see #available() */
+    private int mAvailable = Integer.MAX_VALUE;
 
     protected ArrayData() {
     }
 
-    /** Subclasses must call through to super. */
+    /**
+     * Subclasses must call through to super.
+     * @see #close()
+     * @see #onClose()
+     */
     @Override
     protected void onClose() throws Throwable {
         if (mTask != null) {
@@ -84,12 +95,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final void clear() {
-        mData.clear();
-        invalidate();
-    }
-
-    @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
             notifyDataChanged();
@@ -105,7 +110,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final boolean addAll(Collection<? extends T> collection) {
+    public final boolean addAll(@NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(collection);
         if (changed) {
             notifyDataChanged();
@@ -114,7 +119,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final boolean addAll(int index, Collection<? extends T> collection) {
+    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(index, collection);
         if (changed) {
             notifyDataChanged();
@@ -200,6 +205,15 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         return mData.get(position);
     }
 
+    @Override
+    public final void clear() {
+        mData.clear();
+        setAvailable(Integer.MAX_VALUE);
+        notifyDataChanged();
+        invalidate();
+    }
+
+    /** Marks the existing loaded elements as dirty, such that they will be reloaded as soon as data is next shown. */
     public final void invalidate() {
         mDirty = true;
         loadDataIfAppropriate();
@@ -210,12 +224,26 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         return mTask != null;
     }
 
+    @Override
+    public final int available() {
+        return mAvailable;
+    }
+
+    public final long getAutoInvalidateDelay() {
+        return mAutoInvalidateDelay;
+    }
+
+    /** Automatically invalidate contents if data is hidden for the specified duration. */
+    public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
+        mAutoInvalidateDelay = autoInvalidateDelay;
+    }
+
+    /** Called in a background thread to load the data set. */
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
 
     @Override
     protected final void onShown(long millisHidden) {
-        // TODO: If an error occurred, we always want to invalidate the data?
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
             mDirty = true;
@@ -240,7 +268,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
-            mDirty = false;
             // TODO: Replace use of Task, so we stop depending on NextFaze Concurrent library.
             mTask = new Task<List<? extends T>>() {
                 @Override
@@ -250,6 +277,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
+                    mDirty = false;
                     mData.clear();
                     for (T t : data) {
                         if (t != null) {
@@ -257,8 +285,10 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                         }
                     }
                     mTask = null;
+                    setAvailable(0);
                     notifyLoadingChanged();
                     notifyDataChanged();
+                    loadDataIfAppropriate();
                 }
 
                 @Override
@@ -273,14 +303,21 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                     notifyLoadingChanged();
                     notifyError(e);
                 }
-
-                @Override
-                protected void onFinally() throws Throwable {
-                    loadDataIfAppropriate();
-                }
             };
             notifyLoadingChanged();
             mTask.execute();
         }
+    }
+
+    private void setAvailable(final int available) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mAvailable != available) {
+                    mAvailable = available;
+                    notifyAvailableChanged();
+                }
+            }
+        });
     }
 }

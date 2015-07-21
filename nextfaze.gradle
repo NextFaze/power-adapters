@@ -3,30 +3,27 @@ apply plugin: 'maven'
 allprojects {
     repositories {
         maven {
-            url 'http://maven.nextfaze.com/libs-release'
+            url 'http://maven.nextfaze.com/libs-release/'
+            credentials {
+                username nextfazeArtifactoryUser
+                password nextfazeArtifactoryPassword
+            }
+        }
+        maven {
+            url 'http://maven.nextfaze.com/libs-snapshot/'
             credentials {
                 username nextfazeArtifactoryUser
                 password nextfazeArtifactoryPassword
             }
         }
     }
-}
-
-allprojects {
-    project.ext {
-        release = true
-    }
-}
-
-project.ext.getDeployVersion = {
-    return project.ext.release ? project.version : project.version + '-SNAPSHOT';
+    project.ext.snapshot = project.version.endsWith('-SNAPSHOT')
 }
 
 project.ext.getUrl = {
-    def artifactoryContextUrl = "http://maven.nextfaze.com/"
-    return project.ext.release ?
-            "${artifactoryContextUrl}libs-release-local/" :
-            "${artifactoryContextUrl}libs-snapshot-local/";
+    return project.ext.snapshot ?
+            'http://maven.nextfaze.com/libs-snapshot-local/' :
+            'http://maven.nextfaze.com/libs-release-local/';
 }
 
 uploadArchives {
