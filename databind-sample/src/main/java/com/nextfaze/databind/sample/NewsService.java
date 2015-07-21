@@ -8,7 +8,7 @@ import java.util.Random;
 
 import static java.lang.String.format;
 
-class NewsService {
+final class NewsService {
 
     private static final Random RANDOM = new Random();
 

@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ThreadFactory;
@@ -18,6 +19,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -249,6 +251,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         startThreadIfNeeded();
     }
 
+    /** Load the next increment of elements. */
     public final void loadNext() {
         proceed();
     }
@@ -299,15 +302,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         stopThread();
     }
 
-    // TODO: Refactor load() so subclasses can communicate if the last non-null increment is the final one, to avoid a final redundant request.
-
     /**
      * Load the next set of items.
-     * @return A list containing the next set of items to be appended, or {@code null} if there are no more items.
+     * @return A result containing the next set of elements to be appended, or {@code null} if there are no more items.
+     * The result also indicates if these are the final elements of the data set.
      * @throws Throwable If any error occurs while trying to load.
      */
     @Nullable
-    protected abstract List<? extends T> load() throws Throwable;
+    protected abstract Result<? extends T> load() throws Throwable;
 
     /** Called prior to elements being cleared. Always called from the UI thread. */
     protected void onClear() {
@@ -365,14 +367,17 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    /** Loads each increment until full range has been loading, halting in between increment until instructed to proceed. */
+    /**
+     * Loads each increment until full range has been loading, halting in between increment until instructed to
+     * proceed.
+     */
     private void loadLoop() throws InterruptedException {
         log.trace("Start load loop");
         boolean firstItem = true;
-        boolean hasMore = true;
+        boolean moreAvailable = true;
 
         // Loop until all loaded.
-        while (hasMore) {
+        while (moreAvailable) {
             // Thread interruptions terminate the loop.
             if (currentThread().isInterrupted()) {
                 throw new InterruptedException();
@@ -383,11 +388,11 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                 log.trace("Loading next increment");
 
                 // Load next increment of items.
-                final List<? extends T> items = load();
-                hasMore = items != null;
-                setAvailable(hasMore ? Integer.MAX_VALUE : 0);
+                final Result<? extends T> result = load();
+                moreAvailable = result != null;
+                setAvailable(result != null ? result.getRemaining() : 0);
 
-                if (items != null && !items.isEmpty()) {
+                if (result != null && !result.getElements().isEmpty()) {
                     // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading.
                     final boolean needToClear = firstItem;
                     firstItem = false;
@@ -400,7 +405,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                                 mData.clear();
                             }
                             // Store items and notify of change.
-                            appendNonNullElements(items);
+                            appendNonNullElements(result.getElements());
                             notifyDataChanged();
                         }
                     });
@@ -461,6 +466,32 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             mLoad.signal();
         } finally {
             mLock.unlock();
+        }
+    }
+
+    @Getter
+    @Accessors(prefix = "m")
+    public static final class Result<T> {
+
+        @NonNull
+        private final List<? extends T> mElements;
+
+        /** Indicates how many more elements available to be loaded after this. */
+        private final int mRemaining;
+
+        public Result(@NonNull List<? extends T> elements, int remaining) {
+            mElements = elements;
+            mRemaining = max(0, remaining);
+        }
+
+        @NonNull
+        public static <T> Result<T> moreRemaining(@NonNull List<? extends T> list) {
+            return new Result<>(list, Integer.MAX_VALUE);
+        }
+
+        @NonNull
+        public static <T> Result<T> noneRemaining() {
+            return new Result<>(Collections.<T>emptyList(), 0);
         }
     }
 }
