@@ -1,9 +1,7 @@
 package com.nextfaze.databind;
 
 import com.nextfaze.concurrent.Task;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,6 +238,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         mAutoInvalidateDelay = autoInvalidateDelay;
     }
 
+    /** Called in a background thread to load the data set. */
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
 

@@ -315,7 +315,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     /**
-     * Load the next set of items.
+     * Load the next increment of items.
      * @return A result containing the next set of elements to be appended, or {@code null} if there are no more items.
      * The result also indicates if these are the final elements of the data set.
      * @throws Throwable If any error occurs while trying to load.
