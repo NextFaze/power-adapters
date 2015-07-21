@@ -2,7 +2,6 @@ package com.nextfaze.databind;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,15 +46,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private final Condition mLoad = mLock.newCondition();
 
     /** The number of rows to look ahead before loading. */
-    @Getter
     private volatile int mLookAheadRowCount = 5;
 
     @Nullable
     private Thread mThread;
 
+    // TODO: It makes more sense to auto invalidate after X millis since last load, rather than duration hidden.
+
     /** Automatically invalidate contents if data is hidden for the specified duration. */
-    @Getter
-    @Setter
     private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
     /** Indicates the last attempt to load a page failed. */
@@ -129,7 +127,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     @Override
-    public final boolean addAll(Collection<? extends T> collection) {
+    public final boolean addAll(@NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(collection);
         if (changed) {
             notifyDataChanged();
@@ -138,7 +136,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     @Override
-    public final boolean addAll(int index, Collection<? extends T> collection) {
+    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(index, collection);
         if (changed) {
             notifyDataChanged();
@@ -256,8 +254,22 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         proceed();
     }
 
+    public final int getLookAheadRowCount() {
+        return mLookAheadRowCount;
+    }
+
+    /** Set the number of rows to "look ahead" before loading automatically. */
     public final void setLookAheadRowCount(int lookAheadRowCount) {
         mLookAheadRowCount = lookAheadRowCount;
+    }
+
+    public final long getAutoInvalidateDelay() {
+        return mAutoInvalidateDelay;
+    }
+
+    /** Automatically invalidate contents if data is hidden for the specified duration. */
+    public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
+        mAutoInvalidateDelay = autoInvalidateDelay;
     }
 
     @Override
@@ -389,7 +401,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
                 // Load next increment of items.
                 final Result<? extends T> result = load();
-                moreAvailable = result != null;
+                moreAvailable = result != null && result.getRemaining() > 0;
                 setAvailable(result != null ? result.getRemaining() : 0);
 
                 if (result != null && !result.getElements().isEmpty()) {

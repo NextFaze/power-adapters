@@ -35,9 +35,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Nullable
     private Task<?> mTask;
 
+    // TODO: It makes more sense to auto invalidate after X millis since last load, rather than duration hidden.
+
     /** Automatically invalidate contents if data is hidden for the specified duration. */
-    @Getter
-    @Setter
     private long mAutoInvalidateDelay = Long.MAX_VALUE;
 
     /** Indicates the currently loaded data is invalid and needs to be reloaded next opportunity. */
@@ -112,7 +112,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final boolean addAll(Collection<? extends T> collection) {
+    public final boolean addAll(@NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(collection);
         if (changed) {
             notifyDataChanged();
@@ -121,7 +121,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     }
 
     @Override
-    public final boolean addAll(int index, Collection<? extends T> collection) {
+    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
         boolean changed = mData.addAll(index, collection);
         if (changed) {
             notifyDataChanged();
@@ -229,6 +229,15 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final int available() {
         return mAvailable;
+    }
+
+    public final long getAutoInvalidateDelay() {
+        return mAutoInvalidateDelay;
+    }
+
+    /** Automatically invalidate contents if data is hidden for the specified duration. */
+    public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
+        mAutoInvalidateDelay = autoInvalidateDelay;
     }
 
     @NonNull
