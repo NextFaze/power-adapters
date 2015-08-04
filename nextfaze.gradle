@@ -1,4 +1,4 @@
-apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
 
 allprojects {
     repositories {

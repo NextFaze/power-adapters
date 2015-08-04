@@ -54,10 +54,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
      */
     @Override
     protected void onClose() throws Throwable {
-        if (mTask != null) {
-            mTask.cancel();
-            mTask = null;
-        }
+        cancelTask();
         mData.clear();
         mData.trimToSize();
     }
@@ -216,6 +213,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     /** Marks the existing loaded elements as dirty, such that they will be reloaded as soon as data is next shown. */
     public final void invalidate() {
         mDirty = true;
+        cancelTask();
         loadDataIfAppropriate();
     }
 
@@ -257,10 +255,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     protected final void onHideTimeout() {
-        if (mTask != null) {
-            mTask.cancel();
-            mTask = null;
-        }
+        cancelTask();
     }
 
     private void loadDataIfAppropriate() {
@@ -306,6 +301,13 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
             };
             notifyLoadingChanged();
             mTask.execute();
+        }
+    }
+
+    private void cancelTask() {
+        if (mTask != null) {
+            mTask.cancel();
+            mTask = null;
         }
     }
 
