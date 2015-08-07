@@ -1,2 +1,2 @@
-rootProject.name = 'databind-android'
-include ':databind', ':databind-sample'
+rootProject.name = 'async-data-android'
+include ':async-data', ':async-data-sample'

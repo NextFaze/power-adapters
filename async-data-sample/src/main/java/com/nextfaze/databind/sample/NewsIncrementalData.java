@@ -4,7 +4,6 @@ import com.nextfaze.databind.IncrementalArrayData;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 final class NewsIncrementalData extends IncrementalArrayData<Object> {
 

@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/databind" />
-            <option value="$PROJECT_DIR$/databind-sample" />
+            <option value="$PROJECT_DIR$/async-data" />
+            <option value="$PROJECT_DIR$/async-data-sample" />
           </set>
         </option>
       </GradleProjectSettings>
