@@ -1,4 +1,4 @@
 <manifest
-        package="com.nextfaze.databind">
+        package="com.nextfaze.asyncdata">
     <application/>
 </manifest>
