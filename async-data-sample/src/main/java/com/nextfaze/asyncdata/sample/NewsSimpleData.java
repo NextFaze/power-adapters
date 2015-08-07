@@ -3,10 +3,9 @@ package com.nextfaze.asyncdata.sample;
 import com.nextfaze.asyncdata.ArrayData;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
-final class NewsSimpleData extends ArrayData<Object> {
+final class NewsSimpleData extends ArrayData<NewsItem> {
 
     @NonNull
     private final NewsService mNewsService;
@@ -17,12 +16,7 @@ final class NewsSimpleData extends ArrayData<Object> {
 
     @NonNull
     @Override
-    protected List<Object> load() throws Exception {
-        ArrayList<Object> data = new ArrayList<>();
-        data.add(new NewsSection("Latest News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        data.add(new NewsSection("Yesterdays News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        return data;
+    protected List<NewsItem> load() throws Exception {
+        return mNewsService.getNewsFlaky();
     }
 }

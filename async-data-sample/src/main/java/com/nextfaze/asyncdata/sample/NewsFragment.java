@@ -2,7 +2,6 @@ package com.nextfaze.asyncdata.sample;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.view.LayoutInflater;
@@ -19,14 +18,8 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import com.nextfaze.asyncdata.Binder;
-import com.nextfaze.asyncdata.BindingAdapter;
 import com.nextfaze.asyncdata.ErrorFormatter;
-import com.nextfaze.asyncdata.HeaderFooterAdapter;
-import com.nextfaze.asyncdata.LoadingAdapter;
-import com.nextfaze.asyncdata.Mapper;
-import com.nextfaze.asyncdata.PolymorphicMapper;
-import com.nextfaze.asyncdata.TypedBinder;
+import com.nextfaze.asyncdata.SimpleDataAdapter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import lombok.NonNull;
 
@@ -47,9 +40,26 @@ public final class NewsFragment extends Fragment {
     private final NewsIncrementalData mManualIncrementalData = new NewsIncrementalData(mNewsService);
 
     @NonNull
-    private final Binder mNewsItemBinder = new TypedBinder<NewsItem, TextView>(android.R.layout.simple_list_item_1) {
+    private final ListAdapter mSimpleAdapter = new SimpleDataAdapter<NewsItem>(mSimpleData, android.R.layout.simple_list_item_1) {
         @Override
-        protected void bind(@NonNull final NewsItem newsItem, @NonNull TextView textView, int position) {
+        protected void bindView(@NonNull final NewsItem newsItem, @NonNull View v, int position) {
+            TextView textView = (TextView) v;
+            textView.setText(newsItem.getTitle());
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onNewsItemClick(newsItem);
+                }
+            });
+        }
+    };
+
+
+    @NonNull
+    private final ListAdapter mAutoIncrementalAdapter = new SimpleDataAdapter<NewsItem>(mAutoIncrementalData, android.R.layout.simple_list_item_1) {
+        @Override
+        protected void bindView(@NonNull final NewsItem newsItem, @NonNull View v, int position) {
+            TextView textView = (TextView) v;
             textView.setText(newsItem.getTitle());
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -61,37 +71,22 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final Binder mNewsSectionBinder = new TypedBinder<NewsSection, TextView>(android.R.layout.simple_list_item_1, false) {
+    private final ListAdapter mManualIncrementalAdapter = new SimpleDataAdapter<NewsItem>(mManualIncrementalData, android.R.layout.simple_list_item_1) {
         @Override
-        protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, int position) {
-            textView.setTypeface(Typeface.DEFAULT_BOLD);
-            textView.setText(newsSection.getTitle());
+        protected void bindView(@NonNull final NewsItem newsItem, @NonNull View v, int position) {
+            TextView textView = (TextView) v;
+            textView.setText(newsItem.getTitle());
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onNewsItemClick(newsItem);
+                }
+            });
         }
     };
 
-    @NonNull
-    private final Mapper mMapper = new PolymorphicMapper.Builder()
-            .bind(NewsItem.class, mNewsItemBinder)
-            .bind(NewsSection.class, mNewsSectionBinder)
-            .build();
-
-    @NonNull
-    private final ListAdapter mSimpleAdapter = new HeaderFooterAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mSimpleData), mMapper))
-            .headerResource(R.layout.news_header_item)
-            .build();
-
-    @NonNull
-    private final ListAdapter mAutoIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mAutoIncrementalData), mMapper), mAutoIncrementalData)
-            .loadingItemResource(R.layout.loading_item)
-            .build();
-
-    @NonNull
-    private final ListAdapter mManualIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mManualIncrementalData), mMapper), mManualIncrementalData)
-            .loadingItemResource(R.layout.loading_item)
-            .build();
-
-    @NonNull
-    private final LoadNextAdapter mLoadNextAdapter = new LoadNextAdapter(mManualIncrementalData, mManualIncrementalAdapter, R.layout.load_next_item);
+//    @NonNull
+//    private final LoadNextAdapter mLoadNextAdapter = new LoadNextAdapter(mManualIncrementalData, mManualIncrementalAdapter, R.layout.load_next_item);
 
     @InjectView(R.id.news_fragment_radio_group)
     RadioGroup mRadioGroup;
@@ -135,12 +130,6 @@ public final class NewsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.inject(this, view);
-        mLoadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                onLoadNextClick();
-            }
-        });
         mDataLayout.setErrorFormatter(new ErrorFormatter() {
             @Nullable
             @Override
@@ -203,6 +192,11 @@ public final class NewsFragment extends Fragment {
         showManualIncremental();
     }
 
+    @OnClick(R.id.news_fragment_load_next)
+    void onLoadNextClick() {
+        mManualIncrementalData.loadNext();
+    }
+
     void onClearAllClick() {
         mSimpleData.clear();
         mAutoIncrementalData.clear();
@@ -222,10 +216,6 @@ public final class NewsFragment extends Fragment {
 
     void onNewsItemClick(@NonNull NewsItem newsItem) {
         showToast("News item clicked: " + newsItem);
-    }
-
-    void onLoadNextClick() {
-        mManualIncrementalData.loadNext();
     }
 
     void showCheckedRadioButton(@IdRes int checkedId) {
@@ -256,7 +246,7 @@ public final class NewsFragment extends Fragment {
 
     void showManualIncremental() {
         mDataLayout.setData(mManualIncrementalData);
-        mListView.setAdapter(mLoadNextAdapter);
+        mListView.setAdapter(mManualIncrementalAdapter);
     }
 
     void showToast(@NonNull String msg) {

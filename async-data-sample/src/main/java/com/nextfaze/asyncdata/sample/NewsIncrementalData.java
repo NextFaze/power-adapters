@@ -5,7 +5,7 @@ import lombok.NonNull;
 
 import javax.annotation.Nullable;
 
-final class NewsIncrementalData extends IncrementalArrayData<Object> {
+final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
 
     private static final int TOTAL = 30;
     private static final int INCREMENT = 10;
@@ -21,7 +21,7 @@ final class NewsIncrementalData extends IncrementalArrayData<Object> {
 
     @Nullable
     @Override
-    protected Result<?> load() throws Throwable {
+    protected Result<? extends NewsItem> load() throws Throwable {
         int offset = mOffset;
         if (mOffset >= TOTAL) {
             return null;
