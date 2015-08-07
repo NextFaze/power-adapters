@@ -24,14 +24,12 @@ public final class DividerAdapter extends ListAdapterWrapper {
 
     private final boolean mShowDividerIfEmpty;
 
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
     DividerAdapter(@NonNull ListAdapter adapter,
                           int leadingItemResource,
                           int trailingItemResource,
                           int innerItemResource,
-                          boolean showDividerIfEmpty,
-                          boolean takeOwnership) {
-        super(adapter, takeOwnership);
+                          boolean showDividerIfEmpty) {
+        super(adapter);
         mLeadingItemResource = leadingItemResource;
         mTrailingItemResource = trailingItemResource;
         mInnerItemResource = innerItemResource;
@@ -199,7 +197,6 @@ public final class DividerAdapter extends ListAdapterWrapper {
         private int mTrailingItemResource;
         private int mInnerItemResource;
         private boolean mShowDividerIfEmpty = true;
-        private boolean mTakeOwnership = true;
 
         public Builder(@NonNull ListAdapter adapter) {
             mAdapter = adapter;
@@ -244,17 +241,10 @@ public final class DividerAdapter extends ListAdapterWrapper {
             return this;
         }
 
-        /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-        @NonNull
-        public Builder takeOwnership(boolean takeOwnership) {
-            mTakeOwnership = takeOwnership;
-            return this;
-        }
-
         @NonNull
         public DividerAdapter build() {
             return new DividerAdapter(mAdapter, mLeadingItemResource, mTrailingItemResource,
-                    mInnerItemResource, mShowDividerIfEmpty, mTakeOwnership);
+                    mInnerItemResource, mShowDividerIfEmpty);
         }
     }
 }

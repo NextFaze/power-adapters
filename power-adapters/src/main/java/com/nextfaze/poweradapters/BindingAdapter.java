@@ -21,16 +21,8 @@ public final class BindingAdapter extends ListAdapterWrapper {
     @NonNull
     private final Mapper mMapper;
 
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter) */
     public BindingAdapter(@NonNull ListAdapter adapter, @NonNull Mapper mapper) {
         super(adapter);
-        mBinders = new ArrayList<Binder>(mapper.getAllBinders());
-        mMapper = mapper;
-    }
-
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-    public BindingAdapter(@NonNull ListAdapter adapter, @NonNull Mapper mapper, boolean takeOwnership) {
-        super(adapter, takeOwnership);
         mBinders = new ArrayList<Binder>(mapper.getAllBinders());
         mMapper = mapper;
     }

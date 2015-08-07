@@ -19,14 +19,8 @@ import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
  */
 public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
 
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter) */
     protected HeaderFooterAdapter(@NonNull ListAdapter adapter) {
         super(adapter);
-    }
-
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-    protected HeaderFooterAdapter(@NonNull ListAdapter adapter, boolean takeOwnership) {
-        super(adapter, takeOwnership);
     }
 
     @NonNull
@@ -156,7 +150,6 @@ public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
 
         private boolean mHideHeadersIfEmpty;
         private boolean mHideFootersIfEmpty;
-        private boolean mTakeOwnership = true;
 
         public Builder(@NonNull ListAdapter adapter) {
             mAdapter = adapter;
@@ -198,17 +191,10 @@ public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
             return this;
         }
 
-        /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-        @NonNull
-        public Builder takeOwnership(boolean takeOwnership) {
-            mTakeOwnership = takeOwnership;
-            return this;
-        }
-
         @NonNull
         public HeaderFooterAdapter build() {
             return new ArrayHeaderFooterAdapter(mAdapter, mHeaders, mFooters,
-                    mHideHeadersIfEmpty, mHideFootersIfEmpty, mTakeOwnership);
+                    mHideHeadersIfEmpty, mHideFootersIfEmpty);
         }
     }
 
@@ -227,9 +213,8 @@ public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
                                  @NonNull List<Item> headers,
                                  @NonNull List<Item> footers,
                                  boolean hideHeadersIfEmpty,
-                                 boolean hideFootersIfEmpty,
-                                 boolean takeOwnership) {
-            super(adapter, takeOwnership);
+                                 boolean hideFootersIfEmpty) {
+            super(adapter);
             mHeaders.addAll(headers);
             mFooters.addAll(footers);
             mHideHeadersIfEmpty = hideHeadersIfEmpty;

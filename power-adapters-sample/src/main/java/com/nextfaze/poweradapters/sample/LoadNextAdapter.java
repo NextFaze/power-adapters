@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nullable;
 
 @Accessors(prefix = "m")
-public final class LoadNextAdapter extends ListAdapterWrapper {
+final class LoadNextAdapter extends ListAdapterWrapper {
 
     @NonNull
     private final Data<?> mData;
@@ -47,17 +47,20 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
     @Nullable
     private OnLoadNextClickListener mOnClickListener;
 
-    public LoadNextAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @LayoutRes int loadNextItemResource) {
+    LoadNextAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @LayoutRes int loadNextItemResource) {
         super(adapter);
         mData = data;
         mLoadNextItemResource = loadNextItemResource;
+    }
+
+    @Override
+    protected void onFirstObserverRegistered() {
         mData.registerLoadingObserver(mLoadingObserver);
         mData.registerAvailableObserver(mAvailableObserver);
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
+    protected void onLastObserverUnregistered() {
         mData.unregisterAvailableObserver(mAvailableObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
     }
@@ -119,7 +122,7 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
         return super.getView(position, convertView, parent);
     }
 
-    public void loadNext() {
+    void loadNext() {
         dispatchClick();
     }
 
@@ -153,7 +156,7 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
         return v;
     }
 
-    public interface OnLoadNextClickListener {
+    interface OnLoadNextClickListener {
         void onClick();
     }
 }

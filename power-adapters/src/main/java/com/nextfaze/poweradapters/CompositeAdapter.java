@@ -4,21 +4,27 @@ import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.String.format;
 
 @Slf4j
 @Accessors(prefix = "m")
-public final class CompositeAdapter extends BaseAdapter implements DisposableListAdapter {
+public final class CompositeAdapter extends BaseAdapter {
 
     @NonNull
-    private final ArrayList<DisposableListAdapter> mAdapters = new ArrayList<>();
+    private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
+
+    @NonNull
+    private final ArrayList<ListAdapter> mAdapters = new ArrayList<>();
 
     /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
     @NonNull
@@ -37,29 +43,20 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
         }
     };
 
-    public CompositeAdapter(@NonNull DisposableListAdapter... adapters) {
+    public CompositeAdapter(@NonNull ListAdapter... adapters) {
         this(Arrays.asList(adapters));
     }
 
-    public CompositeAdapter(@NonNull Iterable<? extends DisposableListAdapter> adapters) {
-        for (DisposableListAdapter adapter : adapters) {
+    public CompositeAdapter(@NonNull Iterable<? extends ListAdapter> adapters) {
+        for (ListAdapter adapter : adapters) {
             mAdapters.add(adapter);
-            adapter.registerDataSetObserver(mDataSetObserver);
-        }
-    }
-
-    @Override
-    public void dispose() {
-        for (DisposableListAdapter adapter : mAdapters) {
-            adapter.unregisterDataSetObserver(mDataSetObserver);
-            adapter.dispose();
         }
     }
 
     @Override
     public int getCount() {
         int count = 0;
-        for (DisposableListAdapter adapter : mAdapters) {
+        for (ListAdapter adapter : mAdapters) {
             count += adapter.getCount();
         }
         return count;
@@ -68,7 +65,7 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
     @Override
     public int getViewTypeCount() {
         int viewTypeCount = 0;
-        for (DisposableListAdapter adapter : mAdapters) {
+        for (ListAdapter adapter : mAdapters) {
             viewTypeCount += adapter.getViewTypeCount();
         }
         return viewTypeCount;
@@ -99,14 +96,42 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
         return adapter(position).getItemViewType(position);
     }
 
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+        if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
+            registerObserverWithChildren();
+        }
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        super.unregisterDataSetObserver(observer);
+        if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
+            unregisterObserverWithChildren();
+        }
+    }
+
+    private void registerObserverWithChildren() {
+        for (ListAdapter adapter : mAdapters) {
+            adapter.registerDataSetObserver(mDataSetObserver);
+        }
+    }
+
+    private void unregisterObserverWithChildren() {
+        for (ListAdapter adapter : mAdapters) {
+            adapter.unregisterDataSetObserver(mDataSetObserver);
+        }
+    }
+
     @NonNull
-    private DisposableListAdapter adapter(int position) {
+    private ListAdapter adapter(int position) {
         if (position >= getCount()) {
             throw new ArrayIndexOutOfBoundsException("index: " + position + ", total size: " + getCount());
         }
         int positionOffset = 0;
         int itemViewTypeOffset = 0;
-        for (DisposableListAdapter adapter : mAdapters) {
+        for (ListAdapter adapter : mAdapters) {
             int count = adapter.getCount();
             if (position - positionOffset < count) {
                 return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
@@ -118,16 +143,15 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
                 position, mAdapters.size(), getCount()));
     }
 
-    private static final class OffsetAdapter implements DisposableListAdapter {
+    private static final class OffsetAdapter implements ListAdapter {
 
-        @NonNull
-        private DisposableListAdapter mAdapter;
+        private ListAdapter mAdapter;
 
         private int mPositionOffset;
         private int mItemViewTypeOffset;
 
         @NonNull
-        OffsetAdapter set(@NonNull DisposableListAdapter adapter, int positionOffset, int itemViewTypeOffset) {
+        OffsetAdapter set(@NonNull ListAdapter adapter, int positionOffset, int itemViewTypeOffset) {
             mAdapter = adapter;
             mPositionOffset = positionOffset;
             mItemViewTypeOffset = itemViewTypeOffset;
@@ -157,11 +181,6 @@ public final class CompositeAdapter extends BaseAdapter implements DisposableLis
         @Override
         public int getItemViewType(int position) {
             return mAdapter.getItemViewType(position - mPositionOffset) + mItemViewTypeOffset;
-        }
-
-        @Override
-        public void dispose() {
-            mAdapter.dispose();
         }
 
         @Override

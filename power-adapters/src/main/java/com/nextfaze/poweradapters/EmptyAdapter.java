@@ -18,14 +18,8 @@ import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 @Accessors(prefix = "m")
 public abstract class EmptyAdapter extends ListAdapterWrapper {
 
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter) */
     protected EmptyAdapter(@NonNull ListAdapter adapter) {
         super(adapter);
-    }
-
-    /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-    protected EmptyAdapter(@NonNull ListAdapter adapter, boolean takeOwnership) {
-        super(adapter, takeOwnership);
     }
 
     /**
@@ -119,7 +113,6 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
 
         private boolean mEmptyItemEnabled;
         private boolean mShowIfLoading;
-        private boolean mTakeOwnership = true;
 
         public Builder(@NonNull ListAdapter adapter, @NonNull Data<?> data) {
             mData = data;
@@ -156,19 +149,12 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
             return this;
         }
 
-        /** @see ListAdapterWrapper#ListAdapterWrapper(ListAdapter, boolean) */
-        @NonNull
-        public Builder takeOwnership(boolean takeOwnership) {
-            mTakeOwnership = takeOwnership;
-            return this;
-        }
-
         @NonNull
         public EmptyAdapter build() {
             if (mEmptyItem == null) {
                 throw new IllegalStateException("No empty item specified");
             }
-            return new DataEmptyAdapter(mAdapter, mData, mEmptyItem, mEmptyItemEnabled, mShowIfLoading, mTakeOwnership);
+            return new DataEmptyAdapter(mAdapter, mData, mEmptyItem, mEmptyItemEnabled, mShowIfLoading);
         }
     }
 
@@ -203,20 +189,22 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
                          @NonNull Data<?> data,
                          @NonNull Item emptyItem,
                          boolean emptyItemEnabled,
-                         boolean showIfLoading,
-                         boolean takeOwnership) {
-            super(adapter, takeOwnership);
+                         boolean showIfLoading) {
+            super(adapter);
             mData = data;
             mEmptyItem = emptyItem;
             mEmptyItemEnabled = emptyItemEnabled;
             mShowIfLoading = showIfLoading;
+        }
+
+        @Override
+        protected void onFirstObserverRegistered() {
             mData.registerDataObserver(mDataObserver);
             mData.registerLoadingObserver(mLoadingObserver);
         }
 
         @Override
-        public void dispose() {
-            super.dispose();
+        protected void onLastObserverUnregistered() {
             mData.unregisterDataObserver(mDataObserver);
             mData.unregisterLoadingObserver(mLoadingObserver);
         }

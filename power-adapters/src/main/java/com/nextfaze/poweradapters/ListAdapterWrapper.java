@@ -6,16 +6,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
-public class ListAdapterWrapper extends BaseAdapter implements DisposableListAdapter {
+public class ListAdapterWrapper extends BaseAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(ListAdapterWrapper.class);
+    @NonNull
+    private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
 
     @NonNull
     protected final ListAdapter mAdapter;
@@ -33,48 +32,8 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         }
     };
 
-    private final boolean mTakeOwnership;
-
-    /**
-     * Create a list adapter wrapper, taking ownership of the wrapped adapter.
-     * @param adapter The adapter to be wrapped.
-     * @see #ListAdapterWrapper(ListAdapter, boolean)
-     */
     public ListAdapterWrapper(@NonNull ListAdapter adapter) {
-        this(adapter, true);
-    }
-
-    /**
-     * Create a list adapter wrapper, optionally taking ownership of the wrapped adapter.
-     * @param adapter The adapter to be wrapped.
-     * @param takeOwnership If {@code true}, this adapter assumes ownership of the wrapped adapter and must dispose of
-     * it.
-     */
-    public ListAdapterWrapper(@NonNull ListAdapter adapter, boolean takeOwnership) {
         mAdapter = adapter;
-        mTakeOwnership = takeOwnership;
-        mAdapter.registerDataSetObserver(mDataSetObserver);
-    }
-
-    @Override
-    public void dispose() {
-        mAdapter.unregisterDataSetObserver(mDataSetObserver);
-        if (mTakeOwnership) {
-            close(mAdapter);
-        }
-    }
-
-    private static void close(@Nullable ListAdapter adapter) {
-        if (adapter instanceof DisposableListAdapter) {
-            ((DisposableListAdapter) adapter).dispose();
-        }
-        if (adapter instanceof Closeable) {
-            try {
-                ((Closeable) adapter).close();
-            } catch (IOException e) {
-                log.warn("Error closing wrapped adapter", e);
-            }
-        }
     }
 
     @Override
@@ -127,5 +86,29 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
     @Override
     public int getViewTypeCount() {
         return mAdapter.getViewTypeCount();
+    }
+
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+        if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
+            mAdapter.registerDataSetObserver(mDataSetObserver);
+            onFirstObserverRegistered();
+        }
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        super.unregisterDataSetObserver(observer);
+        if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
+            mAdapter.unregisterDataSetObserver(mDataSetObserver);
+            onLastObserverUnregistered();
+        }
+    }
+
+    protected void onFirstObserverRegistered() {
+    }
+
+    protected void onLastObserverUnregistered() {
     }
 }
