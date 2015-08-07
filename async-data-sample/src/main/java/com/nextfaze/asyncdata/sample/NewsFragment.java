@@ -15,8 +15,8 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.SimpleDataAdapter;
@@ -85,16 +85,13 @@ public final class NewsFragment extends Fragment {
         }
     };
 
-//    @NonNull
-//    private final LoadNextAdapter mLoadNextAdapter = new LoadNextAdapter(mManualIncrementalData, mManualIncrementalAdapter, R.layout.load_next_item);
-
-    @InjectView(R.id.news_fragment_radio_group)
+    @Bind(R.id.news_fragment_radio_group)
     RadioGroup mRadioGroup;
 
-    @InjectView(R.id.news_fragment_data_layout)
+    @Bind(R.id.news_fragment_data_layout)
     DataLayout mDataLayout;
 
-    @InjectView(R.id.news_fragment_list)
+    @Bind(R.id.news_fragment_list)
     ListView mListView;
 
     @Override
@@ -129,7 +126,7 @@ public final class NewsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ButterKnife.inject(this, view);
+        ButterKnife.bind(this, view);
         mDataLayout.setErrorFormatter(new ErrorFormatter() {
             @Nullable
             @Override
@@ -148,7 +145,7 @@ public final class NewsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     @Override
