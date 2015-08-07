@@ -1,6 +1,6 @@
 package com.nextfaze.databind.sample;
 
-import com.nextfaze.databind.ArrayData;
+import com.nextfaze.asyncdata.ArrayData;
 import lombok.NonNull;
 
 import java.util.ArrayList;

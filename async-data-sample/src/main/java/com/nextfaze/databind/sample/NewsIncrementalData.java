@@ -1,6 +1,6 @@
 package com.nextfaze.databind.sample;
 
-import com.nextfaze.databind.IncrementalArrayData;
+import com.nextfaze.asyncdata.IncrementalArrayData;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;

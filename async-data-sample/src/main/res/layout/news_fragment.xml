@@ -43,7 +43,7 @@
 
     <!-- Data layout -->
 
-    <com.nextfaze.databind.widget.DataLayout
+    <com.nextfaze.asyncdata.widget.DataLayout
             android:id="@+id/news_fragment_data_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -89,6 +89,6 @@
                 android:textColor="#ffff0000"
                 android:textStyle="italic"/>
 
-    </com.nextfaze.databind.widget.DataLayout>
+    </com.nextfaze.asyncdata.widget.DataLayout>
 
 </LinearLayout>
