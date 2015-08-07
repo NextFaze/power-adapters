@@ -26,5 +26,5 @@ allprojects {
     }
 
     group = 'com.nextfaze'
-    version = '1.7.1'
+    version = '0.1.0'
 }
