@@ -1,0 +1,29 @@
+apply plugin: 'com.android.application'
+apply from: '../nextfaze.gradle'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '21.1.2'
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName '1.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'org.slf4j:slf4j-android:1.7.7'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.google.guava:guava:18.0'
+    compile project(':async-data')
+    provided 'org.projectlombok:lombok:1.14.2'
+}
