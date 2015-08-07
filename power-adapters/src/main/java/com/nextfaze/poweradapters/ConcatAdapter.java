@@ -16,11 +16,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.String.format;
 
-/** Use {@link ConcatAdapter} instead. */
-@Deprecated
 @Slf4j
 @Accessors(prefix = "m")
-public final class CompositeAdapter extends BaseAdapter {
+public final class ConcatAdapter extends BaseAdapter {
 
     @NonNull
     private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
@@ -45,11 +43,11 @@ public final class CompositeAdapter extends BaseAdapter {
         }
     };
 
-    public CompositeAdapter(@NonNull ListAdapter... adapters) {
+    public ConcatAdapter(@NonNull ListAdapter... adapters) {
         this(Arrays.asList(adapters));
     }
 
-    public CompositeAdapter(@NonNull Iterable<? extends ListAdapter> adapters) {
+    public ConcatAdapter(@NonNull Iterable<? extends ListAdapter> adapters) {
         for (ListAdapter adapter : adapters) {
             mAdapters.add(adapter);
         }
@@ -59,8 +57,7 @@ public final class CompositeAdapter extends BaseAdapter {
     public int getCount() {
         int count = 0;
         for (int i = 0; i < mAdapters.size(); i++) {
-            ListAdapter adapter = mAdapters.get(i);
-            count += adapter.getCount();
+            count += mAdapters.get(i).getCount();
         }
         return count;
     }
@@ -69,8 +66,7 @@ public final class CompositeAdapter extends BaseAdapter {
     public int getViewTypeCount() {
         int viewTypeCount = 0;
         for (int i = 0; i < mAdapters.size(); i++) {
-            ListAdapter adapter = mAdapters.get(i);
-            viewTypeCount += adapter.getViewTypeCount();
+            viewTypeCount += mAdapters.get(i).getViewTypeCount();
         }
         return viewTypeCount;
     }
@@ -118,15 +114,13 @@ public final class CompositeAdapter extends BaseAdapter {
 
     private void registerObserverWithChildren() {
         for (int i = 0; i < mAdapters.size(); i++) {
-            ListAdapter adapter = mAdapters.get(i);
-            adapter.registerDataSetObserver(mDataSetObserver);
+            mAdapters.get(i).registerDataSetObserver(mDataSetObserver);
         }
     }
 
     private void unregisterObserverWithChildren() {
         for (int i = 0; i < mAdapters.size(); i++) {
-            ListAdapter adapter = mAdapters.get(i);
-            adapter.unregisterDataSetObserver(mDataSetObserver);
+            mAdapters.get(i).unregisterDataSetObserver(mDataSetObserver);
         }
     }
 
