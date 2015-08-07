@@ -22,7 +22,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.7'
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.google.guava:guava:18.0'
     compile project(':power-adapters')
     provided 'org.projectlombok:lombok:1.14.2'
