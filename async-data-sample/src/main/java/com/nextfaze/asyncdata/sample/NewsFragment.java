@@ -1,4 +1,4 @@
-package com.nextfaze.databind.sample;
+package com.nextfaze.asyncdata.sample;
 
 import android.app.Fragment;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.nextfaze.databind.sample;
+package com.nextfaze.asyncdata.sample;
 
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import lombok.NonNull;

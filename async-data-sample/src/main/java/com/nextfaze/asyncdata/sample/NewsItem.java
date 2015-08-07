@@ -1,4 +1,4 @@
-package com.nextfaze.databind.sample;
+package com.nextfaze.asyncdata.sample;
 
 import lombok.NonNull;
 import lombok.experimental.Accessors;
