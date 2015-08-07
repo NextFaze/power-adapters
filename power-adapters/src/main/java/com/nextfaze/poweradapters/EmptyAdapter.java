@@ -5,6 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
+import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.DataObserver;
+import com.nextfaze.asyncdata.LoadingObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 

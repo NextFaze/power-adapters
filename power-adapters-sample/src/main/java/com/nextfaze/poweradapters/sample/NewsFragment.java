@@ -19,15 +19,15 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.nextfaze.asyncdata.ErrorFormatter;
+import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.Binder;
 import com.nextfaze.poweradapters.BindingAdapter;
-import com.nextfaze.poweradapters.ErrorFormatter;
 import com.nextfaze.poweradapters.HeaderFooterAdapter;
 import com.nextfaze.poweradapters.LoadingAdapter;
 import com.nextfaze.poweradapters.Mapper;
 import com.nextfaze.poweradapters.PolymorphicMapper;
 import com.nextfaze.poweradapters.TypedBinder;
-import com.nextfaze.poweradapters.widget.DataLayout;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;

@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
-import com.nextfaze.poweradapters.IncrementalArrayData;
+import com.nextfaze.asyncdata.IncrementalArrayData;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;

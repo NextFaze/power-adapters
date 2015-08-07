@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
-import com.nextfaze.poweradapters.ArrayData;
+import com.nextfaze.asyncdata.ArrayData;
 import lombok.NonNull;
 
 import java.util.ArrayList;

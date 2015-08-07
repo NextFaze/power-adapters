@@ -14,6 +14,7 @@ android {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.5'
     compile 'com.nextfaze:concurrent:1.0.4'
+    compile 'com.nextfaze:async-data:0.1.0'
     provided 'com.android.support:support-annotations:22.2.1'
     provided 'com.google.code.findbugs:jsr305:2.0.3'
     provided 'org.projectlombok:lombok:1.14.6'

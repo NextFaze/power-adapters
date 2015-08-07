@@ -2,8 +2,8 @@ package com.nextfaze.poweradapters.sample;
 
 import android.view.View;
 import android.view.ViewGroup;
-import com.nextfaze.poweradapters.Data;
-import com.nextfaze.poweradapters.DataAdapter;
+import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.DataAdapter;
 import lombok.NonNull;
 
 /** Bridge class that enables the use of a {@link DataAdapter} as the root of a chain of wrapped list adapters. */
