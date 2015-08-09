@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-adapters" />
+            <option value="$PROJECT_DIR$/power-adapters-recyclerview" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
           </set>
         </option>

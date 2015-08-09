@@ -1,0 +1,20 @@
+apply plugin: 'com.android.library'
+apply from: '../nextfaze.gradle'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '21.1.2'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 22
+    }
+}
+
+dependencies {
+    compile 'com.android.support:recyclerview-v7:22.2.1'
+    compile project(':power-adapters')
+    provided 'com.android.support:support-annotations:22.2.1'
+    provided 'com.google.code.findbugs:jsr305:2.0.3'
+    provided 'org.projectlombok:lombok:1.14.6'
+}

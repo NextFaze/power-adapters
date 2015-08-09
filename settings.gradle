@@ -1,2 +1,2 @@
 rootProject.name = 'power-adapters-android'
-include ':power-adapters', ':power-adapters-sample'
+include ':power-adapters', ':power-adapters-recyclerview', ':power-adapters-sample'
