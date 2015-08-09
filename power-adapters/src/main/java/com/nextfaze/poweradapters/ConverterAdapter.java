@@ -62,7 +62,7 @@ abstract class ConverterAdapter extends BaseAdapter {
     @Override
     public final View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = mPowerAdapter.newView(parent, position);
+            convertView = mPowerAdapter.newView(parent, getItemViewType(position));
         }
         mPowerAdapter.bindView(convertView, position);
         return convertView;
