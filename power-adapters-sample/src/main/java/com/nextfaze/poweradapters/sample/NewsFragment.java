@@ -21,15 +21,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.Binder;
-import com.nextfaze.poweradapters.BindingAdapter;
-import com.nextfaze.poweradapters.ConverterAdapter;
-import com.nextfaze.poweradapters.DataBindingAdapter;
-import com.nextfaze.poweradapters.HeaderAdapter;
-import com.nextfaze.poweradapters.LoadingAdapter;
-import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapper;
-import com.nextfaze.poweradapters.TypedBinder;
+import com.nextfaze.poweradapters.*;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
@@ -78,9 +70,22 @@ public final class NewsFragment extends Fragment {
             .build();
 
     @NonNull
-    private final ListAdapter mSimpleAdapter = new ConverterAdapter(new HeaderAdapter.Builder(new DataBindingAdapter(mSimpleData, mMapper))
-            .headerResource(R.layout.news_header_item)
-            .build());
+    private final ListAdapter mSimpleAdapter = new ConverterAdapter(createSimpleAdapter());
+
+    @NonNull
+    private PowerAdapter createSimpleAdapter() {
+        PowerAdapter adapter = new DataBindingAdapter(mSimpleData, mMapper);
+        adapter = new HeaderAdapter.Builder(adapter)
+                .headerResource(R.layout.news_header_item)
+                .visibilityPolicy(HeaderAdapter.VisibilityPolicy.HIDE_IF_EMPTY)
+                .build();
+        adapter = new DividerPowerAdapter.Builder(adapter)
+                .innerItemResource(R.layout.divider_item)
+                .outerItemResource(R.layout.divider_item)
+                .visibilityPolicy(DividerPowerAdapter.VisibilityPolicy.SHOW_LEADING_DIVIDER_IF_EMPTY)
+                .build();
+        return adapter;
+    }
 
     @NonNull
     private final ListAdapter mAutoIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mAutoIncrementalData), mMapper), mAutoIncrementalData)
