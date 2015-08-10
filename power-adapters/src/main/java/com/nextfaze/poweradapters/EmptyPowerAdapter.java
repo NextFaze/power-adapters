@@ -95,6 +95,13 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         return super.getViewTypeCount();
     }
 
+    public enum LoadingPolicy {
+        /** Empty item will be shown even while {@link Data} is loading. */
+        SHOW,
+        /** Empty item will not be shown while {@link Data} is loading. */
+        HIDE
+    }
+
     public static final class Builder {
 
         @NonNull
@@ -106,8 +113,10 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         @Nullable
         private Item mEmptyItem;
 
+        @NonNull
+        private LoadingPolicy mLoadingPolicy = LoadingPolicy.HIDE;
+
         private boolean mEmptyItemEnabled;
-        private boolean mShowIfLoading;
 
         public Builder(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
             mData = data;
@@ -137,10 +146,10 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
             return this;
         }
 
-        /** If {@code true}, empty item will be shown even while {@link Data} is loading. Defaults to {@code false}. */
+        /** Set the policy to use when {@link Data} is loading. Use {@link LoadingPolicy#HIDE} by default. */
         @NonNull
-        public Builder showIfLoading(boolean showIfLoading) {
-            mShowIfLoading = showIfLoading;
+        public Builder loadingPolicy(@NonNull LoadingPolicy loadingPolicy) {
+            mLoadingPolicy = loadingPolicy;
             return this;
         }
 
@@ -149,7 +158,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
             if (mEmptyItem == null) {
                 throw new IllegalStateException("No empty item specified");
             }
-            return new DataEmptyAdapter(mAdapter, mData, mEmptyItem, mEmptyItemEnabled, mShowIfLoading);
+            return new DataEmptyAdapter(mAdapter, mData, mEmptyItem, mLoadingPolicy, mEmptyItemEnabled);
         }
     }
 
@@ -177,19 +186,21 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         @NonNull
         private final Item mEmptyItem;
 
+        @NonNull
+        private final LoadingPolicy mLoadingPolicy;
+
         private final boolean mEmptyItemEnabled;
-        private final boolean mShowIfLoading;
 
         DataEmptyAdapter(@NonNull PowerAdapter adapter,
                          @NonNull Data<?> data,
                          @NonNull Item emptyItem,
-                         boolean emptyItemEnabled,
-                         boolean showIfLoading) {
+                         @NonNull LoadingPolicy loadingPolicy,
+                         boolean emptyItemEnabled) {
             super(adapter);
             mData = data;
             mEmptyItem = emptyItem;
+            mLoadingPolicy = loadingPolicy;
             mEmptyItemEnabled = emptyItemEnabled;
-            mShowIfLoading = showIfLoading;
         }
 
         @Override
@@ -206,7 +217,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
 
         @Override
         protected boolean isEmptyItemVisible() {
-            if (mShowIfLoading) {
+            if (mLoadingPolicy == LoadingPolicy.SHOW) {
                 return mData.isEmpty();
             }
             return !mData.isLoading() && mData.isEmpty();
