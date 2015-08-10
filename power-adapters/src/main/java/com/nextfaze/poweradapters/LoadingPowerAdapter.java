@@ -75,7 +75,7 @@ public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
 
     @Override
     public final int getItemViewType(int position) {
-        if (isLoadingItemVisible() && isLoadingItem(position)) {
+        if (isLoadingItem(position)) {
             return loadingViewType();
         }
         return super.getItemViewType(outerToInnerPosition(position));
@@ -99,8 +99,8 @@ public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
 
     @Override
     public final long getItemId(int position) {
-        if (isLoadingItemVisible() && isLoadingItem(position)) {
-            return -1;
+        if (isLoadingItem(position)) {
+            return NO_ID;
         }
         return super.getItemId(outerToInnerPosition(position));
     }
@@ -119,6 +119,9 @@ public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
     protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isLoadingItem(int position) {
+        if (!isLoadingItemVisible()) {
+            return false;
+        }
         // Loading item is the last item in the list.
         return position == getItemCount() - 1;
     }
