@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
+@Deprecated
 @Accessors(prefix = "m")
 public final class BindingAdapter extends ListAdapterWrapper {
 
