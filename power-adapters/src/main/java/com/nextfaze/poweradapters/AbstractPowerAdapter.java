@@ -93,9 +93,11 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
         mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
     }
 
+    /** Called when the first observer has registered with this adapter. Subclasses must call through to super. */
     protected void onFirstObserverRegistered() {
     }
 
+    /** Called when the last observer has unregistered from this adapter. Subclasses must call through to super. */
     protected void onLastObserverUnregistered() {
     }
 }

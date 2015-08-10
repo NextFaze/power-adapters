@@ -34,11 +34,13 @@ public final class DataBindingAdapter extends BindingPowerAdapter {
 
     @Override
     protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
         mData.registerDataObserver(mDataObserver);
     }
 
     @Override
     protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
         mData.unregisterDataObserver(mDataObserver);
     }
 }
