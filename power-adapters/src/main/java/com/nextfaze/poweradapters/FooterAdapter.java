@@ -4,7 +4,6 @@ import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
 /**
- * Wraps an existing {@link ListAdapter} to provide footer views below the wrapped adapters items. This class can be
+ * Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapters items. This class can be
  * subclassed for greater control over the presence of footer views.
  */
 public abstract class FooterAdapter extends PowerAdapterWrapper {
@@ -100,6 +99,23 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return position;
     }
 
+    public enum VisibilityPolicy {
+        ALWAYS() {
+            @Override
+            boolean shouldShow(@NonNull FooterAdapter adapter) {
+                return true;
+            }
+        },
+        HIDE_IF_EMPTY {
+            @Override
+            boolean shouldShow(@NonNull FooterAdapter adapter) {
+                return adapter.getAdapter().getItemCount() > 0;
+            }
+        };
+
+        abstract boolean shouldShow(@NonNull FooterAdapter adapter);
+    }
+
     public static final class Builder {
 
         @NonNull
@@ -108,7 +124,8 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         @NonNull
         private final ArrayList<Item> mFooters = new ArrayList<>();
 
-        private boolean mHideIfEmpty;
+        @NonNull
+        private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.ALWAYS;
 
         public Builder(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
@@ -127,14 +144,14 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public Builder hideIfEmpty(boolean hideIfEmpty) {
-            mHideIfEmpty = hideIfEmpty;
+        public Builder visibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
+            mVisibilityPolicy = visibilityPolicy;
             return this;
         }
 
         @NonNull
         public FooterAdapter build() {
-            return new Impl(mAdapter, mFooters, mHideIfEmpty);
+            return new Impl(mAdapter, mFooters, mVisibilityPolicy);
         }
     }
 
@@ -143,12 +160,13 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         @NonNull
         private final ArrayList<Item> mFooters = new ArrayList<>();
 
-        private boolean mHideIfEmpty;
+        @NonNull
+        private final VisibilityPolicy mVisibilityPolicy;
 
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, boolean hideIfEmpty) {
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull VisibilityPolicy visibilityPolicy) {
             super(adapter);
+            mVisibilityPolicy = visibilityPolicy;
             mFooters.addAll(footers);
-            mHideIfEmpty = hideIfEmpty;
         }
 
         @NonNull
@@ -161,14 +179,10 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
 
         @Override
         protected int getFooterCount(boolean visibleOnly) {
-            if (visibleOnly && mHideIfEmpty && isUnderlyingAdapterEmpty()) {
+            if (visibleOnly && !mVisibilityPolicy.shouldShow(this)) {
                 return 0;
             }
             return mFooters.size();
-        }
-
-        private boolean isUnderlyingAdapterEmpty() {
-            return getAdapter().getItemCount() == 0;
         }
     }
 }
