@@ -15,11 +15,10 @@ import javax.annotation.Nullable;
 
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
-@Deprecated
 @Accessors(prefix = "m")
-public abstract class EmptyAdapter extends ListAdapterWrapper {
+public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
 
-    protected EmptyAdapter(@NonNull ListAdapter adapter) {
+    protected EmptyPowerAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
@@ -29,7 +28,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
      * @return {@code true} if the empty item should be shown right now, otherwise {@code false}.
      */
     protected boolean isEmptyItemVisible() {
-        return mAdapter.isEmpty();
+        return getAdapter().getItemCount() == 0;
     }
 
     /**
@@ -48,11 +47,11 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
     }
 
     @Override
-    public final int getCount() {
+    public final int getItemCount() {
         if (isEmptyItemVisible()) {
-            return mAdapter.getCount() + 1;
+            return super.getItemCount() + 1;
         }
-        return mAdapter.getCount();
+        return super.getItemCount();
     }
 
     @Override
@@ -69,32 +68,27 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         return super.getItemViewType(position);
     }
 
+    @NonNull
     @Override
-    public final View getView(int position, View convertView, ViewGroup parent) {
-        if (getItemViewType(position) == getEmptyViewType()) {
-            if (convertView == null) {
-                convertView = newEmptyView(layoutInflater(parent), position, parent);
-            }
-            return convertView;
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+        if (itemViewType == getEmptyViewType()) {
+            return newEmptyView(layoutInflater(parent), parent);
         }
-        return super.getView(position, convertView, parent);
+        return super.newView(parent, itemViewType);
     }
 
     @Override
-    public final boolean isEnabled(int position) {
-        if (isEmptyItemVisible() && isEmptyItem(position)) {
-            return isEmptyItemEnabled();
+    public void bindView(@NonNull View view, int position) {
+        if (!isEmptyItem(position)) {
+            super.bindView(view, position);
         }
-        return super.isEnabled(position);
     }
 
     @NonNull
-    protected abstract View newEmptyView(@NonNull LayoutInflater layoutInflater,
-                                         int position,
-                                         @NonNull ViewGroup parent);
+    protected abstract View newEmptyView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isEmptyItem(int position) {
-        return position == getCount() - 1;
+        return position == getItemCount() - 1;
     }
 
     private int getEmptyViewType() {
@@ -107,7 +101,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         private final Data<?> mData;
 
         @NonNull
-        private final ListAdapter mAdapter;
+        private final PowerAdapter mAdapter;
 
         @Nullable
         private Item mEmptyItem;
@@ -115,7 +109,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         private boolean mEmptyItemEnabled;
         private boolean mShowIfLoading;
 
-        public Builder(@NonNull ListAdapter adapter, @NonNull Data<?> data) {
+        public Builder(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
             mData = data;
             mAdapter = adapter;
         }
@@ -151,7 +145,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         }
 
         @NonNull
-        public EmptyAdapter build() {
+        public EmptyPowerAdapter build() {
             if (mEmptyItem == null) {
                 throw new IllegalStateException("No empty item specified");
             }
@@ -159,7 +153,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         }
     }
 
-    private static final class DataEmptyAdapter extends EmptyAdapter {
+    private static final class DataEmptyAdapter extends EmptyPowerAdapter {
 
         @NonNull
         private final Data<?> mData;
@@ -186,7 +180,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
         private final boolean mEmptyItemEnabled;
         private final boolean mShowIfLoading;
 
-        DataEmptyAdapter(@NonNull ListAdapter adapter,
+        DataEmptyAdapter(@NonNull PowerAdapter adapter,
                          @NonNull Data<?> data,
                          @NonNull Item emptyItem,
                          boolean emptyItemEnabled,
@@ -225,7 +219,7 @@ public abstract class EmptyAdapter extends ListAdapterWrapper {
 
         @NonNull
         @Override
-        protected View newEmptyView(@NonNull LayoutInflater layoutInflater, int position, @NonNull ViewGroup parent) {
+        protected View newEmptyView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
             return mEmptyItem.get(layoutInflater, parent);
         }
     }
