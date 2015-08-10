@@ -93,28 +93,4 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
     public void bindView(@NonNull View view, int position) {
         mAdapter.bindView(view, position);
     }
-
-    @Override
-    public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        super.registerDataObserver(dataObserver);
-        if (mDataSetObservers.add(dataObserver) && mDataSetObservers.size() == 1) {
-            mAdapter.registerDataObserver(mDataSetObserver);
-            onFirstObserverRegistered();
-        }
-    }
-
-    @Override
-    public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        super.unregisterDataObserver(dataObserver);
-        if (mDataSetObservers.remove(dataObserver) && mDataSetObservers.size() == 0) {
-            mAdapter.unregisterDataObserver(mDataSetObserver);
-            onLastObserverUnregistered();
-        }
-    }
-
-    protected void onFirstObserverRegistered() {
-    }
-
-    protected void onLastObserverUnregistered() {
-    }
 }

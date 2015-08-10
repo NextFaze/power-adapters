@@ -9,17 +9,42 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
 
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservable.registerObserver(dataObserver);
+        boolean firstAdded;
+        synchronized (mDataObservable) {
+            mDataObservable.registerObserver(dataObserver);
+            firstAdded = mDataObservable.size() == 1;
+        }
+        if (firstAdded) {
+            onFirstObserverRegistered();
+        }
     }
 
     @Override
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservable.unregisterObserver(dataObserver);
+        boolean lastRemoved;
+        synchronized (mDataObservable) {
+            mDataObservable.unregisterObserver(dataObserver);
+            lastRemoved = mDataObservable.size() == 0;
+        }
+        if (lastRemoved) {
+            onLastObserverUnregistered();
+        }
     }
 
     @Override
     public boolean hasStableIds() {
         return false;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return NO_ID;
+    }
+
+    @NonNull
+    @Override
+    public Metadata getItemMetadata(int position) {
+        return Metadata.NONE;
     }
 
     @Override
@@ -68,5 +93,9 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
         mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
     }
 
+    protected void onFirstObserverRegistered() {
+    }
 
+    protected void onLastObserverUnregistered() {
+    }
 }

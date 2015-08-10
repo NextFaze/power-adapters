@@ -4,6 +4,10 @@ import android.database.Observable;
 
 final class DataObservable extends Observable<DataObserver> {
 
+    final int size() {
+        return mObservers.size();
+    }
+
     final void notifyDataSetChanged() {
         for (int i = mObservers.size() - 1; i >= 0; i--) {
             mObservers.get(i).onChanged();
