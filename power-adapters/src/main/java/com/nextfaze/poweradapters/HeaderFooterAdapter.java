@@ -17,6 +17,7 @@ import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
  * adapters items
  * respectively. This class can be subclassed for greater control over the presence of header and footer views.
  */
+@Deprecated
 public abstract class HeaderFooterAdapter extends ListAdapterWrapper {
 
     protected HeaderFooterAdapter(@NonNull ListAdapter adapter) {
