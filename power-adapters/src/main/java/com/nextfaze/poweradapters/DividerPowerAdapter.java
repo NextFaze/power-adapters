@@ -17,6 +17,9 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
     private static final int ITEM_VIEW_TYPE_TRAILING = 2;
     private static final int ITEM_VIEW_TYPE_TOTAL = 3;
 
+    @NonNull
+    private final VisibilityPolicy mVisibilityPolicy;
+
     @LayoutRes
     private final int mLeadingItemResource;
 
@@ -26,25 +29,22 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
     @LayoutRes
     private final int mInnerItemResource;
 
-    // TODO: Use a policy enum instead. Maybe a policy interface + enum?
-    private final boolean mShowDividerIfEmpty;
-
     DividerPowerAdapter(@NonNull PowerAdapter adapter,
-                        int leadingItemResource,
-                        int trailingItemResource,
-                        int innerItemResource,
-                        boolean showDividerIfEmpty) {
+                        @NonNull VisibilityPolicy visibilityPolicy,
+                        @LayoutRes int leadingItemResource,
+                        @LayoutRes int trailingItemResource,
+                        @LayoutRes int innerItemResource) {
         super(adapter);
         mLeadingItemResource = leadingItemResource;
         mTrailingItemResource = trailingItemResource;
         mInnerItemResource = innerItemResource;
-        mShowDividerIfEmpty = showDividerIfEmpty;
+        mVisibilityPolicy = visibilityPolicy;
     }
 
     @Override
     public final int getItemCount() {
         int superCount = super.getItemCount();
-        if (!mShowDividerIfEmpty && superCount <= 0) {
+        if (mVisibilityPolicy != VisibilityPolicy.SHOW_LEADING_DIVIDER_IF_EMPTY && superCount <= 0) {
             return 0;
         }
         int count;
@@ -61,23 +61,6 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
         }
         return count;
     }
-
-//    @Override
-//    public final boolean isEnabled(int position) {
-//        //noinspection SimplifiableIfStatement
-//        if (isDivider(position)) {
-//            return false;
-//        }
-//        return super.isEnabled(map(position));
-//    }
-
-//    @Override
-//    public final Object getItem(int position) {
-//        if (isDivider(position)) {
-//            return null;
-//        }
-//        return super.getItem(map(position));
-//    }
 
     @Override
     public final long getItemId(int position) {
@@ -199,15 +182,26 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
         return position / 2;
     }
 
+    public enum VisibilityPolicy {
+        SHOW_LEADING_DIVIDER_IF_EMPTY, SHOW_NOTHING_IF_EMPTY
+    }
+
     public static final class Builder {
 
         @NonNull
         private final PowerAdapter mAdapter;
 
+        @NonNull
+        private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.SHOW_LEADING_DIVIDER_IF_EMPTY;
+
+        @LayoutRes
         private int mLeadingItemResource;
+
+        @LayoutRes
         private int mTrailingItemResource;
+
+        @LayoutRes
         private int mInnerItemResource;
-        private boolean mShowDividerIfEmpty = true;
 
         public Builder(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
@@ -216,6 +210,13 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
         /** Indicates if any dividers were configured in this builder. */
         public boolean isEmpty() {
             return mLeadingItemResource <= 0 && mTrailingItemResource <= 0 && mInnerItemResource <= 0;
+        }
+
+        /** If {@code true}, a single divider may be shown if the wrapped adapter is empty. Defaults to {@code true}. */
+        @NonNull
+        public Builder visibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
+            mVisibilityPolicy = visibilityPolicy;
+            return this;
         }
 
         /** Sets layout resource of the divider that appears BEFORE the wrapped adapters items. */
@@ -245,17 +246,10 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
             return leadingItemResource(itemResource).trailingItemResource(itemResource);
         }
 
-        /** If {@code true}, a single divider may be shown if the wrapped adapter is empty. Defaults to {@code true}. */
-        @NonNull
-        public Builder showDividerIfEmpty(boolean showDividerIfEmpty) {
-            mShowDividerIfEmpty = showDividerIfEmpty;
-            return this;
-        }
-
         @NonNull
         public DividerPowerAdapter build() {
-            return new DividerPowerAdapter(mAdapter, mLeadingItemResource, mTrailingItemResource,
-                    mInnerItemResource, mShowDividerIfEmpty);
+            return new DividerPowerAdapter(mAdapter, mVisibilityPolicy, mLeadingItemResource, mTrailingItemResource,
+                    mInnerItemResource);
         }
     }
 }

@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
+@Deprecated
 @Accessors(prefix = "m")
 public final class DividerAdapter extends ListAdapterWrapper {
 
