@@ -170,15 +170,24 @@ public class DataLayout extends RelativeLayout {
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         mInflated = true;
         mContentView = findViewById(mContentViewId);
-        mContentView.setVisibility(INVISIBLE);
+        if (mContentView != null) {
+            mContentView.setVisibility(INVISIBLE);
+        }
         mEmptyView = findViewById(mEmptyViewId);
-        mEmptyView.setVisibility(INVISIBLE);
+        if (mEmptyView != null) {
+            mEmptyView.setVisibility(INVISIBLE);
+        }
         mLoadingView = findViewById(mLoadingViewId);
-        mLoadingView.setVisibility(INVISIBLE);
+        if (mLoadingView != null) {
+            mLoadingView.setVisibility(INVISIBLE);
+        }
         mErrorView = findViewById(mErrorViewId);
-        mErrorView.setVisibility(INVISIBLE);
+        if (mErrorView != null) {
+            mErrorView.setVisibility(INVISIBLE);
+        }
         updateViews();
     }
 
