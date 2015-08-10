@@ -19,6 +19,7 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.*;
@@ -70,11 +71,11 @@ public final class NewsFragment extends Fragment {
             .build();
 
     @NonNull
-    private final ListAdapter mSimpleAdapter = new ConverterAdapter(createSimpleAdapter());
+    private final ListAdapter mSimpleAdapter = new ConverterAdapter(createSimpleAdapter(mSimpleData));
 
     @NonNull
-    private PowerAdapter createSimpleAdapter() {
-        PowerAdapter adapter = new DataBindingAdapter(mSimpleData, mMapper);
+    private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
+        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         adapter = new HeaderAdapter.Builder(adapter)
                 .headerResource(R.layout.news_header_item)
                 .visibilityPolicy(HeaderAdapter.VisibilityPolicy.HIDE_IF_EMPTY)
@@ -82,15 +83,22 @@ public final class NewsFragment extends Fragment {
         adapter = new DividerPowerAdapter.Builder(adapter)
                 .innerItemResource(R.layout.divider_item)
                 .outerItemResource(R.layout.divider_item)
-                .visibilityPolicy(DividerPowerAdapter.VisibilityPolicy.SHOW_LEADING_DIVIDER_IF_EMPTY)
+                .emptyPolicy(DividerPowerAdapter.EmptyPolicy.SHOW_LEADING)
                 .build();
         return adapter;
     }
 
     @NonNull
-    private final ListAdapter mAutoIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mAutoIncrementalData), mMapper), mAutoIncrementalData)
-            .loadingItemResource(R.layout.loading_item)
-            .build();
+    private final ListAdapter mAutoIncrementalAdapter = new ConverterAdapter(createAutoIncrementalAdapter(mAutoIncrementalData));
+
+    @NonNull
+    private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
+        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
+        adapter = new LoadingPowerAdapter.Builder(adapter, data)
+                .loadingItemResource(R.layout.loading_item)
+                .build();
+        return adapter;
+    }
 
     @NonNull
     private final ListAdapter mManualIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mManualIncrementalData), mMapper), mManualIncrementalData)
@@ -153,6 +161,15 @@ public final class NewsFragment extends Fragment {
             @Override
             public String format(@NonNull Context context, @NonNull Throwable e) {
                 return "Failed to load news: " + e.getMessage();
+            }
+        });
+        mDataLayout.setVisibilityPolicy(new DataLayout.VisibilityPolicy() {
+            @Override
+            public boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v) {
+                if (v == dataLayout.findViewById(R.id.news_fragment_list)) {
+                    return true;
+                }
+                return DEFAULT.shouldShow(dataLayout, v);
             }
         });
     }

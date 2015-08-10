@@ -17,14 +17,13 @@ import javax.annotation.Nullable;
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
 /**
- * Wraps an existing {@link ListAdapter} and displays a loading indicator while loading. Also supports checking a
+ * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Also supports checking a
  * {@link Data} instance for the loading state. The loading indicator is shown at the end of the adapter.
  */
-@Deprecated
 @Accessors(prefix = "m")
-public abstract class LoadingAdapter extends ListAdapterWrapper {
+public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
 
-    protected LoadingAdapter(@NonNull ListAdapter adapter) {
+    protected LoadingPowerAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
@@ -61,11 +60,11 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     }
 
     @Override
-    public final int getCount() {
+    public final int getItemCount() {
         if (isLoadingItemVisible()) {
-            return mAdapter.getCount() + 1;
+            return super.getItemCount() + 1;
         }
-        return mAdapter.getCount();
+        return super.getItemCount();
     }
 
     @Override
@@ -77,28 +76,25 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     @Override
     public final int getItemViewType(int position) {
         if (isLoadingItemVisible() && isLoadingItem(position)) {
-            return getLoadingViewType();
+            return loadingViewType();
         }
         return super.getItemViewType(outerToInnerPosition(position));
     }
 
+    @NonNull
     @Override
-    public final View getView(int position, View convertView, ViewGroup parent) {
-        if (getItemViewType(position) == getLoadingViewType()) {
-            if (convertView == null) {
-                convertView = newLoadingView(layoutInflater(parent), position, parent);
-            }
-            return convertView;
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+        if (itemViewType == loadingViewType()) {
+            return newLoadingView(layoutInflater(parent), parent);
         }
-        return super.getView(outerToInnerPosition(position), convertView, parent);
+        return super.newView(parent, itemViewType);
     }
 
     @Override
-    public final boolean isEnabled(int position) {
-        if (isLoadingItemVisible() && isLoadingItem(position)) {
-            return isLoadingItemEnabled();
+    public void bindView(@NonNull View view, int position) {
+        if (!isLoadingItem(position)) {
+            super.bindView(view, outerToInnerPosition(position));
         }
-        return super.isEnabled(outerToInnerPosition(position));
     }
 
     @Override
@@ -109,15 +105,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         return super.getItemId(outerToInnerPosition(position));
     }
 
-    @Override
-    public final Object getItem(int position) {
-        if (isLoadingItemVisible() && isLoadingItem(position)) {
-            return null;
-        }
-        return super.getItem(outerToInnerPosition(position));
-    }
-
-    private int getLoadingViewType() {
+    private int loadingViewType() {
         return super.getViewTypeCount();
     }
 
@@ -128,19 +116,17 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
     }
 
     @NonNull
-    protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater,
-                                           int position,
-                                           @NonNull ViewGroup parent);
+    protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isLoadingItem(int position) {
         // Loading item is the last item in the list.
-        return position == getCount() - 1;
+        return position == getItemCount() - 1;
     }
 
     public static final class Builder {
 
         @NonNull
-        private final ListAdapter mAdapter;
+        private final PowerAdapter mAdapter;
 
         @NonNull
         private final Data<?> mData;
@@ -151,7 +137,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         private boolean mOnlyShowIfEmpty;
         private boolean mLoadingItemEnabled;
 
-        public Builder(@NonNull ListAdapter adapter, @NonNull Data<?> data) {
+        public Builder(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
             mAdapter = adapter;
             mData = data;
         }
@@ -183,15 +169,15 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         }
 
         @NonNull
-        public LoadingAdapter build() {
+        public LoadingPowerAdapter build() {
             if (mLoadingItem == null) {
                 throw new IllegalStateException("No loading item specified");
             }
-            return new DataLoadingAdapter(mAdapter, mData, mLoadingItem, mLoadingItemEnabled, mOnlyShowIfEmpty);
+            return new Impl(mAdapter, mData, mLoadingItem, mLoadingItemEnabled, mOnlyShowIfEmpty);
         }
     }
 
-    private static final class DataLoadingAdapter extends LoadingAdapter {
+    private static final class Impl extends LoadingPowerAdapter {
 
         @NonNull
         private final Data<?> mData;
@@ -218,11 +204,11 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         private final boolean mLoadingItemEnabled;
         private final boolean mOnlyShowIfEmpty;
 
-        DataLoadingAdapter(@NonNull ListAdapter adapter,
-                           @NonNull Data<?> data,
-                           @NonNull Item loadingItem,
-                           boolean loadingItemEnabled,
-                           boolean onlyShowIfEmpty) {
+        Impl(@NonNull PowerAdapter adapter,
+             @NonNull Data<?> data,
+             @NonNull Item loadingItem,
+             boolean loadingItemEnabled,
+             boolean onlyShowIfEmpty) {
             super(adapter);
             mData = data;
             mLoadingItem = loadingItem;
@@ -249,9 +235,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
 
         @NonNull
         @Override
-        protected View newLoadingView(@NonNull LayoutInflater layoutInflater,
-                                      int position,
-                                      @NonNull ViewGroup parent) {
+        protected View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
             return mLoadingItem.get(layoutInflater, parent);
         }
 
@@ -259,7 +243,7 @@ public abstract class LoadingAdapter extends ListAdapterWrapper {
         protected boolean isLoadingItemVisible() {
             boolean visible = super.isLoadingItemVisible();
             if (mOnlyShowIfEmpty) {
-                return visible && isEmpty();
+                return visible && getItemCount() == 0;
             }
             return visible;
         }

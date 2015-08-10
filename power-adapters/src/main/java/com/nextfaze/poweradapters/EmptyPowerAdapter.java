@@ -63,7 +63,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
     @Override
     public final int getItemViewType(int position) {
         if (isEmptyItemVisible() && isEmptyItem(position)) {
-            return getEmptyViewType();
+            return emptyViewType();
         }
         return super.getItemViewType(position);
     }
@@ -71,7 +71,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        if (itemViewType == getEmptyViewType()) {
+        if (itemViewType == emptyViewType()) {
             return newEmptyView(layoutInflater(parent), parent);
         }
         return super.newView(parent, itemViewType);
@@ -91,7 +91,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         return position == getItemCount() - 1;
     }
 
-    private int getEmptyViewType() {
+    private int emptyViewType() {
         return super.getViewTypeCount();
     }
 
@@ -158,11 +158,11 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
             if (mEmptyItem == null) {
                 throw new IllegalStateException("No empty item specified");
             }
-            return new DataEmptyAdapter(mAdapter, mData, mEmptyItem, mLoadingPolicy, mEmptyItemEnabled);
+            return new Impl(mAdapter, mData, mEmptyItem, mLoadingPolicy, mEmptyItemEnabled);
         }
     }
 
-    private static final class DataEmptyAdapter extends EmptyPowerAdapter {
+    private static final class Impl extends EmptyPowerAdapter {
 
         @NonNull
         private final Data<?> mData;
@@ -191,11 +191,11 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
 
         private final boolean mEmptyItemEnabled;
 
-        DataEmptyAdapter(@NonNull PowerAdapter adapter,
-                         @NonNull Data<?> data,
-                         @NonNull Item emptyItem,
-                         @NonNull LoadingPolicy loadingPolicy,
-                         boolean emptyItemEnabled) {
+        Impl(@NonNull PowerAdapter adapter,
+             @NonNull Data<?> data,
+             @NonNull Item emptyItem,
+             @NonNull LoadingPolicy loadingPolicy,
+             boolean emptyItemEnabled) {
             super(adapter);
             mData = data;
             mEmptyItem = emptyItem;
