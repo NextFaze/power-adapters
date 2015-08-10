@@ -116,7 +116,7 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
         if (itemViewType == trailingDividerItemViewType()) {
             return;
         }
-        super.bindView(view, position);
+        super.bindView(view, map(position));
     }
 
     @NonNull
