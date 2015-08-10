@@ -30,13 +30,13 @@ public abstract class BindingPowerAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
         Binder binder = mBinders.get(itemViewType - super.getViewTypeCount());
         return binder.newView(parent);
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
+    public final void bindView(@NonNull View view, int position) {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         if (binder != null) {

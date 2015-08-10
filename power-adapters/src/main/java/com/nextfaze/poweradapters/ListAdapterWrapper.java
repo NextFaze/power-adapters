@@ -82,7 +82,6 @@ public class ListAdapterWrapper extends BaseAdapter {
         return mAdapter.getItemViewType(position);
     }
 
-    /** Subclasses must always return the sum of the super call and any additional view types they provide. */
     @Override
     public int getViewTypeCount() {
         return mAdapter.getViewTypeCount();
@@ -106,9 +105,11 @@ public class ListAdapterWrapper extends BaseAdapter {
         }
     }
 
+    /** Called when the first observer has registered with this adapter. Subclasses must call through to super. */
     protected void onFirstObserverRegistered() {
     }
 
+    /** Called when the last observer has unregistered from this adapter. Subclasses must call through to super. */
     protected void onLastObserverUnregistered() {
     }
 }
