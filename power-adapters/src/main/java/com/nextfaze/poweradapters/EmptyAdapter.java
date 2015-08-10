@@ -16,9 +16,9 @@ import javax.annotation.Nullable;
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
-public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
+public abstract class EmptyAdapter extends PowerAdapterWrapper {
 
-    protected EmptyPowerAdapter(@NonNull PowerAdapter adapter) {
+    protected EmptyAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
@@ -154,7 +154,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public EmptyPowerAdapter build() {
+        public EmptyAdapter build() {
             if (mEmptyItem == null) {
                 throw new IllegalStateException("No empty item specified");
             }
@@ -162,7 +162,7 @@ public abstract class EmptyPowerAdapter extends PowerAdapterWrapper {
         }
     }
 
-    private static final class Impl extends EmptyPowerAdapter {
+    private static final class Impl extends EmptyAdapter {
 
         @NonNull
         private final Data<?> mData;

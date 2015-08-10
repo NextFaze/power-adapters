@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters;
 import com.nextfaze.asyncdata.Data;
 import lombok.NonNull;
 
-public final class DataBindingAdapter extends BindingPowerAdapter {
+public final class DataBindingAdapter extends BindingAdapter {
 
     @NonNull
     private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.DataObserver() {

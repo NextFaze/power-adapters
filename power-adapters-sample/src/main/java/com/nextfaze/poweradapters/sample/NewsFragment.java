@@ -23,9 +23,9 @@ import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.Binder;
 import com.nextfaze.poweradapters.DataBindingAdapter;
-import com.nextfaze.poweradapters.DividerPowerAdapter;
+import com.nextfaze.poweradapters.DividerAdapter;
 import com.nextfaze.poweradapters.HeaderAdapter;
-import com.nextfaze.poweradapters.LoadingPowerAdapter;
+import com.nextfaze.poweradapters.LoadingAdapter;
 import com.nextfaze.poweradapters.Mapper;
 import com.nextfaze.poweradapters.PolymorphicMapper;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -89,10 +89,10 @@ public final class NewsFragment extends Fragment {
                 .headerResource(R.layout.news_header_item)
                 .visibilityPolicy(HeaderAdapter.VisibilityPolicy.HIDE_IF_EMPTY)
                 .build();
-        adapter = new DividerPowerAdapter.Builder(adapter)
+        adapter = new DividerAdapter.Builder(adapter)
                 .innerItemResource(R.layout.divider_item)
                 .outerItemResource(R.layout.divider_item)
-                .emptyPolicy(DividerPowerAdapter.EmptyPolicy.SHOW_LEADING)
+                .emptyPolicy(DividerAdapter.EmptyPolicy.SHOW_LEADING)
                 .build();
         return adapter;
     }
@@ -103,7 +103,7 @@ public final class NewsFragment extends Fragment {
     @NonNull
     private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        adapter = new LoadingPowerAdapter.Builder(adapter, data)
+        adapter = new LoadingAdapter.Builder(adapter, data)
                 .loadingItemResource(R.layout.loading_item)
                 .build();
         return adapter;
@@ -115,7 +115,7 @@ public final class NewsFragment extends Fragment {
     @NonNull
     private LoadNextAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        adapter = new LoadingPowerAdapter.Builder(adapter, data)
+        adapter = new LoadingAdapter.Builder(adapter, data)
                 .loadingItemResource(R.layout.loading_item)
                 .build();
         LoadNextAdapter loadNextAdapter = new LoadNextAdapter(data, adapter, R.layout.load_next_item);

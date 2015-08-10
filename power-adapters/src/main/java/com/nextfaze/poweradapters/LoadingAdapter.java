@@ -21,9 +21,9 @@ import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
  * {@link Data} instance for the loading state. The loading indicator is shown at the end of the adapter.
  */
 @Accessors(prefix = "m")
-public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
+public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
-    protected LoadingPowerAdapter(@NonNull PowerAdapter adapter) {
+    protected LoadingAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
@@ -172,7 +172,7 @@ public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public LoadingPowerAdapter build() {
+        public LoadingAdapter build() {
             if (mLoadingItem == null) {
                 throw new IllegalStateException("No loading item specified");
             }
@@ -180,7 +180,7 @@ public abstract class LoadingPowerAdapter extends PowerAdapterWrapper {
         }
     }
 
-    private static final class Impl extends LoadingPowerAdapter {
+    private static final class Impl extends LoadingAdapter {
 
         @NonNull
         private final Data<?> mData;

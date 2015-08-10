@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
 @Accessors(prefix = "m")
-public abstract class BindingPowerAdapter extends AbstractPowerAdapter {
+public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @NonNull
     private final ArrayList<Binder> mBinders;
@@ -20,7 +20,7 @@ public abstract class BindingPowerAdapter extends AbstractPowerAdapter {
     @NonNull
     private final Mapper mMapper;
 
-    public BindingPowerAdapter(@NonNull Mapper mapper) {
+    public BindingAdapter(@NonNull Mapper mapper) {
         mBinders = new ArrayList<Binder>(mapper.getAllBinders());
         mMapper = mapper;
     }

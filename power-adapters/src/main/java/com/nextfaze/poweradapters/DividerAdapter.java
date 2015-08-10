@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
-public final class DividerPowerAdapter extends PowerAdapterWrapper {
+public final class DividerAdapter extends PowerAdapterWrapper {
 
     private static final int ITEM_VIEW_TYPE_INNER = 0;
     private static final int ITEM_VIEW_TYPE_LEADING = 1;
@@ -29,11 +29,11 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
     @LayoutRes
     private final int mInnerItemResource;
 
-    DividerPowerAdapter(@NonNull PowerAdapter adapter,
-                        @NonNull EmptyPolicy emptyPolicy,
-                        @LayoutRes int leadingItemResource,
-                        @LayoutRes int trailingItemResource,
-                        @LayoutRes int innerItemResource) {
+    DividerAdapter(@NonNull PowerAdapter adapter,
+                   @NonNull EmptyPolicy emptyPolicy,
+                   @LayoutRes int leadingItemResource,
+                   @LayoutRes int trailingItemResource,
+                   @LayoutRes int innerItemResource) {
         super(adapter);
         mLeadingItemResource = leadingItemResource;
         mTrailingItemResource = trailingItemResource;
@@ -253,8 +253,8 @@ public final class DividerPowerAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public DividerPowerAdapter build() {
-            return new DividerPowerAdapter(mAdapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
+        public DividerAdapter build() {
+            return new DividerAdapter(mAdapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
                     mInnerItemResource);
         }
     }
