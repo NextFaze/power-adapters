@@ -22,11 +22,11 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    protected abstract View getFooterView(@NonNull LayoutInflater layoutInflater,
+    abstract View getFooterView(@NonNull LayoutInflater layoutInflater,
                                           @NonNull ViewGroup parent,
                                           int position);
 
-    protected abstract int getFooterCount(boolean visibleOnly);
+    abstract int getFooterCount(boolean visibleOnly);
 
     @Override
     public final int getItemCount() {

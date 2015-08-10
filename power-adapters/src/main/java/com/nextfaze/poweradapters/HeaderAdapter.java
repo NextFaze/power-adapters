@@ -22,11 +22,11 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    protected abstract View getHeaderView(@NonNull LayoutInflater layoutInflater,
+    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater,
                                           @NonNull ViewGroup parent,
                                           int position);
 
-    protected abstract int getHeaderCount(boolean visibleOnly);
+    abstract int getHeaderCount(boolean visibleOnly);
 
     @Override
     public final int getItemCount() {
