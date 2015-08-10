@@ -16,29 +16,12 @@ public interface PowerAdapter {
     int getItemCount();
 
     /**
-     * Return the stable ID for the item at {@code position}. If {@link #hasStableIds()}
-     * would return false this method should return {@link #NO_ID}.
-     * @param position Adapter position to query
-     * @return the stable ID of the item at position
-     */
-    long getItemId(int position);
-
-    /**
      * Returns true if this adapter publishes a unique {@code long} value that can
      * act as a key for the item at a given position in the data set. If that item is relocated
      * in the data set, the ID returned for that item should be the same.
      * @return true if this adapter's items have stable IDs
      */
     boolean hasStableIds();
-
-    /**
-     * Get the type of View that will be created, for the purpose of view recycling.
-     * @param position The position of the item within the adapter's data set whose view type we
-     * want.
-     * @return An integer representing the type of View. Two views should share the same type if one
-     * can be converted to the other. Note: Integers must be in the range 0 to {@link #getViewTypeCount} - 1.
-     */
-    int getItemViewType(int position);
 
     /**
      * <p>
@@ -53,12 +36,29 @@ public interface PowerAdapter {
     int getViewTypeCount();
 
     /**
+     * Return the stable ID for the item at {@code position}. If {@link #hasStableIds()}
+     * would return false this method should return {@link #NO_ID}.
+     * @param position Adapter position to query
+     * @return the stable ID of the item at position
+     */
+    long getItemId(int position);
+
+    /**
+     * Get the type of View that will be created, for the purpose of view recycling.
+     * @param position The position of the item within the adapter's data set whose view type we
+     * want.
+     * @return An integer representing the type of View. Two views should share the same type if one
+     * can be converted to the other. Note: Integers must be in the range 0 to {@link #getViewTypeCount} - 1.
+     */
+    int getItemViewType(int position);
+
+    /**
      * Returns metadata associated with this {@code position}.
      * @param position The position in the adapter's data set from which metadata will be retrieved.
      * @return Non-null metadata object containing additional information about this item.
      */
     @NonNull
-    Metadata getMetadata(int position);
+    Metadata getItemMetadata(int position);
 
     @NonNull
     View newView(@NonNull ViewGroup parent, int itemViewType);
