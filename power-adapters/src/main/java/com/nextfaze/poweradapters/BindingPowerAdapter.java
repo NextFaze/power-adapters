@@ -31,13 +31,7 @@ public abstract class BindingPowerAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        if (itemViewType >= mBinders.size()) {
-            throw new AssertionError();
-        }
-        Binder binder = mBinders.get(itemViewType);
-        if (binder == null) {
-            throw new AssertionError();
-        }
+        Binder binder = mBinders.get(itemViewType - super.getViewTypeCount());
         return binder.newView(parent);
     }
 
