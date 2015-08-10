@@ -11,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -71,7 +70,7 @@ public final class NewsFragment extends Fragment {
             .build();
 
     @NonNull
-    private final ListAdapter mSimpleAdapter = new ConverterAdapter(createSimpleAdapter(mSimpleData));
+    private final PowerAdapter mSimpleAdapter = createSimpleAdapter(mSimpleData);
 
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
@@ -89,7 +88,7 @@ public final class NewsFragment extends Fragment {
     }
 
     @NonNull
-    private final ListAdapter mAutoIncrementalAdapter = new ConverterAdapter(createAutoIncrementalAdapter(mAutoIncrementalData));
+    private final PowerAdapter mAutoIncrementalAdapter = createAutoIncrementalAdapter(mAutoIncrementalData);
 
     @NonNull
     private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
@@ -101,12 +100,23 @@ public final class NewsFragment extends Fragment {
     }
 
     @NonNull
-    private final ListAdapter mManualIncrementalAdapter = new LoadingAdapter.Builder(new BindingAdapter(new PartialDataAdapter<>(mManualIncrementalData), mMapper), mManualIncrementalData)
-            .loadingItemResource(R.layout.loading_item)
-            .build();
+    private final LoadNextAdapter mManualIncrementalAdapter = createManualIncrementalAdapter(mManualIncrementalData);
 
     @NonNull
-    private final LoadNextAdapter mLoadNextAdapter = new LoadNextAdapter(mManualIncrementalData, mManualIncrementalAdapter, R.layout.load_next_item);
+    private LoadNextAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
+        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
+        adapter = new LoadingPowerAdapter.Builder(adapter, data)
+                .loadingItemResource(R.layout.loading_item)
+                .build();
+        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(data, adapter, R.layout.load_next_item);
+        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
+            @Override
+            public void onClick() {
+                onLoadNextClick();
+            }
+        });
+        return loadNextAdapter;
+    }
 
     @Bind(R.id.news_fragment_radio_group)
     RadioGroup mRadioGroup;
@@ -150,26 +160,11 @@ public final class NewsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        mLoadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                onLoadNextClick();
-            }
-        });
         mDataLayout.setErrorFormatter(new ErrorFormatter() {
             @Nullable
             @Override
             public String format(@NonNull Context context, @NonNull Throwable e) {
                 return "Failed to load news: " + e.getMessage();
-            }
-        });
-        mDataLayout.setVisibilityPolicy(new DataLayout.VisibilityPolicy() {
-            @Override
-            public boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v) {
-                if (v == dataLayout.findViewById(R.id.news_fragment_list)) {
-                    return true;
-                }
-                return DEFAULT.shouldShow(dataLayout, v);
             }
         });
     }
@@ -182,8 +177,11 @@ public final class NewsFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        // Nullify adapter to ensure ListView unregisters any observers, which will transitively disconnect all internal
+        // observer registrations.
+        mListView.setAdapter(null);
         ButterKnife.unbind(this);
+        super.onDestroyView();
     }
 
     @Override
@@ -270,17 +268,17 @@ public final class NewsFragment extends Fragment {
 
     void showSimple() {
         mDataLayout.setData(mSimpleData);
-        mListView.setAdapter(mSimpleAdapter);
+        mListView.setAdapter(new ConverterAdapter(mSimpleAdapter));
     }
 
     void showAutoIncremental() {
         mDataLayout.setData(mAutoIncrementalData);
-        mListView.setAdapter(mAutoIncrementalAdapter);
+        mListView.setAdapter(new ConverterAdapter(mAutoIncrementalAdapter));
     }
 
     void showManualIncremental() {
         mDataLayout.setData(mManualIncrementalData);
-        mListView.setAdapter(mLoadNextAdapter);
+        mListView.setAdapter(new ConverterAdapter(mManualIncrementalAdapter));
     }
 
     void showToast(@NonNull String msg) {

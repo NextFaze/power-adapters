@@ -4,11 +4,11 @@ import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import com.nextfaze.asyncdata.AvailableObserver;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.LoadingObserver;
-import com.nextfaze.poweradapters.ListAdapterWrapper;
+import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.PowerAdapterWrapper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nullable;
 
 @Accessors(prefix = "m")
-final class LoadNextAdapter extends ListAdapterWrapper {
+final class LoadNextAdapter extends PowerAdapterWrapper {
 
     @NonNull
     private final Data<?> mData;
@@ -47,7 +47,7 @@ final class LoadNextAdapter extends ListAdapterWrapper {
     @Nullable
     private OnLoadNextClickListener mOnClickListener;
 
-    LoadNextAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @LayoutRes int loadNextItemResource) {
+    LoadNextAdapter(@NonNull Data<?> data, @NonNull PowerAdapter adapter, @LayoutRes int loadNextItemResource) {
         super(adapter);
         mData = data;
         mLoadNextItemResource = loadNextItemResource;
@@ -66,36 +66,19 @@ final class LoadNextAdapter extends ListAdapterWrapper {
     }
 
     @Override
-    public final int getCount() {
+    public final int getItemCount() {
         if (isLoadNextShown()) {
-            return super.getCount() + 1;
+            return super.getItemCount() + 1;
         }
-        return super.getCount();
-    }
-
-    @Override
-    public final boolean isEnabled(int position) {
-        //noinspection SimplifiableIfStatement
-        if (isLoadNextItem(position)) {
-            return false;
-        }
-        return super.isEnabled(position);
+        return super.getItemCount();
     }
 
     @Override
     public final long getItemId(int position) {
         if (isLoadNextItem(position)) {
-            return -1;
+            return NO_ID;
         }
         return super.getItemId(position);
-    }
-
-    @Override
-    public final Object getItem(int position) {
-        if (isLoadNextItem(position)) {
-            return null;
-        }
-        return super.getItem(position);
     }
 
     @Override
@@ -106,20 +89,25 @@ final class LoadNextAdapter extends ListAdapterWrapper {
     @Override
     public final int getItemViewType(int position) {
         if (isLoadNextItem(position)) {
-            return getLoadNextItemViewType();
+            return loadNextItemViewType();
         }
         return super.getItemViewType(position);
     }
 
+    @NonNull
     @Override
-    public final View getView(int position, View convertView, ViewGroup parent) {
-        if (isLoadNextItem(position)) {
-            if (convertView == null) {
-                convertView = newLoadNextView(parent);
-            }
-            return convertView;
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+        if (itemViewType == loadNextItemViewType()) {
+            return newLoadNextView(parent);
         }
-        return super.getView(position, convertView, parent);
+        return super.newView(parent, itemViewType);
+    }
+
+    @Override
+    public void bindView(@NonNull View view, int position) {
+        if (!isLoadNextItem(position)) {
+            super.bindView(view, position);
+        }
     }
 
     void loadNext() {
@@ -137,10 +125,10 @@ final class LoadNextAdapter extends ListAdapterWrapper {
     }
 
     private boolean isLoadNextItem(int position) {
-        return position == super.getCount();
+        return position == super.getItemCount();
     }
 
-    private int getLoadNextItemViewType() {
+    private int loadNextItemViewType() {
         return super.getViewTypeCount();
     }
 
