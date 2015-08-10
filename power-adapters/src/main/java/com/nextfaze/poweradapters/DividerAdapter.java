@@ -4,18 +4,14 @@ import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
-public final class DividerAdapter extends PowerAdapterWrapper {
-
-    private static final int ITEM_VIEW_TYPE_INNER = 0;
-    private static final int ITEM_VIEW_TYPE_LEADING = 1;
-    private static final int ITEM_VIEW_TYPE_TRAILING = 2;
-    private static final int ITEM_VIEW_TYPE_TOTAL = 3;
+public final class DividerAdapter extends ListAdapterWrapper {
 
     @LayoutRes
     private final int mLeadingItemResource;
@@ -26,14 +22,13 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     @LayoutRes
     private final int mInnerItemResource;
 
-    // TODO: Use a policy enum instead. Maybe a policy interface + enum?
     private final boolean mShowDividerIfEmpty;
 
-    DividerAdapter(@NonNull PowerAdapter adapter,
-                   int leadingItemResource,
-                   int trailingItemResource,
-                   int innerItemResource,
-                   boolean showDividerIfEmpty) {
+    DividerAdapter(@NonNull ListAdapter adapter,
+                          int leadingItemResource,
+                          int trailingItemResource,
+                          int innerItemResource,
+                          boolean showDividerIfEmpty) {
         super(adapter);
         mLeadingItemResource = leadingItemResource;
         mTrailingItemResource = trailingItemResource;
@@ -42,8 +37,8 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getItemCount() {
-        int superCount = super.getItemCount();
+    public final int getCount() {
+        int superCount = super.getCount();
         if (!mShowDividerIfEmpty && superCount <= 0) {
             return 0;
         }
@@ -62,78 +57,72 @@ public final class DividerAdapter extends PowerAdapterWrapper {
         return count;
     }
 
-//    @Override
-//    public final boolean isEnabled(int position) {
-//        //noinspection SimplifiableIfStatement
-//        if (isDivider(position)) {
-//            return false;
-//        }
-//        return super.isEnabled(map(position));
-//    }
+    @Override
+    public final boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isDivider(position)) {
+            return false;
+        }
+        return super.isEnabled(map(position));
+    }
 
-//    @Override
-//    public final Object getItem(int position) {
-//        if (isDivider(position)) {
-//            return null;
-//        }
-//        return super.getItem(map(position));
-//    }
+    @Override
+    public final Object getItem(int position) {
+        if (isDivider(position)) {
+            return null;
+        }
+        return super.getItem(map(position));
+    }
 
     @Override
     public final long getItemId(int position) {
         if (isDivider(position)) {
-            return NO_ID;
+            return -1;
         }
         return super.getItemId(map(position));
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public final View getView(int position, View convertView, ViewGroup parent) {
         if (isInnerDivider(position)) {
-            return innerDividerItemViewType();
+            if (convertView == null) {
+                convertView = newInnerDividerView(layoutInflater(parent), parent);
+            }
+            return convertView;
         }
         if (isLeadingDivider(position)) {
-            return leadingDividerItemViewType();
+            if (convertView == null) {
+                convertView = newLeadingDividerView(layoutInflater(parent), parent);
+            }
+            return convertView;
         }
         if (isTrailingDivider(position)) {
-            return trailingDividerItemViewType();
+            if (convertView == null) {
+                convertView = newTrailingDividerView(layoutInflater(parent), parent);
+            }
+            return convertView;
+        }
+        return super.getView(map(position), convertView, parent);
+    }
+
+    @Override
+    public final int getItemViewType(int position) {
+        if (isInnerDivider(position)) {
+            return getInnerDividerItemViewType();
+        }
+        if (isLeadingDivider(position)) {
+            return getLeadingDividerItemViewType();
+        }
+        if (isTrailingDivider(position)) {
+            return getTrailingDividerItemViewType();
         }
         return super.getItemViewType(map(position));
     }
 
     @Override
     public final int getViewTypeCount() {
-        return super.getViewTypeCount() + ITEM_VIEW_TYPE_TOTAL;
-    }
-
-    @NonNull
-    @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        if (itemViewType == innerDividerItemViewType()) {
-            return newInnerDividerView(layoutInflater(parent), parent);
-        }
-        if (itemViewType == leadingDividerItemViewType()) {
-            return newLeadingDividerView(layoutInflater(parent), parent);
-        }
-        if (itemViewType == trailingDividerItemViewType()) {
-            return newTrailingDividerView(layoutInflater(parent), parent);
-        }
-        return super.newView(parent, itemViewType);
-    }
-
-    @Override
-    public void bindView(@NonNull View view, int position) {
-        int itemViewType = getItemViewType(position);
-        if (itemViewType == innerDividerItemViewType()) {
-            return;
-        }
-        if (itemViewType == leadingDividerItemViewType()) {
-            return;
-        }
-        if (itemViewType == trailingDividerItemViewType()) {
-            return;
-        }
-        super.bindView(view, position);
+        // One additional view type for inner, leading, and trailing divider views.
+        return super.getViewTypeCount() + 3;
     }
 
     @NonNull
@@ -172,24 +161,24 @@ public final class DividerAdapter extends PowerAdapterWrapper {
         return false;
     }
 
-    private int innerDividerItemViewType() {
-        return super.getViewTypeCount() + ITEM_VIEW_TYPE_INNER;
-    }
-
     private boolean isLeadingDivider(int position) {
         return mLeadingItemResource > 0 && position == 0;
     }
 
-    private int leadingDividerItemViewType() {
-        return super.getViewTypeCount() + ITEM_VIEW_TYPE_LEADING;
-    }
-
     private boolean isTrailingDivider(int position) {
-        return mTrailingItemResource > 0 && position == getItemCount() - 1;
+        return mTrailingItemResource > 0 && position == getCount() - 1;
     }
 
-    private int trailingDividerItemViewType() {
-        return super.getViewTypeCount() + ITEM_VIEW_TYPE_TRAILING;
+    private int getInnerDividerItemViewType() {
+        return super.getViewTypeCount();
+    }
+
+    private int getLeadingDividerItemViewType() {
+        return super.getViewTypeCount() + 1;
+    }
+
+    private int getTrailingDividerItemViewType() {
+        return super.getViewTypeCount() + 2;
     }
 
     private int map(int position) {
@@ -202,14 +191,14 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     public static final class Builder {
 
         @NonNull
-        private final PowerAdapter mAdapter;
+        private final ListAdapter mAdapter;
 
         private int mLeadingItemResource;
         private int mTrailingItemResource;
         private int mInnerItemResource;
         private boolean mShowDividerIfEmpty = true;
 
-        public Builder(@NonNull PowerAdapter adapter) {
+        public Builder(@NonNull ListAdapter adapter) {
             mAdapter = adapter;
         }
 
