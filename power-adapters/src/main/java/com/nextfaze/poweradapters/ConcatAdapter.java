@@ -1,63 +1,80 @@
 package com.nextfaze.poweradapters;
 
-import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.String.format;
 
 @Slf4j
 @Accessors(prefix = "m")
-public final class ConcatAdapter extends BaseAdapter {
+final class ConcatAdapter extends AbstractPowerAdapter {
 
     @NonNull
-    private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
-
-    @NonNull
-    private final ArrayList<ListAdapter> mAdapters = new ArrayList<>();
+    private final ArrayList<PowerAdapter> mAdapters = new ArrayList<>();
 
     /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
     @NonNull
     private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
 
     @NonNull
-    private final DataSetObserver mDataSetObserver = new DataSetObserver() {
+    private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChanged() {
             notifyDataSetChanged();
         }
 
         @Override
-        public void onInvalidated() {
-            notifyDataSetInvalidated();
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
 
-    public ConcatAdapter(@NonNull ListAdapter... adapters) {
+    ConcatAdapter(@NonNull PowerAdapter... adapters) {
         this(Arrays.asList(adapters));
     }
 
-    public ConcatAdapter(@NonNull Iterable<? extends ListAdapter> adapters) {
-        for (ListAdapter adapter : adapters) {
+    ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
+        for (PowerAdapter adapter : adapters) {
             mAdapters.add(adapter);
         }
     }
 
     @Override
-    public int getCount() {
+    public boolean hasStableIds() {
+        for (int i = 0; i < mAdapters.size(); i++) {
+            if (!mAdapters.get(i).hasStableIds()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int getItemCount() {
         int count = 0;
         for (int i = 0; i < mAdapters.size(); i++) {
-            count += mAdapters.get(i).getCount();
+            count += mAdapters.get(i).getItemCount();
         }
         return count;
     }
@@ -72,151 +89,133 @@ public final class ConcatAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
-        return adapter(position).getItem(position);
-    }
-
-    @Override
     public long getItemId(int position) {
-        return adapter(position).getItemId(position);
+        return findAdapterByPosition(position).getItemId(position);
+    }
+
+    @NonNull
+    @Override
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+        return findAdapterByItemViewType(itemViewType).newView(parent, itemViewType);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return adapter(position).getView(position, convertView, parent);
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        return adapter(position).isEnabled(position);
+    public void bindView(@NonNull View view, int position) {
+        findAdapterByPosition(position).bindView(view, position);
     }
 
     @Override
     public int getItemViewType(int position) {
-        return adapter(position).getItemViewType(position);
+        return findAdapterByPosition(position).getItemViewType(position);
+    }
+
+    @NonNull
+    @Override
+    public Metadata getItemMetadata(int position) {
+        return findAdapterByPosition(position).getItemMetadata(position);
     }
 
     @Override
-    public void registerDataSetObserver(DataSetObserver observer) {
-        super.registerDataSetObserver(observer);
-        if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
-            registerObserverWithChildren();
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        for (int i = 0; i < mAdapters.size(); i++) {
+            mAdapters.get(i).registerDataObserver(mDataObserver);
         }
     }
 
     @Override
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        super.unregisterDataSetObserver(observer);
-        if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
-            unregisterObserverWithChildren();
-        }
-    }
-
-    private void registerObserverWithChildren() {
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
         for (int i = 0; i < mAdapters.size(); i++) {
-            mAdapters.get(i).registerDataSetObserver(mDataSetObserver);
-        }
-    }
-
-    private void unregisterObserverWithChildren() {
-        for (int i = 0; i < mAdapters.size(); i++) {
-            mAdapters.get(i).unregisterDataSetObserver(mDataSetObserver);
+            mAdapters.get(i).unregisterDataObserver(mDataObserver);
         }
     }
 
     @NonNull
-    private ListAdapter adapter(int position) {
-        if (position >= getCount()) {
-            throw new ArrayIndexOutOfBoundsException("index: " + position + ", total size: " + getCount());
+    private OffsetAdapter findAdapterByPosition(int position) {
+        int totalItemCount = getItemCount();
+        if (position >= totalItemCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
         }
         int positionOffset = 0;
         int itemViewTypeOffset = 0;
         for (int i = 0; i < mAdapters.size(); i++) {
-            ListAdapter adapter = mAdapters.get(i);
-            int count = adapter.getCount();
-            if (position - positionOffset < count) {
+            PowerAdapter adapter = mAdapters.get(i);
+            int itemCount = adapter.getItemCount();
+            if (position - positionOffset < itemCount) {
                 return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
             }
-            positionOffset += count;
+            positionOffset += itemCount;
             itemViewTypeOffset += adapter.getViewTypeCount();
         }
-        throw new IndexOutOfBoundsException(format("position %d not within range of any of the %d child adapters, total size %d",
-                position, mAdapters.size(), getCount()));
+        throw new IndexOutOfBoundsException(
+                format("Position %d not within range of any of the %d child adapters, total size %d",
+                        position, mAdapters.size(), totalItemCount));
     }
 
-    private static final class OffsetAdapter implements ListAdapter {
+    @NonNull
+    private OffsetAdapter findAdapterByItemViewType(int itemViewType) {
+        int totalViewTypeCount = getViewTypeCount();
+        if (itemViewType >= totalViewTypeCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Item view type: %d, total item view types: %d",
+                    itemViewType, totalViewTypeCount));
+        }
+        int positionOffset = 0;
+        int itemViewTypeOffset = 0;
+        for (int i = 0; i < mAdapters.size(); i++) {
+            PowerAdapter adapter = mAdapters.get(i);
+            int itemCount = adapter.getItemCount();
+            int viewTypeCount = adapter.getViewTypeCount();
+            if (itemViewType - itemViewTypeOffset < viewTypeCount) {
+                return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
+            }
+            positionOffset += itemCount;
+            itemViewTypeOffset += viewTypeCount;
+        }
+        throw new IndexOutOfBoundsException(
+                format("Item view type %d not within range of any of the %d child adapters, total item view types %d",
+                        itemViewType, mAdapters.size(), totalViewTypeCount));
+    }
 
-        private ListAdapter mAdapter;
+    private static final class OffsetAdapter {
+
+        private PowerAdapter mAdapter;
 
         private int mPositionOffset;
         private int mItemViewTypeOffset;
 
         @NonNull
-        OffsetAdapter set(@NonNull ListAdapter adapter, int positionOffset, int itemViewTypeOffset) {
+        OffsetAdapter set(@NonNull PowerAdapter adapter, int positionOffset, int itemViewTypeOffset) {
             mAdapter = adapter;
             mPositionOffset = positionOffset;
             mItemViewTypeOffset = itemViewTypeOffset;
             return this;
         }
 
-        @Override
-        public boolean isEnabled(int position) {
-            return mAdapter.isEnabled(position - mPositionOffset);
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mAdapter.getItem(position - mPositionOffset);
-        }
-
-        @Override
-        public long getItemId(int position) {
+        long getItemId(int position) {
             return mAdapter.getItemId(position - mPositionOffset);
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return mAdapter.getView(position - mPositionOffset, convertView, parent);
+        @NonNull
+        View newView(@NonNull ViewGroup parent, int itemViewType) {
+            return mAdapter.newView(parent, itemViewType - mItemViewTypeOffset);
         }
 
-        @Override
-        public int getItemViewType(int position) {
+        void bindView(@NonNull View view, int position) {
+            mAdapter.bindView(view, position - mPositionOffset);
+        }
+
+        int getItemViewType(int position) {
             return mAdapter.getItemViewType(position - mPositionOffset) + mItemViewTypeOffset;
         }
 
-        @Override
-        public boolean areAllItemsEnabled() {
-            return mAdapter.areAllItemsEnabled();
+        @NonNull
+        Metadata getItemMetadata(int position) {
+            return mAdapter.getItemMetadata(position - mPositionOffset);
         }
 
-        @Override
-        public void registerDataSetObserver(DataSetObserver observer) {
-            mAdapter.registerDataSetObserver(observer);
-        }
-
-        @Override
-        public void unregisterDataSetObserver(DataSetObserver observer) {
-            mAdapter.unregisterDataSetObserver(observer);
-        }
-
-        @Override
-        public int getCount() {
-            return mAdapter.getCount();
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return mAdapter.hasStableIds();
-        }
-
-        @Override
-        public int getViewTypeCount() {
+        int getViewTypeCount() {
             return mAdapter.getViewTypeCount();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return mAdapter.isEmpty();
         }
     }
 }

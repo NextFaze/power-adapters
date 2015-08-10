@@ -21,10 +21,20 @@ import butterknife.OnClick;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.*;
+import com.nextfaze.poweradapters.Binder;
+import com.nextfaze.poweradapters.DataBindingAdapter;
+import com.nextfaze.poweradapters.DividerPowerAdapter;
+import com.nextfaze.poweradapters.HeaderAdapter;
+import com.nextfaze.poweradapters.LoadingPowerAdapter;
+import com.nextfaze.poweradapters.Mapper;
+import com.nextfaze.poweradapters.PolymorphicMapper;
+import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.TypedBinder;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
+
+import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
 
 public final class NewsFragment extends Fragment {
 
@@ -268,17 +278,17 @@ public final class NewsFragment extends Fragment {
 
     void showSimple() {
         mDataLayout.setData(mSimpleData);
-        mListView.setAdapter(new ConverterAdapter(mSimpleAdapter));
+        mListView.setAdapter(toListAdapter(mSimpleAdapter));
     }
 
     void showAutoIncremental() {
         mDataLayout.setData(mAutoIncrementalData);
-        mListView.setAdapter(new ConverterAdapter(mAutoIncrementalAdapter));
+        mListView.setAdapter(toListAdapter(mAutoIncrementalAdapter));
     }
 
     void showManualIncremental() {
         mDataLayout.setData(mManualIncrementalData);
-        mListView.setAdapter(new ConverterAdapter(mManualIncrementalAdapter));
+        mListView.setAdapter(toListAdapter(mManualIncrementalAdapter));
     }
 
     void showToast(@NonNull String msg) {

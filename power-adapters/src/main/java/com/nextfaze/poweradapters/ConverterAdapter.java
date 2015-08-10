@@ -9,7 +9,7 @@ import lombok.NonNull;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public final class ConverterAdapter extends BaseAdapter {
+final class ConverterAdapter extends BaseAdapter {
 
     @NonNull
     private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
@@ -45,7 +45,7 @@ public final class ConverterAdapter extends BaseAdapter {
     @NonNull
     private final PowerAdapter mPowerAdapter;
 
-    public ConverterAdapter(@NonNull PowerAdapter powerAdapter) {
+    ConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
     }
 
