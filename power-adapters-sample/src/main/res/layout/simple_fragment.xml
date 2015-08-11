@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.nextfaze.asyncdata.widget.DataLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/simple_fragment_data_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="HardcodedText"
+        app:contentView="@+id/simple_fragment_list"
+        app:emptyView="@+id/simple_fragment_empty"
+        app:loadingView="@+id/simple_fragment_loading"
+        app:errorView="@+id/simple_fragment_error">
+
+    <!-- List -->
+
+    <ListView
+            android:id="@+id/simple_fragment_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:dividerHeight="0dp"
+            android:divider="@null"/>
+
+    <!-- Empty -->
+
+    <TextView
+            android:id="@+id/simple_fragment_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="No news today!"/>
+
+    <!-- Loading -->
+
+    <ProgressBar
+            style="@android:style/Widget.Holo.ProgressBar"
+            android:id="@+id/simple_fragment_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+    <!-- Error -->
+
+    <TextView
+            android:id="@+id/simple_fragment_error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="#ffff0000"
+            android:textStyle="italic"/>
+
+</com.nextfaze.asyncdata.widget.DataLayout>

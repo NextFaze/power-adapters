@@ -1,10 +1,9 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.app.Fragment;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,13 +56,7 @@ public final class NewsFragment extends Fragment {
     };
 
     @NonNull
-    private final Binder mNewsSectionBinder = new TypedBinder<NewsSection, TextView>(android.R.layout.simple_list_item_1, false) {
-        @Override
-        protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, @NonNull Holder holder) {
-            textView.setTypeface(Typeface.DEFAULT_BOLD);
-            textView.setText(newsSection.getTitle());
-        }
-    };
+    private final Binder mNewsSectionBinder = new NewsSectionBinder();
 
     @NonNull
     private final Mapper mMapper = new PolymorphicMapper.Builder()
@@ -286,4 +279,5 @@ public final class NewsFragment extends Fragment {
     void showToast(@NonNull String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
     }
+
 }
