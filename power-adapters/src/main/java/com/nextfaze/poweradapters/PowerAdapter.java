@@ -63,7 +63,7 @@ public interface PowerAdapter {
     @NonNull
     View newView(@NonNull ViewGroup parent, int itemViewType);
 
-    void bindView(@NonNull View view, int position);
+    void bindView(@NonNull View view, @NonNull Holder holder);
 
     void registerDataObserver(@NonNull DataObserver dataObserver);
 

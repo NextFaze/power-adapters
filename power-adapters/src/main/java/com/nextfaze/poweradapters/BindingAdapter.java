@@ -36,11 +36,12 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     }
 
     @Override
-    public final void bindView(@NonNull View view, int position) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
+        int position = holder.getPosition();
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         if (binder != null) {
-            binder.bindView(item, view, position);
+            binder.bindView(item, view, holder);
         }
     }
 

@@ -38,7 +38,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         if (isFooterView(position)) {
             return NO_ID;
         }
-        return super.getItemId(outerToInnerPosition(position));
+        return super.getItemId(position);
     }
 
     @Override
@@ -52,7 +52,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         if (itemViewType != -1) {
             return itemViewType;
         }
-        return super.getItemViewType(outerToInnerPosition(position));
+        return super.getItemViewType(position);
     }
 
     @NonNull
@@ -66,10 +66,16 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        if (!isFooterView(position)) {
-            super.bindView(view, outerToInnerPosition(position));
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isFooterView(holder.getPosition())) {
+            super.bindView(view, holder);
         }
+    }
+
+    @Override
+    protected int mapPosition(int outerPosition) {
+        // No conversion necessary, as footers appear at the end.
+        return outerPosition;
     }
 
     private boolean isFooterView(int position) {
@@ -92,11 +98,6 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
             return -1;
         }
         return superViewTypeCount - itemViewType;
-    }
-
-    /** Translate a position from our coordinate space to the wrapped adapters coordinate space. */
-    private int outerToInnerPosition(int position) {
-        return position;
     }
 
     public enum VisibilityPolicy {

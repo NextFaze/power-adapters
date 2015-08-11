@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import com.nextfaze.asyncdata.AvailableObserver;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.LoadingObserver;
+import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.PowerAdapterWrapper;
 import lombok.Getter;
@@ -104,10 +105,16 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        if (!isLoadNextItem(position)) {
-            super.bindView(view, position);
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isLoadNextItem(holder.getPosition())) {
+            super.bindView(view, holder);
         }
+    }
+
+    @Override
+    protected int mapPosition(int outerPosition) {
+        // No conversion necessary, as loading item appears at the end.
+        return outerPosition;
     }
 
     void loadNext() {

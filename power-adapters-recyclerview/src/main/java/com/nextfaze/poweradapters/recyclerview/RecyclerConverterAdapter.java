@@ -63,8 +63,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        // TODO: Supply a Holder through bindView() to access the position, in compliance with recycler adapter contract.
-        mPowerAdapter.bindView(holder.itemView, position);
+        mPowerAdapter.bindView(holder.itemView, holder.holder);
     }
 
     @Override
@@ -99,6 +98,15 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     }
 
     final class Holder extends RecyclerView.ViewHolder {
+
+        @NonNull
+        private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
+            @Override
+            public int getPosition() {
+                return getAdapterPosition();
+            }
+        };
+
         Holder(View itemView) {
             super(itemView);
         }

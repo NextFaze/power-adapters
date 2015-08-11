@@ -28,7 +28,7 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
      * @return {@code true} if the empty item should be shown right now, otherwise {@code false}.
      */
     protected boolean isEmptyItemVisible() {
-        return getAdapter().getItemCount() == 0;
+        return super.getItemCount() == 0;
     }
 
     /**
@@ -78,10 +78,16 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        if (!isEmptyItem(position)) {
-            super.bindView(view, position);
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isEmptyItem(holder.getPosition())) {
+            super.bindView(view, holder);
         }
+    }
+
+    @Override
+    protected int mapPosition(int outerPosition) {
+        // No conversion necessary. The empty item is added at the end.
+        return super.mapPosition(outerPosition);
     }
 
     @NonNull

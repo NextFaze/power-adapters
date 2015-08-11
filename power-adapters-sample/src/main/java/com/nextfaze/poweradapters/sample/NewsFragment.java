@@ -21,15 +21,7 @@ import butterknife.OnClick;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.Binder;
-import com.nextfaze.poweradapters.DataBindingAdapter;
-import com.nextfaze.poweradapters.DividerAdapter;
-import com.nextfaze.poweradapters.HeaderAdapter;
-import com.nextfaze.poweradapters.LoadingAdapter;
-import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapper;
-import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.TypedBinder;
+import com.nextfaze.poweradapters.*;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
@@ -53,7 +45,7 @@ public final class NewsFragment extends Fragment {
     @NonNull
     private final Binder mNewsItemBinder = new TypedBinder<NewsItem, TextView>(android.R.layout.simple_list_item_1) {
         @Override
-        protected void bind(@NonNull final NewsItem newsItem, @NonNull TextView textView, int position) {
+        protected void bind(@NonNull final NewsItem newsItem, @NonNull TextView textView, @NonNull Holder holder) {
             textView.setText(newsItem.getTitle());
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -67,7 +59,7 @@ public final class NewsFragment extends Fragment {
     @NonNull
     private final Binder mNewsSectionBinder = new TypedBinder<NewsSection, TextView>(android.R.layout.simple_list_item_1, false) {
         @Override
-        protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, int position) {
+        protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, @NonNull Holder holder) {
             textView.setTypeface(Typeface.DEFAULT_BOLD);
             textView.setText(newsSection.getTitle());
         }

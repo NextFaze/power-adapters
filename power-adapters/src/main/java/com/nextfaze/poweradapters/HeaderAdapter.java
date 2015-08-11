@@ -38,7 +38,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         if (isHeaderView(position)) {
             return NO_ID;
         }
-        return super.getItemId(outerToInnerPosition(position));
+        return super.getItemId(position);
     }
 
     @Override
@@ -52,7 +52,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         if (itemViewType != -1) {
             return itemViewType;
         }
-        return super.getItemViewType(outerToInnerPosition(position));
+        return super.getItemViewType(position);
     }
 
     @NonNull
@@ -66,10 +66,15 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        if (!isHeaderView(position)) {
-            super.bindView(view, outerToInnerPosition(position));
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isHeaderView(holder.getPosition())) {
+            super.bindView(view, holder);
         }
+    }
+
+    @Override
+    protected int mapPosition(int outerPosition) {
+        return outerPosition - getHeaderCount(true);
     }
 
     private boolean isHeaderView(int position) {
@@ -92,11 +97,6 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
             return -1;
         }
         return superViewTypeCount - itemViewType;
-    }
-
-    /** Translate a position from our coordinate space to the wrapped adapters coordinate space. */
-    private int outerToInnerPosition(int position) {
-        return position - getHeaderCount(true);
     }
 
     public enum VisibilityPolicy {

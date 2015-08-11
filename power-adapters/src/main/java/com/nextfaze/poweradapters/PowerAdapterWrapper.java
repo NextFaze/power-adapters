@@ -5,9 +5,13 @@ import android.view.ViewGroup;
 import lombok.NonNull;
 
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class PowerAdapterWrapper extends AbstractPowerAdapter {
+
+    @NonNull
+    private final WeakHashMap<View, HolderWrapper> mHolders = new WeakHashMap<>();
 
     @NonNull
     private final Set<DataObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
@@ -21,6 +25,8 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
         public void onChanged() {
             notifyDataSetChanged();
         }
+
+        // TODO: Map the following positions.
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
@@ -67,20 +73,35 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
         return mAdapter.getViewTypeCount();
     }
 
+    /**
+     * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
+     * coordinate space.
+     * @see #mapPosition(int)
+     */
     @Override
     public long getItemId(int position) {
-        return mAdapter.getItemId(position);
+        return mAdapter.getItemId(mapPosition(position));
     }
 
+    /**
+     * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
+     * coordinate space.
+     * @see #mapPosition(int)
+     */
     @Override
     public int getItemViewType(int position) {
-        return mAdapter.getItemViewType(position);
+        return mAdapter.getItemViewType(mapPosition(position));
     }
 
+    /**
+     * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
+     * coordinate space.
+     * @see #mapPosition(int)
+     */
     @Override
     @NonNull
     public Metadata getItemMetadata(int position) {
-        return mAdapter.getItemMetadata(position);
+        return mAdapter.getItemMetadata(mapPosition(position));
     }
 
     @Override
@@ -90,7 +111,29 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        mAdapter.bindView(view, position);
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        HolderWrapper holderWrapper = mHolders.get(view);
+        if (holderWrapper == null) {
+            holderWrapper = new HolderWrapper(holder) {
+                @Override
+                public int getPosition() {
+                    return mapPosition(super.getPosition());
+                }
+            };
+            mHolders.put(view, holderWrapper);
+        }
+        mAdapter.bindView(view, holderWrapper);
+    }
+
+    /**
+     * Converts a {@code position} in this adapter's coordinate space to the coordinate space of the wrapped adapter.
+     * By default, simply returns returns the position value unchanged. Must be overridden by subclasses that augment
+     * the items in this adapter, in order for the {@link #bindView(View, Holder)} {@link Holder} position to be
+     * correct.
+     * @param outerPosition The {@code position} in this adapter's coordinate space.
+     * @return The {@code position} converted into the coordinate space of the wrapped adapter.
+     */
+    protected int mapPosition(int outerPosition) {
+        return outerPosition;
     }
 }

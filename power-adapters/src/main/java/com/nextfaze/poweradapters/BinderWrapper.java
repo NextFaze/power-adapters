@@ -20,8 +20,8 @@ public abstract class BinderWrapper implements Binder {
     }
 
     @Override
-    public void bindView(@NonNull Object item, @NonNull View v, int position) {
-        mBinder.bindView(item, v, position);
+    public void bindView(@NonNull Object item, @NonNull View v, @NonNull Holder holder) {
+        mBinder.bindView(item, v, holder);
     }
 
     @Override

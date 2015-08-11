@@ -37,10 +37,10 @@ public abstract class TypedBinder<T, V extends View> implements Binder {
     }
 
     @Override
-    public final void bindView(@NonNull Object obj, @NonNull View v, int position) {
+    public final void bindView(@NonNull Object obj, @NonNull View v, @NonNull Holder holder) {
         // Infrastructure ensures only the correct types are passed here.
         //noinspection unchecked
-        bind((T) obj, (V) v, position);
+        bind((T) obj, (V) v, holder);
     }
 
     @Override
@@ -48,5 +48,5 @@ public abstract class TypedBinder<T, V extends View> implements Binder {
         return mEnabled;
     }
 
-    protected abstract void bind(@NonNull T t, @NonNull V v, int position);
+    protected abstract void bind(@NonNull T t, @NonNull V v, @NonNull Holder holder);
 }

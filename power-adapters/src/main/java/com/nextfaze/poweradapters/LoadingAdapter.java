@@ -78,7 +78,15 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         if (isLoadingItem(position)) {
             return loadingViewType();
         }
-        return super.getItemViewType(outerToInnerPosition(position));
+        return super.getItemViewType(position);
+    }
+
+    @Override
+    public final long getItemId(int position) {
+        if (isLoadingItem(position)) {
+            return NO_ID;
+        }
+        return super.getItemId(position);
     }
 
     @NonNull
@@ -91,28 +99,20 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        if (!isLoadingItem(position)) {
-            super.bindView(view, outerToInnerPosition(position));
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isLoadingItem(holder.getPosition())) {
+            super.bindView(view, holder);
         }
     }
 
     @Override
-    public final long getItemId(int position) {
-        if (isLoadingItem(position)) {
-            return NO_ID;
-        }
-        return super.getItemId(outerToInnerPosition(position));
+    protected int mapPosition(int outerPosition) {
+        // No translation necessary for loading adapter, because the item appears at the end.
+        return outerPosition;
     }
 
     private int loadingViewType() {
         return super.getViewTypeCount();
-    }
-
-    /** Translate a position from our coordinate space to the wrapped adapters coordinate space. */
-    private int outerToInnerPosition(int position) {
-        // No translation necessary for loading adapter, because the item appears at the end.
-        return position;
     }
 
     @NonNull

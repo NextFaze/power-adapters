@@ -67,7 +67,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
         if (isDivider(position)) {
             return NO_ID;
         }
-        return super.getItemId(map(position));
+        return super.getItemId(position);
     }
 
     @Override
@@ -81,7 +81,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
         if (isTrailingDivider(position)) {
             return trailingDividerItemViewType();
         }
-        return super.getItemViewType(map(position));
+        return super.getItemViewType(position);
     }
 
     @Override
@@ -105,8 +105,8 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, int position) {
-        int itemViewType = getItemViewType(position);
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        int itemViewType = getItemViewType(holder.getPosition());
         if (itemViewType == innerDividerItemViewType()) {
             return;
         }
@@ -116,7 +116,15 @@ public final class DividerAdapter extends PowerAdapterWrapper {
         if (itemViewType == trailingDividerItemViewType()) {
             return;
         }
-        super.bindView(view, map(position));
+        super.bindView(view, holder);
+    }
+
+    @Override
+    protected int mapPosition(int outerPosition) {
+        if (mLeadingItemResource > 0) {
+            return (outerPosition - 1) / 2;
+        }
+        return outerPosition / 2;
     }
 
     @NonNull
@@ -173,13 +181,6 @@ public final class DividerAdapter extends PowerAdapterWrapper {
 
     private int trailingDividerItemViewType() {
         return super.getViewTypeCount() + ITEM_VIEW_TYPE_TRAILING;
-    }
-
-    private int map(int position) {
-        if (mLeadingItemResource > 0) {
-            return (position - 1) / 2;
-        }
-        return position / 2;
     }
 
     public enum EmptyPolicy {
