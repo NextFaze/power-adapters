@@ -31,7 +31,8 @@ public final class LaunchActivity extends AppCompatActivity {
             new Sample("Simple", SimpleFragment.class),
             new Sample("Multiple Bindings", MultipleBindingsFragment.class),
             new Sample("Auto Incremental", AutoIncrementalFragment.class),
-            new Sample("Manual Incremental", ManualIncrementalFragment.class)
+            new Sample("Manual Incremental", ManualIncrementalFragment.class),
+            new Sample("Long-Lived Data", LongLivedDataFragment.class)
     );
 
     @NonNull

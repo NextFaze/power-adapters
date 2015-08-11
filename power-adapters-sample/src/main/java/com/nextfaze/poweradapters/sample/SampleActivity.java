@@ -21,11 +21,14 @@ public final class SampleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sample_activity);
         if (savedInstanceState == null) {
-            //noinspection unchecked
-            Class<? extends Fragment> fragmentClass = (Class<? extends Fragment>) getIntent().getSerializableExtra(EXTRA_FRAGMENT_CLASS);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.sample_activity_fragment, Fragment.instantiate(this, fragmentClass.getName()))
+                    .replace(R.id.sample_activity_fragment, Fragment.instantiate(this, getFragmentClass().getName()))
                     .commit();
         }
+    }
+
+    private Class<? extends Fragment> getFragmentClass() {
+        //noinspection unchecked
+        return (Class<? extends Fragment>) getIntent().getSerializableExtra(EXTRA_FRAGMENT_CLASS);
     }
 }

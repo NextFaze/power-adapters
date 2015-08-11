@@ -8,19 +8,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="HardcodedText"
-        app:contentView="@+id/news_list_fragment_list"
+        app:contentView="@+id/news_list_fragment_list_group"
         app:emptyView="@+id/news_list_fragment_empty"
         app:loadingView="@+id/news_list_fragment_loading"
         app:errorView="@+id/news_list_fragment_error">
 
     <!-- List -->
 
-    <ListView
-            android:id="@+id/news_list_fragment_list"
+    <FrameLayout
+            android:id="@+id/news_list_fragment_list_group"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:dividerHeight="0dp"
-            android:divider="@null"/>
+            android:layout_height="match_parent">
+
+        <!-- ListView -->
+
+        <ListView
+                android:id="@+id/news_list_fragment_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:dividerHeight="0dp"
+                android:divider="@null"/>
+
+        <!-- RecyclerView -->
+
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/news_list_fragment_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+    </FrameLayout>
 
     <!-- Empty -->
 

@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,6 +48,9 @@ public final class AutoIncrementalFragment extends BaseFragment {
 
     @Bind(R.id.news_list_fragment_list)
     ListView mListView;
+
+    @Bind(R.id.news_list_fragment_recycler)
+    RecyclerView mRecyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
