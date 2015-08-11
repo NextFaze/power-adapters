@@ -7,17 +7,13 @@ import javax.annotation.Nullable;
 
 final class NewsIncrementalData extends IncrementalArrayData<Object> {
 
-    private static final int TOTAL = 30;
-    private static final int INCREMENT = 10;
+    private static final int TOTAL = 100;
+    private static final int INCREMENT = 20;
 
     @NonNull
-    private final NewsService mNewsService;
+    private final NewsService mNewsService = new NewsService();
 
     private volatile int mOffset;
-
-    NewsIncrementalData(@NonNull NewsService newsService) {
-        mNewsService = newsService;
-    }
 
     @Nullable
     @Override

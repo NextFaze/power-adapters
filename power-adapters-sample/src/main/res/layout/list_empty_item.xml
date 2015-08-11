@@ -7,4 +7,4 @@
           android:gravity="center"
           android:textAppearance="?android:attr/textAppearanceListItemSmall"
           android:textStyle="italic"
-          android:text="No news."/>
+          android:text="List is empty"/>

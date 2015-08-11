@@ -29,7 +29,9 @@ public final class LaunchActivity extends AppCompatActivity {
     @NonNull
     private final List<? extends Sample> mSamples = ImmutableList.of(
             new Sample("Simple", SimpleFragment.class),
-            new Sample("Combined (legacy)", NewsFragment.class)
+            new Sample("Multiple Bindings", MultipleBindingsFragment.class),
+            new Sample("Auto Incremental", AutoIncrementalFragment.class),
+            new Sample("Manual Incremental", ManualIncrementalFragment.class)
     );
 
     @NonNull

@@ -4,19 +4,19 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/simple_fragment_data_layout"
+        android:id="@+id/news_list_fragment_data_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="HardcodedText"
-        app:contentView="@+id/simple_fragment_list"
-        app:emptyView="@+id/simple_fragment_empty"
-        app:loadingView="@+id/simple_fragment_loading"
-        app:errorView="@+id/simple_fragment_error">
+        app:contentView="@+id/news_list_fragment_list"
+        app:emptyView="@+id/news_list_fragment_empty"
+        app:loadingView="@+id/news_list_fragment_loading"
+        app:errorView="@+id/news_list_fragment_error">
 
     <!-- List -->
 
     <ListView
-            android:id="@+id/simple_fragment_list"
+            android:id="@+id/news_list_fragment_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:dividerHeight="0dp"
@@ -25,7 +25,7 @@
     <!-- Empty -->
 
     <TextView
-            android:id="@+id/simple_fragment_empty"
+            android:id="@+id/news_list_fragment_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -35,7 +35,7 @@
 
     <ProgressBar
             style="@android:style/Widget.Holo.ProgressBar"
-            android:id="@+id/simple_fragment_loading"
+            android:id="@+id/news_list_fragment_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"/>
@@ -43,7 +43,7 @@
     <!-- Error -->
 
     <TextView
-            android:id="@+id/simple_fragment_error"
+            android:id="@+id/news_list_fragment_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
