@@ -10,7 +10,7 @@ import lombok.NonNull;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.Holder> {
+final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.Holder> {
 
     @NonNull
     private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new CopyOnWriteArraySet<>();
@@ -51,7 +51,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         }
     };
 
-    public RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
+    RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
         setHasStableIds(mPowerAdapter.hasStableIds());
     }
