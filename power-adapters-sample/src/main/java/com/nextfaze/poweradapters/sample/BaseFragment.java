@@ -53,11 +53,6 @@ abstract class BaseFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        // Nullify adapter to ensure ListView unregisters any observers,
-        // which will transitively disconnect all internal observer registrations.
-        mListView.setAdapter(null);
-        // Do the same for DataLayout.
-        mDataLayout.setData(null);
         ButterKnife.unbind(this);
         super.onDestroyView();
     }
