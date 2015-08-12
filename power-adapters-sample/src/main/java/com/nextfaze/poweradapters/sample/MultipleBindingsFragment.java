@@ -4,15 +4,20 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 import butterknife.Bind;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapter;
 import com.nextfaze.poweradapters.HeaderAdapter;
+import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.DataBindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.binding.ViewHolder;
+import com.nextfaze.poweradapters.binding.ViewHolderBinder;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
@@ -23,8 +28,24 @@ public final class MultipleBindingsFragment extends BaseFragment {
     private final NewsMultiTypeData mData = new NewsMultiTypeData();
 
     @NonNull
+    private final Binder mNewsItemBinder = new ViewHolderBinder<NewsItem, NewsItemHolder>(android.R.layout.simple_list_item_1) {
+        @NonNull
+        @Override
+        protected NewsItemHolder newViewHolder(@NonNull View v) {
+            return new NewsItemHolder(v);
+        }
+
+        @Override
+        protected void bindViewHolder(@NonNull NewsItem newsItem,
+                                      @NonNull NewsItemHolder newsItemHolder,
+                                      @NonNull Holder holder) {
+            newsItemHolder.labelView.setText(newsItem.getTitle());
+        }
+    };
+
+    @NonNull
     private final Mapper mMapper = new PolymorphicMapperBuilder()
-            .bind(NewsItem.class, new NewsItemBinder())
+            .bind(NewsItem.class, mNewsItemBinder)
             .bind(NewsSection.class, new NewsSectionBinder())
             .build();
 
@@ -79,5 +100,16 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @Override
     void onInvalidateClick() {
         mData.invalidate();
+    }
+
+    static final class NewsItemHolder extends ViewHolder {
+
+        @NonNull
+        final TextView labelView;
+
+        NewsItemHolder(@NonNull View view) {
+            super(view);
+            labelView = (TextView) view.findViewById(android.R.id.text1);
+        }
     }
 }
