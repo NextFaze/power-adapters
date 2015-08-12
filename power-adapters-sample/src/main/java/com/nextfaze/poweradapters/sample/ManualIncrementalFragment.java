@@ -45,7 +45,7 @@ public final class ManualIncrementalFragment extends BaseFragment {
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
         // "Load next" adapter lets user click the button to load next increment of results.
-        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(data, adapter, R.layout.list_load_next_item);
+        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
             @Override
             public void onClick() {

@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +16,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.IncrementalArrayData;
+import com.nextfaze.poweradapters.EmptyAdapter;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapter;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -28,36 +29,46 @@ import lombok.NonNull;
 
 import java.util.List;
 
+import static android.graphics.Color.*;
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends Fragment {
 
     @NonNull
-    private final Binder mRedBinder = new ColoredBinder(Color.RED);
-
-    @NonNull
-    private final Binder mGreenBinder = new ColoredBinder(Color.GREEN);
-
-    @NonNull
-    private final Binder mBlueBinder = new ColoredBinder(Color.BLUE);
-
-    @NonNull
     private final List<? extends Pair<Data<?>, PowerAdapter>> mPairs = ImmutableList.of(
-            createPair(new NewsIncrementalData(5, 2), mRedBinder),
-            createPair(new NewsIncrementalData(10, 5), mGreenBinder),
-            createPair(new NewsIncrementalData(20, 5), mBlueBinder)
+            createPair(new NewsIncrementalData(5, 2), new ColoredBinder(RED)),
+            createPair(new NewsIncrementalData(10, 5), new ColoredBinder(GREEN)),
+            createPair(new NewsIncrementalData(20, 5), new ColoredBinder(BLUE)),
+            createPair(new NewsIncrementalData(0, 0), new ColoredBinder(DKGRAY)),
+            createPair(new NewsIncrementalData(3, 1), new ColoredBinder(WHITE))
     );
 
     @NonNull
-    private Pair<Data<?>, PowerAdapter> createPair(@NonNull Data<?> data, @NonNull Binder newsItemBinder) {
+    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data, @NonNull Binder newsItemBinder) {
         Mapper mapper = new PolymorphicMapperBuilder()
                 .bind(NewsItem.class, newsItemBinder)
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
+
         adapter = new LoadingAdapter.Builder(adapter, data)
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
+
+        adapter = new EmptyAdapter.Builder(adapter, data)
+                .emptyItemResource(R.layout.list_empty_item)
+                .build();
+
+        data.setLookAheadRowCount(-1);
+        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);
+        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
+            @Override
+            public void onClick() {
+                data.loadNext();
+            }
+        });
+        adapter = loadNextAdapter;
+
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
     }
 
@@ -140,8 +151,4 @@ public class ConcatFragment extends Fragment {
             v.setBackgroundColor(mColor);
         }
     }
-
-    // TODO: Concat several Data adapters.
-    // TODO: Use an EmptyAdapter.
-
 }

@@ -60,7 +60,9 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
 
     private boolean mVisible;
 
-    LoadNextAdapter(@NonNull Data<?> data, @NonNull PowerAdapter adapter, @LayoutRes int loadNextItemResource) {
+    LoadNextAdapter(@NonNull PowerAdapter adapter,
+                    @NonNull Data<?> data,
+                    @LayoutRes int loadNextItemResource) {
         super(adapter);
         mData = data;
         mLoadNextItemResource = loadNextItemResource;
