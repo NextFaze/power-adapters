@@ -8,7 +8,7 @@ import butterknife.Bind;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DataBindingAdapter;
 import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapper;
+import com.nextfaze.poweradapters.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
@@ -17,7 +17,7 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 public final class LongLivedDataFragment extends BaseFragment {
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapper.Builder()
+    private final Mapper mMapper = new PolymorphicMapperBuilder()
             .bind(NewsItem.class, new NewsItemBinder())
             .build();
 

@@ -13,7 +13,7 @@ import com.nextfaze.poweradapters.Binder;
 import com.nextfaze.poweradapters.BindingAdapter;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapper;
+import com.nextfaze.poweradapters.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TypedBinder;
 import lombok.Getter;
@@ -50,7 +50,7 @@ public final class LaunchActivity extends AppCompatActivity {
     };
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapper.Builder()
+    private final Mapper mMapper = new PolymorphicMapperBuilder()
             .bind(Sample.class, mSampleBinder)
             .build();
 

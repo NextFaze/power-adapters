@@ -8,7 +8,7 @@ import butterknife.Bind;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DataBindingAdapter;
 import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapper;
+import com.nextfaze.poweradapters.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
@@ -20,7 +20,7 @@ public final class SimpleFragment extends BaseFragment {
     private final NewsSimpleData mData = new NewsSimpleData();
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapper.Builder()
+    private final Mapper mMapper = new PolymorphicMapperBuilder()
             .bind(NewsItem.class, new NewsItemBinder())
             .build();
 
