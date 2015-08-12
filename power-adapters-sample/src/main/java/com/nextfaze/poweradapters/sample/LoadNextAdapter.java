@@ -6,7 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.asyncdata.AvailableObserver;
 import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.LoadingObserver;
+import com.nextfaze.asyncdata.SimpleDataObserver;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.PowerAdapterWrapper;
@@ -28,10 +30,18 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     private final int mLoadNextItemResource;
 
     @NonNull
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
+        @Override
+        public void onChange() {
+            updateVisible();
+        }
+    };
+
+    @NonNull
     private final LoadingObserver mLoadingObserver = new LoadingObserver() {
         @Override
         public void onLoadingChange() {
-            notifyDataSetChanged();
+            updateVisible();
         }
     };
 
@@ -39,7 +49,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     private final AvailableObserver mAvailableObserver = new AvailableObserver() {
         @Override
         public void onAvailableChange() {
-            notifyDataSetChanged();
+            updateVisible();
         }
     };
 
@@ -48,27 +58,34 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     @Nullable
     private OnLoadNextClickListener mOnClickListener;
 
+    private boolean mVisible;
+
     LoadNextAdapter(@NonNull Data<?> data, @NonNull PowerAdapter adapter, @LayoutRes int loadNextItemResource) {
         super(adapter);
         mData = data;
         mLoadNextItemResource = loadNextItemResource;
+        updateVisible();
     }
 
     @Override
     protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mData.registerDataObserver(mDataObserver);
         mData.registerLoadingObserver(mLoadingObserver);
         mData.registerAvailableObserver(mAvailableObserver);
     }
 
     @Override
     protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mData.unregisterDataObserver(mDataObserver);
         mData.unregisterAvailableObserver(mAvailableObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
     @Override
     public int getItemCount() {
-        if (isLoadNextShown()) {
+        if (mVisible) {
             return super.getItemCount() + 1;
         }
         return super.getItemCount();
@@ -142,8 +159,20 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
         }
     }
 
-    private boolean isLoadNextShown() {
-        return !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
+    private boolean isLoadNextVisible() {
+        return mLoadNextItemResource > 0 && !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
+    }
+
+    private void updateVisible() {
+        boolean visible = isLoadNextVisible();
+        if (visible != mVisible) {
+            mVisible = visible;
+            if (visible) {
+                notifyItemInserted(super.getItemCount());
+            } else {
+                notifyItemRemoved(super.getItemCount() + 1);
+            }
+        }
     }
 
     private boolean isLoadNextItem(int position) {
