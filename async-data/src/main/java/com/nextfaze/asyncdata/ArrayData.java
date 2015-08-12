@@ -108,20 +108,28 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(oldSize, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
     public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(index, collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(index, collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(index, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
@@ -165,6 +173,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     public final boolean removeAll(@NonNull Collection<?> collection) {
         boolean removed = mData.removeAll(collection);
         if (removed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return removed;
@@ -174,6 +183,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     public final boolean retainAll(@NonNull Collection<?> collection) {
         boolean changed = mData.retainAll(collection);
         if (changed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return changed;
@@ -278,7 +288,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     mDirty = false;
                     mData.clear();
-                    int positionStart = mData.size();
                     for (T t : data) {
                         if (t != null) {
                             mData.add(t);
@@ -287,7 +296,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                     mTask = null;
                     setAvailable(0);
                     notifyLoadingChanged();
-                    notifyItemRangeInserted(positionStart, data.size());
+                    notifyItemRangeInserted(0, data.size());
                     loadDataIfAppropriate();
                 }
 
