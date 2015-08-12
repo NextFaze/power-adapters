@@ -203,6 +203,58 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
+    protected void notifyItemChanged(final int position) {
+        notifyItemRangeChanged(position, 1);
+    }
+
+    protected void notifyItemRangeChanged(final int positionStart, final int itemCount) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyItemRangeChanged(positionStart, itemCount);
+            }
+        });
+    }
+
+    protected void notifyItemInserted(int position) {
+        notifyItemRangeInserted(position, 1);
+    }
+
+    protected void notifyItemRangeInserted(final int positionStart, final int itemCount) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyItemRangeInserted(positionStart, itemCount);
+            }
+        });
+    }
+
+    protected void notifyItemMoved(int fromPosition, int toPosition) {
+        notifyItemRangeMoved(fromPosition, toPosition, 1);
+    }
+
+    protected void notifyItemRangeMoved(final int fromPosition, final int toPosition, final int itemCount) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+            }
+        });
+    }
+
+    protected void notifyItemRemoved(int position) {
+        notifyItemRangeRemoved(position, 1);
+    }
+
+    protected void notifyItemRangeRemoved(final int positionStart, final int itemCount) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDataObservers.notifyItemRangeRemoved(positionStart, itemCount);
+            }
+        });
+    }
+
     /** Dispatch a available change notification on the UI thread. */
     protected void notifyAvailableChanged() {
         runOnUiThread(new Runnable() {
