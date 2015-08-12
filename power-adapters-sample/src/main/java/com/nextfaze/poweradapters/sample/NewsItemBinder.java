@@ -7,7 +7,7 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
 
-final class NewsItemBinder extends TypedBinder<NewsItem, TextView> {
+class NewsItemBinder extends TypedBinder<NewsItem, TextView> {
 
     NewsItemBinder() {
         super(android.R.layout.simple_list_item_1);
@@ -24,7 +24,7 @@ final class NewsItemBinder extends TypedBinder<NewsItem, TextView> {
         });
     }
 
-    private void onNewsItemClick(@NonNull NewsItem newsItem, @NonNull View v) {
+    void onNewsItemClick(@NonNull NewsItem newsItem, @NonNull View v) {
         Toast.makeText(v.getContext(), "News item clicked: " + newsItem.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }
