@@ -22,6 +22,8 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 @Accessors(prefix = "m")
 public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
+    private boolean mVisible;
+
     protected LoadingAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
@@ -55,12 +57,24 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
     /** Call this to notify the loading adapter that the value of {@link #isLoading()} has changed. */
     protected final void notifyLoadingChanged() {
-        notifyDataSetChanged();
+        updateVisible();
+    }
+
+    private void updateVisible() {
+        boolean visible = isLoadingItemVisible();
+        if (visible != mVisible) {
+            mVisible = visible;
+            if (visible) {
+                notifyItemInserted(super.getItemCount());
+            } else {
+                notifyItemRemoved(super.getItemCount() + 1);
+            }
+        }
     }
 
     @Override
     public final int getItemCount() {
-        if (isLoadingItemVisible()) {
+        if (mVisible) {
             return super.getItemCount() + 1;
         }
         return super.getItemCount();
@@ -132,7 +146,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isLoadingItem(int position) {
-        if (!isLoadingItemVisible()) {
+        if (!mVisible) {
             return false;
         }
         // Loading item is the last item in the list.
@@ -221,30 +235,10 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         private final Data<?> mData;
 
         @NonNull
-        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.DataObserver() {
+        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.SimpleDataObserver() {
             @Override
             public void onChange() {
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                notifyItemRangeInserted(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                notifyItemRangeRemoved(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+                notifyLoadingChanged();
             }
         };
 
@@ -274,6 +268,8 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
             mLoadingItem = loadingItem;
             mLoadingItemEnabled = loadingItemEnabled;
             mEmptyPolicy = emptyPolicy;
+            // Notify immediately to ensure current Data state is accounted for.
+            notifyLoadingChanged();
         }
 
         @Override
