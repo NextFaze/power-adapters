@@ -57,6 +57,7 @@ abstract class BaseFragment extends Fragment {
         ButterKnife.bind(this, view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mDataLayout.setErrorFormatter(new NewsErrorFormatter());
+        showCollectionView(CollectionView.LIST_VIEW);
     }
 
     @Override

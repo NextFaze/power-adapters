@@ -8,15 +8,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="HardcodedText"
-        app:contentView="@+id/news_list_fragment_list_group"
+        app:contentView="@+id/news_list_fragment_content"
         app:emptyView="@+id/news_list_fragment_empty"
         app:loadingView="@+id/news_list_fragment_loading"
         app:errorView="@+id/news_list_fragment_error">
 
-    <!-- List -->
+    <!-- Content -->
 
     <FrameLayout
-            android:id="@+id/news_list_fragment_list_group"
+            android:id="@+id/news_list_fragment_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
