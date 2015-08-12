@@ -10,7 +10,7 @@ public final class PowerAdapters {
 
     @NonNull
     public static ListAdapter toListAdapter(@NonNull PowerAdapter powerAdapter) {
-        return new ConverterAdapter(powerAdapter);
+        return new ListAdapterConverterAdapter(powerAdapter);
     }
 
     @NonNull

@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-final class ConverterAdapter extends BaseAdapter {
+final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @NonNull
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
@@ -49,7 +49,7 @@ final class ConverterAdapter extends BaseAdapter {
     @NonNull
     private final PowerAdapter mPowerAdapter;
 
-    ConverterAdapter(@NonNull PowerAdapter powerAdapter) {
+    ListAdapterConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
     }
 
@@ -100,12 +100,13 @@ final class ConverterAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return mPowerAdapter.isEnabled(position);
+//        return mPowerAdapter.isEnabled(position);
+        return true;
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return false;
+        return true;
     }
 
     @Override
