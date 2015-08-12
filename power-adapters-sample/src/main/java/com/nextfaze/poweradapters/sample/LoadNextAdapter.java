@@ -67,7 +67,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getItemCount() {
+    public int getItemCount() {
         if (isLoadNextShown()) {
             return super.getItemCount() + 1;
         }
@@ -75,7 +75,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         if (isLoadNextItem(position)) {
             return NO_ID;
         }
@@ -83,16 +83,25 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         return super.getViewTypeCount() + 1;
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         if (isLoadNextItem(position)) {
             return loadNextItemViewType();
         }
         return super.getItemViewType(position);
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isLoadNextItem(position)) {
+            return true;
+        }
+        return super.isEnabled(position);
     }
 
     @NonNull
