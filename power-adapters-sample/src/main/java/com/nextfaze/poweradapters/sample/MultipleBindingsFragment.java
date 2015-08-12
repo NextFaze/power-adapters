@@ -63,7 +63,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         adapter = new HeaderAdapter.Builder(adapter)
                 .headerResource(R.layout.news_header_item)
-                .visibilityPolicy(HeaderAdapter.VisibilityPolicy.HIDE_IF_EMPTY)
+                .emptyPolicy(HeaderAdapter.EmptyPolicy.HIDE)
                 .build();
         adapter = new DividerAdapter.Builder(adapter)
                 .innerItemResource(R.layout.list_divider_item)

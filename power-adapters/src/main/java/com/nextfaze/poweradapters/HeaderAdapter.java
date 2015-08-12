@@ -11,10 +11,7 @@ import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-/**
- * Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapters items. This class can be
- * subclassed for greater control over the presence of header views.
- */
+/** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
 public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     protected HeaderAdapter(@NonNull PowerAdapter adapter) {
@@ -106,14 +103,14 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         return superViewTypeCount - itemViewType;
     }
 
-    public enum VisibilityPolicy {
-        ALWAYS() {
+    public enum EmptyPolicy {
+        SHOW() {
             @Override
             boolean shouldShow(@NonNull HeaderAdapter adapter) {
                 return true;
             }
         },
-        HIDE_IF_EMPTY {
+        HIDE {
             @Override
             boolean shouldShow(@NonNull HeaderAdapter adapter) {
                 return adapter.getAdapter().getItemCount() > 0;
@@ -132,7 +129,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         private final ArrayList<Item> mHeaders = new ArrayList<>();
 
         @NonNull
-        private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.ALWAYS;
+        private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
 
         public Builder(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
@@ -151,14 +148,14 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public Builder visibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
-            mVisibilityPolicy = visibilityPolicy;
+        public Builder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
+            mEmptyPolicy = emptyPolicy;
             return this;
         }
 
         @NonNull
         public HeaderAdapter build() {
-            return new Impl(mAdapter, mHeaders, mVisibilityPolicy);
+            return new Impl(mAdapter, mHeaders, mEmptyPolicy);
         }
     }
 
@@ -168,11 +165,11 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         private final ArrayList<Item> mHeaders = new ArrayList<>();
 
         @NonNull
-        private final VisibilityPolicy mVisibilityPolicy;
+        private final EmptyPolicy mEmptyPolicy;
 
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull VisibilityPolicy visibilityPolicy) {
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
             super(adapter);
-            mVisibilityPolicy = visibilityPolicy;
+            mEmptyPolicy = emptyPolicy;
             mHeaders.addAll(footers);
         }
 
@@ -186,7 +183,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
         @Override
         protected int getHeaderCount(boolean visibleOnly) {
-            if (visibleOnly && !mVisibilityPolicy.shouldShow(this)) {
+            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }
             return mHeaders.size();

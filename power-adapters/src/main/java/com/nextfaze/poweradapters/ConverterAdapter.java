@@ -54,22 +54,22 @@ final class ConverterAdapter extends BaseAdapter {
     }
 
     @Override
-    public final Object getItem(int position) {
+    public Object getItem(int position) {
         return null;
     }
 
     @Override
-    public final int getCount() {
+    public int getCount() {
         return mPowerAdapter.getItemCount();
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         return mPowerAdapter.getItemId(position);
     }
 
     @Override
-    public final View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         HolderImpl holder;
         if (convertView == null) {
             holder = new HolderImpl();
@@ -84,32 +84,32 @@ final class ConverterAdapter extends BaseAdapter {
     }
 
     @Override
-    public final boolean hasStableIds() {
+    public boolean hasStableIds() {
         return mPowerAdapter.hasStableIds();
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         return mPowerAdapter.getItemViewType(position);
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         return mPowerAdapter.getViewTypeCount();
     }
 
     @Override
-    public final boolean isEnabled(int position) {
+    public boolean isEnabled(int position) {
         return mPowerAdapter.isEnabled(position);
     }
 
     @Override
-    public final boolean areAllItemsEnabled() {
+    public boolean areAllItemsEnabled() {
         return false;
     }
 
     @Override
-    public final void registerDataSetObserver(DataSetObserver observer) {
+    public void registerDataSetObserver(DataSetObserver observer) {
         super.registerDataSetObserver(observer);
         if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
             mPowerAdapter.registerDataObserver(mDataSetObserver);
@@ -117,7 +117,7 @@ final class ConverterAdapter extends BaseAdapter {
     }
 
     @Override
-    public final void unregisterDataSetObserver(DataSetObserver observer) {
+    public void unregisterDataSetObserver(DataSetObserver observer) {
         super.unregisterDataSetObserver(observer);
         if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
             mPowerAdapter.unregisterDataObserver(mDataSetObserver);

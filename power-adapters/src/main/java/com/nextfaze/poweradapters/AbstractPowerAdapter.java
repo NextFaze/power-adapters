@@ -8,30 +8,6 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
     private final DataObservable mDataObservable = new DataObservable();
 
     @Override
-    public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        boolean firstAdded;
-        synchronized (mDataObservable) {
-            mDataObservable.registerObserver(dataObserver);
-            firstAdded = mDataObservable.size() == 1;
-        }
-        if (firstAdded) {
-            onFirstObserverRegistered();
-        }
-    }
-
-    @Override
-    public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        boolean lastRemoved;
-        synchronized (mDataObservable) {
-            mDataObservable.unregisterObserver(dataObserver);
-            lastRemoved = mDataObservable.size() == 0;
-        }
-        if (lastRemoved) {
-            onLastObserverUnregistered();
-        }
-    }
-
-    @Override
     public boolean hasStableIds() {
         return false;
     }
@@ -54,6 +30,30 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
     @Override
     public int getViewTypeCount() {
         return 1;
+    }
+
+    @Override
+    public final void registerDataObserver(@NonNull DataObserver dataObserver) {
+        boolean firstAdded;
+        synchronized (mDataObservable) {
+            mDataObservable.registerObserver(dataObserver);
+            firstAdded = mDataObservable.size() == 1;
+        }
+        if (firstAdded) {
+            onFirstObserverRegistered();
+        }
+    }
+
+    @Override
+    public final void unregisterDataObserver(@NonNull DataObserver dataObserver) {
+        boolean lastRemoved;
+        synchronized (mDataObservable) {
+            mDataObservable.unregisterObserver(dataObserver);
+            lastRemoved = mDataObservable.size() == 0;
+        }
+        if (lastRemoved) {
+            onLastObserverUnregistered();
+        }
     }
 
     public final void notifyDataSetChanged() {

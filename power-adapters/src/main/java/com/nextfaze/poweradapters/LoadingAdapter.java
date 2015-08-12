@@ -90,7 +90,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         if (isLoadingItem(position)) {
             return isLoadingItemEnabled();
         }
@@ -99,7 +99,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
         if (itemViewType == loadingViewType()) {
             return newLoadingView(layoutInflater(parent), parent);
         }
@@ -107,7 +107,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isLoadingItem(holder.getPosition())) {
             super.bindView(view, holder);
         }

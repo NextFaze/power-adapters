@@ -11,10 +11,7 @@ import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-/**
- * Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapters items. This class can be
- * subclassed for greater control over the presence of footer views.
- */
+/** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 public abstract class FooterAdapter extends PowerAdapterWrapper {
 
     protected FooterAdapter(@NonNull PowerAdapter adapter) {
@@ -107,14 +104,14 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return superViewTypeCount - itemViewType;
     }
 
-    public enum VisibilityPolicy {
-        ALWAYS() {
+    public enum EmptyPolicy {
+        SHOW() {
             @Override
             boolean shouldShow(@NonNull FooterAdapter adapter) {
                 return true;
             }
         },
-        HIDE_IF_EMPTY {
+        HIDE {
             @Override
             boolean shouldShow(@NonNull FooterAdapter adapter) {
                 return adapter.getAdapter().getItemCount() > 0;
@@ -133,7 +130,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         private final ArrayList<Item> mFooters = new ArrayList<>();
 
         @NonNull
-        private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.ALWAYS;
+        private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
 
         public Builder(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
@@ -152,14 +149,14 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         }
 
         @NonNull
-        public Builder visibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
-            mVisibilityPolicy = visibilityPolicy;
+        public Builder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
+            mEmptyPolicy = emptyPolicy;
             return this;
         }
 
         @NonNull
         public FooterAdapter build() {
-            return new Impl(mAdapter, mFooters, mVisibilityPolicy);
+            return new Impl(mAdapter, mFooters, mEmptyPolicy);
         }
     }
 
@@ -169,11 +166,11 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         private final ArrayList<Item> mFooters = new ArrayList<>();
 
         @NonNull
-        private final VisibilityPolicy mVisibilityPolicy;
+        private final EmptyPolicy mEmptyPolicy;
 
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull VisibilityPolicy visibilityPolicy) {
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
             super(adapter);
-            mVisibilityPolicy = visibilityPolicy;
+            mEmptyPolicy = emptyPolicy;
             mFooters.addAll(footers);
         }
 
@@ -187,7 +184,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
 
         @Override
         protected int getFooterCount(boolean visibleOnly) {
-            if (visibleOnly && !mVisibilityPolicy.shouldShow(this)) {
+            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }
             return mFooters.size();
