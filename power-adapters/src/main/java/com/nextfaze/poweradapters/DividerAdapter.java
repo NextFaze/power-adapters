@@ -220,11 +220,6 @@ public final class DividerAdapter extends PowerAdapterWrapper {
             mAdapter = adapter;
         }
 
-        /** Indicates if any dividers were configured in this builder. */
-        public boolean isEmpty() {
-            return mLeadingItemResource <= 0 && mTrailingItemResource <= 0 && mInnerItemResource <= 0;
-        }
-
         /**
          * Set the policy that determines what dividers are shown if the wrapped adapter is empty. Defaults to {@link
          * EmptyPolicy#SHOW_LEADING}
