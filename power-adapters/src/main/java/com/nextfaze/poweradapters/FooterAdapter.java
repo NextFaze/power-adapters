@@ -54,7 +54,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         //noinspection SimplifiableIfStatement
         if (isFooter(position)) {
             return false;
@@ -64,7 +64,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
         int footerIndex = itemViewTypeToFooterIndex(itemViewType);
         if (footerIndex != -1) {
             return getFooterView(layoutInflater(parent), parent, footerIndex);
@@ -73,14 +73,14 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isFooter(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected final int mapPosition(int outerPosition) {
         // No conversion necessary, as footers appear at the end.
         return outerPosition;
     }

@@ -68,9 +68,17 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
         return super.getItemViewType(position);
     }
 
+    @Override
+    public final boolean isEnabled(int position) {
+        if (isEmptyItem(position)) {
+            return isEmptyItemEnabled();
+        }
+        return super.isEnabled(position);
+    }
+
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
         if (itemViewType == emptyViewType()) {
             return newEmptyView(layoutInflater(parent), parent);
         }
@@ -78,14 +86,14 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isEmptyItem(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected final int mapPosition(int outerPosition) {
         // No conversion necessary. The empty item is added at the end.
         return super.mapPosition(outerPosition);
     }

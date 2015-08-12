@@ -54,7 +54,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         //noinspection SimplifiableIfStatement
         if (isHeader(position)) {
             return false;
@@ -64,7 +64,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
         int headerIndex = itemViewTypeToHeaderIndex(itemViewType);
         if (headerIndex != -1) {
             return getHeaderView(layoutInflater(parent), parent, headerIndex);
@@ -73,14 +73,14 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isHeader(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected final int mapPosition(int outerPosition) {
         return outerPosition - getHeaderCount(true);
     }
 

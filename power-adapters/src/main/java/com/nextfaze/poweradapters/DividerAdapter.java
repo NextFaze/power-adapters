@@ -42,7 +42,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getItemCount() {
+    public int getItemCount() {
         int superCount = super.getItemCount();
         if (mEmptyPolicy != EmptyPolicy.SHOW_LEADING && superCount <= 0) {
             return 0;
@@ -63,7 +63,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         if (isDivider(position)) {
             return NO_ID;
         }
@@ -71,7 +71,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         if (isInnerDivider(position)) {
             return innerDividerItemViewType();
         }
@@ -94,7 +94,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         return super.getViewTypeCount() + ITEM_VIEW_TYPE_TOTAL;
     }
 
