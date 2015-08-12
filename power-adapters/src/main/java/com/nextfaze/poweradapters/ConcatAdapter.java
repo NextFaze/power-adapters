@@ -4,67 +4,43 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.WeakHashMap;
 
 import static java.lang.String.format;
 
-@Slf4j
+/** Concatenates several adapters together. */
 @Accessors(prefix = "m")
 final class ConcatAdapter extends AbstractPowerAdapter {
-
-    @NonNull
-    private final ArrayList<PowerAdapter> mAdapters = new ArrayList<>();
 
     /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
     @NonNull
     private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
 
     @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
-        @Override
-        public void onChanged() {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyItemRangeInserted(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyItemRangeRemoved(positionStart, itemCount);
-        }
-
-        @Override
-        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-        }
-    };
+    private final ArrayList<Entry> mEntries;
 
     ConcatAdapter(@NonNull PowerAdapter... adapters) {
-        this(Arrays.asList(adapters));
+        mEntries = new ArrayList<>(adapters.length);
+        //noinspection ForLoopReplaceableByForEach
+        for (int i = 0; i < adapters.length; i++) {
+            PowerAdapter adapter = adapters[i];
+            mEntries.add(new Entry(adapter));
+        }
     }
 
     ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
+        mEntries = new ArrayList<>();
         for (PowerAdapter adapter : adapters) {
-            mAdapters.add(adapter);
+            mEntries.add(new Entry(adapter));
         }
     }
 
     @Override
     public boolean hasStableIds() {
-        for (int i = 0; i < mAdapters.size(); i++) {
-            if (!mAdapters.get(i).hasStableIds()) {
+        for (int i = 0; i < mEntries.size(); i++) {
+            if (!mEntries.get(i).mAdapter.hasStableIds()) {
                 return false;
             }
         }
@@ -74,8 +50,8 @@ final class ConcatAdapter extends AbstractPowerAdapter {
     @Override
     public int getItemCount() {
         int count = 0;
-        for (int i = 0; i < mAdapters.size(); i++) {
-            count += mAdapters.get(i).getItemCount();
+        for (int i = 0; i < mEntries.size(); i++) {
+            count += mEntries.get(i).mAdapter.getItemCount();
         }
         return count;
     }
@@ -83,8 +59,8 @@ final class ConcatAdapter extends AbstractPowerAdapter {
     @Override
     public int getViewTypeCount() {
         int viewTypeCount = 0;
-        for (int i = 0; i < mAdapters.size(); i++) {
-            viewTypeCount += mAdapters.get(i).getViewTypeCount();
+        for (int i = 0; i < mEntries.size(); i++) {
+            viewTypeCount += mEntries.get(i).mAdapter.getViewTypeCount();
         }
         return viewTypeCount;
     }
@@ -118,16 +94,16 @@ final class ConcatAdapter extends AbstractPowerAdapter {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        for (int i = 0; i < mAdapters.size(); i++) {
-            mAdapters.get(i).registerDataObserver(mDataObserver);
+        for (int i = 0; i < mEntries.size(); i++) {
+            mEntries.get(i).registerObservers();
         }
     }
 
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
-        for (int i = 0; i < mAdapters.size(); i++) {
-            mAdapters.get(i).unregisterDataObserver(mDataObserver);
+        for (int i = 0; i < mEntries.size(); i++) {
+            mEntries.get(i).unregisterObservers();
         }
     }
 
@@ -139,8 +115,8 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         }
         int positionOffset = 0;
         int itemViewTypeOffset = 0;
-        for (int i = 0; i < mAdapters.size(); i++) {
-            PowerAdapter adapter = mAdapters.get(i);
+        for (int i = 0; i < mEntries.size(); i++) {
+            PowerAdapter adapter = mEntries.get(i).mAdapter;
             int itemCount = adapter.getItemCount();
             if (position - positionOffset < itemCount) {
                 return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
@@ -150,7 +126,7 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         }
         throw new IndexOutOfBoundsException(
                 format("Position %d not within range of any of the %d child adapters, total size %d",
-                        position, mAdapters.size(), totalItemCount));
+                        position, mEntries.size(), totalItemCount));
     }
 
     @NonNull
@@ -163,8 +139,8 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         }
         int positionOffset = 0;
         int itemViewTypeOffset = 0;
-        for (int i = 0; i < mAdapters.size(); i++) {
-            PowerAdapter adapter = mAdapters.get(i);
+        for (int i = 0; i < mEntries.size(); i++) {
+            PowerAdapter adapter = mEntries.get(i).mAdapter;
             int itemCount = adapter.getItemCount();
             int viewTypeCount = adapter.getViewTypeCount();
             if (itemViewType - itemViewTypeOffset < viewTypeCount) {
@@ -175,7 +151,7 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         }
         throw new IndexOutOfBoundsException(
                 format("Item view type %d not within range of any of the %d child adapters, total item view types %d",
-                        itemViewType, mAdapters.size(), totalViewTypeCount));
+                        itemViewType, mEntries.size(), totalViewTypeCount));
     }
 
     private static final class OffsetAdapter {
@@ -239,6 +215,64 @@ final class ConcatAdapter extends AbstractPowerAdapter {
             public int getPosition() {
                 return super.getPosition() - offset;
             }
+        }
+    }
+
+    private final class Entry {
+
+        @NonNull
+        private final PowerAdapter mAdapter;
+
+        @NonNull
+        private final DataObserver mDataObserver = new DataObserver() {
+            @Override
+            public void onChanged() {
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                notifyItemRangeChanged(innerToOuter(positionStart), itemCount);
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                notifyItemRangeInserted(innerToOuter(positionStart), itemCount);
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                notifyItemRangeRemoved(innerToOuter(positionStart), itemCount);
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                notifyItemRangeMoved(innerToOuter(fromPosition), innerToOuter(toPosition), itemCount);
+            }
+        };
+
+        private int innerToOuter(int innerPosition) {
+            int positionOffset = 0;
+            for (int i = 0; i < mEntries.size(); i++) {
+                Entry entry = mEntries.get(i);
+                if (entry.mAdapter == mAdapter) {
+                    break;
+                }
+                positionOffset += entry.mAdapter.getItemCount();
+            }
+            return positionOffset + innerPosition;
+        }
+
+        Entry(@NonNull PowerAdapter adapter) {
+            mAdapter = adapter;
+        }
+
+        void registerObservers() {
+            mAdapter.registerDataObserver(mDataObserver);
+        }
+
+        void unregisterObservers() {
+            mAdapter.unregisterDataObserver(mDataObserver);
         }
     }
 }
