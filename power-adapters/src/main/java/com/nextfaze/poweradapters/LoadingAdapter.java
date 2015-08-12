@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 /**
  * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Also supports checking a

@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters;
+package com.nextfaze.poweradapters.binding;
 
 import com.nextfaze.asyncdata.Data;
 import lombok.NonNull;

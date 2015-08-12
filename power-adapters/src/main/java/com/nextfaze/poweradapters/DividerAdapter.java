@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
 public final class DividerAdapter extends PowerAdapterWrapper {

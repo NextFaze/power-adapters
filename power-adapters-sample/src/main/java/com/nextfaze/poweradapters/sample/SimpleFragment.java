@@ -6,10 +6,10 @@ import android.view.View;
 import android.widget.ListView;
 import butterknife.Bind;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.DataBindingAdapter;
-import com.nextfaze.poweradapters.Mapper;
-import com.nextfaze.poweradapters.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.binding.DataBindingAdapter;
+import com.nextfaze.poweradapters.binding.Mapper;
+import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;

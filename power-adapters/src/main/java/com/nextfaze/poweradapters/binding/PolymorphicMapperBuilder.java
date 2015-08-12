@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters;
+package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
 import android.view.View;
@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static java.util.Collections.unmodifiableCollection;
 
 public final class PolymorphicMapperBuilder {

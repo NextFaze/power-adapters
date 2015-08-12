@@ -9,7 +9,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 /**
  * Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapters items. This class can be

@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters.sample;
 import android.graphics.Typeface;
 import android.widget.TextView;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.TypedBinder;
+import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
 
 final class NewsSectionBinder extends TypedBinder<NewsSection, TextView> {

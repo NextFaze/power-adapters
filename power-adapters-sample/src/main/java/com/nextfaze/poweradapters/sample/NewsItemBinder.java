@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.TypedBinder;
+import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
 
 final class NewsItemBinder extends TypedBinder<NewsItem, TextView> {

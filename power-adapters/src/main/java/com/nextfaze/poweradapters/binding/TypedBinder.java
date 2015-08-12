@@ -1,11 +1,12 @@
-package com.nextfaze.poweradapters;
+package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 /** A "type safe" binder implementation that performs the casts for you. */
 public abstract class TypedBinder<T, V extends View> implements Binder {

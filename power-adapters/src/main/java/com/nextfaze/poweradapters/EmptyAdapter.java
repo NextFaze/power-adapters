@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 
-import static com.nextfaze.poweradapters.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
 public abstract class EmptyAdapter extends PowerAdapterWrapper {
