@@ -93,9 +93,15 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected final int mapPosition(int outerPosition) {
+    protected final int outerToInner(int outerPosition) {
         // No conversion necessary. The empty item is added at the end.
-        return super.mapPosition(outerPosition);
+        return outerPosition;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        // No conversion necessary. The empty item is added at the end.
+        return innerPosition;
     }
 
     @NonNull

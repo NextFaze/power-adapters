@@ -79,8 +79,13 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected final int mapPosition(int outerPosition) {
+    protected final int outerToInner(int outerPosition) {
         return outerPosition - getHeaderCount(true);
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        return getHeaderCount(true) + innerPosition;
     }
 
     @Override

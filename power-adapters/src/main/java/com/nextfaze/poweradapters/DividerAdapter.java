@@ -129,11 +129,19 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         if (mLeadingItemResource > 0) {
             return (outerPosition - 1) / 2;
         }
         return outerPosition / 2;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        if (mLeadingItemResource > 0) {
+            return (innerPosition * 2) + 1;
+        }
+        return innerPosition * 2;
     }
 
     @NonNull

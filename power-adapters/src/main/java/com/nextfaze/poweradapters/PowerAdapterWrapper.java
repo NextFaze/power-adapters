@@ -21,26 +21,24 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
             notifyDataSetChanged();
         }
 
-        // TODO: Map the following positions.
-
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+            notifyItemRangeChanged(innerToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyItemRangeInserted(positionStart, itemCount);
+            notifyItemRangeInserted(innerToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyItemRangeRemoved(positionStart, itemCount);
+            notifyItemRangeRemoved(innerToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+            notifyItemRangeMoved(innerToOuter(fromPosition), innerToOuter(toPosition), itemCount);
         }
     };
 
@@ -71,31 +69,31 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
     /**
      * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
      * coordinate space.
-     * @see #mapPosition(int)
+     * @see #outerToInner(int)
      */
     @Override
     public long getItemId(int position) {
-        return mAdapter.getItemId(mapPosition(position));
+        return mAdapter.getItemId(outerToInner(position));
     }
 
     /**
      * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
      * coordinate space.
-     * @see #mapPosition(int)
+     * @see #outerToInner(int)
      */
     @Override
     public int getItemViewType(int position) {
-        return mAdapter.getItemViewType(mapPosition(position));
+        return mAdapter.getItemViewType(outerToInner(position));
     }
 
     /**
      * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
      * coordinate space.
-     * @see #mapPosition(int)
+     * @see #outerToInner(int)
      */
     @Override
     public boolean isEnabled(int position) {
-        return mAdapter.isEnabled(mapPosition(position));
+        return mAdapter.isEnabled(outerToInner(position));
     }
 
     @Override
@@ -111,7 +109,7 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
             holderWrapper = new HolderWrapper(holder) {
                 @Override
                 public int getPosition() {
-                    return mapPosition(super.getPosition());
+                    return outerToInner(super.getPosition());
                 }
             };
             mHolders.put(view, holderWrapper);
@@ -123,12 +121,24 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
      * Converts a {@code position} in this adapter's coordinate space to the coordinate space of the wrapped adapter.
      * By default, simply returns returns the position value unchanged. Must be overridden by subclasses that augment
      * the items in this adapter, in order for the {@link #bindView(View, Holder)} {@link Holder} position to be
-     * correct.
+     * correct. This method is also called when forwarding calls that accept a {@code position} parameter.
      * @param outerPosition The {@code position} in this adapter's coordinate space.
      * @return The {@code position} converted into the coordinate space of the wrapped adapter.
      */
-    protected int mapPosition(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         return outerPosition;
+    }
+
+    /**
+     * Converts a {@code position} in the wrapped adapter's coordinate space to the coordinate space of this adapter.
+     * By default, simply returns returns the position value unchanged. Must be overridden by subclasses that augment
+     * the items in this adapter, otherwise fine-grained change notifications emitted by the wrapped adapter will not
+     * match the coordinate space of this adapter.
+     * @param innerPosition The {@code position} in the wrapped adapter's coordinate space.
+     * @return The {@code position} converted into the coordinate space of this adapter.
+     */
+    protected int innerToOuter(int innerPosition) {
+        return innerPosition;
     }
 
     @Override

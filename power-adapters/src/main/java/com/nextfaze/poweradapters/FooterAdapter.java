@@ -79,9 +79,15 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected final int mapPosition(int outerPosition) {
+    protected final int outerToInner(int outerPosition) {
         // No conversion necessary, as footers appear at the end.
         return outerPosition;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        // No conversion necessary, as footers appear at the end.
+        return super.innerToOuter(innerPosition);
     }
 
     @Override

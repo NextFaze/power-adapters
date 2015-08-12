@@ -114,9 +114,15 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         // No translation necessary for loading adapter, because the item appears at the end.
         return outerPosition;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        // No translation necessary for loading adapter, because the item appears at the end.
+        return super.innerToOuter(innerPosition);
     }
 
     private int loadingViewType() {

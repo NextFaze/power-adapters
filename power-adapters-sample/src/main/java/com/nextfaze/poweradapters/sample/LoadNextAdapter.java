@@ -121,9 +121,15 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected int mapPosition(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         // No conversion necessary, as loading item appears at the end.
         return outerPosition;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        // No conversion necessary, as loading item appears at the end.
+        return super.innerToOuter(innerPosition);
     }
 
     void loadNext() {
