@@ -17,6 +17,10 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 @Accessors(prefix = "m")
 public abstract class EmptyAdapter extends PowerAdapterWrapper {
 
+    // TODO: Consolidate with LoadingAdapter, because both add a single item at the end.
+
+    private boolean mVisible;
+
     protected EmptyAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
@@ -45,9 +49,21 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
         notifyDataSetChanged();
     }
 
+    private void updateVisible() {
+        boolean visible = isEmptyItemVisible();
+        if (visible != mVisible) {
+            mVisible = visible;
+            if (visible) {
+                notifyItemInserted(super.getItemCount());
+            } else {
+                notifyItemRemoved(super.getItemCount());
+            }
+        }
+    }
+
     @Override
     public final int getItemCount() {
-        if (isEmptyItemVisible()) {
+        if (mVisible) {
             return super.getItemCount() + 1;
         }
         return super.getItemCount();
@@ -61,7 +77,7 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
 
     @Override
     public final int getItemViewType(int position) {
-        if (isEmptyItemVisible() && isEmptyItem(position)) {
+        if (isEmptyItem(position)) {
             return emptyViewType();
         }
         return super.getItemViewType(position);
@@ -107,6 +123,10 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
     protected abstract View newEmptyView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isEmptyItem(int position) {
+        //noinspection SimplifiableIfStatement
+        if (!mVisible) {
+            return false;
+        }
         return position == getItemCount() - 1;
     }
 
@@ -187,30 +207,10 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
         private final Data<?> mData;
 
         @NonNull
-        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.DataObserver() {
+        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.SimpleDataObserver() {
             @Override
             public void onChange() {
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                notifyItemRangeInserted(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                notifyItemRangeRemoved(positionStart, itemCount);
-            }
-
-            @Override
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+                notifyEmptyChanged();
             }
         };
 
@@ -218,7 +218,7 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
         private final LoadingObserver mLoadingObserver = new LoadingObserver() {
             @Override
             public void onLoadingChange() {
-                notifyDataSetChanged();
+                notifyEmptyChanged();
             }
         };
 
@@ -240,6 +240,8 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
             mEmptyItem = emptyItem;
             mLoadingPolicy = loadingPolicy;
             mEmptyItemEnabled = emptyItemEnabled;
+            // Notify immediately to ensure current Data state is accounted for.
+            notifyEmptyChanged();
         }
 
         @Override
