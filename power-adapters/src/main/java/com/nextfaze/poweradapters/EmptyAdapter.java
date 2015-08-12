@@ -46,7 +46,7 @@ public abstract class EmptyAdapter extends PowerAdapterWrapper {
     }
 
     protected final void notifyEmptyChanged() {
-        notifyDataSetChanged();
+        updateVisible();
     }
 
     private void updateVisible() {
