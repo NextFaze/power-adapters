@@ -4,6 +4,7 @@ import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.ErrorObserver;
 import com.nextfaze.asyncdata.LoadingObserver;
+import com.nextfaze.asyncdata.SimpleDataObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public abstract class DataWatcher {
     private static final Logger log = LoggerFactory.getLogger(DataWatcher.class);
 
     @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChange() {
             dispatchDataChange();

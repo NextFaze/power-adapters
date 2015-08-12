@@ -8,7 +8,7 @@ public class DataWrapper<T> extends AbstractData<T> {
     private final Data<? extends T> mData;
 
     @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChange() {
             notifyDataChanged();

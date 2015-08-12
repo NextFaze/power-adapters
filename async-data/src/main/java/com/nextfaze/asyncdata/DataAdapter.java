@@ -19,9 +19,29 @@ public abstract class DataAdapter<T> extends BaseAdapter {
     private final Data<T> mData;
 
     @NonNull
-    private final DataObserver mDataObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChange() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             notifyDataSetChanged();
         }
     };
