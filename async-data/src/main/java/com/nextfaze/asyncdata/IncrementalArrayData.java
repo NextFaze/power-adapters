@@ -107,14 +107,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final T remove(int index) {
         T removed = mData.remove(index);
-        notifyDataChanged();
+        notifyItemRemoved(index);
         return removed;
     }
 
     @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
-            notifyDataChanged();
+            notifyItemInserted(mData.size() - 1);
             return true;
         }
         return false;
@@ -123,31 +123,42 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
-        notifyDataChanged();
+        notifyItemInserted(index);
     }
 
     @Override
     public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(oldSize, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
     public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(index, collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(index, collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(index, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
     public final boolean remove(@NonNull Object obj) {
-        if (mData.remove(obj)) {
-            notifyDataChanged();
+        //noinspection SuspiciousMethodCalls
+        int index = mData.indexOf(obj);
+        if (index != -1) {
+            mData.remove(index);
+            notifyItemRemoved(index);
             return true;
         }
         return false;
@@ -182,6 +193,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     public final boolean removeAll(@NonNull Collection<?> collection) {
         boolean removed = mData.removeAll(collection);
         if (removed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return removed;
@@ -191,6 +203,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     public final boolean retainAll(@NonNull Collection<?> collection) {
         boolean changed = mData.retainAll(collection);
         if (changed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return changed;
@@ -199,7 +212,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final T set(int index, T object) {
         T t = mData.set(index, object);
-        notifyDataChanged();
+        notifyItemChanged(index);
         return t;
     }
 
@@ -331,19 +344,25 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     protected void onInvalidate() {
     }
 
-    private void appendNonNullElements(@NonNull List<? extends T> list) {
+    private void appendNonNullElementsAndNotify(@NonNull List<? extends T> list) {
+        int oldSize = mData.size();
         for (T t : list) {
             if (t != null) {
                 mData.add(t);
             }
         }
+        int count = mData.size() - oldSize;
+        if (count != 0) {
+            notifyItemRangeInserted(oldSize, count);
+        }
     }
 
     private void clearDataAndNotify() {
-        if (mData.size() > 0) {
+        int size = mData.size();
+        if (size > 0) {
             onClear();
             mData.clear();
-            notifyDataChanged();
+            notifyItemRangeRemoved(0, size);
         }
         onInvalidate();
     }
@@ -417,8 +436,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                                 mData.clear();
                             }
                             // Store items and notify of change.
-                            appendNonNullElements(result.getElements());
-                            notifyDataChanged();
+                            appendNonNullElementsAndNotify(result.getElements());
                         }
                     });
                 }
