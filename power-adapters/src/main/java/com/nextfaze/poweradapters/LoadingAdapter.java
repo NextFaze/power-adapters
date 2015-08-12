@@ -278,12 +278,14 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
         @Override
         protected void onFirstObserverRegistered() {
+            super.onFirstObserverRegistered();
             mData.registerDataObserver(mDataObserver);
             mData.registerLoadingObserver(mLoadingObserver);
         }
 
         @Override
         protected void onLastObserverUnregistered() {
+            super.onLastObserverUnregistered();
             mData.unregisterDataObserver(mDataObserver);
             mData.unregisterLoadingObserver(mLoadingObserver);
         }
