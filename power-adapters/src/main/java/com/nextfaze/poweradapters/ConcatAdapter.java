@@ -25,8 +25,7 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         mEntries = new ArrayList<>(adapters.length);
         //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < adapters.length; i++) {
-            PowerAdapter adapter = adapters[i];
-            mEntries.add(new Entry(adapter));
+            mEntries.add(new Entry(adapters[i]));
         }
     }
 

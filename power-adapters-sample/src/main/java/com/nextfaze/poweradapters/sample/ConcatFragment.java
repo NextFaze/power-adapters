@@ -14,7 +14,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import com.nextfaze.poweradapters.EmptyAdapter;
@@ -27,25 +26,35 @@ import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import static android.graphics.Color.*;
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends Fragment {
 
-    @NonNull
-    private final List<? extends Pair<Data<?>, PowerAdapter>> mPairs = ImmutableList.of(
-            createPair(new NewsIncrementalData(5, 2), new ColoredBinder(RED)),
-            createPair(new NewsIncrementalData(10, 5), new ColoredBinder(GREEN)),
-            createPair(new NewsIncrementalData(20, 5), new ColoredBinder(BLUE)),
-            createPair(new NewsIncrementalData(0, 0), new ColoredBinder(DKGRAY)),
-            createPair(new NewsIncrementalData(3, 1), new ColoredBinder(WHITE))
-    );
+    private static final int ADAPTER_COUNT = 100;
 
     @NonNull
-    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data, @NonNull Binder newsItemBinder) {
+    private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
+
+    @Bind(R.id.news_recycler)
+    RecyclerView mRecyclerView;
+
+    public ConcatFragment() {
+        Random random = new Random();
+        for (int i = 0; i < ADAPTER_COUNT; i++) {
+            NewsIncrementalData data = new NewsIncrementalData(random.nextInt(50), 1 + random.nextInt(9));
+            ColoredBinder binder = new ColoredBinder(random.nextInt());
+            mPairs.add(createPair(data, binder));
+        }
+    }
+
+    @NonNull
+    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data,
+                                                   @NonNull Binder newsItemBinder) {
         Mapper mapper = new PolymorphicMapperBuilder()
                 .bind(NewsItem.class, newsItemBinder)
                 .build();
@@ -71,9 +80,6 @@ public class ConcatFragment extends Fragment {
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
     }
-
-    @Bind(R.id.news_recycler)
-    RecyclerView mRecyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
