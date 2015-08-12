@@ -14,12 +14,14 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 /** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
 public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
-    protected HeaderAdapter(@NonNull PowerAdapter adapter) {
+    HeaderAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
     @NonNull
-    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int position);
+    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater,
+                                @NonNull ViewGroup parent,
+                                int headerIndex);
 
     abstract int getHeaderCount(boolean visibleOnly);
 
@@ -182,8 +184,8 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         @Override
         protected View getHeaderView(@NonNull LayoutInflater layoutInflater,
                                      @NonNull ViewGroup parent,
-                                     int position) {
-            return mHeaders.get(position).get(layoutInflater, parent);
+                                     int headerIndex) {
+            return mHeaders.get(headerIndex).get(layoutInflater, parent);
         }
 
         @Override

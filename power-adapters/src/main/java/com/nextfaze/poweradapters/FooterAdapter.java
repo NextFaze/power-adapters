@@ -14,12 +14,14 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 public abstract class FooterAdapter extends PowerAdapterWrapper {
 
-    protected FooterAdapter(@NonNull PowerAdapter adapter) {
+    FooterAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
 
     @NonNull
-    abstract View getFooterView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int position);
+    abstract View getFooterView(@NonNull LayoutInflater layoutInflater,
+                                @NonNull ViewGroup parent,
+                                int footerIndex);
 
     abstract int getFooterCount(boolean visibleOnly);
 
@@ -183,8 +185,8 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         @Override
         protected View getFooterView(@NonNull LayoutInflater layoutInflater,
                                      @NonNull ViewGroup parent,
-                                     int position) {
-            return mFooters.get(position).get(layoutInflater, parent);
+                                     int footerIndex) {
+            return mFooters.get(footerIndex).get(layoutInflater, parent);
         }
 
         @Override
