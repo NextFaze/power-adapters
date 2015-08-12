@@ -14,6 +14,7 @@ import java.util.Map;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static java.util.Collections.unmodifiableCollection;
 
+/** Mapper that binds an item object by traversing its class hierarchy until a binder is found. */
 public final class PolymorphicMapperBuilder {
 
     @NonNull
@@ -22,9 +23,9 @@ public final class PolymorphicMapperBuilder {
     /** Map an item class to the specified binder, overriding the layout resource used to inflate the item view. */
     @NonNull
     public PolymorphicMapperBuilder bind(@NonNull Class<?> itemClass,
-                        @LayoutRes int overrideItemLayoutResource,
-                        @NonNull Binder binder) {
-        mBinders.put(itemClass, PolymorphicMapper.wrapBinder(binder, overrideItemLayoutResource));
+                                         @LayoutRes int overrideItemLayoutResource,
+                                         @NonNull Binder binder) {
+        mBinders.put(itemClass, wrapBinder(binder, overrideItemLayoutResource));
         return this;
     }
 
@@ -36,8 +37,19 @@ public final class PolymorphicMapperBuilder {
     }
 
     @NonNull
-    public PolymorphicMapper build() {
+    public Mapper build() {
         return new PolymorphicMapper(mBinders);
+    }
+
+    @NonNull
+    private static Binder wrapBinder(@NonNull Binder binder, @LayoutRes final int overrideItemLayoutResource) {
+        return new BinderWrapper(binder) {
+            @NonNull
+            @Override
+            public View newView(@NonNull ViewGroup viewGroup) {
+                return layoutInflater(viewGroup).inflate(overrideItemLayoutResource, viewGroup, false);
+            }
+        };
     }
 
     @Accessors(prefix = "m")
@@ -67,17 +79,6 @@ public final class PolymorphicMapperBuilder {
         @Override
         public Collection<? extends Binder> getAllBinders() {
             return unmodifiableCollection(mBinders.values());
-        }
-
-        @NonNull
-        private static Binder wrapBinder(@NonNull Binder binder, @LayoutRes final int overrideItemLayoutResource) {
-            return new BinderWrapper(binder) {
-                @NonNull
-                @Override
-                public View newView(@NonNull ViewGroup viewGroup) {
-                    return layoutInflater(viewGroup).inflate(overrideItemLayoutResource, viewGroup, false);
-                }
-            };
         }
     }
 }
