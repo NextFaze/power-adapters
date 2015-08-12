@@ -4,17 +4,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class PowerAdapterWrapper extends AbstractPowerAdapter {
 
     @NonNull
     private final WeakHashMap<View, HolderWrapper> mHolders = new WeakHashMap<>();
-
-    @NonNull
-    private final Set<DataObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
 
     @NonNull
     private final PowerAdapter mAdapter;
@@ -134,5 +129,17 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
      */
     protected int mapPosition(int outerPosition) {
         return outerPosition;
+    }
+
+    @Override
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mAdapter.registerDataObserver(mDataSetObserver);
+    }
+
+    @Override
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mAdapter.unregisterDataObserver(mDataSetObserver);
     }
 }
