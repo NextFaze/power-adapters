@@ -41,12 +41,6 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
         return NO_ID;
     }
 
-    @NonNull
-    @Override
-    public Metadata getItemMetadata(int position) {
-        return Metadata.NONE;
-    }
-
     @Override
     public int getItemViewType(int position) {
         return 0;

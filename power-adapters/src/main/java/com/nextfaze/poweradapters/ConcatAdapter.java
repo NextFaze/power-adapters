@@ -110,12 +110,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         return findAdapterByPosition(position).getItemViewType(position);
     }
 
-    @NonNull
-    @Override
-    public Metadata getItemMetadata(int position) {
-        return findAdapterByPosition(position).getItemMetadata(position);
-    }
-
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
@@ -218,11 +212,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
         int getItemViewType(int position) {
             return mAdapter.getItemViewType(position - mPositionOffset) + mItemViewTypeOffset;
-        }
-
-        @NonNull
-        Metadata getItemMetadata(int position) {
-            return mAdapter.getItemMetadata(position - mPositionOffset);
         }
 
         int getViewTypeCount() {

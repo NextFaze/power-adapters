@@ -52,14 +52,6 @@ public interface PowerAdapter {
      */
     int getItemViewType(int position);
 
-    /**
-     * Returns metadata associated with this {@code position}.
-     * @param position The position in the adapter's data set from which metadata will be retrieved.
-     * @return Non-null metadata object containing additional information about this item.
-     */
-    @NonNull
-    Metadata getItemMetadata(int position);
-
     @NonNull
     View newView(@NonNull ViewGroup parent, int itemViewType);
 

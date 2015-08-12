@@ -93,17 +93,6 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
         return mAdapter.getItemViewType(mapPosition(position));
     }
 
-    /**
-     * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
-     * coordinate space.
-     * @see #mapPosition(int)
-     */
-    @Override
-    @NonNull
-    public Metadata getItemMetadata(int position) {
-        return mAdapter.getItemMetadata(mapPosition(position));
-    }
-
     @Override
     @NonNull
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
