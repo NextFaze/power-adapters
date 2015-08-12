@@ -87,14 +87,14 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final T remove(int index) {
         T removed = mData.remove(index);
-        notifyDataChanged();
+        notifyItemRemoved(index);
         return removed;
     }
 
     @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
-            notifyDataChanged();
+            notifyItemInserted(mData.size() - 1);
             return true;
         }
         return false;
@@ -103,7 +103,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
-        notifyDataChanged();
+        notifyItemInserted(index);
     }
 
     @Override
@@ -126,8 +126,11 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     public final boolean remove(@NonNull Object obj) {
-        if (mData.remove(obj)) {
-            notifyDataChanged();
+        //noinspection SuspiciousMethodCalls
+        int index = mData.indexOf(obj);
+        if (index != -1) {
+            mData.remove(index);
+            notifyItemRemoved(index);
             return true;
         }
         return false;
@@ -179,7 +182,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final T set(int index, T object) {
         T t = mData.set(index, object);
-        notifyDataChanged();
+        notifyItemChanged(index);
         return t;
     }
 
@@ -204,9 +207,10 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     public final void clear() {
+        int size = mData.size();
         mData.clear();
         setAvailable(Integer.MAX_VALUE);
-        notifyDataChanged();
+        notifyItemRangeRemoved(0, size);
         invalidate();
     }
 
@@ -274,6 +278,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     mDirty = false;
                     mData.clear();
+                    int positionStart = mData.size();
                     for (T t : data) {
                         if (t != null) {
                             mData.add(t);
@@ -282,7 +287,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                     mTask = null;
                     setAvailable(0);
                     notifyLoadingChanged();
-                    notifyDataChanged();
+                    notifyItemRangeInserted(positionStart, data.size());
                     loadDataIfAppropriate();
                 }
 
