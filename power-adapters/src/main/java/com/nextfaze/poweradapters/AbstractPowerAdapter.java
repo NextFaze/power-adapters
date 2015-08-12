@@ -47,6 +47,11 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        return true;
+    }
+
+    @Override
     public int getViewTypeCount() {
         return 1;
     }

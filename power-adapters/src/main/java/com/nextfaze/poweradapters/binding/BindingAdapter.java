@@ -7,6 +7,7 @@ import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 
@@ -56,16 +57,28 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     public final int getItemViewType(int position) {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
-        if (binder != null) {
-            // Cache index of each binder to avoid linear search each time.
-            Integer index = mIndexes.get(binder);
-            if (index == null) {
-                index = mBinders.indexOf(binder);
-                mIndexes.put(binder, index);
-            }
-            // Offset type by inner type count, otherwise we could get collisions.
-            return super.getViewTypeCount() + index;
+        assertBinder(binder, position, item);
+        // Cache index of each binder to avoid linear search each time.
+        Integer index = mIndexes.get(binder);
+        if (index == null) {
+            index = mBinders.indexOf(binder);
+            mIndexes.put(binder, index);
         }
-        throw new AssertionError();
+        // Offset type by inner type count, otherwise we could get collisions.
+        return super.getViewTypeCount() + index;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        Object item = getItem(position);
+        Binder binder = mMapper.getBinder(item, position);
+        assertBinder(binder, position, item);
+        return binder.isEnabled(position);
+    }
+
+    private void assertBinder(@Nullable Binder binder, int position, Object item) {
+        if (binder == null) {
+            throw new AssertionError("No binder for position " + position + ", item");
+        }
     }
 }

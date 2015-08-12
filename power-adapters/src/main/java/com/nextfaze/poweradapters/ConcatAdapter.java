@@ -94,6 +94,11 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         return findAdapterByPosition(position).getItemId(position);
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        return findAdapterByPosition(position).isEnabled(position);
+    }
+
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
@@ -193,6 +198,10 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
         long getItemId(int position) {
             return mAdapter.getItemId(position - mPositionOffset);
+        }
+
+        boolean isEnabled(int position) {
+            return mAdapter.isEnabled(position - mPositionOffset);
         }
 
         @NonNull

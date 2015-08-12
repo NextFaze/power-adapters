@@ -99,6 +99,11 @@ final class ConverterAdapter extends BaseAdapter {
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        return mPowerAdapter.isEnabled(position);
+    }
+
+    @Override
     public final void registerDataSetObserver(DataSetObserver observer) {
         super.registerDataSetObserver(observer);
         if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
