@@ -69,7 +69,7 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         assertBinder(binder, position, item);

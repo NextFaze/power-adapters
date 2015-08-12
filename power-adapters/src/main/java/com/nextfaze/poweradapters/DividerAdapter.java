@@ -85,6 +85,15 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isDivider(position)) {
+            return false;
+        }
+        return super.isEnabled(position);
+    }
+
+    @Override
     public final int getViewTypeCount() {
         return super.getViewTypeCount() + ITEM_VIEW_TYPE_TOTAL;
     }

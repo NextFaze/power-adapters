@@ -22,9 +22,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater,
-                                          @NonNull ViewGroup parent,
-                                          int position);
+    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int position);
 
     abstract int getHeaderCount(boolean visibleOnly);
 
@@ -35,7 +33,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     @Override
     public final long getItemId(int position) {
-        if (isHeaderView(position)) {
+        if (isHeader(position)) {
             return NO_ID;
         }
         return super.getItemId(position);
@@ -55,6 +53,15 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         return super.getItemViewType(position);
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isHeader(position)) {
+            return false;
+        }
+        return super.isEnabled(position);
+    }
+
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
@@ -67,7 +74,7 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        if (!isHeaderView(holder.getPosition())) {
+        if (!isHeader(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
@@ -77,12 +84,12 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         return outerPosition - getHeaderCount(true);
     }
 
-    private boolean isHeaderView(int position) {
+    private boolean isHeader(int position) {
         return position < getHeaderCount(true);
     }
 
     private int headerItemViewType(int position) {
-        if (!isHeaderView(position)) {
+        if (!isHeader(position)) {
             return -1;
         }
         return super.getViewTypeCount() + position;

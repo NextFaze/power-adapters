@@ -99,8 +99,13 @@ final class ConverterAdapter extends BaseAdapter {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         return mPowerAdapter.isEnabled(position);
+    }
+
+    @Override
+    public final boolean areAllItemsEnabled() {
+        return false;
     }
 
     @Override

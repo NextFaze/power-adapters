@@ -22,9 +22,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    abstract View getFooterView(@NonNull LayoutInflater layoutInflater,
-                                          @NonNull ViewGroup parent,
-                                          int position);
+    abstract View getFooterView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int position);
 
     abstract int getFooterCount(boolean visibleOnly);
 
@@ -35,7 +33,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
 
     @Override
     public final long getItemId(int position) {
-        if (isFooterView(position)) {
+        if (isFooter(position)) {
             return NO_ID;
         }
         return super.getItemId(position);
@@ -55,6 +53,15 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return super.getItemViewType(position);
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isFooter(position)) {
+            return false;
+        }
+        return super.isEnabled(position);
+    }
+
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
@@ -67,7 +74,7 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        if (!isFooterView(holder.getPosition())) {
+        if (!isFooter(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
@@ -78,12 +85,12 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return outerPosition;
     }
 
-    private boolean isFooterView(int position) {
+    private boolean isFooter(int position) {
         return position >= super.getItemCount();
     }
 
     private int footerItemViewType(int position) {
-        if (!isFooterView(position)) {
+        if (!isFooter(position)) {
             return -1;
         }
         return super.getViewTypeCount() + position - super.getItemCount();

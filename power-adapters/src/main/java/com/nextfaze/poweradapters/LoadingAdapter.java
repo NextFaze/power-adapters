@@ -89,6 +89,14 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         return super.getItemId(position);
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        if (isLoadingItem(position)) {
+            return isLoadingItemEnabled();
+        }
+        return super.isEnabled(position);
+    }
+
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, int itemViewType) {
