@@ -11,6 +11,26 @@ public final class DataBindingAdapter extends BindingAdapter {
         public void onChange() {
             notifyDataSetChanged();
         }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
     };
 
     @NonNull

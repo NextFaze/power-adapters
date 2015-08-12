@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.ListAdapter;
 import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.LoadingObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -222,10 +221,30 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         private final Data<?> mData;
 
         @NonNull
-        private final DataObserver mDataObserver = new DataObserver() {
+        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.DataObserver() {
             @Override
             public void onChange() {
                 notifyDataSetChanged();
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                notifyItemRangeChanged(positionStart, itemCount);
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                notifyItemRangeInserted(positionStart, itemCount);
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                notifyItemRangeRemoved(positionStart, itemCount);
+            }
+
+            @Override
+            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
             }
         };
 

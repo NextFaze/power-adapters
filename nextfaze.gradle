@@ -16,6 +16,7 @@ allprojects {
                 password nextfazeArtifactoryPassword
             }
         }
+        mavenLocal()
     }
     project.ext.snapshot = project.version.endsWith('-SNAPSHOT')
 }
