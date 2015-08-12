@@ -81,6 +81,11 @@ public abstract class HeaderAdapter extends PowerAdapterWrapper {
         return outerPosition - getHeaderCount(true);
     }
 
+    @Override
+    public final boolean hasStableIds() {
+        return super.hasStableIds();
+    }
+
     private boolean isHeader(int position) {
         return position < getHeaderCount(true);
     }

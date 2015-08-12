@@ -82,6 +82,11 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return outerPosition;
     }
 
+    @Override
+    public final boolean hasStableIds() {
+        return super.hasStableIds();
+    }
+
     private boolean isFooter(int position) {
         return position >= super.getItemCount();
     }
