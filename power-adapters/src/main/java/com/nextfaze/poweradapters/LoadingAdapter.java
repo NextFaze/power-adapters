@@ -67,7 +67,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
             if (visible) {
                 notifyItemInserted(super.getItemCount());
             } else {
-                notifyItemRemoved(super.getItemCount() + 1);
+                notifyItemRemoved(super.getItemCount());
             }
         }
     }
