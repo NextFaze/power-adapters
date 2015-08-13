@@ -27,7 +27,7 @@ import static java.lang.Thread.currentThread;
  * @param <T> The type of element this data contains.
  */
 @Accessors(prefix = "m")
-public abstract class IncrementalArrayData<T> extends AbstractData<T> implements MutableData<T> {
+public abstract class IncrementalArrayData<T> extends AbstractData<T> implements List<T> {
 
     private static final Logger log = LoggerFactory.getLogger(IncrementalArrayData.class);
 
@@ -239,27 +239,28 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mData.get(position);
     }
 
-    /** Clears the contents, and starts loading again if data is currently shown. */
     @Override
     public final void clear() {
-        clearDataAndNotify();
-        stopThread();
-        startThreadIfNeeded();
+        clearElementsAndNotify();
     }
 
-    /** Flags the data to be cleared and reloaded next time it is shown. */
-    public final void invalidateDeferred() {
-        mDirty = true;
-    }
-
-    /** Starts loading data from the beginning, but does not clear existing data until first increment has loaded. */
     @Override
     public final void invalidate() {
         mDirty = true;
+    }
+
+    @Override
+    public final void refresh() {
+        mDirty = true;
         setAvailable(Integer.MAX_VALUE);
-        onInvalidate();
         stopThread();
         startThreadIfNeeded();
+    }
+
+    @Override
+    public final void reload() {
+        clear();
+        refresh();
     }
 
     /** Load the next increment of elements. */
@@ -307,10 +308,8 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             mDirty = true;
         }
         if (mDirty) {
-            // Data is dirty, so reload everything.
-            clearDataAndNotify();
             stopThread();
-            mDirty = false;
+            clearElementsAndNotify();
         }
         startThreadIfNeeded();
     }
@@ -323,7 +322,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     protected void onHideTimeout() {
         log.trace("Hide timeout elapsed ({} ms); clearing and stopping thread", getHideTimeout());
-        clearDataAndNotify();
+        clearElementsAndNotify();
         stopThread();
     }
 
@@ -340,36 +339,24 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     protected void onClear() {
     }
 
-    /** Called when data is invalidated or cleared. Always called from the UI thread. */
-    protected void onInvalidate() {
+    /** Called when loading is about to begin from the start. Always called from the UI thread. */
+    protected void onLoadBegin() {
     }
 
-    private void appendNonNullElementsAndNotify(@NonNull List<? extends T> list) {
-        int oldSize = mData.size();
-        for (T t : list) {
-            if (t != null) {
-                mData.add(t);
-            }
-        }
-        int count = mData.size() - oldSize;
-        if (count != 0) {
-            notifyItemRangeInserted(oldSize, count);
-        }
-    }
-
-    private void clearDataAndNotify() {
+    private void clearElementsAndNotify() {
         int size = mData.size();
         if (size > 0) {
             onClear();
             mData.clear();
             notifyItemRangeRemoved(0, size);
         }
-        onInvalidate();
     }
 
     private void startThreadIfNeeded() {
-        if (mThread == null && isShown()) {
+        if (mDirty && mThread == null && isShown()) {
+            mDirty = false;
             log.trace("Starting thread");
+            onLoadBegin();
             setLoading(true);
             mThread = mThreadFactory.newThread(new Runnable() {
                 @Override
@@ -431,12 +418,20 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (needToClear && mData.size() > 0) {
-                                onClear();
-                                mData.clear();
+                            if (needToClear) {
+                                clearElementsAndNotify();
                             }
-                            // Store items and notify of change.
-                            appendNonNullElementsAndNotify(result.getElements());
+                            int positionStart = mData.size();
+                            int insertCount = 0;
+                            for (T t : result.getElements()) {
+                                if (t != null) {
+                                    mData.add(t);
+                                    insertCount++;
+                                }
+                            }
+                            if (insertCount > 0) {
+                                notifyItemRangeInserted(positionStart, insertCount);
+                            }
                         }
                     });
                 }

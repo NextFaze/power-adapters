@@ -18,7 +18,7 @@ import java.util.ListIterator;
  * @param <T> The type of element this data contains.
  */
 @Accessors(prefix = "m")
-public abstract class ArrayData<T> extends AbstractData<T> implements MutableData<T> {
+public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
     private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
@@ -221,14 +221,26 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         mData.clear();
         setAvailable(Integer.MAX_VALUE);
         notifyItemRangeRemoved(0, size);
-        invalidate();
     }
 
-    /** Marks the existing loaded elements as dirty, such that they will be reloaded as soon as data is next shown. */
+    @Override
     public final void invalidate() {
         mDirty = true;
         cancelTask();
         loadDataIfAppropriate();
+    }
+
+    @Override
+    public final void refresh() {
+        mDirty = true;
+        cancelTask();
+        loadDataIfAppropriate();
+    }
+
+    @Override
+    public final void reload() {
+        clear();
+        refresh();
     }
 
     @Override

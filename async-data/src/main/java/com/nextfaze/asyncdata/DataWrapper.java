@@ -73,13 +73,28 @@ public class DataWrapper<T> extends AbstractData<T> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return mData.isEmpty();
+    }
+
+    @Override
     public boolean isLoading() {
         return mData.isLoading();
     }
 
     @Override
-    public boolean isEmpty() {
-        return mData.isEmpty();
+    public void invalidate() {
+        mData.invalidate();
+    }
+
+    @Override
+    public void refresh() {
+        mData.refresh();
+    }
+
+    @Override
+    public void reload() {
+        mData.reload();
     }
 
     @Override

@@ -85,6 +85,15 @@ public interface Data<T> extends Iterable<T> {
     /** If {@code true}, indicates the data is currently loading more elements. */
     boolean isLoading();
 
+    /** Marks existing elements as invalid, such that they will be reloaded next time the data is shown. */
+    void invalidate();
+
+    /** Reloads the elements without clearing them first. */
+    void refresh();
+
+    /** Clears then refreshes the elements. */
+    void reload();
+
     /** Close this instance. Other methods should not called after this. */
     void close();
 

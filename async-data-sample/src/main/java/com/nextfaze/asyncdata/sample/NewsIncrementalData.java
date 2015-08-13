@@ -31,7 +31,7 @@ final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
     }
 
     @Override
-    protected void onInvalidate() {
+    protected void onLoadBegin() {
         mOffset = 0;
     }
 }
