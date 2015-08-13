@@ -74,10 +74,17 @@ abstract class BaseFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Clear").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.add("Reload").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onClearClick();
+                onReloadClick();
+                return true;
+            }
+        });
+        menu.add("Refresh").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                onRefreshClick();
                 return true;
             }
         });
@@ -123,7 +130,10 @@ abstract class BaseFragment extends Fragment {
         return (SampleApplication) getActivity().getApplication();
     }
 
-    void onClearClick() {
+    void onReloadClick() {
+    }
+
+    void onRefreshClick() {
     }
 
     void onInvalidateClick() {

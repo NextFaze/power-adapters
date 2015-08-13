@@ -53,12 +53,18 @@ public final class SimpleFragment extends BaseFragment {
     }
 
     @Override
-    void onClearClick() {
-        mData.clear();
+    void onReloadClick() {
+        mData.reload();
+    }
+
+    @Override
+    void onRefreshClick() {
+        mData.refresh();
     }
 
     @Override
     void onInvalidateClick() {
         mData.invalidate();
+        showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 }

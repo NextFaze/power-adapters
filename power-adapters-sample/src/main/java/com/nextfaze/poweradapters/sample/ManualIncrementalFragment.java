@@ -3,9 +3,6 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import butterknife.Bind;
 import com.nextfaze.asyncdata.Data;
@@ -85,29 +82,18 @@ public final class ManualIncrementalFragment extends BaseFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Deferred Invalidate").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateDeferredClick();
-                return true;
-            }
-        });
+    void onReloadClick() {
+        mData.reload();
     }
 
     @Override
-    void onClearClick() {
-        mData.clear();
+    void onRefreshClick() {
+        mData.refresh();
     }
 
     @Override
     void onInvalidateClick() {
         mData.invalidate();
-    }
-
-    void onInvalidateDeferredClick() {
-        mData.invalidateDeferred();
         showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 

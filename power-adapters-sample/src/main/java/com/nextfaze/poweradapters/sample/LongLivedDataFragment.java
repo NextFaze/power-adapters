@@ -44,12 +44,12 @@ public final class LongLivedDataFragment extends BaseFragment {
     }
 
     @Override
-    void onClearClick() {
+    void onReloadClick() {
         mData.clear();
     }
 
     @Override
-    void onInvalidateClick() {
+    void onRefreshClick() {
         mData.invalidate();
     }
 }
