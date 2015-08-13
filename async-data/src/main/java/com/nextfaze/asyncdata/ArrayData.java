@@ -217,6 +217,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
     @Override
     public final void clear() {
+        onClear();
         int size = mData.size();
         mData.clear();
         setAvailable(Integer.MAX_VALUE);
@@ -266,6 +267,10 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
 
+    /** Called prior to elements being cleared. Always called from the UI thread. */
+    protected void onClear() {
+    }
+
     @Override
     protected final void onShown(long millisHidden) {
         if (millisHidden >= mAutoInvalidateDelay) {
@@ -298,6 +303,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
+                    onClear();
                     mDirty = false;
                     mData.clear();
                     for (T t : data) {
