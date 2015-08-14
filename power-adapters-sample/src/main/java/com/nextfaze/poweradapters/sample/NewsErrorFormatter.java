@@ -1,10 +1,9 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import lombok.NonNull;
-
-import javax.annotation.Nullable;
 
 final class NewsErrorFormatter implements ErrorFormatter {
     @Nullable

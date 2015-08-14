@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +11,6 @@ import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.LoadingObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-
-import javax.annotation.Nullable;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 

@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.Nullable;
 import android.view.View;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 /** Used to determine which {@link Binder} should be used to bind an item to a {@link View}. */

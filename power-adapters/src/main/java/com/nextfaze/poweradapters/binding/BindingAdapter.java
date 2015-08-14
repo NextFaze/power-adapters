@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.AbstractPowerAdapter;
@@ -7,7 +8,6 @@ import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 

@@ -2,13 +2,13 @@ package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
 import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 

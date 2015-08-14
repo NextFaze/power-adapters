@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import javax.annotation.Nullable;
 
 @Accessors(prefix = "m")
 final class LoadNextAdapter extends PowerAdapterWrapper {

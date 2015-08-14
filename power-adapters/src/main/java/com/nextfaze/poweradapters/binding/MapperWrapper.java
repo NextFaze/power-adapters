@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.Nullable;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 public class MapperWrapper implements Mapper {
