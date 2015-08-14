@@ -1,4 +1,4 @@
-package com.nextfaze.asyncdata.util;
+package com.nextfaze.asyncdata.internal;
 
 import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.Data;

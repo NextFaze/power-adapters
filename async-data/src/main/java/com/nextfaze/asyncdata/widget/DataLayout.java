@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.R;
-import com.nextfaze.asyncdata.util.DataWatcher;
+import com.nextfaze.asyncdata.internal.DataWatcher;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
@@ -158,7 +158,6 @@ public class DataLayout extends RelativeLayout {
     /** Indicates animations will run as inner views show and hide. */
     private boolean mAnimationEnabled = true;
 
-    @SuppressWarnings("UnusedDeclaration")
     public DataLayout(Context context) {
         this(context, null);
     }

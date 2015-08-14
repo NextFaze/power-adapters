@@ -50,7 +50,6 @@
             android:layout_weight="1"
             app:contentView="@+id/news_fragment_list"
             app:emptyView="@+id/news_fragment_empty"
-            app:loadingView="@+id/news_fragment_loading"
             app:errorView="@+id/news_fragment_error">
 
         <!-- List -->
@@ -69,15 +68,6 @@
                 android:layout_centerInParent="true"
                 android:text="No news today!"
                 tools:ignore="HardcodedText"/>
-
-        <!-- Loading -->
-
-        <ProgressBar
-                style="@android:style/Widget.Holo.ProgressBar"
-                android:id="@+id/news_fragment_loading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"/>
 
         <!-- Error -->
 
