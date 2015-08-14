@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
+import android.support.annotation.CallSuper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -105,11 +106,13 @@ public class ListAdapterWrapper extends BaseAdapter {
         }
     }
 
-    /** Called when the first observer has registered with this adapter. Subclasses must call through to super. */
+    /** Called when the first observer has registered with this adapter. */
+    @CallSuper
     protected void onFirstObserverRegistered() {
     }
 
-    /** Called when the last observer has unregistered from this adapter. Subclasses must call through to super. */
+    /** Called when the last observer has unregistered from this adapter. */
+    @CallSuper
     protected void onLastObserverUnregistered() {
     }
 }
