@@ -1,8 +1,11 @@
 package com.nextfaze.asyncdata.rx;
 
 import android.support.annotation.CheckResult;
+import com.nextfaze.asyncdata.AvailableObserver;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.DataObserver;
+import com.nextfaze.asyncdata.ErrorObserver;
+import com.nextfaze.asyncdata.LoadingObserver;
 import com.nextfaze.asyncdata.SimpleDataObserver;
 import lombok.NonNull;
 import rx.Observable;
@@ -26,6 +29,7 @@ public final class RxData {
             @Override
             public void call(final Subscriber<? super List<T>> subscriber) {
                 assertUiThread();
+                subscriber.onNext(toList(data));
                 final DataObserver dataObserver = new SimpleDataObserver() {
                     @Override
                     public void onChange() {
@@ -47,7 +51,7 @@ public final class RxData {
 
     @CheckResult
     @NonNull
-    public static <T> Observable<Change> changes(@NonNull final Data<T> data) {
+    public static Observable<Change> changes(@NonNull final Data<?> data) {
         return Observable.create(new Observable.OnSubscribe<Change>() {
             @Override
             public void call(final Subscriber<? super Change> subscriber) {
@@ -93,6 +97,82 @@ public final class RxData {
                     @Override
                     protected void onUnsubscribe() {
                         data.unregisterDataObserver(dataObserver);
+                    }
+                });
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public static Observable<Boolean> loading(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<Boolean>() {
+            @Override
+            public void call(final Subscriber<? super Boolean> subscriber) {
+                assertUiThread();
+                subscriber.onNext(data.isLoading());
+                final LoadingObserver loadingObserver = new LoadingObserver() {
+                    @Override
+                    public void onLoadingChange() {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(data.isLoading());
+                        }
+                    }
+                };
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterLoadingObserver(loadingObserver);
+                    }
+                });
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public static Observable<Integer> available(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> subscriber) {
+                subscriber.onNext(data.available());
+                final AvailableObserver availableObserver = new AvailableObserver() {
+                    @Override
+                    public void onAvailableChange() {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(data.available());
+                        }
+                    }
+                };
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterAvailableObserver(availableObserver);
+                    }
+                });
+            }
+        });
+    }
+
+    @CheckResult
+    @NonNull
+    public static Observable<Throwable> errors(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<Throwable>() {
+            @Override
+            public void call(final Subscriber<? super Throwable> subscriber) {
+                final ErrorObserver errorObserver = new ErrorObserver() {
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(e);
+                        }
+                    }
+                };
+                data.registerErrorObserver(errorObserver);
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterErrorObserver(errorObserver);
                     }
                 });
             }
