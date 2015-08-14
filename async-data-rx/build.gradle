@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+apply from: '../nextfaze.gradle'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '21.1.2'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 22
+    }
+}
+
+dependencies {
+    compile 'io.reactivex:rxandroid:1.0.1'
+    compile project(':async-data')
+    provided 'com.android.support:support-annotations:22.2.1'
+    provided 'org.projectlombok:lombok:1.14.6'
+}
