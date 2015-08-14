@@ -80,13 +80,12 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-//        return mPowerAdapter.isEnabled(position);
-        return true;
+        return mPowerAdapter.isEnabled(position);
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return true;
+        return false;
     }
 
     @Override
