@@ -128,7 +128,7 @@ public abstract class AbstractData<T> implements Data<T> {
      */
     @Override
     public int available() {
-        return Integer.MAX_VALUE;
+        return UNKNOWN;
     }
 
     @Override
@@ -177,7 +177,7 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     /**
-     * Called when this instance is closed. Only one invocation is ever mad per-instance. Any exceptions are caught by
+     * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
      * the caller. Subclasses must call through to super.
      * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
      */
@@ -285,11 +285,17 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
-    /** Called when the data enters the shown state. */
+    /**
+     * Called when the data enters the shown state. Never called twice without an intervening {@link #onHidden(long)}
+     * call.
+     */
     protected void onShown(long millisHidden) {
     }
 
-    /** Called when the data enters the hidden state. */
+    /**
+     * Called when the data enters the hidden state. Never called twice without an intervening {@link #onShown(long)}
+     * call.
+     */
     protected void onHidden(long millisShown) {
     }
 

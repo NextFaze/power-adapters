@@ -32,7 +32,7 @@
     <option name="excludeFilter" value="" />
   </component>
   <component name="NullableNotNullManager">
-    <option name="myDefaultNullable" value="javax.annotation.Nullable" />
+    <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="lombok.NonNull" />
     <option name="myNullables">
       <value>

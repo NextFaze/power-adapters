@@ -1,9 +1,8 @@
 package com.nextfaze.asyncdata.sample;
 
+import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import lombok.NonNull;
-
-import javax.annotation.Nullable;
 
 final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
 

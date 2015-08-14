@@ -1,9 +1,8 @@
 package com.nextfaze.asyncdata;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import lombok.NonNull;
-
-import javax.annotation.Nullable;
 
 public interface ErrorFormatter {
     @Nullable

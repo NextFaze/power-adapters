@@ -67,7 +67,8 @@ public interface Data<T> extends Iterable<T> {
     int size();
 
     /**
-     * Indicates how many more elements are available to be loaded relative to the current data set. Implementations can
+     * Indicates how many more elements are available to be loaded relative to the current data set. Implementations
+     * can
      * override this if they wish to convey an incomplete data set to observers.
      * <p/>The return value must never change:
      * <ul>

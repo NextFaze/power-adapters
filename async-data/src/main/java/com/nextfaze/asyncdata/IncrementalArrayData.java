@@ -1,12 +1,12 @@
 package com.nextfaze.asyncdata;
 
+import android.support.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -3,6 +3,7 @@ package com.nextfaze.asyncdata.sample;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,8 +23,6 @@ import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.SimpleDataAdapter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import lombok.NonNull;
-
-import javax.annotation.Nullable;
 
 public final class NewsFragment extends Fragment {
 
@@ -53,7 +52,6 @@ public final class NewsFragment extends Fragment {
             });
         }
     };
-
 
     @NonNull
     private final ListAdapter mAutoIncrementalAdapter = new SimpleDataAdapter<NewsItem>(mAutoIncrementalData, android.R.layout.simple_list_item_1) {

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
@@ -25,8 +26,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
@@ -396,7 +395,8 @@ public class DataLayout extends RelativeLayout {
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
     private boolean isThisViewShown() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() && isEnabled();
+        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
+                isEnabled();
     }
 
     /** Returns whether now is an appropriate time to perform animations. */

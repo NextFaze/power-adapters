@@ -1,5 +1,6 @@
 package com.nextfaze.asyncdata.util;
 
+import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.ErrorObserver;
@@ -9,8 +10,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 /**
  * Convenience class for observing a {@link Data} instance, and ensuring observers are correctly
