@@ -6,9 +6,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import lombok.NonNull;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 final class ListAdapterConverterAdapter extends BaseAdapter {
 
@@ -16,32 +16,12 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
 
     @NonNull
-    private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
+    private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
 
     @NonNull
-    private final DataObserver mDataSetObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             notifyDataSetChanged();
         }
     };
@@ -113,7 +93,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     public void registerDataSetObserver(DataSetObserver observer) {
         super.registerDataSetObserver(observer);
         if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
-            mPowerAdapter.registerDataObserver(mDataSetObserver);
+            mPowerAdapter.registerDataObserver(mDataObserver);
         }
     }
 
@@ -121,7 +101,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     public void unregisterDataSetObserver(DataSetObserver observer) {
         super.unregisterDataSetObserver(observer);
         if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
-            mPowerAdapter.unregisterDataObserver(mDataSetObserver);
+            mPowerAdapter.unregisterDataObserver(mDataObserver);
         }
     }
 
