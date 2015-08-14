@@ -1,5 +1,6 @@
 package com.nextfaze.asyncdata;
 
+import android.support.annotation.CallSuper;
 import lombok.NonNull;
 
 public class DataWrapper<T> extends AbstractData<T> {
@@ -45,7 +46,7 @@ public class DataWrapper<T> extends AbstractData<T> {
         mData.registerErrorObserver(mErrorObserver);
     }
 
-    /** Subclasses must make super call. */
+    @CallSuper
     @Override
     protected void onClose() throws Throwable {
         mData.unregisterDataObserver(mDataObserver);
@@ -97,13 +98,15 @@ public class DataWrapper<T> extends AbstractData<T> {
         mData.reload();
     }
 
+    @CallSuper
     @Override
-    public void notifyShown() {
+    protected void onShown(long millisHidden) {
         mData.notifyShown();
     }
 
+    @CallSuper
     @Override
-    public void notifyHidden() {
+    protected void onHidden(long millisShown) {
         mData.notifyHidden();
     }
 }

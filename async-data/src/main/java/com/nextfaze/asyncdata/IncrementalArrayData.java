@@ -1,6 +1,9 @@
 package com.nextfaze.asyncdata;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -71,7 +74,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         mThreadFactory = threadFactory;
     }
 
-    /** Subclasses must call through to super. */
+    @CallSuper
     @Override
     protected void onClose() throws Throwable {
         stopThread();
@@ -104,6 +107,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mData.lastIndexOf(object);
     }
 
+    @UiThread
     @Override
     public final T remove(int index) {
         T removed = mData.remove(index);
@@ -111,6 +115,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return removed;
     }
 
+    @UiThread
     @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
@@ -120,12 +125,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return false;
     }
 
+    @UiThread
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
         notifyItemInserted(index);
     }
 
+    @UiThread
     @Override
     public final boolean addAll(@NonNull Collection<? extends T> collection) {
         int oldSize = mData.size();
@@ -139,6 +146,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return false;
     }
 
+    @UiThread
     @Override
     public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
         int oldSize = mData.size();
@@ -152,6 +160,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return false;
     }
 
+    @UiThread
     @Override
     public final boolean remove(@NonNull Object obj) {
         //noinspection SuspiciousMethodCalls
@@ -166,29 +175,34 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     // TODO: Notify of change if modified from iterator.
 
+    @UiThread
     @NonNull
     @Override
     public final ListIterator<T> listIterator() {
         return mData.listIterator();
     }
 
+    @UiThread
     @NonNull
     @Override
     public final ListIterator<T> listIterator(int location) {
         return mData.listIterator(location);
     }
 
+    @UiThread
     @NonNull
     @Override
     public final List<T> subList(int start, int end) {
         return mData.subList(start, end);
     }
 
+    @UiThread
     @Override
     public final boolean containsAll(@NonNull Collection<?> collection) {
         return mData.containsAll(collection);
     }
 
+    @UiThread
     @Override
     public final boolean removeAll(@NonNull Collection<?> collection) {
         boolean removed = mData.removeAll(collection);
@@ -199,6 +213,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return removed;
     }
 
+    @UiThread
     @Override
     public final boolean retainAll(@NonNull Collection<?> collection) {
         boolean changed = mData.retainAll(collection);
@@ -209,6 +224,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return changed;
     }
 
+    @UiThread
     @Override
     public final T set(int index, T object) {
         T t = mData.set(index, object);
@@ -216,18 +232,21 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return t;
     }
 
+    @UiThread
     @NonNull
     @Override
     public final Object[] toArray() {
         return mData.toArray();
     }
 
+    @UiThread
     @NonNull
     @Override
     public final <T> T[] toArray(@NonNull T[] contents) {
         return mData.toArray(contents);
     }
 
+    @UiThread
     @NonNull
     @Override
     public final T get(int position, int flags) {
@@ -239,6 +258,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mData.get(position);
     }
 
+    @UiThread
     @Override
     public final void clear() {
         clearElementsAndNotify();
@@ -264,24 +284,29 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     /** Load the next increment of elements. */
+    @UiThread
     public final void loadNext() {
         proceed();
     }
 
+    @UiThread
     public final int getLookAheadRowCount() {
         return mLookAheadRowCount;
     }
 
     /** Set the number of rows to "look ahead" before loading automatically. */
+    @UiThread
     public final void setLookAheadRowCount(int lookAheadRowCount) {
         mLookAheadRowCount = lookAheadRowCount;
     }
 
+    @UiThread
     public final long getAutoInvalidateDelay() {
         return mAutoInvalidateDelay;
     }
 
     /** Automatically invalidate contents if data is hidden for the specified duration. */
+    @UiThread
     public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
         mAutoInvalidateDelay = autoInvalidateDelay;
     }
@@ -296,6 +321,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mAvailable;
     }
 
+    @CallSuper
     @Override
     protected final void onShown(long millisHidden) {
         log.trace("Shown after being hidden for {} ms", millisHidden);
@@ -314,32 +340,37 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         startThreadIfNeeded();
     }
 
+    @CallSuper
     @Override
     protected final void onHidden(long millisShown) {
         log.trace("Hidden after being shown for {} ms", millisShown);
     }
 
+    @CallSuper
     @Override
-    protected void onHideTimeout() {
+    protected final void onHideTimeout() {
         log.trace("Hide timeout elapsed ({} ms); clearing and stopping thread", getHideTimeout());
         clearElementsAndNotify();
         stopThread();
     }
 
     /**
-     * Load the next increment of items.
+     * Called from a worker thread to load the next increment of items.
      * @return A result containing the next set of elements to be appended, or {@code null} if there are no more items.
      * The result also indicates if these are the final elements of the data set.
      * @throws Throwable If any error occurs while trying to load.
      */
+    @WorkerThread
     @Nullable
     protected abstract Result<? extends T> load() throws Throwable;
 
     /** Called prior to elements being cleared. Always called from the UI thread. */
+    @UiThread
     protected void onClear() {
     }
 
     /** Called when loading is about to begin from the start. Always called from the UI thread. */
+    @UiThread
     protected void onLoadBegin() {
     }
 

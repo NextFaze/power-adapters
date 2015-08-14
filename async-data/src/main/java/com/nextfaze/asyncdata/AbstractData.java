@@ -2,6 +2,8 @@ package com.nextfaze.asyncdata;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CallSuper;
+import android.support.annotation.UiThread;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
@@ -61,6 +63,7 @@ public abstract class AbstractData<T> implements Data<T> {
     private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
     /** @see #setHideTimeout(long) */
+    @UiThread
     public final long getHideTimeout() {
         return mHideTimeout;
     }
@@ -70,6 +73,7 @@ public abstract class AbstractData<T> implements Data<T> {
      * disabled by default. A negative value or {@link #NEVER} disables the hide timeout callback.
      * @param hideTimeout The hide timeout in milliseconds.
      */
+    @UiThread
     public final void setHideTimeout(long hideTimeout) {
         mHideTimeout = hideTimeout;
     }
@@ -136,7 +140,7 @@ public abstract class AbstractData<T> implements Data<T> {
         return size() <= 0;
     }
 
-    /** Subclasses overriding this method should always make super call. */
+    @CallSuper
     @Override
     public void notifyShown() {
         if (!mShown) {
@@ -147,7 +151,7 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     }
 
-    /** Subclasses overriding this method should always make super call. */
+    @CallSuper
     @Override
     public void notifyHidden() {
         if (mShown) {
@@ -161,7 +165,7 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     }
 
-    /** Subclasses overriding this method should always make super call. */
+    @CallSuper
     @Override
     public void close() {
         if (!mClosed) {
@@ -178,7 +182,7 @@ public abstract class AbstractData<T> implements Data<T> {
 
     /**
      * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
-     * the caller. Subclasses must call through to super.
+     * the caller.
      * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
      */
     protected void onClose() throws Throwable {
@@ -189,6 +193,7 @@ public abstract class AbstractData<T> implements Data<T> {
      * {@link #notifyHidden()} call.
      * @return {@code true} is this data instance is in the shown state.
      */
+    @UiThread
     protected boolean isShown() {
         return mShown;
     }

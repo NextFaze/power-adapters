@@ -1,8 +1,7 @@
 Async Data
 ==========
 
-This project uses semantic versioning
-http://semver.org/
+This project uses [semantic versioning](http://semver.org)
 
 Migrating from Databind
 -----------------------

@@ -1,5 +1,6 @@
 package com.nextfaze.asyncdata;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -46,11 +47,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected ArrayData() {
     }
 
-    /**
-     * Subclasses must call through to super.
-     * @see #close()
-     * @see #onClose()
-     */
+    @CallSuper
     @Override
     protected void onClose() throws Throwable {
         cancelTask();
@@ -268,6 +265,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected void onClear() {
     }
 
+    @CallSuper
     @Override
     protected final void onShown(long millisHidden) {
         if (millisHidden >= mAutoInvalidateDelay) {
@@ -281,10 +279,12 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         loadDataIfAppropriate();
     }
 
+    @CallSuper
     @Override
     protected final void onHidden(long millisShown) {
     }
 
+    @CallSuper
     @Override
     protected final void onHideTimeout() {
         cancelTask();
