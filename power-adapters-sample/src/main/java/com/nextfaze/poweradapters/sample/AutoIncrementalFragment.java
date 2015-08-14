@@ -12,6 +12,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.DataBindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
@@ -33,7 +34,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
     private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapter.Builder(adapter, data)
+        adapter = new LoadingAdapter.Builder(adapter, new DataLoadingDelegate(data))
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
         return adapter;

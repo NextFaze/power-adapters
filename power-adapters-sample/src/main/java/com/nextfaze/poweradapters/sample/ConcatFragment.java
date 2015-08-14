@@ -21,9 +21,11 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapter;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
+import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.binding.DataBindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -56,11 +58,22 @@ public class ConcatFragment extends Fragment {
     private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data,
                                                    @NonNull Binder newsItemBinder) {
         Mapper mapper = new PolymorphicMapperBuilder()
-                .bind(NewsItem.class, newsItemBinder)
+                .bind(NewsItem.class, new BinderWrapper(newsItemBinder) {
+                    @Override
+                    public void bindView(@NonNull final Object item, @NonNull View v, @NonNull Holder holder) {
+                        super.bindView(item, v, holder);
+                        v.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                data.remove(item);
+                            }
+                        });
+                    }
+                })
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
 
-        adapter = new LoadingAdapter.Builder(adapter, data)
+        adapter = new LoadingAdapter.Builder(adapter, new DataLoadingDelegate(data))
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
 

@@ -1,9 +1,7 @@
 Power Adapters
 ==============
 
-This project uses semantic versioning
-http://semver.org/
-
+This project uses [semantic versioning](http://semver.org)
 
 Databind Migration Notes
 ------------------------

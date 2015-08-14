@@ -2,73 +2,45 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
-import android.widget.ListAdapter;
-import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.LoadingObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-/**
- * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Also supports checking a
- * {@link Data} instance for the loading state. The loading indicator is shown at the end of the adapter.
- */
+/** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
 @Accessors(prefix = "m")
-public abstract class LoadingAdapter extends PowerAdapterWrapper {
+public final class LoadingAdapter extends PowerAdapterWrapper {
+
+    @NonNull
+    private final Delegate mDelegate;
+
+    @NonNull
+    private final Item mLoadingItem;
+
+    @NonNull
+    private final EmptyPolicy mEmptyPolicy;
 
     private boolean mVisible;
 
-    protected LoadingAdapter(@NonNull PowerAdapter adapter) {
+    private final boolean mLoadingItemEnabled;
+
+    private LoadingAdapter(@NonNull PowerAdapter adapter,
+                           @NonNull Item loadingItem,
+                           @NonNull EmptyPolicy emptyPolicy,
+                           @NonNull Delegate delegate,
+                           boolean loadingItemEnabled) {
         super(adapter);
-    }
-
-    /**
-     * Override this to indicate the current loading state. Invoke {@link #notifyLoadingChanged()} if the state
-     * changes.
-     * @return {@code true} if currently loading, otherwise {@code false}.
-     */
-    protected abstract boolean isLoading();
-
-    /**
-     * Override this to indicate if the loading item should be shown in the current state. By default returns {@link
-     * #isLoading()}.
-     * @return {@code true} to show the loading item in the current state.
-     */
-    protected boolean isLoadingItemVisible() {
-        return isLoading();
-    }
-
-    /**
-     * Determines whether the loading item should be enabled in the list, allowing it to be clicked or not.
-     * <p/>
-     * Returns {@code false} by default.
-     * @return {@code true} if the loading item should be enabled, otherwise {@code false}.
-     * @see ListAdapter#isEnabled(int)
-     */
-    protected boolean isLoadingItemEnabled() {
-        return false;
-    }
-
-    /** Call this to notify the loading adapter that the value of {@link #isLoading()} has changed. */
-    protected final void notifyLoadingChanged() {
+        mLoadingItem = loadingItem;
+        mEmptyPolicy = emptyPolicy;
+        mDelegate = delegate;
+        mDelegate.mAdapter = this;
+        mLoadingItemEnabled = loadingItemEnabled;
         updateVisible();
-    }
-
-    private void updateVisible() {
-        boolean visible = isLoadingItemVisible();
-        if (visible != mVisible) {
-            mVisible = visible;
-            if (visible) {
-                notifyItemInserted(super.getItemCount());
-            } else {
-                notifyItemRemoved(super.getItemCount());
-            }
-        }
     }
 
     @Override
@@ -104,7 +76,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
     @Override
     public final boolean isEnabled(int position) {
         if (isLoadingItem(position)) {
-            return isLoadingItemEnabled();
+            return mLoadingItemEnabled;
         }
         return super.isEnabled(position);
     }
@@ -137,12 +109,33 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         return super.innerToOuter(innerPosition);
     }
 
+    @Override
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mDelegate.onFirstObserverRegistered();
+    }
+
+    @Override
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mDelegate.onLastObserverUnregistered();
+    }
+
+    private void updateVisible() {
+        boolean visible = mDelegate.isLoading() && mEmptyPolicy.shouldShow(this);
+        if (visible != mVisible) {
+            mVisible = visible;
+            if (visible) {
+                notifyItemInserted(super.getItemCount());
+            } else {
+                notifyItemRemoved(super.getItemCount());
+            }
+        }
+    }
+
     private int loadingViewType() {
         return super.getViewTypeCount();
     }
-
-    @NonNull
-    protected abstract View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent);
 
     private boolean isLoadingItem(int position) {
         if (!mVisible) {
@@ -152,20 +145,25 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         return position == getItemCount() - 1;
     }
 
+    @NonNull
+    private View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
+        return mLoadingItem.get(layoutInflater, parent);
+    }
+
     /** Determines when the loading item is shown while empty. Item is never shown if not loading. */
     public enum EmptyPolicy {
-        /** Show the loading item ONLY while empty. */
+        /** Show the loading item ONLY while wrapped adapter is empty. */
         SHOW_ONLY_IF_EMPTY {
             @Override
             boolean shouldShow(@NonNull LoadingAdapter adapter) {
-                return adapter.isLoading() && adapter.getAdapter().getItemCount() == 0;
+                return adapter.getAdapter().getItemCount() == 0;
             }
         },
         /** Show the loading item regardless of the empty state. */
         SHOW_ALWAYS {
             @Override
             boolean shouldShow(@NonNull LoadingAdapter adapter) {
-                return adapter.isLoading();
+                return true;
             }
         };
 
@@ -178,7 +176,7 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
         private final PowerAdapter mAdapter;
 
         @NonNull
-        private final Data<?> mData;
+        private final Delegate mDelegate;
 
         @Nullable
         private Item mLoadingItem;
@@ -188,9 +186,9 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
 
         private boolean mLoadingItemEnabled;
 
-        public Builder(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
+        public Builder(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
             mAdapter = adapter;
-            mData = data;
+            mDelegate = delegate;
         }
 
         @NonNull
@@ -205,7 +203,6 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
             return this;
         }
 
-        /** @see #isLoadingItemEnabled() */
         @NonNull
         public Builder loadingItemEnabled(boolean loadingItemEnabled) {
             mLoadingItemEnabled = loadingItemEnabled;
@@ -224,86 +221,44 @@ public abstract class LoadingAdapter extends PowerAdapterWrapper {
             if (mLoadingItem == null) {
                 throw new IllegalStateException("No loading item specified");
             }
-            return new Impl(mAdapter, mData, mLoadingItem, mEmptyPolicy, mLoadingItemEnabled);
+            return new LoadingAdapter(mAdapter, mLoadingItem, mEmptyPolicy, mDelegate, mLoadingItemEnabled);
         }
     }
 
-    private static final class Impl extends LoadingAdapter {
+    public static abstract class Delegate {
 
-        @NonNull
-        private final Data<?> mData;
+        @Nullable
+        private LoadingAdapter mAdapter;
 
-        @NonNull
-        private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.SimpleDataObserver() {
-            @Override
-            public void onChange() {
-                notifyLoadingChanged();
-            }
-        };
+        /**
+         * Returns whether the loading item should be shown or not.
+         * @return {@code true} if the item should be shown, otherwise {@code false}.
+         * @see #notifyLoadingChanged()
+         */
+        @UiThread
+        protected abstract boolean isLoading();
 
-        @NonNull
-        private final LoadingObserver mLoadingObserver = new LoadingObserver() {
-            @Override
-            public void onLoadingChange() {
-                notifyLoadingChanged();
-            }
-        };
-
-        @NonNull
-        private final Item mLoadingItem;
-
-        @NonNull
-        private final EmptyPolicy mEmptyPolicy;
-
-        private final boolean mLoadingItemEnabled;
-
-        Impl(@NonNull PowerAdapter adapter,
-             @NonNull Data<?> data,
-             @NonNull Item loadingItem,
-             @NonNull EmptyPolicy emptyPolicy,
-             boolean loadingItemEnabled) {
-            super(adapter);
-            mData = data;
-            mLoadingItem = loadingItem;
-            mLoadingItemEnabled = loadingItemEnabled;
-            mEmptyPolicy = emptyPolicy;
-            // Notify immediately to ensure current Data state is accounted for.
-            notifyLoadingChanged();
-        }
-
-        @Override
+        /**
+         * @see PowerAdapterWrapper#onFirstObserverRegistered()
+         */
+        @UiThread
         protected void onFirstObserverRegistered() {
-            super.onFirstObserverRegistered();
-            mData.registerDataObserver(mDataObserver);
-            mData.registerLoadingObserver(mLoadingObserver);
         }
 
-        @Override
+        /**
+         * @see PowerAdapterWrapper#onLastObserverUnregistered()
+         */
+        @UiThread
         protected void onLastObserverUnregistered() {
-            super.onLastObserverUnregistered();
-            mData.unregisterDataObserver(mDataObserver);
-            mData.unregisterLoadingObserver(mLoadingObserver);
         }
 
-        @Override
-        protected boolean isLoading() {
-            return mData.isLoading();
-        }
-
-        @NonNull
-        @Override
-        protected View newLoadingView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-            return mLoadingItem.get(layoutInflater, parent);
-        }
-
-        @Override
-        protected boolean isLoadingItemVisible() {
-            return mEmptyPolicy.shouldShow(this);
-        }
-
-        @Override
-        protected boolean isLoadingItemEnabled() {
-            return mLoadingItemEnabled;
+        /** Must be called when the value of {@link #isLoading()} changes. */
+        @UiThread
+        protected final void notifyLoadingChanged() {
+            if (mAdapter != null) {
+                mAdapter.updateVisible();
+            }
         }
     }
+
 }
