@@ -225,13 +225,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     }
 
     @Override
-    public final void invalidate() {
-        mDirty = true;
-        cancelTask();
-        loadDataIfAppropriate();
-    }
-
-    @Override
     public final void refresh() {
         mDirty = true;
         cancelTask();
@@ -242,6 +235,11 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     public final void reload() {
         clear();
         refresh();
+    }
+
+    @Override
+    public final void invalidate() {
+        mDirty = true;
     }
 
     @Override
@@ -276,6 +274,10 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
             mDirty = true;
+        }
+        if (mDirty) {
+            cancelTask();
+            clear();
         }
         loadDataIfAppropriate();
     }
