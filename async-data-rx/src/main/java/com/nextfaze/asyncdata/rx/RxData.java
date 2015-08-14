@@ -11,9 +11,6 @@ import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.nextfaze.asyncdata.rx.ThreadUtils.assertUiThread;
 
 public final class RxData {
@@ -23,18 +20,17 @@ public final class RxData {
 
     @CheckResult
     @NonNull
-    public static <T> Observable<List<T>> contents(@NonNull final Data<T> data) {
-        // TODO: Copy vs non-copy version.
-        return Observable.create(new Observable.OnSubscribe<List<T>>() {
+    public static <T> Observable<Data<T>> elements(@NonNull final Data<T> data) {
+        return Observable.create(new Observable.OnSubscribe<Data<T>>() {
             @Override
-            public void call(final Subscriber<? super List<T>> subscriber) {
+            public void call(final Subscriber<? super Data<T>> subscriber) {
                 assertUiThread();
-                subscriber.onNext(toList(data));
+                subscriber.onNext(data);
                 final DataObserver dataObserver = new SimpleDataObserver() {
                     @Override
                     public void onChange() {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(toList(data));
+                            subscriber.onNext(data);
                         }
                     }
                 };
@@ -177,14 +173,5 @@ public final class RxData {
                 });
             }
         });
-    }
-
-    @NonNull
-    private static <T> List<T> toList(@NonNull Data<T> data) {
-        ArrayList<T> list = new ArrayList<T>(data.size());
-        for (T t : data) {
-            list.add(t);
-        }
-        return list;
     }
 }
