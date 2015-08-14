@@ -5,15 +5,15 @@ import android.widget.BaseAdapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /** Presents the contents of a {@link Data} instance, and responds to change events. */
 @Accessors(prefix = "m")
 public abstract class DataAdapter<T> extends BaseAdapter {
 
     @NonNull
-    private final Set<DataSetObserver> mDataObservers = new CopyOnWriteArraySet<>();
+    private final Set<DataSetObserver> mDataObservers = new HashSet<>();
 
     @NonNull
     private final Data<T> mData;
@@ -22,26 +22,6 @@ public abstract class DataAdapter<T> extends BaseAdapter {
     private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChange() {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             notifyDataSetChanged();
         }
     };

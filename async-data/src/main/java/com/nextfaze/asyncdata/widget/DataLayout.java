@@ -389,11 +389,7 @@ public class DataLayout extends RelativeLayout {
         mDataWatcher.setEnabled(shown);
         if (shown != mShown) {
             mShown = shown;
-            if (shown) {
-                mShownTime = elapsedRealtime();
-            } else {
-                mShownTime = 0;
-            }
+            mShownTime = shown ? elapsedRealtime() : 0;
             updateViews();
             if (shown) {
                 if (mData != null) {
@@ -595,11 +591,6 @@ public class DataLayout extends RelativeLayout {
     }
 
     //endregion
-
-    @NonNull
-    private static String name(@NonNull View v) {
-        return v.getResources().getResourceEntryName(v.getId());
-    }
 
     /** Allows control of visibility of each {@link DataLayout} component. */
     public interface VisibilityPolicy {
