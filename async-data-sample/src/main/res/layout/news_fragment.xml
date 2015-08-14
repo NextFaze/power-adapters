@@ -49,6 +49,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             app:contentView="@+id/news_fragment_list"
+            app:loadingView="@+id/news_fragment_loading"
             app:emptyView="@+id/news_fragment_empty"
             app:errorView="@+id/news_fragment_error">
 
@@ -57,7 +58,17 @@
         <ListView
                 android:id="@+id/news_fragment_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:background="#ff00ff00"/>
+
+        <!-- Loading -->
+
+        <ProgressBar
+                style="@android:style/Widget.Holo.ProgressBar"
+                android:id="@+id/news_fragment_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"/>
 
         <!-- Empty -->
 

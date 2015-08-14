@@ -459,9 +459,6 @@ public class DataLayout extends RelativeLayout {
 
     @Nullable
     private View viewToBeShown() {
-        if (mContentView != null && mVisibilityPolicy.shouldShow(this, mContentView)) {
-            return mContentView;
-        }
         if (mLoadingView != null && mVisibilityPolicy.shouldShow(this, mLoadingView)) {
             return mLoadingView;
         }
@@ -471,40 +468,27 @@ public class DataLayout extends RelativeLayout {
         if (mEmptyView != null && mVisibilityPolicy.shouldShow(this, mEmptyView)) {
             return mEmptyView;
         }
+        if (mContentView != null && mVisibilityPolicy.shouldShow(this, mContentView)) {
+            return mContentView;
+        }
         return null;
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
     private boolean shouldShow(@NonNull View v) {
-        if (v == mContentView) {
-            return shouldShowContents();
-        }
         if (v == mLoadingView) {
-            return shouldShowLoading();
+            return mData != null && mData.isLoading() && mData.isEmpty();
         }
         if (v == mEmptyView) {
-            return shouldShowEmpty();
+            return mData == null || mData.isEmpty();
         }
         if (v == mErrorView) {
-            return shouldShowError();
+            return mErrorMessage != null;
+        }
+        if (v == mContentView) {
+            return mData != null;
         }
         return false;
-    }
-
-    private boolean shouldShowContents() {
-        return mData != null && !mData.isEmpty();
-    }
-
-    private boolean shouldShowLoading() {
-        return mData != null && mData.isLoading();
-    }
-
-    private boolean shouldShowError() {
-        return mErrorMessage != null;
-    }
-
-    private boolean shouldShowEmpty() {
-        return mData == null || mData.isEmpty();
     }
 
     private void updateErrorView() {
@@ -634,10 +618,10 @@ public class DataLayout extends RelativeLayout {
          * Called to determine whether or not to show the specified view. Callbacks are made to for each of the
          * following views in order:
          * <ol>
-         * <li>Content</li>
          * <li>Loading</li>
          * <li>Error</li>
          * <li>Empty</li>
+         * <li>Content</li>
          * </ol>
          * The view of the first callback to return {@code true} will be made visible.
          * @param dataLayout The parent {@link DataLayout}.
