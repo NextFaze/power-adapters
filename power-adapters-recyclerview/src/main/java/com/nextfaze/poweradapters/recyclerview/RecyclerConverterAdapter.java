@@ -7,13 +7,13 @@ import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.Holder> {
 
     @NonNull
-    private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new CopyOnWriteArraySet<>();
+    private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
 
     @NonNull
     private final PowerAdapter mPowerAdapter;

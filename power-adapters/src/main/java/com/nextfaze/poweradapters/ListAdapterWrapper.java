@@ -8,13 +8,13 @@ import android.widget.ListAdapter;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class ListAdapterWrapper extends BaseAdapter {
 
     @NonNull
-    private final Set<DataSetObserver> mDataSetObservers = new CopyOnWriteArraySet<>();
+    private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
 
     @NonNull
     protected final ListAdapter mAdapter;
