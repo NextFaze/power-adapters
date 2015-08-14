@@ -2,11 +2,13 @@ package com.nextfaze.asyncdata;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import com.nextfaze.asyncdata.widget.DataLayout;
 import lombok.NonNull;
 
+/** Converts a {@link Throwable} into a {@link CharSequence} for presentation in a {@link DataLayout}. */
 public interface ErrorFormatter {
     @Nullable
-    String format(@NonNull Context context, @NonNull Throwable e);
+    CharSequence format(@NonNull Context context, @NonNull Throwable e);
 
     /** Uses {@link Throwable#toString()} to render an error. */
     ErrorFormatter DEFAULT = new ErrorFormatter() {

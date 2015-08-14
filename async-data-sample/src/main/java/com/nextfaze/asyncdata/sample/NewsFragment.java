@@ -166,7 +166,7 @@ public final class NewsFragment extends Fragment {
         menu.add("Invalidate").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateAlClick();
+                onInvalidateClick();
                 return true;
             }
         });
@@ -204,7 +204,7 @@ public final class NewsFragment extends Fragment {
         mManualIncrementalData.refresh();
     }
 
-    void onInvalidateAlClick() {
+    void onInvalidateClick() {
         mSimpleData.invalidate();
         mAutoIncrementalData.invalidate();
         mManualIncrementalData.invalidate();
