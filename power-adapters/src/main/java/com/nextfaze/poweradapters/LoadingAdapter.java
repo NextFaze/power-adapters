@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
@@ -109,12 +110,14 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
         return super.innerToOuter(innerPosition);
     }
 
+    @CallSuper
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         mDelegate.onFirstObserverRegistered();
     }
 
+    @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
@@ -225,6 +228,7 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
         }
     }
 
+    /** Invoked by {@link LoadingAdapter} to determine when the loading item is shown. */
     public static abstract class Delegate {
 
         @Nullable
@@ -232,6 +236,7 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
 
         /**
          * Returns whether the loading item should be shown or not.
+         * Invoke {@link #notifyLoadingChanged()} to inform the owning adapter if the empty state has changed.
          * @return {@code true} if the item should be shown, otherwise {@code false}.
          * @see #notifyLoadingChanged()
          */

@@ -25,6 +25,7 @@ import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
+import com.nextfaze.poweradapters.data.DataEmptyDelegate;
 import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import lombok.NonNull;
 
@@ -77,7 +78,7 @@ public class ConcatFragment extends Fragment {
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
 
-        adapter = new EmptyAdapter.Builder(adapter, data)
+        adapter = new EmptyAdapter.Builder(adapter, new DataEmptyDelegate(data))
                 .emptyItemResource(R.layout.list_empty_item)
                 .build();
 
