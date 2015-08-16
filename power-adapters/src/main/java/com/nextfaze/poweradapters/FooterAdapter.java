@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +10,7 @@ import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-/** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
-public abstract class FooterAdapter extends PowerAdapterWrapper {
+abstract class FooterAdapter extends PowerAdapterWrapper {
 
     FooterAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
@@ -117,71 +115,17 @@ public abstract class FooterAdapter extends PowerAdapterWrapper {
         return superViewTypeCount - itemViewType;
     }
 
-    public enum EmptyPolicy {
-        SHOW() {
-            @Override
-            boolean shouldShow(@NonNull FooterAdapter adapter) {
-                return true;
-            }
-        },
-        HIDE {
-            @Override
-            boolean shouldShow(@NonNull FooterAdapter adapter) {
-                return adapter.getAdapter().getItemCount() > 0;
-            }
-        };
-
-        abstract boolean shouldShow(@NonNull FooterAdapter adapter);
-    }
-
-    public static final class Builder {
-
-        @NonNull
-        private final PowerAdapter mAdapter;
+    static final class Impl extends FooterAdapter {
 
         @NonNull
         private final ArrayList<Item> mFooters = new ArrayList<>();
 
         @NonNull
-        private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
+        private final FooterAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
-        public Builder(@NonNull PowerAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        @NonNull
-        public Builder footerView(@NonNull View footerView) {
-            mFooters.add(new Item(footerView));
-            return this;
-        }
-
-        @NonNull
-        public Builder footerResource(@LayoutRes int footerResource) {
-            mFooters.add(new Item(footerResource));
-            return this;
-        }
-
-        @NonNull
-        public Builder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
-            mEmptyPolicy = emptyPolicy;
-            return this;
-        }
-
-        @NonNull
-        public FooterAdapter build() {
-            return new Impl(mAdapter, mFooters, mEmptyPolicy);
-        }
-    }
-
-    private static final class Impl extends FooterAdapter {
-
-        @NonNull
-        private final ArrayList<Item> mFooters = new ArrayList<>();
-
-        @NonNull
-        private final EmptyPolicy mEmptyPolicy;
-
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
+        Impl(@NonNull PowerAdapter adapter,
+             @NonNull List<Item> footers,
+             @NonNull FooterAdapterBuilder.EmptyPolicy emptyPolicy) {
             super(adapter);
             mEmptyPolicy = emptyPolicy;
             mFooters.addAll(footers);

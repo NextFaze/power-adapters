@@ -11,3 +11,6 @@ Databind Migration Notes
 The `DisposeableListAdapter` interface has been eliminated. You no longer need to `dispose` of adapters. Instead,
 adapters keep track of external observers, and use a reference counting system to automatically unregister their own
 internal observers once no external clients are observing.
+
+TODO Benefits of this lib:
+* Mention the order of wrapping adapters

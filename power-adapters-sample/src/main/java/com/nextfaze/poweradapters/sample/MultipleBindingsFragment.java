@@ -8,8 +8,8 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.DividerAdapter;
-import com.nextfaze.poweradapters.HeaderAdapter;
+import com.nextfaze.poweradapters.DividerAdapterBuilder;
+import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
@@ -61,14 +61,14 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        adapter = new HeaderAdapter.Builder(adapter)
+        adapter = new HeaderAdapterBuilder(adapter)
                 .headerResource(R.layout.news_header_item)
-                .emptyPolicy(HeaderAdapter.EmptyPolicy.HIDE)
+                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.HIDE)
                 .build();
-        adapter = new DividerAdapter.DividerAdapterBuilder(adapter)
+        adapter = new DividerAdapterBuilder(adapter)
                 .innerItemResource(R.layout.list_divider_item)
                 .outerItemResource(R.layout.list_divider_item)
-                .emptyPolicy(DividerAdapter.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
+                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
                 .build();
         return adapter;
     }
