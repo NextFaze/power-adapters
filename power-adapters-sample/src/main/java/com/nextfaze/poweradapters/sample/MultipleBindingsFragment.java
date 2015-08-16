@@ -94,12 +94,18 @@ public final class MultipleBindingsFragment extends BaseFragment {
 
     @Override
     void onReloadClick() {
-        mData.clear();
+        mData.reload();
     }
 
     @Override
     void onRefreshClick() {
+        mData.refresh();
+    }
+
+    @Override
+    void onInvalidateClick() {
         mData.invalidate();
+        showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 
     static final class NewsItemHolder extends ViewHolder {
