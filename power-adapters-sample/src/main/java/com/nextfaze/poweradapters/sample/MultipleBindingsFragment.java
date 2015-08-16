@@ -13,11 +13,11 @@ import com.nextfaze.poweradapters.HeaderAdapter;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
-import com.nextfaze.poweradapters.binding.DataBindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.binding.ViewHolderBinder;
+import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;

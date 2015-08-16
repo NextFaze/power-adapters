@@ -260,5 +260,4 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
             }
         }
     }
-
 }

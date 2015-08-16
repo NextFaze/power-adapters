@@ -1,6 +1,8 @@
-package com.nextfaze.poweradapters.binding;
+package com.nextfaze.poweradapters.data;
 
 import com.nextfaze.asyncdata.Data;
+import com.nextfaze.poweradapters.binding.BindingAdapter;
+import com.nextfaze.poweradapters.binding.Mapper;
 import lombok.NonNull;
 
 public final class DataBindingAdapter extends BindingAdapter {
