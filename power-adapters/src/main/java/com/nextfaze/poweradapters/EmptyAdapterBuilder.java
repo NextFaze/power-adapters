@@ -1,0 +1,139 @@
+package com.nextfaze.poweradapters;
+
+import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
+import android.view.View;
+import android.widget.ListAdapter;
+import lombok.NonNull;
+
+public final class EmptyAdapterBuilder {
+
+    @NonNull
+    private final Delegate mDelegate;
+
+    @NonNull
+    private final PowerAdapter mAdapter;
+
+    @Nullable
+    private Item mEmptyItem;
+
+    private boolean mEmptyItemEnabled;
+
+    public EmptyAdapterBuilder(@NonNull PowerAdapter adapter) {
+        this(adapter, new DefaultDelegate(adapter));
+    }
+
+    public EmptyAdapterBuilder(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
+        mDelegate = delegate;
+        mAdapter = adapter;
+    }
+
+    @NonNull
+    public EmptyAdapterBuilder emptyItemResource(@LayoutRes int emptyItemResource) {
+        mEmptyItem = new Item(emptyItemResource);
+        return this;
+    }
+
+    @NonNull
+    public EmptyAdapterBuilder emptyItemView(@NonNull View emptyItemView) {
+        mEmptyItem = new Item(emptyItemView);
+        return this;
+    }
+
+    /**
+     * Sets whether the empty item should be enabled in the list, allowing it to be clicked or not.
+     * @param emptyItemEnabled {@code true} to make it enabled, otherwise {@code false} to make it disabled.
+     * @see ListAdapter#isEnabled(int)
+     */
+    @NonNull
+    public EmptyAdapterBuilder emptyItemEnabled(boolean emptyItemEnabled) {
+        mEmptyItemEnabled = emptyItemEnabled;
+        return this;
+    }
+
+    @NonNull
+    public EmptyAdapter build() {
+        if (mEmptyItem == null) {
+            throw new IllegalStateException("No empty item specified");
+        }
+        return new EmptyAdapter(mAdapter, mDelegate, mEmptyItem, mEmptyItemEnabled);
+    }
+
+    /** Empty state is determined by wrapped adapter size. */
+    private static class DefaultDelegate extends Delegate {
+
+        @NonNull
+        private final PowerAdapter mAdapter;
+
+        @NonNull
+        private final DataObserver mDataObserver = new SimpleDataObserver() {
+            @Override
+            public void onChanged() {
+                notifyEmptyChanged();
+            }
+        };
+
+        DefaultDelegate(@NonNull PowerAdapter adapter) {
+            mAdapter = adapter;
+        }
+
+        @Override
+        protected boolean isEmpty() {
+            return mAdapter.getItemCount() == 0;
+        }
+
+        @Override
+        protected void onFirstObserverRegistered() {
+            super.onFirstObserverRegistered();
+            mAdapter.registerDataObserver(mDataObserver);
+        }
+
+        @Override
+        protected void onLastObserverUnregistered() {
+            super.onLastObserverUnregistered();
+            mAdapter.unregisterDataObserver(mDataObserver);
+        }
+    }
+
+    /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
+    public static abstract class Delegate {
+
+        @Nullable
+        private EmptyAdapter mAdapter;
+
+        /**
+         * Determines if the empty item should currently be shown.
+         * Invoke {@link #notifyEmptyChanged()} to inform the owning adapter if the empty state has changed.
+         * @return {@code true} if the empty item should be shown right now, otherwise {@code false}.
+         * @see #notifyEmptyChanged()
+         */
+        protected abstract boolean isEmpty();
+
+        /**
+         * @see PowerAdapterWrapper#onFirstObserverRegistered()
+         */
+        @UiThread
+        protected void onFirstObserverRegistered() {
+        }
+
+        /**
+         * @see PowerAdapterWrapper#onLastObserverUnregistered()
+         */
+        @UiThread
+        protected void onLastObserverUnregistered() {
+        }
+
+        /** Must be called when the value of {@link #isEmpty()} changes. */
+        @UiThread
+        protected final void notifyEmptyChanged() {
+            if (mAdapter != null) {
+                mAdapter.updateVisible();
+            }
+        }
+
+        void setAdapter(@Nullable EmptyAdapter adapter) {
+            mAdapter = adapter;
+        }
+    }
+}

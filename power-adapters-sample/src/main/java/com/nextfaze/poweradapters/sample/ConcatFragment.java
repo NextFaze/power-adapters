@@ -16,7 +16,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
-import com.nextfaze.poweradapters.EmptyAdapter;
+import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapter;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -78,7 +78,7 @@ public class ConcatFragment extends Fragment {
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
 
-        adapter = new EmptyAdapter.Builder(adapter, new DataEmptyDelegate(data))
+        adapter = new EmptyAdapterBuilder(adapter, new DataEmptyDelegate(data))
                 .emptyItemResource(R.layout.list_empty_item)
                 .build();
 

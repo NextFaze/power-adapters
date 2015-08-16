@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.data;
 
 import com.nextfaze.asyncdata.Data;
-import com.nextfaze.poweradapters.EmptyAdapter;
+import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import lombok.NonNull;
 
-public final class DataEmptyDelegate extends EmptyAdapter.Delegate {
+public final class DataEmptyDelegate extends EmptyAdapterBuilder.Delegate {
 
     @NonNull
     private final Data<?> mData;
