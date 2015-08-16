@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
-public final class DividerAdapter extends PowerAdapterWrapper {
+final class DividerAdapter extends PowerAdapterWrapper {
 
     private static final int ITEM_VIEW_TYPE_INNER = 0;
     private static final int ITEM_VIEW_TYPE_LEADING = 1;
@@ -18,7 +18,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     private static final int ITEM_VIEW_TYPE_TOTAL = 3;
 
     @NonNull
-    private final EmptyPolicy mEmptyPolicy;
+    private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     @LayoutRes
     private final int mLeadingItemResource;
@@ -30,7 +30,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     private final int mInnerItemResource;
 
     DividerAdapter(@NonNull PowerAdapter adapter,
-                   @NonNull EmptyPolicy emptyPolicy,
+                   @NonNull DividerAdapterBuilder.EmptyPolicy emptyPolicy,
                    @LayoutRes int leadingItemResource,
                    @LayoutRes int trailingItemResource,
                    @LayoutRes int innerItemResource) {
@@ -44,7 +44,7 @@ public final class DividerAdapter extends PowerAdapterWrapper {
     @Override
     public int getItemCount() {
         int superCount = super.getItemCount();
-        if (mEmptyPolicy != EmptyPolicy.SHOW_LEADING && superCount <= 0) {
+        if (mEmptyPolicy != DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING && superCount <= 0) {
             return 0;
         }
         int count;
@@ -198,77 +198,5 @@ public final class DividerAdapter extends PowerAdapterWrapper {
 
     private int trailingDividerItemViewType() {
         return super.getViewTypeCount() + ITEM_VIEW_TYPE_TRAILING;
-    }
-
-    public enum EmptyPolicy {
-        /** A single leading divider will be shown if the wrapped adapter is empty. */
-        SHOW_LEADING,
-        /** No dividers are shown if the wrapped adapter is empty. */
-        SHOW_NOTHING
-    }
-
-    public static final class Builder {
-
-        @NonNull
-        private final PowerAdapter mAdapter;
-
-        @NonNull
-        private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_LEADING;
-
-        @LayoutRes
-        private int mLeadingItemResource;
-
-        @LayoutRes
-        private int mTrailingItemResource;
-
-        @LayoutRes
-        private int mInnerItemResource;
-
-        public Builder(@NonNull PowerAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        /**
-         * Set the policy that determines what dividers are shown if the wrapped adapter is empty. Defaults to {@link
-         * EmptyPolicy#SHOW_LEADING}
-         */
-        @NonNull
-        public Builder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
-            mEmptyPolicy = emptyPolicy;
-            return this;
-        }
-
-        /** Sets layout resource of the divider that appears BEFORE the wrapped adapters items. */
-        @NonNull
-        public Builder leadingItemResource(@LayoutRes int itemResource) {
-            mLeadingItemResource = itemResource;
-            return this;
-        }
-
-        /** Sets layout resource of the divider that appears AFTER the wrapped adapters items. */
-        @NonNull
-        public Builder trailingItemResource(@LayoutRes int itemResource) {
-            mTrailingItemResource = itemResource;
-            return this;
-        }
-
-        /** Sets the layout resource of the divider that appears between all of the wrapped adapters items. */
-        @NonNull
-        public Builder innerItemResource(@LayoutRes int itemResource) {
-            mInnerItemResource = itemResource;
-            return this;
-        }
-
-        /** Sets layout resource of the divider that appears BEFORE and AFTER the wrapped adapters items. */
-        @NonNull
-        public Builder outerItemResource(@LayoutRes int itemResource) {
-            return leadingItemResource(itemResource).trailingItemResource(itemResource);
-        }
-
-        @NonNull
-        public DividerAdapter build() {
-            return new DividerAdapter(mAdapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
-                    mInnerItemResource);
-        }
     }
 }

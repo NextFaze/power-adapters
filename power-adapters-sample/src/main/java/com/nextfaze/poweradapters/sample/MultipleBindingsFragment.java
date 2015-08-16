@@ -65,10 +65,10 @@ public final class MultipleBindingsFragment extends BaseFragment {
                 .headerResource(R.layout.news_header_item)
                 .emptyPolicy(HeaderAdapter.EmptyPolicy.HIDE)
                 .build();
-        adapter = new DividerAdapter.Builder(adapter)
+        adapter = new DividerAdapter.DividerAdapterBuilder(adapter)
                 .innerItemResource(R.layout.list_divider_item)
                 .outerItemResource(R.layout.list_divider_item)
-                .emptyPolicy(DividerAdapter.EmptyPolicy.SHOW_LEADING)
+                .emptyPolicy(DividerAdapter.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
                 .build();
         return adapter;
     }
