@@ -1,10 +1,13 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
 public final class HeaderAdapterBuilder {
@@ -42,7 +45,7 @@ public final class HeaderAdapterBuilder {
 
     @NonNull
     public HeaderAdapter build() {
-        return new HeaderAdapter.Impl(mAdapter, mHeaders, mEmptyPolicy);
+        return new Impl(mAdapter, mHeaders, mEmptyPolicy);
     }
 
     public enum EmptyPolicy {
@@ -60,5 +63,36 @@ public final class HeaderAdapterBuilder {
         };
 
         abstract boolean shouldShow(@NonNull HeaderAdapter adapter);
+    }
+
+    static final class Impl extends HeaderAdapter {
+
+        @NonNull
+        private final ArrayList<Item> mHeaders;
+
+        @NonNull
+        private final EmptyPolicy mEmptyPolicy;
+
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
+            super(adapter);
+            mHeaders = new ArrayList<>(footers);
+            mEmptyPolicy = emptyPolicy;
+        }
+
+        @NonNull
+        @Override
+        protected View getHeaderView(@NonNull LayoutInflater layoutInflater,
+                                     @NonNull ViewGroup parent,
+                                     int headerIndex) {
+            return mHeaders.get(headerIndex).get(layoutInflater, parent);
+        }
+
+        @Override
+        protected int getHeaderCount(boolean visibleOnly) {
+            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
+                return 0;
+            }
+            return mHeaders.size();
+        }
     }
 }

@@ -5,9 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 abstract class HeaderAdapter extends PowerAdapterWrapper {
@@ -113,34 +110,4 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
         return superViewTypeCount - itemViewType;
     }
 
-    static final class Impl extends HeaderAdapter {
-
-        @NonNull
-        private final ArrayList<Item> mHeaders = new ArrayList<>();
-
-        @NonNull
-        private final HeaderAdapterBuilder.EmptyPolicy mEmptyPolicy;
-
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull HeaderAdapterBuilder.EmptyPolicy emptyPolicy) {
-            super(adapter);
-            mEmptyPolicy = emptyPolicy;
-            mHeaders.addAll(footers);
-        }
-
-        @NonNull
-        @Override
-        protected View getHeaderView(@NonNull LayoutInflater layoutInflater,
-                                     @NonNull ViewGroup parent,
-                                     int headerIndex) {
-            return mHeaders.get(headerIndex).get(layoutInflater, parent);
-        }
-
-        @Override
-        protected int getHeaderCount(boolean visibleOnly) {
-            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
-                return 0;
-            }
-            return mHeaders.size();
-        }
-    }
 }

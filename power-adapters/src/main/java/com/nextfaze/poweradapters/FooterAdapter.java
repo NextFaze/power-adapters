@@ -5,9 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 abstract class FooterAdapter extends PowerAdapterWrapper {
@@ -115,36 +112,4 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
         return superViewTypeCount - itemViewType;
     }
 
-    static final class Impl extends FooterAdapter {
-
-        @NonNull
-        private final ArrayList<Item> mFooters = new ArrayList<>();
-
-        @NonNull
-        private final FooterAdapterBuilder.EmptyPolicy mEmptyPolicy;
-
-        Impl(@NonNull PowerAdapter adapter,
-             @NonNull List<Item> footers,
-             @NonNull FooterAdapterBuilder.EmptyPolicy emptyPolicy) {
-            super(adapter);
-            mEmptyPolicy = emptyPolicy;
-            mFooters.addAll(footers);
-        }
-
-        @NonNull
-        @Override
-        protected View getFooterView(@NonNull LayoutInflater layoutInflater,
-                                     @NonNull ViewGroup parent,
-                                     int footerIndex) {
-            return mFooters.get(footerIndex).get(layoutInflater, parent);
-        }
-
-        @Override
-        protected int getFooterCount(boolean visibleOnly) {
-            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
-                return 0;
-            }
-            return mFooters.size();
-        }
-    }
 }

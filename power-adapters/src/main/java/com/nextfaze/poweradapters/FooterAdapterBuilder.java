@@ -1,10 +1,13 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 public final class FooterAdapterBuilder {
@@ -42,7 +45,7 @@ public final class FooterAdapterBuilder {
 
     @NonNull
     public FooterAdapter build() {
-        return new FooterAdapter.Impl(mAdapter, mFooters, mEmptyPolicy);
+        return new Impl(mAdapter, mFooters, mEmptyPolicy);
     }
 
     public enum EmptyPolicy {
@@ -60,5 +63,36 @@ public final class FooterAdapterBuilder {
         };
 
         abstract boolean shouldShow(@NonNull FooterAdapter adapter);
+    }
+
+    static final class Impl extends FooterAdapter {
+
+        @NonNull
+        private final ArrayList<Item> mFooters;
+
+        @NonNull
+        private final EmptyPolicy mEmptyPolicy;
+
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
+            super(adapter);
+            mFooters = new ArrayList<>(footers);
+            mEmptyPolicy = emptyPolicy;
+        }
+
+        @NonNull
+        @Override
+        protected View getFooterView(@NonNull LayoutInflater layoutInflater,
+                                     @NonNull ViewGroup parent,
+                                     int footerIndex) {
+            return mFooters.get(footerIndex).get(layoutInflater, parent);
+        }
+
+        @Override
+        protected int getFooterCount(boolean visibleOnly) {
+            if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
+                return 0;
+            }
+            return mFooters.size();
+        }
     }
 }
