@@ -7,7 +7,7 @@ import android.view.View;
 import butterknife.Bind;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.LoadingAdapter;
+import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
@@ -39,7 +39,7 @@ public final class ManualIncrementalFragment extends BaseFragment {
     private PowerAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapter.Builder(adapter, new DataLoadingDelegate(data))
+        adapter = new LoadingAdapterBuilder(adapter, new DataLoadingDelegate(data))
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
         // "Load next" adapter lets user click the button to load next increment of results.

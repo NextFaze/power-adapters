@@ -1,13 +1,9 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CallSuper;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -15,31 +11,31 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 /** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
 @Accessors(prefix = "m")
-public final class LoadingAdapter extends PowerAdapterWrapper {
+final class LoadingAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final Delegate mDelegate;
+    private final LoadingAdapterBuilder.Delegate mDelegate;
 
     @NonNull
     private final Item mLoadingItem;
 
     @NonNull
-    private final EmptyPolicy mEmptyPolicy;
+    private final LoadingAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     private boolean mVisible;
 
     private final boolean mLoadingItemEnabled;
 
-    private LoadingAdapter(@NonNull PowerAdapter adapter,
-                           @NonNull Item loadingItem,
-                           @NonNull EmptyPolicy emptyPolicy,
-                           @NonNull Delegate delegate,
-                           boolean loadingItemEnabled) {
+    LoadingAdapter(@NonNull PowerAdapter adapter,
+                   @NonNull Item loadingItem,
+                   @NonNull LoadingAdapterBuilder.EmptyPolicy emptyPolicy,
+                   @NonNull LoadingAdapterBuilder.Delegate delegate,
+                   boolean loadingItemEnabled) {
         super(adapter);
         mLoadingItem = loadingItem;
         mEmptyPolicy = emptyPolicy;
         mDelegate = delegate;
-        mDelegate.mAdapter = this;
+        mDelegate.setAdapter(this);
         mLoadingItemEnabled = loadingItemEnabled;
         updateVisible();
     }
@@ -124,7 +120,7 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
         mDelegate.onLastObserverUnregistered();
     }
 
-    private void updateVisible() {
+    void updateVisible() {
         boolean visible = mDelegate.isLoading() && mEmptyPolicy.shouldShow(this);
         if (visible != mVisible) {
             mVisible = visible;
@@ -153,116 +149,4 @@ public final class LoadingAdapter extends PowerAdapterWrapper {
         return mLoadingItem.get(layoutInflater, parent);
     }
 
-    /** Determines when the loading item is shown while empty. Item is never shown if not loading. */
-    public enum EmptyPolicy {
-        /** Show the loading item ONLY while wrapped adapter is empty. */
-        SHOW_ONLY_IF_EMPTY {
-            @Override
-            boolean shouldShow(@NonNull LoadingAdapter adapter) {
-                return adapter.getAdapter().getItemCount() == 0;
-            }
-        },
-        /** Show the loading item regardless of the empty state. */
-        SHOW_ALWAYS {
-            @Override
-            boolean shouldShow(@NonNull LoadingAdapter adapter) {
-                return true;
-            }
-        };
-
-        abstract boolean shouldShow(@NonNull LoadingAdapter adapter);
-    }
-
-    public static final class Builder {
-
-        @NonNull
-        private final PowerAdapter mAdapter;
-
-        @NonNull
-        private final Delegate mDelegate;
-
-        @Nullable
-        private Item mLoadingItem;
-
-        @NonNull
-        private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_ALWAYS;
-
-        private boolean mLoadingItemEnabled;
-
-        public Builder(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
-            mAdapter = adapter;
-            mDelegate = delegate;
-        }
-
-        @NonNull
-        public Builder loadingItemResource(@LayoutRes int loadingItemResource) {
-            mLoadingItem = new Item(loadingItemResource);
-            return this;
-        }
-
-        @NonNull
-        public Builder loadingItemView(@NonNull View loadingItemView) {
-            mLoadingItem = new Item(loadingItemView);
-            return this;
-        }
-
-        @NonNull
-        public Builder loadingItemEnabled(boolean loadingItemEnabled) {
-            mLoadingItemEnabled = loadingItemEnabled;
-            return this;
-        }
-
-        /** If {@code true}, loading item is only shown while {@link Adapter#isEmpty()} is {@code true}. */
-        @NonNull
-        public Builder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
-            mEmptyPolicy = emptyPolicy;
-            return this;
-        }
-
-        @NonNull
-        public LoadingAdapter build() {
-            if (mLoadingItem == null) {
-                throw new IllegalStateException("No loading item specified");
-            }
-            return new LoadingAdapter(mAdapter, mLoadingItem, mEmptyPolicy, mDelegate, mLoadingItemEnabled);
-        }
-    }
-
-    /** Invoked by {@link LoadingAdapter} to determine when the loading item is shown. */
-    public static abstract class Delegate {
-
-        @Nullable
-        private LoadingAdapter mAdapter;
-
-        /**
-         * Returns whether the loading item should be shown or not.
-         * Invoke {@link #notifyLoadingChanged()} to inform the owning adapter if the empty state has changed.
-         * @return {@code true} if the item should be shown, otherwise {@code false}.
-         * @see #notifyLoadingChanged()
-         */
-        @UiThread
-        protected abstract boolean isLoading();
-
-        /**
-         * @see PowerAdapterWrapper#onFirstObserverRegistered()
-         */
-        @UiThread
-        protected void onFirstObserverRegistered() {
-        }
-
-        /**
-         * @see PowerAdapterWrapper#onLastObserverUnregistered()
-         */
-        @UiThread
-        protected void onLastObserverUnregistered() {
-        }
-
-        /** Must be called when the value of {@link #isLoading()} changes. */
-        @UiThread
-        protected final void notifyLoadingChanged() {
-            if (mAdapter != null) {
-                mAdapter.updateVisible();
-            }
-        }
-    }
 }

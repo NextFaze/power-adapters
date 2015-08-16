@@ -25,9 +25,9 @@ final class EmptyAdapter extends PowerAdapterWrapper {
     private boolean mVisible;
 
     EmptyAdapter(@NonNull PowerAdapter adapter,
-                         @NonNull EmptyAdapterBuilder.Delegate delegate,
-                         @NonNull Item emptyItem,
-                         boolean emptyItemEnabled) {
+                 @NonNull EmptyAdapterBuilder.Delegate delegate,
+                 @NonNull Item emptyItem,
+                 boolean emptyItemEnabled) {
         super(adapter);
         mEmptyItem = emptyItem;
         mDelegate = delegate;

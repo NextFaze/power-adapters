@@ -18,7 +18,7 @@ import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.LoadingAdapter;
+import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
@@ -74,7 +74,7 @@ public class ConcatFragment extends Fragment {
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
 
-        adapter = new LoadingAdapter.Builder(adapter, new DataLoadingDelegate(data))
+        adapter = new LoadingAdapterBuilder(adapter, new DataLoadingDelegate(data))
                 .loadingItemResource(R.layout.list_loading_item)
                 .build();
 
