@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CallSuper;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
@@ -141,12 +142,14 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
         return innerPosition;
     }
 
+    @CallSuper
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         mAdapter.registerDataObserver(mDataSetObserver);
     }
 
+    @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
