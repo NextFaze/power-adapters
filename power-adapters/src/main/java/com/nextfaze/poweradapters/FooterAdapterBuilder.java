@@ -76,14 +76,14 @@ public final class FooterAdapterBuilder {
 
         @NonNull
         @Override
-        protected View getFooterView(@NonNull LayoutInflater layoutInflater,
-                                     @NonNull ViewGroup parent,
-                                     int footerIndex) {
+        View getFooterView(@NonNull LayoutInflater layoutInflater,
+                           @NonNull ViewGroup parent,
+                           int footerIndex) {
             return mFooters.get(footerIndex).get(layoutInflater, parent);
         }
 
         @Override
-        protected int getFooterCount(boolean visibleOnly) {
+        int getFooterCount(boolean visibleOnly) {
             if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }

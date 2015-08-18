@@ -14,17 +14,17 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 final class LoadingAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final LoadingAdapterBuilder.Delegate mDelegate;
+    private LoadingAdapterBuilder.Delegate mDelegate;
 
     @NonNull
-    private final Item mLoadingItem;
+    private Item mLoadingItem;
 
     @NonNull
-    private final LoadingAdapterBuilder.EmptyPolicy mEmptyPolicy;
+    private LoadingAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     private boolean mVisible;
 
-    private final boolean mLoadingItemEnabled;
+    private boolean mLoadingItemEnabled;
 
     LoadingAdapter(@NonNull PowerAdapter adapter,
                    @NonNull Item loadingItem,
@@ -41,7 +41,7 @@ final class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getItemCount() {
+    public int getItemCount() {
         if (mVisible) {
             return super.getItemCount() + 1;
         }
@@ -49,13 +49,13 @@ final class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         // Fixed amount of view types: whatever the underlying adapter wants, plus our loading item.
         return super.getViewTypeCount() + 1;
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         if (isLoadingItem(position)) {
             return loadingViewType();
         }
@@ -63,7 +63,7 @@ final class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         if (isLoadingItem(position)) {
             return NO_ID;
         }
@@ -71,7 +71,7 @@ final class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final boolean isEnabled(int position) {
+    public boolean isEnabled(int position) {
         if (isLoadingItem(position)) {
             return mLoadingItemEnabled;
         }
@@ -80,7 +80,7 @@ final class LoadingAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
         if (itemViewType == loadingViewType()) {
             return newLoadingView(layoutInflater(parent), parent);
         }
@@ -88,7 +88,7 @@ final class LoadingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isLoadingItem(holder.getPosition())) {
             super.bindView(view, holder);
         }

@@ -76,14 +76,14 @@ public final class HeaderAdapterBuilder {
 
         @NonNull
         @Override
-        protected View getHeaderView(@NonNull LayoutInflater layoutInflater,
-                                     @NonNull ViewGroup parent,
-                                     int headerIndex) {
+        View getHeaderView(@NonNull LayoutInflater layoutInflater,
+                           @NonNull ViewGroup parent,
+                           int headerIndex) {
             return mHeaders.get(headerIndex).get(layoutInflater, parent);
         }
 
         @Override
-        protected int getHeaderCount(boolean visibleOnly) {
+        int getHeaderCount(boolean visibleOnly) {
             if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }
