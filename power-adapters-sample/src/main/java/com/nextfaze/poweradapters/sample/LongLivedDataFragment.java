@@ -24,7 +24,7 @@ public final class LongLivedDataFragment extends BaseFragment {
 
     private PowerAdapter mAdapter;
 
-    @Bind(R.id.news_list_fragment_data_layout)
+    @Bind(R.id.news_data_layout)
     DataLayout mDataLayout;
 
     @Override

@@ -52,10 +52,10 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private final PowerAdapter mAdapter = createSimpleAdapter(mData);
 
-    @Bind(R.id.news_list_fragment_data_layout)
+    @Bind(R.id.news_data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.news_list_fragment_list)
+    @Bind(R.id.news_list)
     ListView mListView;
 
     @NonNull

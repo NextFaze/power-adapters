@@ -30,13 +30,13 @@ abstract class BaseFragment extends Fragment {
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
 
-    @Bind(R.id.news_list_fragment_data_layout)
+    @Bind(R.id.news_data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.news_list_fragment_list)
+    @Bind(R.id.news_list)
     ListView mListView;
 
-    @Bind(R.id.news_list_fragment_recycler)
+    @Bind(R.id.news_recycler)
     RecyclerView mRecyclerView;
 
     @Override
