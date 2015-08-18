@@ -16,8 +16,7 @@ android {
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.5'
-    compile 'com.nextfaze:async-data:0.2.2-SNAPSHOT'
-    provided 'com.android.support:support-annotations:22.2.1'
-    provided 'org.projectlombok:lombok:1.14.6'
+    compile rootProject.ext.slf4j
+    provided rootProject.ext.supportAnnotations
+    provided rootProject.ext.lombok
 }

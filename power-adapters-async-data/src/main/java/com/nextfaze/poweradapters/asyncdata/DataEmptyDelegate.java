@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters.data;
+package com.nextfaze.poweradapters.asyncdata;
 
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;

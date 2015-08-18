@@ -17,7 +17,7 @@ android {
 
 dependencies {
     compile project(':power-adapters')
-    compile rootProject.ext.supportRecyclerView
+    compile 'com.nextfaze:async-data:0.2.2-SNAPSHOT'
     provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }

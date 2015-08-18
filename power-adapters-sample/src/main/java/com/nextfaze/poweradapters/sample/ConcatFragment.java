@@ -20,13 +20,13 @@ import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
+import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
+import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
-import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataEmptyDelegate;
-import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import lombok.NonNull;
 
 import java.util.ArrayList;

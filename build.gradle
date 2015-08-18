@@ -33,4 +33,9 @@ ext {
     minSdkVersion = 14
     compileSdkVersion = 22
     buildToolsVersion = '21.1.2'
+    supportAnnotations = 'com.android.support:support-annotations:22.2.1'
+    supportAppCompat = 'com.android.support:appcompat-v7:22.2.1'
+    supportRecyclerView = 'com.android.support:recyclerview-v7:22.2.1'
+    lombok = 'org.projectlombok:lombok:1.14.6'
+    slf4j = 'org.slf4j:slf4j-api:1.7.5'
 }
