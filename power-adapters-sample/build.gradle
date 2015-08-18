@@ -2,11 +2,11 @@ apply plugin: 'com.android.application'
 apply from: '../nextfaze.gradle'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '21.1.2'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion 22
         versionCode 1
         versionName '1.0'

@@ -28,3 +28,9 @@ allprojects {
     group = 'com.nextfaze'
     version = '0.2.0-SNAPSHOT'
 }
+
+ext {
+    minSdkVersion = 14
+    compileSdkVersion = 22
+    buildToolsVersion = '21.1.2'
+}
