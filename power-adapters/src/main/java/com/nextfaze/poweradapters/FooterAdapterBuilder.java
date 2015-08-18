@@ -42,12 +42,14 @@ public final class FooterAdapterBuilder {
     }
 
     public enum EmptyPolicy {
+        /** Show the footers when the wrapped adapter is empty. */
         SHOW() {
             @Override
             boolean shouldShow(@NonNull FooterAdapter adapter) {
                 return true;
             }
         },
+        /** Hide the footers when the wrapped adapter is empty. */
         HIDE {
             @Override
             boolean shouldShow(@NonNull FooterAdapter adapter) {

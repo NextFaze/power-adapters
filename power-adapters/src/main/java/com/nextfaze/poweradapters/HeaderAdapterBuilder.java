@@ -42,12 +42,14 @@ public final class HeaderAdapterBuilder {
     }
 
     public enum EmptyPolicy {
+        /** Show the headers when the wrapped adapter is empty. */
         SHOW() {
             @Override
             boolean shouldShow(@NonNull HeaderAdapter adapter) {
                 return true;
             }
         },
+        /** Hide the headers when the wrapped adapter is empty. */
         HIDE {
             @Override
             boolean shouldShow(@NonNull HeaderAdapter adapter) {
