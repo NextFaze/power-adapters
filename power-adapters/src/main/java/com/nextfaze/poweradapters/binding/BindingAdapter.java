@@ -78,7 +78,7 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     private void assertBinder(@Nullable Binder binder, int position, Object item) {
         if (binder == null) {
-            throw new AssertionError("No binder for position " + position + ", item");
+            throw new AssertionError("No binder for position " + position + ", item " + item);
         }
     }
 }
