@@ -9,25 +9,10 @@ import lombok.NonNull;
 
 public final class EmptyAdapterBuilder {
 
-    @NonNull
-    private final Delegate mDelegate;
-
-    @NonNull
-    private final PowerAdapter mAdapter;
-
     @Nullable
     private Item mEmptyItem;
 
     private boolean mEmptyItemEnabled;
-
-    public EmptyAdapterBuilder(@NonNull PowerAdapter adapter) {
-        this(adapter, new DefaultDelegate(adapter));
-    }
-
-    public EmptyAdapterBuilder(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
-        mDelegate = delegate;
-        mAdapter = adapter;
-    }
 
     @NonNull
     public EmptyAdapterBuilder emptyItemResource(@LayoutRes int emptyItemResource) {
@@ -53,11 +38,16 @@ public final class EmptyAdapterBuilder {
     }
 
     @NonNull
-    public EmptyAdapter build() {
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        return build(adapter, new DefaultDelegate(adapter));
+    }
+
+    @NonNull
+    public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
         if (mEmptyItem == null) {
             throw new IllegalStateException("No empty item specified");
         }
-        return new EmptyAdapter(mAdapter, mDelegate, mEmptyItem, mEmptyItemEnabled);
+        return new EmptyAdapter(adapter, delegate, mEmptyItem, mEmptyItemEnabled);
     }
 
     /** Empty state is determined by wrapped adapter size. */

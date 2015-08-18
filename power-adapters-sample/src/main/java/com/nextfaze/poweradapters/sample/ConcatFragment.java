@@ -74,13 +74,13 @@ public class ConcatFragment extends Fragment {
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
 
-        adapter = new LoadingAdapterBuilder(adapter, new DataLoadingDelegate(data))
+        adapter = new LoadingAdapterBuilder()
                 .loadingItemResource(R.layout.list_loading_item)
-                .build();
+                .build(adapter, new DataLoadingDelegate(data));
 
-        adapter = new EmptyAdapterBuilder(adapter, new DataEmptyDelegate(data))
+        adapter = new EmptyAdapterBuilder()
                 .emptyItemResource(R.layout.list_empty_item)
-                .build();
+                .build(adapter, new DataEmptyDelegate(data));
 
         data.setLookAheadRowCount(-1);
         LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);

@@ -6,9 +6,6 @@ import lombok.NonNull;
 public final class DividerAdapterBuilder {
 
     @NonNull
-    private final PowerAdapter mAdapter;
-
-    @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_LEADING;
 
     @LayoutRes
@@ -19,10 +16,6 @@ public final class DividerAdapterBuilder {
 
     @LayoutRes
     private int mInnerItemResource;
-
-    public DividerAdapterBuilder(@NonNull PowerAdapter adapter) {
-        mAdapter = adapter;
-    }
 
     /**
      * Set the policy that determines what dividers are shown if the wrapped adapter is empty. Defaults to {@link
@@ -62,8 +55,8 @@ public final class DividerAdapterBuilder {
     }
 
     @NonNull
-    public DividerAdapter build() {
-        return new DividerAdapter(mAdapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        return new DividerAdapter(adapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
                 mInnerItemResource);
     }
 

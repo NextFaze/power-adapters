@@ -34,9 +34,9 @@ public final class AutoIncrementalFragment extends BaseFragment {
     private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapterBuilder(adapter, new DataLoadingDelegate(data))
+        adapter = new LoadingAdapterBuilder()
                 .loadingItemResource(R.layout.list_loading_item)
-                .build();
+                .build(adapter, new DataLoadingDelegate(data));
         return adapter;
     }
 

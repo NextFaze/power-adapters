@@ -10,12 +10,6 @@ import lombok.NonNull;
 /** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
 public final class LoadingAdapterBuilder {
 
-    @NonNull
-    private final PowerAdapter mAdapter;
-
-    @NonNull
-    private final Delegate mDelegate;
-
     @Nullable
     private Item mLoadingItem;
 
@@ -23,11 +17,6 @@ public final class LoadingAdapterBuilder {
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_ALWAYS;
 
     private boolean mLoadingItemEnabled;
-
-    public LoadingAdapterBuilder(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
-        mAdapter = adapter;
-        mDelegate = delegate;
-    }
 
     @NonNull
     public LoadingAdapterBuilder loadingItemResource(@LayoutRes int loadingItemResource) {
@@ -55,11 +44,11 @@ public final class LoadingAdapterBuilder {
     }
 
     @NonNull
-    public LoadingAdapter build() {
+    public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
         if (mLoadingItem == null) {
             throw new IllegalStateException("No loading item specified");
         }
-        return new LoadingAdapter(mAdapter, mLoadingItem, mEmptyPolicy, mDelegate, mLoadingItemEnabled);
+        return new LoadingAdapter(adapter, mLoadingItem, mEmptyPolicy, delegate, mLoadingItemEnabled);
     }
 
     /** Determines when the loading item is shown while empty. Item is never shown if not loading. */

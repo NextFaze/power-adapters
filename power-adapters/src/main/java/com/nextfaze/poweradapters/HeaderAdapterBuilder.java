@@ -13,17 +13,10 @@ import java.util.List;
 public final class HeaderAdapterBuilder {
 
     @NonNull
-    private final PowerAdapter mAdapter;
-
-    @NonNull
     private final ArrayList<Item> mHeaders = new ArrayList<>();
 
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
-
-    public HeaderAdapterBuilder(@NonNull PowerAdapter adapter) {
-        mAdapter = adapter;
-    }
 
     @NonNull
     public HeaderAdapterBuilder headerView(@NonNull View headerView) {
@@ -44,8 +37,8 @@ public final class HeaderAdapterBuilder {
     }
 
     @NonNull
-    public HeaderAdapter build() {
-        return new Impl(mAdapter, mHeaders, mEmptyPolicy);
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        return new Impl(adapter, mHeaders, mEmptyPolicy);
     }
 
     public enum EmptyPolicy {
@@ -65,7 +58,7 @@ public final class HeaderAdapterBuilder {
         abstract boolean shouldShow(@NonNull HeaderAdapter adapter);
     }
 
-    static final class Impl extends HeaderAdapter {
+    private static final class Impl extends HeaderAdapter {
 
         @NonNull
         private final ArrayList<Item> mHeaders;

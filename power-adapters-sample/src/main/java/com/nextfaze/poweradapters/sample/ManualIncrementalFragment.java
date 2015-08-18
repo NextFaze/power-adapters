@@ -39,9 +39,9 @@ public final class ManualIncrementalFragment extends BaseFragment {
     private PowerAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapterBuilder(adapter, new DataLoadingDelegate(data))
+        adapter = new LoadingAdapterBuilder()
                 .loadingItemResource(R.layout.list_loading_item)
-                .build();
+                .build(adapter, new DataLoadingDelegate(data));
         // "Load next" adapter lets user click the button to load next increment of results.
         LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {

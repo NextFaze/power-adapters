@@ -21,12 +21,12 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     abstract int getFooterCount(boolean visibleOnly);
 
     @Override
-    public final int getItemCount() {
+    public int getItemCount() {
         return getFooterCount(true) + super.getItemCount();
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         if (isFooter(position)) {
             return NO_ID;
         }
@@ -34,12 +34,12 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         return super.getViewTypeCount() + getFooterCount(false);
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         int itemViewType = footerItemViewType(position);
         if (itemViewType != -1) {
             return itemViewType;
@@ -48,7 +48,7 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final boolean isEnabled(int position) {
+    public boolean isEnabled(int position) {
         //noinspection SimplifiableIfStatement
         if (isFooter(position)) {
             return false;
@@ -58,7 +58,7 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
         int footerIndex = itemViewTypeToFooterIndex(itemViewType);
         if (footerIndex != -1) {
             return getFooterView(layoutInflater(parent), parent, footerIndex);
@@ -67,14 +67,14 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isFooter(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
 
     @Override
-    protected final int outerToInner(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         // No conversion necessary, as footers appear at the end.
         return outerPosition;
     }
@@ -86,7 +86,7 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final boolean hasStableIds() {
+    public boolean hasStableIds() {
         return super.hasStableIds();
     }
 
@@ -111,5 +111,4 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
         }
         return superViewTypeCount - itemViewType;
     }
-
 }

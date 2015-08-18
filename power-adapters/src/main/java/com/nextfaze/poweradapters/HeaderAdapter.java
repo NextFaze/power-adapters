@@ -21,12 +21,12 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     abstract int getHeaderCount(boolean visibleOnly);
 
     @Override
-    public final int getItemCount() {
+    public int getItemCount() {
         return getHeaderCount(true) + super.getItemCount();
     }
 
     @Override
-    public final long getItemId(int position) {
+    public long getItemId(int position) {
         if (isHeader(position)) {
             return NO_ID;
         }
@@ -34,12 +34,12 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final int getViewTypeCount() {
+    public int getViewTypeCount() {
         return super.getViewTypeCount() + getHeaderCount(false);
     }
 
     @Override
-    public final int getItemViewType(int position) {
+    public int getItemViewType(int position) {
         int itemViewType = headerItemViewType(position);
         if (itemViewType != -1) {
             return itemViewType;
@@ -48,7 +48,7 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final boolean isEnabled(int position) {
+    public boolean isEnabled(int position) {
         //noinspection SimplifiableIfStatement
         if (isHeader(position)) {
             return false;
@@ -58,7 +58,7 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
+    public View newView(@NonNull ViewGroup parent, int itemViewType) {
         int headerIndex = itemViewTypeToHeaderIndex(itemViewType);
         if (headerIndex != -1) {
             return getHeaderView(layoutInflater(parent), parent, headerIndex);
@@ -67,14 +67,14 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
         if (!isHeader(holder.getPosition())) {
             super.bindView(view, holder);
         }
     }
 
     @Override
-    protected final int outerToInner(int outerPosition) {
+    protected int outerToInner(int outerPosition) {
         return outerPosition - getHeaderCount(true);
     }
 
@@ -84,7 +84,7 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public final boolean hasStableIds() {
+    public boolean hasStableIds() {
         return super.hasStableIds();
     }
 
@@ -109,5 +109,4 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
         }
         return superViewTypeCount - itemViewType;
     }
-
 }

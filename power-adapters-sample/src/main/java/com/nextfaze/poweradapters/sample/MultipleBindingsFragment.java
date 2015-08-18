@@ -61,15 +61,15 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        adapter = new HeaderAdapterBuilder(adapter)
+        adapter = new HeaderAdapterBuilder()
                 .headerResource(R.layout.news_header_item)
                 .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.HIDE)
-                .build();
-        adapter = new DividerAdapterBuilder(adapter)
+                .build(adapter);
+        adapter = new DividerAdapterBuilder()
                 .innerItemResource(R.layout.list_divider_item)
                 .outerItemResource(R.layout.list_divider_item)
                 .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
-                .build();
+                .build(adapter);
         return adapter;
     }
 

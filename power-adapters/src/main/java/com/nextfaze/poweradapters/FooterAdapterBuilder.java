@@ -13,17 +13,10 @@ import java.util.List;
 public final class FooterAdapterBuilder {
 
     @NonNull
-    private final PowerAdapter mAdapter;
-
-    @NonNull
     private final ArrayList<Item> mFooters = new ArrayList<>();
 
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
-
-    public FooterAdapterBuilder(@NonNull PowerAdapter adapter) {
-        mAdapter = adapter;
-    }
 
     @NonNull
     public FooterAdapterBuilder footerView(@NonNull View footerView) {
@@ -44,8 +37,8 @@ public final class FooterAdapterBuilder {
     }
 
     @NonNull
-    public FooterAdapter build() {
-        return new Impl(mAdapter, mFooters, mEmptyPolicy);
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        return new Impl(adapter, mFooters, mEmptyPolicy);
     }
 
     public enum EmptyPolicy {
@@ -65,7 +58,7 @@ public final class FooterAdapterBuilder {
         abstract boolean shouldShow(@NonNull FooterAdapter adapter);
     }
 
-    static final class Impl extends FooterAdapter {
+    private static final class Impl extends FooterAdapter {
 
         @NonNull
         private final ArrayList<Item> mFooters;
