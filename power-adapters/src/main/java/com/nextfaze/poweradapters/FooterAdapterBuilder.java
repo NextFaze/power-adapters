@@ -20,13 +20,23 @@ public final class FooterAdapterBuilder {
 
     @NonNull
     public FooterAdapterBuilder footerView(@NonNull View footerView) {
-        mFooters.add(new Item(footerView));
+        return footerView(footerView, false);
+    }
+
+    @NonNull
+    public FooterAdapterBuilder footerView(@NonNull View footerView, boolean enabled) {
+        mFooters.add(new Item(footerView, enabled));
         return this;
     }
 
     @NonNull
     public FooterAdapterBuilder footerResource(@LayoutRes int footerResource) {
-        mFooters.add(new Item(footerResource));
+        return footerResource(footerResource, false);
+    }
+
+    @NonNull
+    public FooterAdapterBuilder footerResource(@LayoutRes int footerResource, boolean enabled) {
+        mFooters.add(new Item(footerResource, enabled));
         return this;
     }
 
@@ -63,23 +73,26 @@ public final class FooterAdapterBuilder {
     private static final class Impl extends FooterAdapter {
 
         @NonNull
-        private final ArrayList<Item> mFooters;
+        private final ArrayList<Item> mItems;
 
         @NonNull
         private final EmptyPolicy mEmptyPolicy;
 
-        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
+        Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> items, @NonNull EmptyPolicy emptyPolicy) {
             super(adapter);
-            mFooters = new ArrayList<>(footers);
+            mItems = new ArrayList<>(items);
             mEmptyPolicy = emptyPolicy;
         }
 
         @NonNull
         @Override
-        View getFooterView(@NonNull LayoutInflater layoutInflater,
-                           @NonNull ViewGroup parent,
-                           int footerIndex) {
-            return mFooters.get(footerIndex).get(layoutInflater, parent);
+        View getFooterView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int index) {
+            return mItems.get(index).get(layoutInflater, parent);
+        }
+
+        @Override
+        boolean isFooterEnabled(int index) {
+            return mItems.get(index).isEnabled();
         }
 
         @Override
@@ -87,7 +100,7 @@ public final class FooterAdapterBuilder {
             if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }
-            return mFooters.size();
+            return mItems.size();
         }
     }
 }

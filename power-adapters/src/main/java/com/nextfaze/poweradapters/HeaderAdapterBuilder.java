@@ -20,13 +20,23 @@ public final class HeaderAdapterBuilder {
 
     @NonNull
     public HeaderAdapterBuilder headerView(@NonNull View headerView) {
-        mHeaders.add(new Item(headerView));
+        return headerView(headerView, false);
+    }
+
+    @NonNull
+    public HeaderAdapterBuilder headerView(@NonNull View headerView, boolean enabled) {
+        mHeaders.add(new Item(headerView, enabled));
         return this;
     }
 
     @NonNull
     public HeaderAdapterBuilder headerResource(@LayoutRes int headerResource) {
-        mHeaders.add(new Item(headerResource));
+        return headerResource(headerResource, false);
+    }
+
+    @NonNull
+    public HeaderAdapterBuilder headerResource(@LayoutRes int headerResource, boolean enabled) {
+        mHeaders.add(new Item(headerResource, enabled));
         return this;
     }
 
@@ -63,23 +73,26 @@ public final class HeaderAdapterBuilder {
     private static final class Impl extends HeaderAdapter {
 
         @NonNull
-        private final ArrayList<Item> mHeaders;
+        private final ArrayList<Item> mItems;
 
         @NonNull
         private final EmptyPolicy mEmptyPolicy;
 
         Impl(@NonNull PowerAdapter adapter, @NonNull List<Item> footers, @NonNull EmptyPolicy emptyPolicy) {
             super(adapter);
-            mHeaders = new ArrayList<>(footers);
+            mItems = new ArrayList<>(footers);
             mEmptyPolicy = emptyPolicy;
         }
 
         @NonNull
         @Override
-        View getHeaderView(@NonNull LayoutInflater layoutInflater,
-                           @NonNull ViewGroup parent,
-                           int headerIndex) {
-            return mHeaders.get(headerIndex).get(layoutInflater, parent);
+        View getHeaderView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int index) {
+            return mItems.get(index).get(layoutInflater, parent);
+        }
+
+        @Override
+        boolean isHeaderEnabled(int index) {
+            return mItems.get(index).isEnabled();
         }
 
         @Override
@@ -87,7 +100,7 @@ public final class HeaderAdapterBuilder {
             if (visibleOnly && !mEmptyPolicy.shouldShow(this)) {
                 return 0;
             }
-            return mHeaders.size();
+            return mItems.size();
         }
     }
 }

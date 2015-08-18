@@ -15,13 +15,24 @@ final class Item {
     @Nullable
     private final View mView;
 
+    private final boolean mEnabled;
+
     Item(int layoutResource) {
+        this(layoutResource, true);
+    }
+
+    Item(int layoutResource, boolean enabled) {
         mLayoutResource = layoutResource;
+        mEnabled = enabled;
         mView = null;
     }
 
-    @SuppressWarnings("NullableProblems")
     Item(@NonNull View view) {
+        this(view, true);
+    }
+
+    Item(@SuppressWarnings("NullableProblems") @NonNull View view, boolean enabled) {
+        mEnabled = enabled;
         mLayoutResource = 0;
         mView = view;
     }
@@ -33,5 +44,9 @@ final class Item {
         }
         //noinspection ConstantConditions
         return mView;
+    }
+
+    boolean isEnabled() {
+        return mEnabled;
     }
 }

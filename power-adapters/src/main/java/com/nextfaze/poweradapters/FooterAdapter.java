@@ -14,9 +14,9 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    abstract View getFooterView(@NonNull LayoutInflater layoutInflater,
-                                @NonNull ViewGroup parent,
-                                int footerIndex);
+    abstract View getFooterView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int index);
+
+    abstract boolean isFooterEnabled(int index);
 
     abstract int getFooterCount(boolean visibleOnly);
 
@@ -49,9 +49,9 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
 
     @Override
     public boolean isEnabled(int position) {
-        //noinspection SimplifiableIfStatement
-        if (isFooter(position)) {
-            return false;
+        int index = footerIndex(position);
+        if (index != -1) {
+            return isFooterEnabled(index);
         }
         return super.isEnabled(position);
     }
@@ -85,13 +85,15 @@ abstract class FooterAdapter extends PowerAdapterWrapper {
         return super.innerToOuter(innerPosition);
     }
 
-    @Override
-    public boolean hasStableIds() {
-        return super.hasStableIds();
+    private boolean isFooter(int position) {
+        return footerIndex(position) != -1;
     }
 
-    private boolean isFooter(int position) {
-        return position >= super.getItemCount();
+    private int footerIndex(int position) {
+        if (position < super.getItemCount()) {
+            return -1;
+        }
+        return position - super.getItemCount();
     }
 
     private int footerItemViewType(int position) {

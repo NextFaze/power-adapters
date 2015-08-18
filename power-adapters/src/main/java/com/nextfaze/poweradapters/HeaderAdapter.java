@@ -14,9 +14,9 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
     }
 
     @NonNull
-    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater,
-                                @NonNull ViewGroup parent,
-                                int headerIndex);
+    abstract View getHeaderView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent, int index);
+
+    abstract boolean isHeaderEnabled(int index);
 
     abstract int getHeaderCount(boolean visibleOnly);
 
@@ -49,9 +49,9 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
 
     @Override
     public boolean isEnabled(int position) {
-        //noinspection SimplifiableIfStatement
-        if (isHeader(position)) {
-            return false;
+        int index = headerIndex(position);
+        if (index != -1) {
+            return isHeaderEnabled(index);
         }
         return super.isEnabled(position);
     }
@@ -83,13 +83,15 @@ abstract class HeaderAdapter extends PowerAdapterWrapper {
         return getHeaderCount(true) + innerPosition;
     }
 
-    @Override
-    public boolean hasStableIds() {
-        return super.hasStableIds();
+    private boolean isHeader(int position) {
+        return headerIndex(position) != -1;
     }
 
-    private boolean isHeader(int position) {
-        return position < getHeaderCount(true);
+    private int headerIndex(int position) {
+        if (position >= getHeaderCount(true)) {
+            return -1;
+        }
+        return position;
     }
 
     private int headerItemViewType(int position) {
