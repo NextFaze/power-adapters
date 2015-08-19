@@ -8,10 +8,15 @@ import java.util.Collection;
 public class MapperWrapper implements Mapper {
 
     @NonNull
-    protected final Mapper mMapper;
+    private final Mapper mMapper;
 
     public MapperWrapper(@NonNull Mapper mapper) {
         mMapper = mapper;
+    }
+
+    @NonNull
+    public final Mapper getMapper() {
+        return mMapper;
     }
 
     @Nullable
