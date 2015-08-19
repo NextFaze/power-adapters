@@ -4,19 +4,20 @@ import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.ViewFactory;
 import lombok.NonNull;
 
 import java.util.WeakHashMap;
 
-import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 
 public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binder {
 
     @NonNull
     private final WeakHashMap<View, H> mViewHolders = new WeakHashMap<>();
 
-    @LayoutRes
-    private final int mItemLayoutResource;
+    @NonNull
+    private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
 
@@ -25,19 +26,22 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binde
     }
 
     public ViewHolderBinder(@LayoutRes int itemLayoutResource, boolean enabled) {
-        mItemLayoutResource = itemLayoutResource;
-        mEnabled = enabled;
+        this(viewFactoryForResource(itemLayoutResource), enabled);
     }
 
-    @LayoutRes
-    public final int getItemLayoutResource() {
-        return mItemLayoutResource;
+    public ViewHolderBinder(@NonNull ViewFactory viewFactory) {
+        this(viewFactory, true);
+    }
+
+    public ViewHolderBinder(@NonNull ViewFactory viewFactory, boolean enabled) {
+        mViewFactory = viewFactory;
+        mEnabled = enabled;
     }
 
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent) {
-        H h = newViewHolder(layoutInflater(parent).inflate(mItemLayoutResource, parent, false));
+        H h = newViewHolder(mViewFactory.create(parent));
         mViewHolders.put(h.view, h);
         return h.view;
     }

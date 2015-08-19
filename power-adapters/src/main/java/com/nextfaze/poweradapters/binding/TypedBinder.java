@@ -4,37 +4,41 @@ import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.ViewFactory;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 
 /** A "type safe" binder implementation that performs the casts for you. */
 public abstract class TypedBinder<T, V extends View> implements Binder {
 
-    @LayoutRes
-    private final int mItemLayoutResource;
+    @NonNull
+    private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
 
-    protected TypedBinder(@LayoutRes int itemLayoutResource) {
+    public TypedBinder(@LayoutRes int itemLayoutResource) {
         this(itemLayoutResource, true);
     }
 
-    protected TypedBinder(@LayoutRes int itemLayoutResource, boolean enabled) {
-        mItemLayoutResource = itemLayoutResource;
-        mEnabled = enabled;
+    public TypedBinder(@LayoutRes int itemLayoutResource, boolean enabled) {
+        this(viewFactoryForResource(itemLayoutResource), enabled);
     }
 
-    @LayoutRes
-    public final int getItemLayoutResource() {
-        return mItemLayoutResource;
+    public TypedBinder(@NonNull ViewFactory viewFactory) {
+        this(viewFactory, true);
+    }
+
+    public TypedBinder(@NonNull ViewFactory viewFactory, boolean enabled) {
+        mViewFactory = viewFactory;
+        mEnabled = enabled;
     }
 
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent) {
         // Must return the view type specified by type argument.
-        return layoutInflater(parent).inflate(mItemLayoutResource, parent, false);
+        return mViewFactory.create(parent);
     }
 
     @Override
