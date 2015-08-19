@@ -1,63 +1,105 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.lang.String.format;
 
-/** Concatenates several adapters together. */
-@Accessors(prefix = "m")
-final class ConcatAdapter extends AbstractPowerAdapter {
+public abstract class TreeAdapter extends AbstractPowerAdapter {
+
+    @NonNull
+    private final DataObserver mRootDataObserver = new DataObserver() {
+        @Override
+        public void onChanged() {
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            notifyItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            notifyItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
+    };
+
+    @NonNull
+    private final PowerAdapter mRootAdapter;
 
     /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
     @NonNull
     private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
 
     @NonNull
-    private final ArrayList<Entry> mEntries;
+    private final SparseArray<Entry> mEntries = new SparseArray<>();
 
     @NonNull
     private final Map<ViewType, Entry> mEntriesByViewType = new HashMap<>();
 
-    ConcatAdapter(@NonNull PowerAdapter... adapters) {
-        mEntries = new ArrayList<>(adapters.length);
-        //noinspection ForLoopReplaceableByForEach
-        for (int i = 0; i < adapters.length; i++) {
-            mEntries.add(new Entry(adapters[i]));
+    public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
+        mRootAdapter = rootAdapter;
+    }
+
+    public void setExpanded(int position, boolean expanded) {
+        Entry entry = mEntries.get(position);
+        if (expanded) {
+            if (entry == null) {
+                entry = new Entry(getChildAdapter(position));
+                mEntries.put(position, entry);
+                notifyItemRangeInserted(position, entry.getItemCount());
+            }
+        } else {
+            if (entry != null) {
+                int itemCount = entry.getItemCount();
+                entry.dispose();
+                mEntries.remove(position);
+                notifyItemRangeRemoved(position, itemCount);
+            }
         }
     }
 
-    ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
-        mEntries = new ArrayList<>();
-        for (PowerAdapter adapter : adapters) {
-            mEntries.add(new Entry(adapter));
-        }
+    public boolean isExpanded(int position) {
+        return mEntries.get(position) != null;
     }
+
+    @NonNull
+    protected abstract PowerAdapter getChildAdapter(int position);
 
     @Override
     public boolean hasStableIds() {
-        for (int i = 0; i < mEntries.size(); i++) {
-            if (!mEntries.get(i).mAdapter.hasStableIds()) {
-                return false;
-            }
-        }
-        return true;
+        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
+        return false;
     }
 
     @Override
     public int getItemCount() {
-        int count = 0;
+        // Account for root adapter items, at a minimum.
+        int itemCount = mRootAdapter.getItemCount();
+        // Add each expanded adapter item count also.
         for (int i = 0; i < mEntries.size(); i++) {
-            count += mEntries.get(i).mAdapter.getItemCount();
+            itemCount += mEntries.get(i).getItemCount();
         }
-        return count;
+        return itemCount;
     }
 
     @Override
@@ -91,19 +133,23 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         findAdapterByPosition(holder.getPosition()).bindView(view, holder);
     }
 
+    @CallSuper
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
+        mRootAdapter.registerDataObserver(mRootDataObserver);
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.get(i).registerObservers();
+            mEntries.get(i).registerObserversIfNecessary();
         }
     }
 
+    @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
+        mRootAdapter.unregisterDataObserver(mRootDataObserver);
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.get(i).unregisterObservers();
+            mEntries.get(i).unregisterObserversIfNecessary();
         }
     }
 
@@ -120,27 +166,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
             int itemCount = adapter.getItemCount();
             if (position - positionOffset < itemCount) {
                 return mOffsetAdapter.set(entry, positionOffset);
-            }
-            positionOffset += itemCount;
-        }
-        throw new IndexOutOfBoundsException(
-                format("Position %d not within range of any of the %d child adapters, total size %d",
-                        position, mEntries.size(), totalItemCount));
-    }
-
-    @NonNull
-    private Entry findEntryByPosition(int position) {
-        int totalItemCount = getItemCount();
-        if (position >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
-        }
-        int positionOffset = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.get(i);
-            PowerAdapter adapter = entry.mAdapter;
-            int itemCount = adapter.getItemCount();
-            if (position - positionOffset < itemCount) {
-                return entry;
             }
             positionOffset += itemCount;
         }
@@ -167,10 +192,28 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         throw new IllegalStateException("No entry found with the specified view type");
     }
 
-    private final class Entry {
+    @NonNull
+    private Entry findEntryByPosition(int position) {
+        int totalItemCount = getItemCount();
+        if (position >= totalItemCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
+        }
+        int positionOffset = 0;
+        for (int i = 0; i < mEntries.size(); i++) {
+            Entry entry = mEntries.get(i);
+            PowerAdapter adapter = entry.mAdapter;
+            int itemCount = adapter.getItemCount();
+            if (position - positionOffset < itemCount) {
+                return entry;
+            }
+            positionOffset += itemCount;
+        }
+        throw new IndexOutOfBoundsException(
+                format("Position %d not within range of any of the %d child adapters, total size %d",
+                        position, mEntries.size(), totalItemCount));
+    }
 
-        @NonNull
-        private final PowerAdapter mAdapter;
+    private final class Entry {
 
         @NonNull
         private final DataObserver mDataObserver = new DataObserver() {
@@ -200,6 +243,17 @@ final class ConcatAdapter extends AbstractPowerAdapter {
             }
         };
 
+        @Nullable
+        private DataObserver mRegisteredDataObserver;
+
+        @NonNull
+        private final PowerAdapter mAdapter;
+
+        Entry(@NonNull PowerAdapter adapter) {
+            mAdapter = adapter;
+            registerObserversIfNecessary();
+        }
+
         private int innerToOuter(int innerPosition) {
             int positionOffset = 0;
             for (int i = 0; i < mEntries.size(); i++) {
@@ -207,28 +261,38 @@ final class ConcatAdapter extends AbstractPowerAdapter {
                 if (entry.mAdapter == mAdapter) {
                     break;
                 }
-                positionOffset += entry.mAdapter.getItemCount();
+                positionOffset += entry.getItemCount();
             }
             return positionOffset + innerPosition;
         }
 
-        Entry(@NonNull PowerAdapter adapter) {
-            mAdapter = adapter;
+        void registerObserversIfNecessary() {
+            if (mRegisteredDataObserver == null) {
+                mAdapter.registerDataObserver(mDataObserver);
+                mRegisteredDataObserver = mDataObserver;
+            }
         }
 
-        void registerObservers() {
-            mAdapter.registerDataObserver(mDataObserver);
+        void unregisterObserversIfNecessary() {
+            if (mRegisteredDataObserver != null) {
+                mAdapter.unregisterDataObserver(mRegisteredDataObserver);
+                mRegisteredDataObserver = null;
+            }
         }
 
-        void unregisterObservers() {
-            mAdapter.unregisterDataObserver(mDataObserver);
+        int getItemCount() {
+            return mAdapter.getItemCount();
+        }
+
+        void dispose() {
+            unregisterObserversIfNecessary();
         }
     }
 
     private static final class OffsetAdapter {
 
         @NonNull
-        private final WeakHashMap<View, OffsetAdapter.OffsetHolder> mHolders = new WeakHashMap<>();
+        private final WeakHashMap<View, OffsetHolder> mHolders = new WeakHashMap<>();
 
         private Entry mEntry;
 
