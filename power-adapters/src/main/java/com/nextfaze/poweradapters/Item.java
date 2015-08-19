@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
@@ -11,22 +10,6 @@ final class Item implements ViewFactory {
     private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
-
-    Item(@LayoutRes int layoutResource) {
-        this(layoutResource, true);
-    }
-
-    Item(@LayoutRes int layoutResource, boolean enabled) {
-        this(ViewFactories.viewFactoryForResource(layoutResource), enabled);
-    }
-
-    Item(@NonNull View view) {
-        this(view, true);
-    }
-
-    Item(@NonNull View view, boolean enabled) {
-        this(ViewFactories.viewFactoryForView(view), enabled);
-    }
 
     Item(@NonNull ViewFactory viewFactory, boolean enabled) {
         mViewFactory = viewFactory;

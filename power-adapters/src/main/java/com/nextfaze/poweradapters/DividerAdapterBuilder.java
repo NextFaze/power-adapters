@@ -1,8 +1,10 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.view.View;
 import lombok.NonNull;
 
+/** Inserts {@link View}-based dividers between items. */
 public final class DividerAdapterBuilder {
 
     @NonNull

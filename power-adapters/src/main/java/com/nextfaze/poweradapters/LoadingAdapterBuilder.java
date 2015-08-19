@@ -8,6 +8,8 @@ import android.widget.Adapter;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
 public final class LoadingAdapterBuilder {
@@ -21,14 +23,18 @@ public final class LoadingAdapterBuilder {
     private boolean mEnabled;
 
     @NonNull
-    public LoadingAdapterBuilder view(@NonNull View loadingItemView) {
-        mItem = new Item(loadingItemView, false);
-        return this;
+    public LoadingAdapterBuilder view(@NonNull View view) {
+        return view(viewFactoryForView(view));
     }
 
     @NonNull
-    public LoadingAdapterBuilder resource(@LayoutRes int loadingItemResource) {
-        mItem = new Item(loadingItemResource, false);
+    public LoadingAdapterBuilder resource(@LayoutRes int resource) {
+        return view(viewFactoryForResource(resource));
+    }
+
+    @NonNull
+    public LoadingAdapterBuilder view(@NonNull ViewFactory viewFactory) {
+        mItem = new Item(viewFactory, false);
         return this;
     }
 

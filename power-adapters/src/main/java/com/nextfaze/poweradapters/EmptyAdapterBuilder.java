@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
+
 public final class EmptyAdapterBuilder {
 
     @Nullable
@@ -15,25 +18,29 @@ public final class EmptyAdapterBuilder {
     private boolean mEnabled;
 
     @NonNull
-    public EmptyAdapterBuilder resource(@LayoutRes int emptyItemResource) {
-        mItem = new Item(emptyItemResource);
-        return this;
+    public EmptyAdapterBuilder resource(@LayoutRes int resource) {
+        return view(viewFactoryForResource(resource));
     }
 
     @NonNull
-    public EmptyAdapterBuilder view(@NonNull View emptyItemView) {
-        mItem = new Item(emptyItemView);
+    public EmptyAdapterBuilder view(@NonNull View view) {
+        return view(viewFactoryForView(view));
+    }
+
+    @NonNull
+    public EmptyAdapterBuilder view(@NonNull ViewFactory viewFactory) {
+        mItem = new Item(viewFactory, false);
         return this;
     }
 
     /**
      * Sets whether the empty item should be enabled in the list, allowing it to be clicked or not.
-     * @param emptyItemEnabled {@code true} to make it enabled, otherwise {@code false} to make it disabled.
+     * @param enabled {@code true} to make it enabled, otherwise {@code false} to make it disabled.
      * @see ListAdapter#isEnabled(int)
      */
     @NonNull
-    public EmptyAdapterBuilder enabled(boolean emptyItemEnabled) {
-        mEnabled = emptyItemEnabled;
+    public EmptyAdapterBuilder enabled(boolean enabled) {
+        mEnabled = enabled;
         return this;
     }
 
