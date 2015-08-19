@@ -17,6 +17,8 @@ import com.google.common.collect.FluentIterable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
+import com.nextfaze.poweradapters.FooterAdapterBuilder;
+import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -49,7 +51,7 @@ public class ConcatFragment extends Fragment {
     public ConcatFragment() {
         Random random = new Random();
         for (int i = 0; i < ADAPTER_COUNT; i++) {
-            NewsIncrementalData data = new NewsIncrementalData(random.nextInt(50), 1 + random.nextInt(9));
+            NewsIncrementalData data = new NewsIncrementalData(random.nextInt(10), 3);
             ColoredBinder binder = new ColoredBinder(random.nextInt());
             mPairs.add(createPair(data, binder));
         }
@@ -58,29 +60,31 @@ public class ConcatFragment extends Fragment {
     @NonNull
     private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data,
                                                    @NonNull Binder newsItemBinder) {
-        Mapper mapper = new PolymorphicMapperBuilder()
-                .bind(NewsItem.class, new BinderWrapper(newsItemBinder) {
+        BinderWrapper removeItemBinder = new BinderWrapper(newsItemBinder) {
+            @Override
+            public void bindView(@NonNull final Object item, @NonNull View v, @NonNull Holder holder) {
+                super.bindView(item, v, holder);
+                v.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void bindView(@NonNull final Object item, @NonNull View v, @NonNull Holder holder) {
-                        super.bindView(item, v, holder);
-                        v.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                data.remove(item);
-                            }
-                        });
+                    public void onClick(View v) {
+                        data.remove(item);
                     }
-                })
+                });
+            }
+        };
+        Mapper mapper = new PolymorphicMapperBuilder()
+                .bind(NewsItem.class, removeItemBinder)
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
+
+        adapter = new HeaderAdapterBuilder()
+                .addResource(R.layout.news_header_item)
+                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.HIDE)
+                .build(adapter);
 
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
                 .build(adapter, new DataLoadingDelegate(data));
-
-        adapter = new EmptyAdapterBuilder()
-                .emptyItemResource(R.layout.list_empty_item)
-                .build(adapter, new DataEmptyDelegate(data));
 
         data.setLookAheadRowCount(-1);
         LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);
@@ -91,6 +95,15 @@ public class ConcatFragment extends Fragment {
             }
         });
         adapter = loadNextAdapter;
+
+        adapter = new FooterAdapterBuilder()
+                .addResource(R.layout.news_footer_item)
+                .emptyPolicy(FooterAdapterBuilder.EmptyPolicy.HIDE)
+                .build(adapter);
+
+        adapter = new EmptyAdapterBuilder()
+                .emptyItemResource(R.layout.list_empty_item)
+                .build(adapter, new DataEmptyDelegate(data));
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
     }
