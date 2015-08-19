@@ -2,7 +2,9 @@ package com.nextfaze.poweradapters.binding;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
 /**
@@ -10,6 +12,13 @@ import lombok.NonNull;
  * enabled (which means it can be clicked within a list).
  */
 public interface Binder {
+    /**
+     * Creates a {@link View} to be bound later by this binder instance. The view will be reused.
+     * @param parent The destination parent view group of the view.
+     * @return A new view capable of presenting the object that this binder expects later in its {@link
+     * #bindView(Object, View, Holder)} method.
+     * @see PowerAdapter#newView(ViewGroup, int)
+     */
     @NonNull
     View newView(@NonNull ViewGroup parent);
 
@@ -20,8 +29,12 @@ public interface Binder {
      * @param v The destination view.
      * @param holder A "holder" object which can be queried to determine the position of the item in the data set.
      * @see Holder
+     * @see PowerAdapter#bindView(View, Holder)
      */
     void bindView(@NonNull Object obj, @NonNull View v, @NonNull Holder holder);
 
+    /**
+     * @see ListAdapter#isEnabled(int)
+     */
     boolean isEnabled(int position);
 }
