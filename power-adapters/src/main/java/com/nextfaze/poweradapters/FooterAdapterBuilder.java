@@ -8,6 +8,8 @@ import lombok.NonNull;
 import java.util.ArrayList;
 
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 public final class FooterAdapterBuilder {
@@ -19,24 +21,33 @@ public final class FooterAdapterBuilder {
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
 
     @NonNull
-    public FooterAdapterBuilder addView(@NonNull View footerView) {
-        return addView(footerView, false);
+    public FooterAdapterBuilder addView(@NonNull View view) {
+        return addView(view, false);
     }
 
     @NonNull
-    public FooterAdapterBuilder addView(@NonNull View footerView, boolean enabled) {
-        mItems.add(new Item(footerView, enabled));
-        return this;
+    public FooterAdapterBuilder addView(@NonNull View view, boolean enabled) {
+        return addView(viewFactoryForView(view), enabled);
     }
 
     @NonNull
-    public FooterAdapterBuilder addResource(@LayoutRes int footerResource) {
-        return addResource(footerResource, false);
+    public FooterAdapterBuilder addResource(@LayoutRes int resource) {
+        return addResource(resource, false);
     }
 
     @NonNull
-    public FooterAdapterBuilder addResource(@LayoutRes int footerResource, boolean enabled) {
-        mItems.add(new Item(footerResource, enabled));
+    public FooterAdapterBuilder addResource(@LayoutRes int resource, boolean enabled) {
+        return addView(viewFactoryForResource(resource), enabled);
+    }
+
+    @NonNull
+    public FooterAdapterBuilder addView(@NonNull ViewFactory viewFactory) {
+        return addView(viewFactory, false);
+    }
+
+    @NonNull
+    public FooterAdapterBuilder addView(@NonNull ViewFactory viewFactory, boolean enabled) {
+        mItems.add(new Item(viewFactory, enabled));
         return this;
     }
 

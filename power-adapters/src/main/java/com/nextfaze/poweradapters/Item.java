@@ -1,58 +1,50 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
-import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
-import lombok.experimental.Wither;
 
-@Accessors(prefix = "m")
-@AllArgsConstructor
-final class Item {
+final class Item implements ViewFactory {
 
-    @LayoutRes
-    private final int mLayoutResource;
+    @NonNull
+    private final ViewFactory mViewFactory;
 
-    @Nullable
-    private final View mView;
-
-    @Wither
     private final boolean mEnabled;
 
-    Item(int layoutResource) {
+    Item(@LayoutRes int layoutResource) {
         this(layoutResource, true);
     }
 
-    Item(int layoutResource, boolean enabled) {
-        mLayoutResource = layoutResource;
-        mEnabled = enabled;
-        mView = null;
+    Item(@LayoutRes int layoutResource, boolean enabled) {
+        this(ViewFactories.viewFactoryForResource(layoutResource), enabled);
     }
 
     Item(@NonNull View view) {
         this(view, true);
     }
 
-    Item(@SuppressWarnings("NullableProblems") @NonNull View view, boolean enabled) {
-        mEnabled = enabled;
-        mLayoutResource = 0;
-        mView = view;
+    Item(@NonNull View view, boolean enabled) {
+        this(ViewFactories.viewFactoryForView(view), enabled);
     }
 
-    @NonNull
-    View get(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-        if (mLayoutResource > 0) {
-            return layoutInflater.inflate(mLayoutResource, parent, false);
-        }
-        //noinspection ConstantConditions
-        return mView;
+    Item(@NonNull ViewFactory viewFactory, boolean enabled) {
+        mViewFactory = viewFactory;
+        mEnabled = enabled;
     }
 
     boolean isEnabled() {
         return mEnabled;
+    }
+
+    @NonNull
+    Item withEnabled(boolean enabled) {
+        return mEnabled == enabled ? this : new Item(mViewFactory, enabled);
+    }
+
+    @NonNull
+    @Override
+    public View create(@NonNull ViewGroup parent) {
+        return mViewFactory.create(parent);
     }
 }

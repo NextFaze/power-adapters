@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static java.util.Collections.singletonList;
 
 class ItemAdapter extends AbstractPowerAdapter {
@@ -61,7 +60,7 @@ class ItemAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent, int itemViewType) {
-        return mItems.get(itemViewType).get(layoutInflater(parent), parent);
+        return mItems.get(itemViewType).create(parent);
     }
 
     @Override
