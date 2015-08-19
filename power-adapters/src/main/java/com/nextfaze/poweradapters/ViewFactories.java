@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -20,6 +21,18 @@ public final class ViewFactories {
             @Override
             public View create(@NonNull ViewGroup parent) {
                 return layoutInflater(parent).inflate(layoutResource, parent, false);
+            }
+        };
+    }
+
+    @NonNull
+    public static ViewFactory viewFactoryForResource(@NonNull final LayoutInflater layoutInflater,
+                                                     @LayoutRes final int layoutResource) {
+        return new ViewFactory() {
+            @NonNull
+            @Override
+            public View create(@NonNull ViewGroup parent) {
+                return layoutInflater.inflate(layoutResource, parent, false);
             }
         };
     }
