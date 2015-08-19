@@ -6,6 +6,8 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.lang.String.format;
@@ -20,6 +22,9 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
     @NonNull
     private final ArrayList<Entry> mEntries;
+
+    @NonNull
+    private final Map<ViewType, Entry> mEntriesByViewType = new HashMap<>();
 
     ConcatAdapter(@NonNull PowerAdapter... adapters) {
         mEntries = new ArrayList<>(adapters.length);
@@ -56,15 +61,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
     }
 
     @Override
-    public int getViewTypeCount() {
-        int viewTypeCount = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            viewTypeCount += mEntries.get(i).mAdapter.getViewTypeCount();
-        }
-        return viewTypeCount;
-    }
-
-    @Override
     public long getItemId(int position) {
         return findAdapterByPosition(position).getItemId(position);
     }
@@ -76,18 +72,23 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        return findAdapterByItemViewType(itemViewType).newView(parent, itemViewType);
+    public ViewType getItemViewType(int position) {
+        OffsetAdapter offsetAdapter = findAdapterByPosition(position);
+        Entry entry = offsetAdapter.mEntry;
+        ViewType viewType = offsetAdapter.getViewType(position);
+        mEntriesByViewType.put(viewType, entry);
+        return viewType;
+    }
+
+    @NonNull
+    @Override
+    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        return findAdapterByItemViewType(viewType).newView(parent, viewType);
     }
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
         findAdapterByPosition(holder.getPosition()).bindView(view, holder);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return findAdapterByPosition(position).getItemViewType(position);
     }
 
     @Override
@@ -113,15 +114,14 @@ final class ConcatAdapter extends AbstractPowerAdapter {
             throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
         }
         int positionOffset = 0;
-        int itemViewTypeOffset = 0;
         for (int i = 0; i < mEntries.size(); i++) {
-            PowerAdapter adapter = mEntries.get(i).mAdapter;
+            Entry entry = mEntries.get(i);
+            PowerAdapter adapter = entry.mAdapter;
             int itemCount = adapter.getItemCount();
             if (position - positionOffset < itemCount) {
-                return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
+                return mOffsetAdapter.set(entry, positionOffset);
             }
             positionOffset += itemCount;
-            itemViewTypeOffset += adapter.getViewTypeCount();
         }
         throw new IndexOutOfBoundsException(
                 format("Position %d not within range of any of the %d child adapters, total size %d",
@@ -129,28 +129,42 @@ final class ConcatAdapter extends AbstractPowerAdapter {
     }
 
     @NonNull
-    private OffsetAdapter findAdapterByItemViewType(int itemViewType) {
-        // TODO: Can be done better with a map.
-        int totalViewTypeCount = getViewTypeCount();
-        if (itemViewType >= totalViewTypeCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Item view type: %d, total item view types: %d",
-                    itemViewType, totalViewTypeCount));
+    private Entry findEntryByPosition(int position) {
+        int totalItemCount = getItemCount();
+        if (position >= totalItemCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
         }
         int positionOffset = 0;
-        int itemViewTypeOffset = 0;
         for (int i = 0; i < mEntries.size(); i++) {
-            PowerAdapter adapter = mEntries.get(i).mAdapter;
+            Entry entry = mEntries.get(i);
+            PowerAdapter adapter = entry.mAdapter;
             int itemCount = adapter.getItemCount();
-            int viewTypeCount = adapter.getViewTypeCount();
-            if (itemViewType - itemViewTypeOffset < viewTypeCount) {
-                return mOffsetAdapter.set(adapter, positionOffset, itemViewTypeOffset);
+            if (position - positionOffset < itemCount) {
+                return entry;
             }
             positionOffset += itemCount;
-            itemViewTypeOffset += viewTypeCount;
         }
         throw new IndexOutOfBoundsException(
-                format("Item view type %d not within range of any of the %d child adapters, total item view types %d",
-                        itemViewType, mEntries.size(), totalViewTypeCount));
+                format("Position %d not within range of any of the %d child adapters, total size %d",
+                        position, mEntries.size(), totalItemCount));
+    }
+
+    @NonNull
+    private OffsetAdapter findAdapterByItemViewType(@NonNull ViewType viewType) {
+        Entry entryWithViewType = mEntriesByViewType.get(viewType);
+        if (entryWithViewType != null) {
+            int positionOffset = 0;
+            for (int i = 0; i < mEntries.size(); i++) {
+                Entry entry = mEntries.get(i);
+                PowerAdapter adapter = entry.mAdapter;
+                int itemCount = adapter.getItemCount();
+                if (entry == entryWithViewType) {
+                    return mOffsetAdapter.set(entry, positionOffset);
+                }
+                positionOffset += itemCount;
+            }
+        }
+        throw new IllegalStateException("No entry found with the specified view type");
     }
 
     private static final class OffsetAdapter {
@@ -158,30 +172,28 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         @NonNull
         private final WeakHashMap<View, OffsetAdapter.OffsetHolder> mHolders = new WeakHashMap<>();
 
-        private PowerAdapter mAdapter;
+        private Entry mEntry;
 
         private int mPositionOffset;
-        private int mItemViewTypeOffset;
 
         @NonNull
-        OffsetAdapter set(@NonNull PowerAdapter adapter, int positionOffset, int itemViewTypeOffset) {
-            mAdapter = adapter;
+        OffsetAdapter set(@NonNull Entry entry, int positionOffset) {
+            mEntry = entry;
             mPositionOffset = positionOffset;
-            mItemViewTypeOffset = itemViewTypeOffset;
             return this;
         }
 
         long getItemId(int position) {
-            return mAdapter.getItemId(position - mPositionOffset);
+            return mEntry.mAdapter.getItemId(position - mPositionOffset);
         }
 
         boolean isEnabled(int position) {
-            return mAdapter.isEnabled(position - mPositionOffset);
+            return mEntry.mAdapter.isEnabled(position - mPositionOffset);
         }
 
         @NonNull
-        View newView(@NonNull ViewGroup parent, int itemViewType) {
-            return mAdapter.newView(parent, itemViewType - mItemViewTypeOffset);
+        View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+            return mEntry.mAdapter.newView(parent, viewType);
         }
 
         void bindView(@NonNull View view, @NonNull Holder holder) {
@@ -191,15 +203,12 @@ final class ConcatAdapter extends AbstractPowerAdapter {
                 mHolders.put(view, offsetHolder);
             }
             offsetHolder.offset = mPositionOffset;
-            mAdapter.bindView(view, offsetHolder);
+            mEntry.mAdapter.bindView(view, offsetHolder);
         }
 
-        int getItemViewType(int position) {
-            return mAdapter.getItemViewType(position - mPositionOffset) + mItemViewTypeOffset;
-        }
-
-        int getViewTypeCount() {
-            return mAdapter.getViewTypeCount();
+        @NonNull
+        ViewType getViewType(int position) {
+            return mEntry.mAdapter.getItemViewType(position - mPositionOffset);
         }
 
         private static final class OffsetHolder extends HolderWrapper {

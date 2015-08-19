@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import lombok.NonNull;
 
 public interface PowerAdapter {
@@ -24,18 +23,6 @@ public interface PowerAdapter {
     boolean hasStableIds();
 
     /**
-     * <p>
-     * Returns the number of types of Views that will be created.
-     * </p>
-     * <p>
-     * This method will only be called once when when the adapter is set on the
-     * the {@link AdapterView}.
-     * </p>
-     * @return The number of types of Views that will be created by this adapter
-     */
-    int getViewTypeCount();
-
-    /**
      * Return the stable ID for the item at {@code position}. If {@link #hasStableIds()}
      * would return false this method should return {@link #NO_ID}.
      * @param position Adapter position to query
@@ -44,13 +31,13 @@ public interface PowerAdapter {
     long getItemId(int position);
 
     /**
-     * Get the type of View that will be created, for the purpose of view recycling.
+     * Get the type of view for item at {@code position}, for the purpose of view recycling.
      * @param position The position of the item within the adapter's data set whose view type we
      * want.
-     * @return An integer representing the type of View. Two views should share the same type if one
-     * can be converted to the other. Note: Integers must be in the range 0 to {@link #getViewTypeCount} - 1.
+     * @return A {@link ViewType} object that is unique for this type of view throughout the process.
      */
-    int getItemViewType(int position);
+    @NonNull
+    ViewType getItemViewType(int position);
 
     /**
      * Returns true if the item at the specified position is not a separator.
@@ -63,7 +50,7 @@ public interface PowerAdapter {
     boolean isEnabled(int position);
 
     @NonNull
-    View newView(@NonNull ViewGroup parent, int itemViewType);
+    View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType);
 
     void bindView(@NonNull View view, @NonNull Holder holder);
 

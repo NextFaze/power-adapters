@@ -5,9 +5,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.Holder> {
@@ -51,19 +54,17 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         }
     };
 
+    @NonNull
+    private final Map<ViewType, Integer> mViewTypeObjectToInt = new HashMap<>();
+
+    @NonNull
+    private final Map<Integer, ViewType> mViewTypeIntToObject = new HashMap<>();
+
+    private int mNextViewTypeInt;
+
     RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
         setHasStableIds(mPowerAdapter.hasStableIds());
-    }
-
-    @Override
-    public Holder onCreateViewHolder(ViewGroup parent, int itemViewType) {
-        return new Holder(mPowerAdapter.newView(parent, itemViewType));
-    }
-
-    @Override
-    public void onBindViewHolder(Holder holder, int position) {
-        mPowerAdapter.bindView(holder.itemView, holder.holder);
     }
 
     @Override
@@ -72,13 +73,30 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     }
 
     @Override
-    public int getItemViewType(int position) {
-        return mPowerAdapter.getItemViewType(position);
+    public long getItemId(int position) {
+        return mPowerAdapter.getItemId(position);
     }
 
     @Override
-    public long getItemId(int position) {
-        return mPowerAdapter.getItemId(position);
+    public int getItemViewType(int position) {
+        ViewType viewType = mPowerAdapter.getItemViewType(position);
+        Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
+        if (viewTypeInt == null) {
+            viewTypeInt = mNextViewTypeInt++;
+            mViewTypeObjectToInt.put(viewType, viewTypeInt);
+            mViewTypeIntToObject.put(viewTypeInt, viewType);
+        }
+        return viewTypeInt;
+    }
+
+    @Override
+    public Holder onCreateViewHolder(ViewGroup parent, int itemViewType) {
+        return new Holder(mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType)));
+    }
+
+    @Override
+    public void onBindViewHolder(Holder holder, int position) {
+        mPowerAdapter.bindView(holder.itemView, holder.holder);
     }
 
     @Override

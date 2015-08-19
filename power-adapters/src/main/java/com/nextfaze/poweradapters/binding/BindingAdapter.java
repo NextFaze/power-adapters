@@ -5,26 +5,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.AbstractPowerAdapter;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
-import java.util.ArrayList;
-import java.util.IdentityHashMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Accessors(prefix = "m")
 public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @NonNull
-    private final ArrayList<Binder> mBinders;
+    private final Map<ViewType, Binder> mBinders;
 
     @NonNull
-    private final IdentityHashMap<Binder, Integer> mIndexes = new IdentityHashMap<Binder, Integer>();
+    private final Map<Binder, ViewType> mViewTypes;
 
     @NonNull
     private final Mapper mMapper;
 
     public BindingAdapter(@NonNull Mapper mapper) {
-        mBinders = new ArrayList<Binder>(mapper.getAllBinders());
+        Collection<? extends Binder> allBinders = mapper.getAllBinders();
+        mBinders = new HashMap<>(allBinders.size());
+        mViewTypes = new HashMap<>(allBinders.size());
+        for (Binder binder : allBinders) {
+            ViewType viewType = new ViewType();
+            mBinders.put(viewType, binder);
+            mViewTypes.put(binder, viewType);
+        }
         mMapper = mapper;
     }
 
@@ -33,8 +42,8 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
-        Binder binder = mBinders.get(itemViewType - super.getViewTypeCount());
+    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        Binder binder = mBinders.get(viewType);
         return binder.newView(parent);
     }
 
@@ -48,24 +57,13 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
         }
     }
 
+    @NonNull
     @Override
-    public final int getViewTypeCount() {
-        return super.getViewTypeCount() + mBinders.size();
-    }
-
-    @Override
-    public final int getItemViewType(int position) {
+    public final ViewType getItemViewType(int position) {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         assertBinder(binder, position, item);
-        // Cache index of each binder to avoid linear search each time.
-        Integer index = mIndexes.get(binder);
-        if (index == null) {
-            index = mBinders.indexOf(binder);
-            mIndexes.put(binder, index);
-        }
-        // Offset type by inner type count, otherwise we could get collisions.
-        return super.getViewTypeCount() + index;
+        return mViewTypes.get(binder);
     }
 
     @Override

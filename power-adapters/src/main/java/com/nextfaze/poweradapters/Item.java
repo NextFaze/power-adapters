@@ -7,6 +7,9 @@ import lombok.NonNull;
 final class Item implements ViewFactory {
 
     @NonNull
+    private final ViewType mViewType = new ViewType();
+
+    @NonNull
     private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
@@ -23,6 +26,11 @@ final class Item implements ViewFactory {
     @NonNull
     Item withEnabled(boolean enabled) {
         return mEnabled == enabled ? this : new Item(mViewFactory, enabled);
+    }
+
+    @NonNull
+    ViewType getViewType() {
+        return mViewType;
     }
 
     @NonNull

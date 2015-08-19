@@ -6,7 +6,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import lombok.NonNull;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -14,6 +16,9 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @NonNull
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
+
+    @NonNull
+    private final Map<ViewType, Integer> mViewTypeObjectToInt = new HashMap<>();
 
     @NonNull
     private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
@@ -28,6 +33,8 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @NonNull
     private final PowerAdapter mPowerAdapter;
+
+    private int mNextViewTypeInt;
 
     ListAdapterConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
@@ -53,7 +60,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
         HolderImpl holder;
         if (convertView == null) {
             holder = new HolderImpl();
-            convertView = mPowerAdapter.newView(parent, getItemViewType(position));
+            convertView = mPowerAdapter.newView(parent, mPowerAdapter.getItemViewType(position));
             mHolders.put(convertView, holder);
         } else {
             holder = mHolders.get(convertView);
@@ -70,12 +77,19 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return mPowerAdapter.getItemViewType(position);
+        ViewType viewType = mPowerAdapter.getItemViewType(position);
+        Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
+        if (viewTypeInt == null) {
+            viewTypeInt = mNextViewTypeInt++;
+            mViewTypeObjectToInt.put(viewType, viewTypeInt);
+        }
+        return viewTypeInt;
     }
 
     @Override
     public int getViewTypeCount() {
-        return mPowerAdapter.getViewTypeCount();
+        // HACK: We simply have to use a magic number here and hope we never exceed it.
+        return 100;
     }
 
     @Override

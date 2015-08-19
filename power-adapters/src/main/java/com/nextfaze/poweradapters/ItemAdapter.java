@@ -8,14 +8,20 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 
 class ItemAdapter extends AbstractPowerAdapter {
 
     @NonNull
     private final List<Item> mItems;
+
+    @NonNull
+    private final Map<ViewType, Item> mItemsByViewType;
 
     /**
      * Indicates the visibility of each item. They're visible by default.
@@ -27,13 +33,17 @@ class ItemAdapter extends AbstractPowerAdapter {
 
     ItemAdapter(@NonNull Item item) {
         mItems = singletonList(item);
+        mItemsByViewType = singletonMap(item.getViewType(), item);
         mVisibleItems.put(0, item);
     }
 
     ItemAdapter(@NonNull Collection<Item> items) {
         mItems = new ArrayList<>(items);
+        mItemsByViewType = new HashMap<>(items.size());
         for (int i = 0; i < mItems.size(); i++) {
-            mVisibleItems.put(i, mItems.get(i));
+            Item item = mItems.get(i);
+            mVisibleItems.put(i, item);
+            mItemsByViewType.put(item.getViewType(), item);
         }
     }
 
@@ -42,14 +52,10 @@ class ItemAdapter extends AbstractPowerAdapter {
         return mVisibleItems.size();
     }
 
+    @NonNull
     @Override
-    public final int getViewTypeCount() {
-        return mItems.size();
-    }
-
-    @Override
-    public final int getItemViewType(int position) {
-        return mVisibleItems.keyAt(position);
+    public final ViewType getItemViewType(int position) {
+        return mVisibleItems.valueAt(position).getViewType();
     }
 
     @Override
@@ -59,8 +65,8 @@ class ItemAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, int itemViewType) {
-        return mItems.get(itemViewType).create(parent);
+    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        return mItemsByViewType.get(viewType).create(parent);
     }
 
     @Override

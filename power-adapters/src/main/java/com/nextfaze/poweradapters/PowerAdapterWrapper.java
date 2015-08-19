@@ -62,11 +62,6 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
         return mAdapter.hasStableIds();
     }
 
-    @Override
-    public int getViewTypeCount() {
-        return mAdapter.getViewTypeCount();
-    }
-
     /**
      * Forwards the call to the wrapped adapter, converting the {@code position} value to the wrapped adapter's
      * coordinate space.
@@ -82,8 +77,9 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
      * coordinate space.
      * @see #outerToInner(int)
      */
+    @NonNull
     @Override
-    public int getItemViewType(int position) {
+    public ViewType getItemViewType(int position) {
         return mAdapter.getItemViewType(outerToInner(position));
     }
 
@@ -99,8 +95,8 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
 
     @Override
     @NonNull
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        return mAdapter.newView(parent, itemViewType);
+    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        return mAdapter.newView(parent, viewType);
     }
 
     @Override

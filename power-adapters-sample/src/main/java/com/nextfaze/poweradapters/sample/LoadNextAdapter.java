@@ -13,6 +13,7 @@ import com.nextfaze.asyncdata.SimpleDataObserver;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.PowerAdapterWrapper;
+import com.nextfaze.poweradapters.ViewType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -51,6 +52,9 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
             updateVisible();
         }
     };
+
+    @NonNull
+    private final ViewType mViewType = new ViewType();
 
     @Getter
     @Setter
@@ -98,15 +102,11 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
         return super.getItemId(position);
     }
 
+    @NonNull
     @Override
-    public int getViewTypeCount() {
-        return super.getViewTypeCount() + 1;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
+    public ViewType getItemViewType(int position) {
         if (isLoadNextItem(position)) {
-            return loadNextItemViewType();
+            return mViewType;
         }
         return super.getItemViewType(position);
     }
@@ -122,11 +122,11 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, int itemViewType) {
-        if (itemViewType == loadNextItemViewType()) {
+    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        if (viewType == mViewType) {
             return newLoadNextView(parent);
         }
-        return super.newView(parent, itemViewType);
+        return super.newView(parent, viewType);
     }
 
     @Override
@@ -176,10 +176,6 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
 
     private boolean isLoadNextItem(int position) {
         return position == super.getItemCount();
-    }
-
-    private int loadNextItemViewType() {
-        return super.getViewTypeCount();
     }
 
     @NonNull

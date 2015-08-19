@@ -6,6 +6,9 @@ import lombok.NonNull;
 public abstract class AbstractPowerAdapter implements PowerAdapter {
 
     @NonNull
+    private final ViewType mViewType = new ViewType();
+
+    @NonNull
     private final DataObservable mDataObservable = new DataObservable();
 
     @Override
@@ -18,19 +21,15 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
         return NO_ID;
     }
 
+    @NonNull
     @Override
-    public int getItemViewType(int position) {
-        return 0;
+    public ViewType getItemViewType(int position) {
+        return mViewType;
     }
 
     @Override
     public boolean isEnabled(int position) {
         return true;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 1;
     }
 
     @Override
