@@ -8,11 +8,10 @@ import butterknife.Bind;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
-import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
 public final class SimpleFragment extends BaseFragment {
 
@@ -20,12 +19,7 @@ public final class SimpleFragment extends BaseFragment {
     private final NewsSimpleData mData = new NewsSimpleData();
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
-            .bind(NewsItem.class, new NewsItemBinder())
-            .build();
-
-    @NonNull
-    private final PowerAdapter mAdapter = new DataBindingAdapter(mData, mMapper);
+    private final PowerAdapter mAdapter = new DataBindingAdapter(mData, singletonMapper(new NewsItemBinder()));
 
     @Bind(R.id.news_data_layout)
     DataLayout mDataLayout;
