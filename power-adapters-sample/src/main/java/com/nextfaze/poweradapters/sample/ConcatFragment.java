@@ -102,7 +102,7 @@ public class ConcatFragment extends Fragment {
                 .build(adapter);
 
         adapter = new EmptyAdapterBuilder()
-                .emptyItemResource(R.layout.list_empty_item)
+                .resource(R.layout.list_empty_item)
                 .build(adapter, new DataEmptyDelegate(data));
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);

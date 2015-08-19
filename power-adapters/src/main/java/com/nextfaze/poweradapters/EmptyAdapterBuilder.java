@@ -10,19 +10,19 @@ import lombok.NonNull;
 public final class EmptyAdapterBuilder {
 
     @Nullable
-    private Item mEmptyItem;
+    private Item mItem;
 
-    private boolean mEmptyItemEnabled;
+    private boolean mEnabled;
 
     @NonNull
-    public EmptyAdapterBuilder emptyItemResource(@LayoutRes int emptyItemResource) {
-        mEmptyItem = new Item(emptyItemResource);
+    public EmptyAdapterBuilder resource(@LayoutRes int emptyItemResource) {
+        mItem = new Item(emptyItemResource);
         return this;
     }
 
     @NonNull
-    public EmptyAdapterBuilder emptyItemView(@NonNull View emptyItemView) {
-        mEmptyItem = new Item(emptyItemView);
+    public EmptyAdapterBuilder view(@NonNull View emptyItemView) {
+        mItem = new Item(emptyItemView);
         return this;
     }
 
@@ -32,8 +32,8 @@ public final class EmptyAdapterBuilder {
      * @see ListAdapter#isEnabled(int)
      */
     @NonNull
-    public EmptyAdapterBuilder emptyItemEnabled(boolean emptyItemEnabled) {
-        mEmptyItemEnabled = emptyItemEnabled;
+    public EmptyAdapterBuilder enabled(boolean emptyItemEnabled) {
+        mEnabled = emptyItemEnabled;
         return this;
     }
 
@@ -44,10 +44,10 @@ public final class EmptyAdapterBuilder {
 
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
-        if (mEmptyItem == null) {
+        if (mItem == null) {
             throw new IllegalStateException("No empty item specified");
         }
-        return new EmptyAdapter(adapter, delegate, mEmptyItem, mEmptyItemEnabled);
+        return PowerAdapters.concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
     }
 
     /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
