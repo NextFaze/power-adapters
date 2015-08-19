@@ -9,13 +9,13 @@ public final class DividerAdapterBuilder {
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_LEADING;
 
     @LayoutRes
-    private int mLeadingItemResource;
+    private int mLeadingResource;
 
     @LayoutRes
-    private int mTrailingItemResource;
+    private int mTrailingResource;
 
     @LayoutRes
-    private int mInnerItemResource;
+    private int mInnerResource;
 
     /**
      * Set the policy that determines what dividers are shown if the wrapped adapter is empty. Defaults to {@link
@@ -27,37 +27,37 @@ public final class DividerAdapterBuilder {
         return this;
     }
 
-    /** Sets layout resource of the divider that appears BEFORE the wrapped adapters items. */
+    /** Sets the layout resource of the divider that appears BEFORE the wrapped adapters items. */
     @NonNull
-    public DividerAdapterBuilder leadingItemResource(@LayoutRes int itemResource) {
-        mLeadingItemResource = itemResource;
+    public DividerAdapterBuilder leadingResource(@LayoutRes int itemResource) {
+        mLeadingResource = itemResource;
         return this;
     }
 
-    /** Sets layout resource of the divider that appears AFTER the wrapped adapters items. */
+    /** Sets the layout resource of the divider that appears AFTER the wrapped adapters items. */
     @NonNull
-    public DividerAdapterBuilder trailingItemResource(@LayoutRes int itemResource) {
-        mTrailingItemResource = itemResource;
+    public DividerAdapterBuilder trailingResource(@LayoutRes int itemResource) {
+        mTrailingResource = itemResource;
         return this;
     }
 
-    /** Sets the layout resource of the divider that appears between all of the wrapped adapters items. */
+    /** Sets the the layout resource of the divider that appears between all of the wrapped adapters items. */
     @NonNull
-    public DividerAdapterBuilder innerItemResource(@LayoutRes int itemResource) {
-        mInnerItemResource = itemResource;
+    public DividerAdapterBuilder innerResource(@LayoutRes int itemResource) {
+        mInnerResource = itemResource;
         return this;
     }
 
-    /** Sets layout resource of the divider that appears BEFORE and AFTER the wrapped adapters items. */
+    /** Sets the layout resource of the divider that appears BEFORE and AFTER the wrapped adapters items. */
     @NonNull
-    public DividerAdapterBuilder outerItemResource(@LayoutRes int itemResource) {
-        return leadingItemResource(itemResource).trailingItemResource(itemResource);
+    public DividerAdapterBuilder outerResource(@LayoutRes int itemResource) {
+        return leadingResource(itemResource).trailingResource(itemResource);
     }
 
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter) {
-        return new DividerAdapter(adapter, mEmptyPolicy, mLeadingItemResource, mTrailingItemResource,
-                mInnerItemResource);
+        return new DividerAdapter(adapter, mEmptyPolicy, mLeadingResource, mTrailingResource,
+                mInnerResource);
     }
 
     public enum EmptyPolicy {
