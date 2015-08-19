@@ -50,42 +50,6 @@ public final class EmptyAdapterBuilder {
         return new EmptyAdapter(adapter, delegate, mEmptyItem, mEmptyItemEnabled);
     }
 
-    /** Empty state is determined by wrapped adapter size. */
-    private static class DefaultDelegate extends Delegate {
-
-        @NonNull
-        private final PowerAdapter mAdapter;
-
-        @NonNull
-        private final DataObserver mDataObserver = new SimpleDataObserver() {
-            @Override
-            public void onChanged() {
-                notifyEmptyChanged();
-            }
-        };
-
-        DefaultDelegate(@NonNull PowerAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        @Override
-        protected boolean isEmpty() {
-            return mAdapter.getItemCount() == 0;
-        }
-
-        @Override
-        protected void onFirstObserverRegistered() {
-            super.onFirstObserverRegistered();
-            mAdapter.registerDataObserver(mDataObserver);
-        }
-
-        @Override
-        protected void onLastObserverUnregistered() {
-            super.onLastObserverUnregistered();
-            mAdapter.unregisterDataObserver(mDataObserver);
-        }
-    }
-
     /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
     public static abstract class Delegate {
 
@@ -124,6 +88,42 @@ public final class EmptyAdapterBuilder {
 
         void setAdapter(@Nullable EmptyAdapter adapter) {
             mAdapter = adapter;
+        }
+    }
+
+    /** Empty state is determined by wrapped adapter size. */
+    private static class DefaultDelegate extends Delegate {
+
+        @NonNull
+        private final PowerAdapter mAdapter;
+
+        @NonNull
+        private final DataObserver mDataObserver = new SimpleDataObserver() {
+            @Override
+            public void onChanged() {
+                notifyEmptyChanged();
+            }
+        };
+
+        DefaultDelegate(@NonNull PowerAdapter adapter) {
+            mAdapter = adapter;
+        }
+
+        @Override
+        protected boolean isEmpty() {
+            return mAdapter.getItemCount() == 0;
+        }
+
+        @Override
+        protected void onFirstObserverRegistered() {
+            super.onFirstObserverRegistered();
+            mAdapter.registerDataObserver(mDataObserver);
+        }
+
+        @Override
+        protected void onLastObserverUnregistered() {
+            super.onLastObserverUnregistered();
+            mAdapter.unregisterDataObserver(mDataObserver);
         }
     }
 }

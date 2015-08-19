@@ -75,7 +75,7 @@ public class ConcatFragment extends Fragment {
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
 
         adapter = new LoadingAdapterBuilder()
-                .loadingItemResource(R.layout.list_loading_item)
+                .resource(R.layout.list_loading_item)
                 .build(adapter, new DataLoadingDelegate(data));
 
         adapter = new EmptyAdapterBuilder()

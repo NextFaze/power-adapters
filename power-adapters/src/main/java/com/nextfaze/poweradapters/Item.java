@@ -5,8 +5,13 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.experimental.Accessors;
+import lombok.experimental.Wither;
 
+@Accessors(prefix = "m")
+@AllArgsConstructor
 final class Item {
 
     @LayoutRes
@@ -15,6 +20,7 @@ final class Item {
     @Nullable
     private final View mView;
 
+    @Wither
     private final boolean mEnabled;
 
     Item(int layoutResource) {

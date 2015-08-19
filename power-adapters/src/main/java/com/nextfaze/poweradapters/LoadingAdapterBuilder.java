@@ -7,32 +7,34 @@ import android.view.View;
 import android.widget.Adapter;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
+
 /** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
 public final class LoadingAdapterBuilder {
 
     @Nullable
-    private Item mLoadingItem;
+    private Item mItem;
 
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_ALWAYS;
 
-    private boolean mLoadingItemEnabled;
+    private boolean mEnabled;
 
     @NonNull
-    public LoadingAdapterBuilder loadingItemResource(@LayoutRes int loadingItemResource) {
-        mLoadingItem = new Item(loadingItemResource);
+    public LoadingAdapterBuilder view(@NonNull View loadingItemView) {
+        mItem = new Item(loadingItemView, false);
         return this;
     }
 
     @NonNull
-    public LoadingAdapterBuilder loadingItemView(@NonNull View loadingItemView) {
-        mLoadingItem = new Item(loadingItemView);
+    public LoadingAdapterBuilder resource(@LayoutRes int loadingItemResource) {
+        mItem = new Item(loadingItemResource, false);
         return this;
     }
 
     @NonNull
-    public LoadingAdapterBuilder loadingItemEnabled(boolean loadingItemEnabled) {
-        mLoadingItemEnabled = loadingItemEnabled;
+    public LoadingAdapterBuilder enabled(boolean loadingItemEnabled) {
+        mEnabled = loadingItemEnabled;
         return this;
     }
 
@@ -45,10 +47,10 @@ public final class LoadingAdapterBuilder {
 
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
-        if (mLoadingItem == null) {
+        if (mItem == null) {
             throw new IllegalStateException("No loading item specified");
         }
-        return new LoadingAdapter(adapter, mLoadingItem, mEmptyPolicy, delegate, mLoadingItemEnabled);
+        return concat(adapter, new LoadingAdapter(delegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
     }
 
     /** Determines when the loading item is shown while empty. Item is never shown if not loading. */
@@ -56,19 +58,19 @@ public final class LoadingAdapterBuilder {
         /** Show the loading item ONLY while wrapped adapter is empty. */
         SHOW_ONLY_IF_EMPTY {
             @Override
-            boolean shouldShow(@NonNull LoadingAdapter adapter) {
-                return adapter.getAdapter().getItemCount() == 0;
+            boolean shouldShow(@NonNull Delegate delegate) {
+                return delegate.isEmpty();
             }
         },
         /** Show the loading item regardless of the empty state. */
         SHOW_ALWAYS {
             @Override
-            boolean shouldShow(@NonNull LoadingAdapter adapter) {
+            boolean shouldShow(@NonNull Delegate delegate) {
                 return true;
             }
         };
 
-        abstract boolean shouldShow(@NonNull LoadingAdapter adapter);
+        abstract boolean shouldShow(@NonNull Delegate delegate);
     }
 
     /** Invoked by {@link LoadingAdapter} to determine when the loading item is shown. */
@@ -87,6 +89,14 @@ public final class LoadingAdapterBuilder {
         protected abstract boolean isLoading();
 
         /**
+         * Returns whether the data set is considered empty, for the purpose of evaluating the {@link
+         * LoadingAdapterBuilder.EmptyPolicy}.
+         * @return {@code true} if the data set is empty, otherwise {@code false}.
+         */
+        @UiThread
+        protected abstract boolean isEmpty();
+
+        /**
          * @see PowerAdapterWrapper#onFirstObserverRegistered()
          */
         @UiThread
@@ -103,6 +113,13 @@ public final class LoadingAdapterBuilder {
         /** Must be called when the value of {@link #isLoading()} changes. */
         @UiThread
         protected final void notifyLoadingChanged() {
+            if (mAdapter != null) {
+                mAdapter.updateVisible();
+            }
+        }
+
+        /** Must be called when the value of {@link #isEmpty()} changes. */
+        protected final void notifyEmptyChanged() {
             if (mAdapter != null) {
                 mAdapter.updateVisible();
             }

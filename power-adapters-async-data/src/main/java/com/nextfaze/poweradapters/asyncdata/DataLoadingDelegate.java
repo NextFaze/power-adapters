@@ -10,6 +10,14 @@ public final class DataLoadingDelegate extends LoadingAdapterBuilder.Delegate {
     private final Data<?> mData;
 
     @NonNull
+    private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.SimpleDataObserver() {
+        @Override
+        public void onChange() {
+            notifyEmptyChanged();
+        }
+    };
+
+    @NonNull
     private final com.nextfaze.asyncdata.LoadingObserver mLoadingObserver = new com.nextfaze.asyncdata.LoadingObserver() {
         @Override
         public void onLoadingChange() {
@@ -26,11 +34,20 @@ public final class DataLoadingDelegate extends LoadingAdapterBuilder.Delegate {
         return mData.isLoading();
     }
 
-    protected void onFirstObserverRegistered() {
-        mData.registerLoadingObserver(mLoadingObserver);
+    @Override
+    protected boolean isEmpty() {
+        return mData.isEmpty();
     }
 
+    @Override
+    protected void onFirstObserverRegistered() {
+        mData.registerLoadingObserver(mLoadingObserver);
+        mData.registerDataObserver(mDataObserver);
+    }
+
+    @Override
     protected void onLastObserverUnregistered() {
         mData.unregisterLoadingObserver(mLoadingObserver);
+        mData.unregisterDataObserver(mDataObserver);
     }
 }

@@ -20,7 +20,7 @@ import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
 public final class AutoIncrementalFragment extends BaseFragment {
 
     @NonNull
-    private final NewsIncrementalData mData = new NewsIncrementalData();
+    private final NewsIncrementalData mData = new NewsIncrementalData(50, 10);
 
     @NonNull
     private final Mapper mMapper = new PolymorphicMapperBuilder()
@@ -35,7 +35,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
         PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
         adapter = new LoadingAdapterBuilder()
-                .loadingItemResource(R.layout.list_loading_item)
+                .resource(R.layout.list_loading_item)
                 .build(adapter, new DataLoadingDelegate(data));
         return adapter;
     }
