@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
@@ -23,6 +24,7 @@ public final class ViewFactories {
         };
     }
 
+    /** Warning: returned view {@link LayoutParams} might not match those of parent. */
     @NonNull
     public static ViewFactory viewFactoryForView(@NonNull final View view) {
         return new ViewFactory() {
