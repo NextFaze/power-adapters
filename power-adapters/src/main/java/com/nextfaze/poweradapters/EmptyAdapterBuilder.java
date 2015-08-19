@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
@@ -44,11 +45,13 @@ public final class EmptyAdapterBuilder {
         return this;
     }
 
+    @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter) {
         return build(adapter, new DefaultDelegate(adapter));
     }
 
+    @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
         if (mItem == null) {

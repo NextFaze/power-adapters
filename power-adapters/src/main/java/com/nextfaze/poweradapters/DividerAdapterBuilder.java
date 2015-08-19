@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.view.View;
 import lombok.NonNull;
@@ -56,6 +57,7 @@ public final class DividerAdapterBuilder {
         return leadingResource(itemResource).trailingResource(itemResource);
     }
 
+    @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter) {
         return new DividerAdapter(adapter, mEmptyPolicy, mLeadingResource, mTrailingResource,

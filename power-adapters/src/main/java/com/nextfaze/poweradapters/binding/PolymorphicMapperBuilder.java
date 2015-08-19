@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -36,6 +37,7 @@ public final class PolymorphicMapperBuilder {
         return this;
     }
 
+    @CheckResult
     @NonNull
     public Mapper build() {
         return new PolymorphicMapper(mBinders);
