@@ -295,7 +295,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
-            // TODO: Replace use of Task, so we stop depending on NextFaze Concurrent library.
+            // TODO: Replace use of Task with either a plain Thread or use of an Executor.
             mTask = new Task<List<? extends T>>() {
                 @Override
                 protected List<? extends T> call() throws Throwable {
