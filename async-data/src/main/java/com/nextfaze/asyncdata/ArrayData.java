@@ -313,9 +313,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                         }
                     }
                     mTask = null;
+                    notifyItemRangeInserted(0, data.size());
                     setAvailable(0);
                     notifyLoadingChanged();
-                    notifyItemRangeInserted(0, data.size());
                     loadDataIfAppropriate();
                 }
 
