@@ -30,13 +30,13 @@ abstract class BaseFragment extends Fragment {
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
 
-    @Bind(R.id.news_data_layout)
+    @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.news_list)
+    @Bind(R.id.list)
     ListView mListView;
 
-    @Bind(R.id.news_recycler)
+    @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
 
     @Override
@@ -48,7 +48,7 @@ abstract class BaseFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.news_data_layout, container, false);
+        return inflater.inflate(R.layout.data_layout, container, false);
     }
 
     @Override
@@ -56,7 +56,7 @@ abstract class BaseFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        mDataLayout.setErrorFormatter(new NewsErrorFormatter());
+        mDataLayout.setErrorFormatter(new SimpleErrorFormatter());
         showCollectionView(CollectionView.LIST_VIEW);
     }
 

@@ -16,7 +16,7 @@ import static java.lang.String.format;
 public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     @NonNull
-    private final DataObserver mRootDataObserver = new DataObserver() {
+    private final DataObserver mRootDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
             notifyDataSetChanged();
@@ -24,22 +24,30 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+            notifyItemRangeChanged(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyItemRangeInserted(positionStart, itemCount);
+            notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyItemRangeRemoved(positionStart, itemCount);
+            notifyItemRangeRemoved(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+            notifyItemRangeMoved(rootToOuter(fromPosition), rootToOuter(toPosition), itemCount);
+        }
+    };
+
+    @NonNull
+    private final Transform mRootTransform = new Transform() {
+        @Override
+        public int transform(int position) {
+            return outerToRoot(position);
         }
     };
 
@@ -53,8 +61,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final SparseArray<Entry> mEntries = new SparseArray<>();
 
+    // TODO: Remove mappings from the following when an Entry is closed.
     @NonNull
-    private final Map<ViewType, Entry> mEntriesByViewType = new HashMap<>();
+    private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
     public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
         mRootAdapter = rootAdapter;
@@ -66,16 +75,22 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             if (entry == null) {
                 entry = new Entry(getChildAdapter(position));
                 mEntries.put(position, entry);
-                notifyItemRangeInserted(position, entry.getItemCount());
+                notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
             }
         } else {
             if (entry != null) {
                 int itemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
-                notifyItemRangeRemoved(position, itemCount);
+                notifyItemRangeRemoved(rootToOuter(position) + 1, itemCount);
             }
         }
+    }
+
+    public boolean toggleExpanded(int position) {
+        boolean expanded = isExpanded(position);
+        setExpanded(position, !expanded);
+        return !expanded;
     }
 
     public boolean isExpanded(int position) {
@@ -97,40 +112,39 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         int itemCount = mRootAdapter.getItemCount();
         // Add each expanded adapter item count also.
         for (int i = 0; i < mEntries.size(); i++) {
-            itemCount += mEntries.get(i).getItemCount();
+            itemCount += mEntries.valueAt(i).getItemCount();
         }
         return itemCount;
     }
 
     @Override
     public long getItemId(int position) {
-        return findAdapterByPosition(position).getItemId(position);
+        return find(position).getItemId(position);
     }
 
     @Override
     public boolean isEnabled(int position) {
-        return findAdapterByPosition(position).isEnabled(position);
+        return find(position).isEnabled(position);
     }
 
     @NonNull
     @Override
     public ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = findAdapterByPosition(position);
-        Entry entry = offsetAdapter.mEntry;
+        OffsetAdapter offsetAdapter = find(position);
         ViewType viewType = offsetAdapter.getViewType(position);
-        mEntriesByViewType.put(viewType, entry);
+        mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
         return viewType;
     }
 
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        return findAdapterByItemViewType(viewType).newView(parent, viewType);
+        return lookup(viewType).newView(parent, viewType);
     }
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        findAdapterByPosition(holder.getPosition()).bindView(view, holder);
+        find(holder.getPosition()).bindView(view, holder);
     }
 
     @CallSuper
@@ -139,7 +153,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         super.onFirstObserverRegistered();
         mRootAdapter.registerDataObserver(mRootDataObserver);
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.get(i).registerObserversIfNecessary();
+            mEntries.valueAt(i).registerObserversIfNecessary();
         }
     }
 
@@ -149,74 +163,71 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         super.onLastObserverUnregistered();
         mRootAdapter.unregisterDataObserver(mRootDataObserver);
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.get(i).unregisterObserversIfNecessary();
+            mEntries.valueAt(i).unregisterObserversIfNecessary();
         }
     }
 
+    /** Find the adapter corresponding to the position. */
     @NonNull
-    private OffsetAdapter findAdapterByPosition(int position) {
-        int totalItemCount = getItemCount();
-        if (position >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
-        }
-        int positionOffset = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.get(i);
-            PowerAdapter adapter = entry.mAdapter;
-            int itemCount = adapter.getItemCount();
-            if (position - positionOffset < itemCount) {
-                return mOffsetAdapter.set(entry, positionOffset);
+    private OffsetAdapter find(int position) {
+        assertWithinBounds(position);
+        int offset = 0;
+        int rootOffset = 0;
+        int rootItemCount = mRootAdapter.getItemCount();
+        for (int i = 0; i < rootItemCount; i++) {
+            if (offset >= position) {
+                return mOffsetAdapter.set(mRootAdapter, mRootTransform, rootOffset);
             }
-            positionOffset += itemCount;
-        }
-        throw new IndexOutOfBoundsException(
-                format("Position %d not within range of any of the %d child adapters, total size %d",
-                        position, mEntries.size(), totalItemCount));
-    }
-
-    @NonNull
-    private OffsetAdapter findAdapterByItemViewType(@NonNull ViewType viewType) {
-        Entry entryWithViewType = mEntriesByViewType.get(viewType);
-        if (entryWithViewType != null) {
-            int positionOffset = 0;
-            for (int i = 0; i < mEntries.size(); i++) {
-                Entry entry = mEntries.get(i);
-                PowerAdapter adapter = entry.mAdapter;
-                int itemCount = adapter.getItemCount();
-                if (entry == entryWithViewType) {
-                    return mOffsetAdapter.set(entry, positionOffset);
+            offset++;
+            Entry entry = mEntries.get(i);
+            if (entry != null) {
+                int itemCount = entry.getItemCount();
+                if (position - offset < itemCount) {
+                    return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, offset);
                 }
-                positionOffset += itemCount;
+                offset += itemCount;
+                rootOffset += itemCount;
             }
         }
-        throw new IllegalStateException("No entry found with the specified view type");
+        throw new AssertionError();
     }
 
+    /** Look up the adapter (root or child), based on view type. */
     @NonNull
-    private Entry findEntryByPosition(int position) {
+    private PowerAdapter lookup(@NonNull ViewType viewType) {
+        PowerAdapter adapter = mAdaptersByViewType.get(viewType);
+        return adapter != null ? adapter : mRootAdapter;
+    }
+
+    private int rootToOuter(int rootPosition) {
+        int offset = 0;
+        for (int i = 0; i < mEntries.size(); i++) {
+            Entry entry = mEntries.valueAt(i);
+            int entryRootPosition = mEntries.keyAt(i);
+            if (entryRootPosition >= rootPosition) {
+                break;
+            }
+            offset += entry.getItemCount();
+        }
+        return offset + rootPosition;
+    }
+
+    private int outerToRoot(int outerPosition) {
+        // TODO
+        return outerPosition;
+    }
+
+    private void assertWithinBounds(int position) {
         int totalItemCount = getItemCount();
         if (position >= totalItemCount) {
             throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
         }
-        int positionOffset = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.get(i);
-            PowerAdapter adapter = entry.mAdapter;
-            int itemCount = adapter.getItemCount();
-            if (position - positionOffset < itemCount) {
-                return entry;
-            }
-            positionOffset += itemCount;
-        }
-        throw new IndexOutOfBoundsException(
-                format("Position %d not within range of any of the %d child adapters, total size %d",
-                        position, mEntries.size(), totalItemCount));
     }
 
     private final class Entry {
 
         @NonNull
-        private final DataObserver mDataObserver = new DataObserver() {
+        private final DataObserver mDataObserver = new SimpleDataObserver() {
             @Override
             public void onChanged() {
                 notifyDataSetChanged();
@@ -224,22 +235,30 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(innerToOuter(positionStart), itemCount);
+                notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
-                notifyItemRangeInserted(innerToOuter(positionStart), itemCount);
+                notifyItemRangeInserted(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
-                notifyItemRangeRemoved(innerToOuter(positionStart), itemCount);
+                notifyItemRangeRemoved(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                notifyItemRangeMoved(innerToOuter(fromPosition), innerToOuter(toPosition), itemCount);
+                notifyItemRangeMoved(entryToOuter(fromPosition), entryToOuter(toPosition), itemCount);
+            }
+        };
+
+        @NonNull
+        private final Transform mTransform = new Transform() {
+            @Override
+            public int transform(int position) {
+                return outerToEntry(position);
             }
         };
 
@@ -254,16 +273,22 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             registerObserversIfNecessary();
         }
 
-        private int innerToOuter(int innerPosition) {
-            int positionOffset = 0;
+        private int entryToOuter(int entryPosition) {
+            int offset = 0;
             for (int i = 0; i < mEntries.size(); i++) {
-                Entry entry = mEntries.get(i);
-                if (entry.mAdapter == mAdapter) {
+                Entry entry = mEntries.valueAt(i);
+                if (entry == this) {
+                    offset += mEntries.keyAt(i) + 1;
                     break;
                 }
-                positionOffset += entry.getItemCount();
+                offset += entry.getItemCount();
             }
-            return positionOffset + innerPosition;
+            return offset + entryPosition;
+        }
+
+        private int outerToEntry(int outerPosition) {
+            // TODO
+            return outerPosition;
         }
 
         void registerObserversIfNecessary() {
@@ -292,49 +317,52 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     private static final class OffsetAdapter {
 
         @NonNull
-        private final WeakHashMap<View, OffsetHolder> mHolders = new WeakHashMap<>();
+        private final WeakHashMap<Holder, OffsetHolder> mHolders = new WeakHashMap<>();
 
-        private Entry mEntry;
-
-        private int mPositionOffset;
+        private PowerAdapter mAdapter;
+        private Transform mTransform;
+        private int mOffset;
 
         @NonNull
-        OffsetAdapter set(@NonNull Entry entry, int positionOffset) {
-            mEntry = entry;
-            mPositionOffset = positionOffset;
+        OffsetAdapter set(@NonNull PowerAdapter adapter, @NonNull Transform transform, int offset) {
+            mAdapter = adapter;
+            mTransform = transform;
+            mOffset = offset;
             return this;
         }
 
         long getItemId(int position) {
-            return mEntry.mAdapter.getItemId(position - mPositionOffset);
+            return mAdapter.getItemId(position - mOffset);
         }
 
         boolean isEnabled(int position) {
-            return mEntry.mAdapter.isEnabled(position - mPositionOffset);
+            return mAdapter.isEnabled(position - mOffset);
         }
 
         @NonNull
         View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-            return mEntry.mAdapter.newView(parent, viewType);
+            return mAdapter.newView(parent, viewType);
         }
 
         void bindView(@NonNull View view, @NonNull Holder holder) {
-            OffsetHolder offsetHolder = mHolders.get(view);
+            OffsetHolder offsetHolder = mHolders.get(holder);
             if (offsetHolder == null) {
                 offsetHolder = new OffsetHolder(holder);
-                mHolders.put(view, offsetHolder);
+                mHolders.put(holder, offsetHolder);
             }
-            offsetHolder.offset = mPositionOffset;
-            mEntry.mAdapter.bindView(view, offsetHolder);
+            offsetHolder.mTransform = mTransform;
+            offsetHolder.offset = mOffset;
+            mAdapter.bindView(view, offsetHolder);
         }
 
         @NonNull
         ViewType getViewType(int position) {
-            return mEntry.mAdapter.getItemViewType(position - mPositionOffset);
+            return mAdapter.getItemViewType(position - mOffset);
         }
 
         private static final class OffsetHolder extends HolderWrapper {
 
+            Transform mTransform;
             int offset;
 
             OffsetHolder(@NonNull Holder holder) {
@@ -346,5 +374,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 return super.getPosition() - offset;
             }
         }
+    }
+
+    interface Transform {
+        int transform(int position);
     }
 }

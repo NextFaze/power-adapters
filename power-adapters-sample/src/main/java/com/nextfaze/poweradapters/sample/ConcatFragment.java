@@ -40,12 +40,12 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class ConcatFragment extends Fragment {
 
-    private static final int ADAPTER_COUNT = 100;
+    private static final int ADAPTER_COUNT = 1;
 
     @NonNull
     private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
 
-    @Bind(R.id.news_recycler)
+    @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
 
     public ConcatFragment() {

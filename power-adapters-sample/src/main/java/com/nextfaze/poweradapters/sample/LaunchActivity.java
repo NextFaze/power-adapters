@@ -33,7 +33,8 @@ public final class LaunchActivity extends AppCompatActivity {
             new Sample("Auto Incremental", AutoIncrementalFragment.class),
             new Sample("Manual Incremental", ManualIncrementalFragment.class),
             new Sample("Long-Lived Data", LongLivedDataFragment.class),
-            new Sample("Concatenation", ConcatFragment.class)
+            new Sample("Concatenation", ConcatFragment.class),
+            new Sample("File Tree", FileTreeFragment.class)
     );
 
     @NonNull

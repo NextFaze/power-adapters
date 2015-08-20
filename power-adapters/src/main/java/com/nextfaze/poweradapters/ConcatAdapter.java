@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.WeakHashMap;
 import static java.lang.String.format;
 
 /** Concatenates several adapters together. */
-@Accessors(prefix = "m")
 final class ConcatAdapter extends AbstractPowerAdapter {
 
     /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
@@ -120,27 +118,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
             int itemCount = adapter.getItemCount();
             if (position - positionOffset < itemCount) {
                 return mOffsetAdapter.set(entry, positionOffset);
-            }
-            positionOffset += itemCount;
-        }
-        throw new IndexOutOfBoundsException(
-                format("Position %d not within range of any of the %d child adapters, total size %d",
-                        position, mEntries.size(), totalItemCount));
-    }
-
-    @NonNull
-    private Entry findEntryByPosition(int position) {
-        int totalItemCount = getItemCount();
-        if (position >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
-        }
-        int positionOffset = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.get(i);
-            PowerAdapter adapter = entry.mAdapter;
-            int itemCount = adapter.getItemCount();
-            if (position - positionOffset < itemCount) {
-                return entry;
             }
             positionOffset += itemCount;
         }

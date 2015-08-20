@@ -5,10 +5,10 @@ import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import lombok.NonNull;
 
-final class NewsErrorFormatter implements ErrorFormatter {
+final class SimpleErrorFormatter implements ErrorFormatter {
     @Nullable
     @Override
     public String format(@NonNull Context context, @NonNull Throwable e) {
-        return "Failed to load news: " + e.getMessage();
+        return "Failed to load: " + e.getMessage();
     }
 }

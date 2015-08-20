@@ -54,10 +54,10 @@ public final class ManualIncrementalFragment extends BaseFragment {
         return adapter;
     }
 
-    @Bind(R.id.news_data_layout)
+    @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.news_recycler)
+    @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
 
     @Override

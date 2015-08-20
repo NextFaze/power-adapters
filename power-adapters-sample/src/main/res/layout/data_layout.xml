@@ -4,26 +4,26 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/news_data_layout"
+        android:id="@+id/data_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:ignore="HardcodedText"
-        app:contentView="@+id/news_content"
-        app:emptyView="@+id/news_empty"
-        app:loadingView="@+id/news_loading"
-        app:errorView="@+id/news_error">
+        app:contentView="@+id/content"
+        app:emptyView="@+id/empty"
+        app:loadingView="@+id/loading"
+        app:errorView="@+id/error">
 
     <!-- Content -->
 
     <FrameLayout
-            android:id="@+id/news_content"
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
         <!-- ListView -->
 
         <ListView
-                android:id="@+id/news_list"
+                android:id="@+id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:dividerHeight="0dp"
@@ -32,7 +32,7 @@
         <!-- RecyclerView -->
 
         <android.support.v7.widget.RecyclerView
-                android:id="@+id/news_recycler"
+                android:id="@+id/recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
@@ -41,17 +41,17 @@
     <!-- Empty -->
 
     <TextView
-            android:id="@+id/news_empty"
+            android:id="@+id/empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="No news today!"/>
+            android:text="List is empty!"/>
 
     <!-- Loading -->
 
     <ProgressBar
             style="@android:style/Widget.Holo.ProgressBar"
-            android:id="@+id/news_loading"
+            android:id="@+id/loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"/>
@@ -59,7 +59,7 @@
     <!-- Error -->
 
     <TextView
-            android:id="@+id/news_error"
+            android:id="@+id/error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
