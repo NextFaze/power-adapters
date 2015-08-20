@@ -7,7 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -19,26 +22,31 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     private final DataObserver mRootDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
+            invalidateGroups();
             notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
+            invalidateGroups();
             notifyItemRangeChanged(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
+            invalidateGroups();
             notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
+            invalidateGroups();
             notifyItemRangeRemoved(rootToOuter(positionStart), itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            invalidateGroups();
             notifyItemRangeMoved(rootToOuter(fromPosition), rootToOuter(toPosition), itemCount);
         }
     };
@@ -65,6 +73,11 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
+    @NonNull
+    private final List<Group> mGroups = new ArrayList<>();
+
+    boolean mDirty = true;
+
     public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
         mRootAdapter = rootAdapter;
     }
@@ -73,8 +86,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         Entry entry = mEntries.get(position);
         if (expanded) {
             if (entry == null) {
-                entry = new Entry(getChildAdapter(position));
+                entry = new Entry(getChildAdapter(position), mGroups.get(position));
                 mEntries.put(position, entry);
+                invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
             }
         } else {
@@ -82,6 +96,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 int itemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
+                invalidateGroups();
                 notifyItemRangeRemoved(rootToOuter(position) + 1, itemCount);
             }
         }
@@ -106,15 +121,75 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return false;
     }
 
+    static final class Group implements Comparable<Group> {
+
+        private final int mOuterStart; // inclusive
+        private final int mOuterEnd; // exclusive
+        private final int mRootStart;
+        private final int mEntryStart;
+
+        Group(int outerStart, int outerEnd, int rootStart) {
+            mOuterStart = outerStart;
+            mOuterEnd = outerEnd;
+            mRootStart = rootStart;
+            mEntryStart = outerStart + 1;
+        }
+
+        @NonNull
+        static Group position(int position) {
+            return new Group(position, position + 1, 0);
+        }
+
+        @Override
+        public int compareTo(Group o) {
+            if (mOuterStart < o.mOuterStart) {
+                return -1;
+            }
+            if (mOuterStart >= o.mOuterEnd) {
+                return +1;
+            }
+            return 0;
+        }
+    }
+
+    private void invalidateGroups() {
+        mDirty = true;
+        rebuildGroupsIfNecessary();
+    }
+
+    private void rebuildGroupsIfNecessary() {
+        if (mDirty) {
+            mGroups.clear();
+            int outerStart = 0;
+            int rootStart = 0;
+            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+                Entry entry = mEntries.get(i);
+                if (entry != null) {
+                    int entryItemCount = entry.getItemCount();
+                    mGroups.add(new Group(outerStart, outerStart + entryItemCount + 1, rootStart));
+                    outerStart += entryItemCount + 1;
+                    rootStart += entryItemCount;
+                } else {
+                    mGroups.add(new Group(outerStart, outerStart + 1, rootStart));
+                    outerStart++;
+                }
+            }
+            mDirty = false;
+        }
+    }
+
     @Override
     public int getItemCount() {
-        // Account for root adapter items, at a minimum.
-        int itemCount = mRootAdapter.getItemCount();
-        // Add each expanded adapter item count also.
-        for (int i = 0; i < mEntries.size(); i++) {
-            itemCount += mEntries.valueAt(i).getItemCount();
+        rebuildGroupsIfNecessary();
+        int total = 0;
+        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+            total++;
+            Entry entry = mEntries.get(i);
+            if (entry != null) {
+                total += entry.getItemCount();
+            }
         }
-        return itemCount;
+        return total;
     }
 
     @Override
@@ -167,29 +242,36 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
     }
 
-    /** Find the adapter corresponding to the position. */
-    @NonNull
-    private OffsetAdapter find(int position) {
-        assertWithinBounds(position);
-        int offset = 0;
-        int rootOffset = 0;
-        int rootItemCount = mRootAdapter.getItemCount();
-        for (int i = 0; i < rootItemCount; i++) {
-            if (offset >= position) {
-                return mOffsetAdapter.set(mRootAdapter, mRootTransform, rootOffset);
-            }
-            offset++;
-            Entry entry = mEntries.get(i);
-            if (entry != null) {
-                int itemCount = entry.getItemCount();
-                if (position - offset < itemCount) {
-                    return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, offset);
-                }
-                offset += itemCount;
-                rootOffset += itemCount;
+    private int binarySearchForGroupPosition(int outerPosition) {
+        return Collections.binarySearch(mGroups, Group.position(outerPosition));
+    }
+
+    private int linearSearchForGroupPosition( int outerPosition) {
+        for (int i = 0; i < mGroups.size(); i++) {
+            Group group = mGroups.get(i);
+            if (outerPosition >= group.mOuterStart && outerPosition < group.mOuterEnd) {
+                return i;
             }
         }
-        throw new AssertionError();
+        return -1;
+    }
+
+    private int searchForGroupPosition( int outerPosition) {
+        // TODO: Get binary search working.
+//        return binarySearchForGroupPosition(outerPosition);
+        return linearSearchForGroupPosition(outerPosition);
+    }
+
+    @NonNull
+    private OffsetAdapter find(int outerPosition) {
+        assertWithinBounds(outerPosition);
+        int groupPosition = searchForGroupPosition(outerPosition);
+        Group group = mGroups.get(groupPosition);
+        if (outerPosition - group.mOuterStart == 0) {
+            return mOffsetAdapter.set(mRootAdapter, mRootTransform, group.mRootStart);
+        }
+        Entry entry = mEntries.get(groupPosition);
+        return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, group.mEntryStart);
     }
 
     /** Look up the adapter (root or child), based on view type. */
@@ -200,27 +282,19 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     private int rootToOuter(int rootPosition) {
-        int offset = 0;
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.valueAt(i);
-            int entryRootPosition = mEntries.keyAt(i);
-            if (entryRootPosition >= rootPosition) {
-                break;
-            }
-            offset += entry.getItemCount();
-        }
-        return offset + rootPosition;
+        return mGroups.get(rootPosition).mOuterStart;
     }
 
     private int outerToRoot(int outerPosition) {
-        // TODO
-        return outerPosition;
+        int groupPosition = searchForGroupPosition(outerPosition);
+        Group group = mGroups.get(groupPosition);
+        return outerPosition - group.mRootStart;
     }
 
-    private void assertWithinBounds(int position) {
+    private void assertWithinBounds(int outerPosition) {
         int totalItemCount = getItemCount();
-        if (position >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", position, totalItemCount));
+        if (outerPosition >= totalItemCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
         }
     }
 
@@ -230,26 +304,31 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         private final DataObserver mDataObserver = new SimpleDataObserver() {
             @Override
             public void onChanged() {
+                invalidateGroups();
                 notifyDataSetChanged();
             }
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
+                invalidateGroups();
                 notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
+                invalidateGroups();
                 notifyItemRangeInserted(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
+                invalidateGroups();
                 notifyItemRangeRemoved(entryToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                invalidateGroups();
                 notifyItemRangeMoved(entryToOuter(fromPosition), entryToOuter(toPosition), itemCount);
             }
         };
@@ -268,27 +347,23 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         @NonNull
         private final PowerAdapter mAdapter;
 
-        Entry(@NonNull PowerAdapter adapter) {
+        @NonNull
+        private final Group mGroup;
+
+        Entry(@NonNull PowerAdapter adapter, @NonNull Group group) {
             mAdapter = adapter;
+            mGroup = group;
             registerObserversIfNecessary();
         }
 
         private int entryToOuter(int entryPosition) {
-            int offset = 0;
-            for (int i = 0; i < mEntries.size(); i++) {
-                Entry entry = mEntries.valueAt(i);
-                if (entry == this) {
-                    offset += mEntries.keyAt(i) + 1;
-                    break;
-                }
-                offset += entry.getItemCount();
-            }
-            return offset + entryPosition;
+            return mGroup.mEntryStart + entryPosition;
         }
 
         private int outerToEntry(int outerPosition) {
-            // TODO
-            return outerPosition;
+            int groupPosition = searchForGroupPosition(outerPosition);
+            Group group = mGroups.get(groupPosition);
+            return outerPosition - group.mEntryStart;
         }
 
         void registerObserversIfNecessary() {
@@ -350,7 +425,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 offsetHolder = new OffsetHolder(holder);
                 mHolders.put(holder, offsetHolder);
             }
-            offsetHolder.mTransform = mTransform;
+            offsetHolder.transform = mTransform;
             offsetHolder.offset = mOffset;
             mAdapter.bindView(view, offsetHolder);
         }
@@ -362,7 +437,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         private static final class OffsetHolder extends HolderWrapper {
 
-            Transform mTransform;
+            Transform transform;
             int offset;
 
             OffsetHolder(@NonNull Holder holder) {
@@ -371,7 +446,8 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public int getPosition() {
-                return super.getPosition() - offset;
+//                return super.getPosition() - offset;
+                return transform.transform(super.getPosition());
             }
         }
     }

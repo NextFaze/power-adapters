@@ -10,7 +10,6 @@ import butterknife.Bind;
 import com.google.common.collect.Lists;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
-import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
@@ -57,8 +56,8 @@ public class FileTreeFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        PowerAdapter adapter = createFilesAdapter(mRootData, 0);
-//        PowerAdapter adapter = createFilesAdapter(new File("/"), 0);
+//        PowerAdapter adapter = createFilesAdapter(mRootData, 0);
+        PowerAdapter adapter = createFilesAdapterSimple(new File("/"), 0, true);
         mDataLayout.setData(mRootData);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
@@ -66,7 +65,7 @@ public class FileTreeFragment extends BaseFragment {
     }
 
     @NonNull
-    private PowerAdapter createFilesAdapter2(@NonNull final File file, final int depth) {
+    private PowerAdapter createFilesAdapterSimple(@NonNull final File file, final int depth, final boolean tree) {
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
@@ -77,7 +76,7 @@ public class FileTreeFragment extends BaseFragment {
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (file.isDirectory()) {
+                        if (tree && file.isDirectory()) {
                             treeAdapterRef.get().toggleExpanded(holder.getPosition());
                         }
                     }
@@ -92,13 +91,12 @@ public class FileTreeFragment extends BaseFragment {
             @Override
             protected PowerAdapter getChildAdapter(int position) {
                 File file = files.get(position);
-                return createFilesAdapter2(file, depth + 1);
+                return createFilesAdapterSimple(file, depth + 1, true);
             }
         });
-        adapter = treeAdapterRef.get();
-        adapter = new EmptyAdapterBuilder()
-                .resource(R.layout.file_list_empty_item)
-                .build(adapter);
+        if (tree) {
+            adapter = treeAdapterRef.get();
+        }
         return adapter;
     }
 
