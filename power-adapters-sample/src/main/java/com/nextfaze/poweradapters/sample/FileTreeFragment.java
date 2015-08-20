@@ -7,13 +7,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.Bind;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
+import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
+import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
+import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
@@ -32,6 +37,8 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class FileTreeFragment extends BaseFragment {
 
+    private static final int LIMIT = 2;
+
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
@@ -45,7 +52,7 @@ public class FileTreeFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mRootData = new DirectoryData(new File("/"), 3);
+        mRootData = new DirectoryData(new File("/"), LIMIT);
     }
 
     @Override
@@ -56,8 +63,8 @@ public class FileTreeFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        PowerAdapter adapter = createFilesAdapter(mRootData, 0);
-        PowerAdapter adapter = createFilesAdapterSimple(new File("/"), 0, true);
+        PowerAdapter adapter = createFilesAdapter(mRootData, 0);
+//        PowerAdapter adapter = createFilesAdapterSimple(new File("/"), 0, true);
         mDataLayout.setData(mRootData);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
@@ -84,7 +91,9 @@ public class FileTreeFragment extends BaseFragment {
             }
         };
         File[] filesArray = file.listFiles();
-        final List<File> files = filesArray != null ? Lists.newArrayList(filesArray) : Collections.<File>emptyList();
+        final List<File> files = FluentIterable.from(filesArray != null ? Lists.newArrayList(filesArray) : Collections.<File>emptyList())
+                .limit(LIMIT)
+                .toList();
         PowerAdapter adapter = new FileAdapter(files, singletonMapper(binder));
         treeAdapterRef.set(new TreeAdapter(adapter) {
             @NonNull
@@ -132,12 +141,12 @@ public class FileTreeFragment extends BaseFragment {
             }
         });
         adapter = treeAdapterRef.get();
-//        adapter = new LoadingAdapterBuilder()
-//                .resource(R.layout.list_loading_item)
-//                .build(adapter, new DataLoadingDelegate(data));
-//        adapter = new EmptyAdapterBuilder()
-//                .resource(R.layout.file_list_empty_item)
-//                .build(adapter, new DataEmptyDelegate(data));
+        adapter = new LoadingAdapterBuilder()
+                .resource(R.layout.list_loading_item)
+                .build(adapter, new DataLoadingDelegate(data));
+        adapter = new EmptyAdapterBuilder()
+                .resource(R.layout.file_list_empty_item)
+                .build(adapter, new DataEmptyDelegate(data));
         return adapter;
     }
 }
