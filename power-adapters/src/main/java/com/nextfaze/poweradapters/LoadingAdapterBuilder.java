@@ -63,11 +63,18 @@ public final class LoadingAdapterBuilder {
 
     /** Determines when the loading item is shown while empty. Item is never shown if not loading. */
     public enum EmptyPolicy {
-        /** Show the loading item ONLY while wrapped adapter is empty. */
+        /** Show the loading item ONLY while delegate is empty. */
         SHOW_ONLY_IF_EMPTY {
             @Override
             boolean shouldShow(@NonNull Delegate delegate) {
                 return delegate.isEmpty();
+            }
+        },
+        /** Show the loading item ONLY while delegate is non-empty. */
+        SHOW_ONLY_IF_NON_EMPTY {
+            @Override
+            boolean shouldShow(@NonNull Delegate delegate) {
+                return !delegate.isEmpty();
             }
         },
         /** Show the loading item regardless of the empty state. */

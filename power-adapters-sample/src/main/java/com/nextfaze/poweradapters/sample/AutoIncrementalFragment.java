@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ListView;
 import butterknife.Bind;
@@ -15,7 +16,7 @@ import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
+import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public final class AutoIncrementalFragment extends BaseFragment {
 
@@ -36,6 +37,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
         // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
+                .emptyPolicy(LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY)
                 .build(adapter, new DataLoadingDelegate(data));
         return adapter;
     }
@@ -45,6 +47,9 @@ public final class AutoIncrementalFragment extends BaseFragment {
 
     @Bind(R.id.list)
     ListView mListView;
+
+    @Bind(R.id.recycler)
+    RecyclerView mRecyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,8 +68,10 @@ public final class AutoIncrementalFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListView.setAdapter(toListAdapter(mAdapter));
+//        mListView.setAdapter(toListAdapter(mAdapter));
+        mRecyclerView.setAdapter(toRecyclerAdapter(mAdapter));
         mDataLayout.setData(mData);
+        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     @Override

@@ -37,7 +37,7 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class FileTreeFragment extends BaseFragment {
 
-    private static final int LIMIT = 2;
+    private static final int LIMIT = Integer.MAX_VALUE;
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
