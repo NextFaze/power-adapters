@@ -7,10 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -74,7 +71,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
     @NonNull
-    private final List<Group> mGroups = new ArrayList<>();
+    private final SparseArray<Group> mGroups = new SparseArray<>();
 
     boolean mDirty = true;
 
@@ -82,11 +79,14 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         mRootAdapter = rootAdapter;
     }
 
+    @NonNull
+    protected abstract PowerAdapter getChildAdapter(int position);
+
     public void setExpanded(int position, boolean expanded) {
         Entry entry = mEntries.get(position);
         if (expanded) {
             if (entry == null) {
-                entry = new Entry(getChildAdapter(position), mGroups.get(position));
+                entry = new Entry(getChildAdapter(position), mGroups.valueAt(position));
                 mEntries.put(position, entry);
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
@@ -112,23 +112,16 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return mEntries.get(position) != null;
     }
 
-    @NonNull
-    protected abstract PowerAdapter getChildAdapter(int position);
-
-    @Override
-    public boolean hasStableIds() {
-        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
-        return false;
-    }
-
     static final class Group implements Comparable<Group> {
 
+        private final int mPosition;
         private final int mOuterStart; // inclusive
         private final int mOuterEnd; // exclusive
         private final int mRootStart;
         private final int mEntryStart;
 
-        Group(int outerStart, int outerEnd, int rootStart) {
+        Group(int position, int outerStart, int outerEnd, int rootStart) {
+            mPosition = position;
             mOuterStart = outerStart;
             mOuterEnd = outerEnd;
             mRootStart = rootStart;
@@ -137,7 +130,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @NonNull
         static Group position(int position) {
-            return new Group(position, position + 1, 0);
+            return new Group(position, position, position + 1, 0);
         }
 
         @Override
@@ -149,6 +142,14 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 return +1;
             }
             return 0;
+        }
+
+        int entryToOuter(int entryPosition) {
+            return mEntryStart + entryPosition;
+        }
+
+        int outerToEntry(int outerPosition) {
+            return outerPosition - mEntryStart;
         }
     }
 
@@ -166,18 +167,69 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 Entry entry = mEntries.get(i);
                 if (entry != null) {
                     int entryItemCount = entry.getItemCount();
-                    Group group = new Group(outerStart, outerStart + entryItemCount + 1, rootStart);
+                    Group group = new Group(i, outerStart, outerStart + entryItemCount + 1, rootStart);
                     entry.mGroup = group;
-                    mGroups.add(group);
+                    mGroups.append(outerStart, group);
                     outerStart += entryItemCount + 1;
                     rootStart += entryItemCount;
                 } else {
-                    mGroups.add(new Group(outerStart, outerStart + 1, rootStart));
+                    mGroups.append(outerStart, new Group(i, outerStart, outerStart + 1, rootStart));
                     outerStart++;
                 }
             }
             mDirty = false;
         }
+    }
+
+    @NonNull
+    private Group groupForPosition(int outerPosition) {
+        rebuildGroupsIfNecessary();
+        int totalItemCount = getItemCount();
+        if (outerPosition >= totalItemCount) {
+            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
+        }
+        int groupPosition = mGroups.indexOfKey(outerPosition);
+        Group group;
+        if (groupPosition >= 0) {
+            group = mGroups.valueAt(groupPosition);
+        } else {
+            group = mGroups.valueAt(-groupPosition - 2);
+        }
+        return group;
+    }
+
+    @NonNull
+    private OffsetAdapter adapterForPosition(int outerPosition) {
+        Group group = groupForPosition(outerPosition);
+        if (outerPosition - group.mOuterStart == 0) {
+            return mOffsetAdapter.set(mRootAdapter, mRootTransform, group.mRootStart);
+        }
+        Entry entry = mEntries.get(group.mPosition);
+        return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, group.mEntryStart);
+    }
+
+    @NonNull
+    private PowerAdapter adapterForViewType(@NonNull ViewType viewType) {
+        PowerAdapter adapter = mAdaptersByViewType.get(viewType);
+        return adapter != null ? adapter : mRootAdapter;
+    }
+
+    private int rootToOuter(int rootPosition) {
+        if (mGroups.size() == 0) {
+            return rootPosition;
+        }
+        return mGroups.valueAt(rootPosition).mOuterStart;
+    }
+
+    private int outerToRoot(int outerPosition) {
+        Group group = groupForPosition(outerPosition);
+        return outerPosition - group.mRootStart;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
+        return false;
     }
 
     @Override
@@ -196,18 +248,18 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     @Override
     public long getItemId(int position) {
-        return find(position).getItemId(position);
+        return adapterForPosition(position).getItemId(position);
     }
 
     @Override
     public boolean isEnabled(int position) {
-        return find(position).isEnabled(position);
+        return adapterForPosition(position).isEnabled(position);
     }
 
     @NonNull
     @Override
     public ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = find(position);
+        OffsetAdapter offsetAdapter = adapterForPosition(position);
         ViewType viewType = offsetAdapter.getViewType(position);
         mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
         return viewType;
@@ -216,12 +268,12 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        return lookup(viewType).newView(parent, viewType);
+        return adapterForViewType(viewType).newView(parent, viewType);
     }
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        find(holder.getPosition()).bindView(view, holder);
+        adapterForPosition(holder.getPosition()).bindView(view, holder);
     }
 
     @CallSuper
@@ -241,65 +293,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         mRootAdapter.unregisterDataObserver(mRootDataObserver);
         for (int i = 0; i < mEntries.size(); i++) {
             mEntries.valueAt(i).unregisterObserversIfNecessary();
-        }
-    }
-
-    private int binarySearchForGroupPosition(int outerPosition) {
-        return Collections.binarySearch(mGroups, Group.position(outerPosition));
-    }
-
-    private int linearSearchForGroupPosition( int outerPosition) {
-        for (int i = 0; i < mGroups.size(); i++) {
-            Group group = mGroups.get(i);
-            if (outerPosition >= group.mOuterStart && outerPosition < group.mOuterEnd) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private int searchForGroupPosition( int outerPosition) {
-        // TODO: Get binary search working.
-//        return binarySearchForGroupPosition(outerPosition);
-        return linearSearchForGroupPosition(outerPosition);
-    }
-
-    @NonNull
-    private OffsetAdapter find(int outerPosition) {
-        assertWithinBounds(outerPosition);
-        int groupPosition = searchForGroupPosition(outerPosition);
-        Group group = mGroups.get(groupPosition);
-        if (outerPosition - group.mOuterStart == 0) {
-            return mOffsetAdapter.set(mRootAdapter, mRootTransform, group.mRootStart);
-        }
-        Entry entry = mEntries.get(groupPosition);
-        return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, group.mEntryStart);
-    }
-
-    /** Look up the adapter (root or child), based on view type. */
-    @NonNull
-    private PowerAdapter lookup(@NonNull ViewType viewType) {
-        PowerAdapter adapter = mAdaptersByViewType.get(viewType);
-        return adapter != null ? adapter : mRootAdapter;
-    }
-
-    private int rootToOuter(int rootPosition) {
-        if (mGroups.isEmpty()) {
-            return rootPosition;
-        }
-        return mGroups.get(rootPosition).mOuterStart;
-    }
-
-    private int outerToRoot(int outerPosition) {
-        int groupPosition = searchForGroupPosition(outerPosition);
-        Group group = mGroups.get(groupPosition);
-        return outerPosition - group.mRootStart;
-    }
-
-    private void assertWithinBounds(int outerPosition) {
-        int totalItemCount = getItemCount();
-        if (outerPosition >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
         }
     }
 
@@ -362,13 +355,12 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
 
         private int entryToOuter(int entryPosition) {
-            return mGroup.mEntryStart + entryPosition;
+            return mGroup.entryToOuter(entryPosition);
         }
 
         private int outerToEntry(int outerPosition) {
-            int groupPosition = searchForGroupPosition(outerPosition);
-            Group group = mGroups.get(groupPosition);
-            return outerPosition - group.mEntryStart;
+            Group group = groupForPosition(outerPosition);
+            return group.outerToEntry(outerPosition);
         }
 
         void registerObserversIfNecessary() {
@@ -451,7 +443,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public int getPosition() {
-//                return super.getPosition() - offset;
                 return transform.transform(super.getPosition());
             }
         }
