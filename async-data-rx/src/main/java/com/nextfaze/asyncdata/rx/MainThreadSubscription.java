@@ -19,7 +19,7 @@ abstract class MainThreadSubscription implements Subscription, Runnable {
     private volatile int mUnsubscribed;
 
     private static final AtomicIntegerFieldUpdater<MainThreadSubscription> mUnsubscribedUpdater =
-            AtomicIntegerFieldUpdater.newUpdater(MainThreadSubscription.class, "unsubscribed");
+            AtomicIntegerFieldUpdater.newUpdater(MainThreadSubscription.class, "mUnsubscribed");
 
     @Override
     public final boolean isUnsubscribed() {
