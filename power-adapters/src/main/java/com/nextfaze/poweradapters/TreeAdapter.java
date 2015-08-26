@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -66,10 +67,14 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final SparseArray<Entry> mEntries = new SparseArray<>();
 
+    @NonNull
+    private final GroupPool mGroupPool = new GroupPool();
+
     // TODO: Remove mappings from the following when an Entry is closed.
     @NonNull
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
+    /** Contains the mapping of outer positions to groups.*/
     @NonNull
     private final SparseArray<Group> mGroups = new SparseArray<>();
 
@@ -112,45 +117,76 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return mEntries.get(position) != null;
     }
 
-    static final class Group implements Comparable<Group> {
+    private final class Group {
 
-        private final int mPosition;
-        private final int mOuterStart; // inclusive
-        private final int mOuterEnd; // exclusive
-        private final int mRootStart;
-        private final int mEntryStart;
-
-        Group(int position, int outerStart, int outerEnd, int rootStart) {
-            mPosition = position;
-            mOuterStart = outerStart;
-            mOuterEnd = outerEnd;
-            mRootStart = rootStart;
-            mEntryStart = outerStart + 1;
-        }
+        private int mPosition;
+        private int mOuterStart;
+        private int mRootStart;
 
         @NonNull
-        static Group position(int position) {
-            return new Group(position, position, position + 1, 0);
-        }
-
-        @Override
-        public int compareTo(Group o) {
-            if (mOuterStart < o.mOuterStart) {
-                return -1;
-            }
-            if (mOuterStart >= o.mOuterEnd) {
-                return +1;
-            }
-            return 0;
+        Group set(int position, int outerStart, int rootStart) {
+            mPosition = position;
+            mOuterStart = outerStart;
+            mRootStart = rootStart;
+            return this;
         }
 
         int entryToOuter(int entryPosition) {
-            return mEntryStart + entryPosition;
+            return getEntryStart() + entryPosition;
         }
 
         int outerToEntry(int outerPosition) {
-            return outerPosition - mEntryStart;
+            return outerPosition - getEntryStart();
         }
+
+        /** Index of this group within the collection. */
+        int getPosition() {
+            return mPosition;
+        }
+
+        /** Offset of this group in outer adapter coordinate space. */
+        int getOuterStart() {
+            return mOuterStart;
+        }
+
+        /** Offset of this group in the root adapter coordinate space. */
+        int getRootStart() {
+            return mRootStart;
+        }
+
+        int getEntryStart() {
+            return mOuterStart + 1;
+        }
+
+        int size() {
+            int size = 1;
+            Entry entry = mEntries.get(getPosition());
+            if (entry != null) {
+                size += entry.getItemCount();
+            }
+            return size;
+        }
+
+        @NonNull
+        OffsetAdapter adapter(int outerPosition) {
+            // Does this outer position map to the root adapter?
+            if (outerPosition - getOuterStart() == 0) {
+                return mOffsetAdapter.set(mRootAdapter, mRootTransform, getRootStart());
+            }
+            // Outer position maps to the child adapter.
+            Entry entry = mEntries.get(getPosition());
+            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getEntryStart());
+        }
+
+        @Override
+        public String toString() {
+            return format("%s (%s)", mPosition, size());
+        }
+    }
+
+    @NonNull
+    private OffsetAdapter adapterForPosition(int outerPosition) {
+        return groupForPosition(outerPosition).adapter(outerPosition);
     }
 
     private void invalidateGroups() {
@@ -160,22 +196,27 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     private void rebuildGroupsIfNecessary() {
         if (mDirty) {
+            for (int i = 0; i < mGroups.size(); i++) {
+                mGroupPool.release(mGroups.valueAt(i));
+            }
             mGroups.clear();
             int outerStart = 0;
             int rootStart = 0;
-            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+            int i = 0;
+            int rootItemCount = mRootAdapter.getItemCount();
+            while (i < rootItemCount) {
+                Group group = mGroupPool.obtain();
+                group.set(i, outerStart, rootStart);
+                mGroups.put(outerStart, group);
                 Entry entry = mEntries.get(i);
                 if (entry != null) {
                     int entryItemCount = entry.getItemCount();
-                    Group group = new Group(i, outerStart, outerStart + entryItemCount + 1, rootStart);
                     entry.mGroup = group;
-                    mGroups.append(outerStart, group);
-                    outerStart += entryItemCount + 1;
+                    outerStart += entryItemCount;
                     rootStart += entryItemCount;
-                } else {
-                    mGroups.append(outerStart, new Group(i, outerStart, outerStart + 1, rootStart));
-                    outerStart++;
                 }
+                outerStart++;
+                i++;
             }
             mDirty = false;
         }
@@ -199,16 +240,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     @NonNull
-    private OffsetAdapter adapterForPosition(int outerPosition) {
-        Group group = groupForPosition(outerPosition);
-        if (outerPosition - group.mOuterStart == 0) {
-            return mOffsetAdapter.set(mRootAdapter, mRootTransform, group.mRootStart);
-        }
-        Entry entry = mEntries.get(group.mPosition);
-        return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, group.mEntryStart);
-    }
-
-    @NonNull
     private PowerAdapter adapterForViewType(@NonNull ViewType viewType) {
         PowerAdapter adapter = mAdaptersByViewType.get(viewType);
         return adapter != null ? adapter : mRootAdapter;
@@ -218,12 +249,11 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         if (mGroups.size() == 0) {
             return rootPosition;
         }
-        return mGroups.valueAt(rootPosition).mOuterStart;
+        return mGroups.valueAt(rootPosition).getOuterStart();
     }
 
     private int outerToRoot(int outerPosition) {
-        Group group = groupForPosition(outerPosition);
-        return outerPosition - group.mRootStart;
+        return outerPosition - groupForPosition(outerPosition).getRootStart();
     }
 
     @Override
@@ -235,15 +265,11 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @Override
     public int getItemCount() {
         rebuildGroupsIfNecessary();
-        int total = 0;
-        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
-            total++;
-            Entry entry = mEntries.get(i);
-            if (entry != null) {
-                total += entry.getItemCount();
-            }
+        if (mGroups.size() == 0) {
+            return 0;
         }
-        return total;
+        Group group = mGroups.valueAt(mGroups.size() - 1);
+        return group.getOuterStart() + group.size();
     }
 
     @Override
@@ -359,8 +385,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
 
         private int outerToEntry(int outerPosition) {
-            Group group = groupForPosition(outerPosition);
-            return group.outerToEntry(outerPosition);
+            return groupForPosition(outerPosition).outerToEntry(outerPosition);
         }
 
         void registerObserversIfNecessary() {
@@ -448,7 +473,25 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
     }
 
-    interface Transform {
+    private interface Transform {
         int transform(int position);
+    }
+
+    private final class GroupPool {
+
+        @NonNull
+        private final ArrayList<Group> mGroups = new ArrayList<>();
+
+        @NonNull
+        Group obtain() {
+            if (mGroups.isEmpty()) {
+                return new Group();
+            }
+            return mGroups.remove(mGroups.size() - 1);
+        }
+
+        void release(@NonNull Group group) {
+            mGroups.add(group);
+        }
     }
 }
