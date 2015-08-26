@@ -74,7 +74,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
-    /** Contains the mapping of outer positions to groups.*/
+    /** Contains the mapping of outer positions to groups. */
     @NonNull
     private final SparseArray<Group> mGroups = new SparseArray<>();
 

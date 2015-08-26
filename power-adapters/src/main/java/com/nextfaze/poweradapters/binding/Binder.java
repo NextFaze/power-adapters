@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 /**
@@ -17,7 +18,7 @@ public interface Binder {
      * @param parent The destination parent view group of the view.
      * @return A new view capable of presenting the object that this binder expects later in its {@link
      * #bindView(Object, View, Holder)} method.
-     * @see PowerAdapter#newView(ViewGroup, int)
+     * @see PowerAdapter#newView(ViewGroup, ViewType)
      */
     @NonNull
     View newView(@NonNull ViewGroup parent);
@@ -37,4 +38,7 @@ public interface Binder {
      * @see ListAdapter#isEnabled(int)
      */
     boolean isEnabled(int position);
+
+    @NonNull
+    ViewType getViewType();
 }

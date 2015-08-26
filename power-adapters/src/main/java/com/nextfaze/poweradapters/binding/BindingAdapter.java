@@ -20,19 +20,13 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     private final Map<ViewType, Binder> mBinders;
 
     @NonNull
-    private final Map<Binder, ViewType> mViewTypes;
-
-    @NonNull
     private final Mapper mMapper;
 
     public BindingAdapter(@NonNull Mapper mapper) {
         Collection<? extends Binder> allBinders = mapper.getAllBinders();
         mBinders = new HashMap<>(allBinders.size());
-        mViewTypes = new HashMap<>(allBinders.size());
         for (Binder binder : allBinders) {
-            ViewType viewType = new ViewType();
-            mBinders.put(viewType, binder);
-            mViewTypes.put(binder, viewType);
+            mBinders.put(binder.getViewType(), binder);
         }
         mMapper = mapper;
     }
@@ -63,7 +57,7 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         assertBinder(binder, position, item);
-        return mViewTypes.get(binder);
+        return binder.getViewType();
     }
 
     @Override
