@@ -40,7 +40,7 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class ConcatFragment extends Fragment {
 
-    private static final int ADAPTER_COUNT = 1;
+    private static final int ADAPTER_COUNT = 100;
 
     @NonNull
     private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
@@ -60,7 +60,7 @@ public class ConcatFragment extends Fragment {
     @NonNull
     private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data,
                                                    @NonNull Binder newsItemBinder) {
-        BinderWrapper removeItemBinder = new BinderWrapper(newsItemBinder) {
+        Binder removeItemBinder = new BinderWrapper(newsItemBinder) {
             @Override
             public void bindView(@NonNull final Object item, @NonNull View v, @NonNull Holder holder) {
                 super.bindView(item, v, holder);

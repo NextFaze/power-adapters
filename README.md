@@ -1,10 +1,18 @@
 # Power Adapters
 
-Universally compatible adapter classes that provide commonly required functionality, such as:
+# Motivation
 
-* Headers and footers
+Presenting large data sets efficiently is a challenging part of Android development. It gets more complicated as you
+begin to handle edge cases and add additional scrolling content like headers. We also find ourselves writing undesirable
+boilerplate as we redefine our adapters for each data source. In addition, Android doesn't provide an easy,
+object-oriented way of present collections of multiple types.
+
+This library provides universally compatible adapter classes that provide commonly required functionality, such as:
+
+* Present **multiple data types** within an adapter
+* Show **Headers** and **footers**
 * Show a **loading** to indicate a loading state
-* Show an item to indicate the underlying data set is **empty**
+* Show an **empty** item to indicate an empty underlying data set
 * **Concatenate** multiple adapters together
 * Add **dividers** in between items of an existing adapter
 * Present **hierarchical** data structures
@@ -12,9 +20,11 @@ Universally compatible adapter classes that provide commonly required functional
 Power adapters are compatible with `ListView`, `GridView` (technically anything that accepts a normal `Adapter`), and
 `RecyclerView`.
 
+Its design promotes reuse via composition.
+
 # Usage
 
-## Adapter Decoration
+## Adapter decoration
 
 All adapters are designed to wrap an existing adapter, allowing you to maintain a separation of concerns. For example,
 say you want to present a list of tweets, but show an empty message when there are no tweets, you can do the following:
@@ -35,6 +45,22 @@ reused elsewhere more easily.
 This also means you can apply as many or as few wrapper adapters as you need to solve your problem. Need to show a loading
 indicator as well? Just wrap the `PowerAdapter` instance with `LoadingAdapterBuilder`. By using the decorator pattern,
 you can also control the **order** of each effect applied.
+
+## Observer registration and strong references
+
+Wrapping an adapter requires registering for change notifications using the `DataObserver` callback interface. This means
+a strong reference cycle is established - the outer adapter holds a strong reference to the wrapped adapter, and the wrapped
+adapter holds a strong reference to the outer adapter via its registered observer.
+
+TODO: Expand on this.
+
+## Conversion
+
+Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
+
+|**Collection view**|**Converter**|
+|ListView|PowerAdapters.toListAdapter()|
+|RecyclerView|RecyclerPowerAdapters.toRecyclerAdapter()|
 
 ## Binding
 
@@ -83,7 +109,16 @@ $ ./gradlew clean build
 
 ```
 
-# Migration Notes
+# Design
+
+## Why introduce another Adapter interface?
+
+One of the goals of this library is first-class support for both `AdapterView` and `RecyclerView`. Using `Adapter` or
+`RecyclerView.Adapter` as base wouldn't satisfy that goal.
+Also, the two interfaces are largely incompatible, because of method signatures used for view reuse. By providing a
+common custom base interface, `PowerAdapter`, we can resolve this.
+
+# Migration notes
 
 Some users may be familiar with earlier iterations of this library. Below are tips for migrating to Power Adapters from
 the previous generation called Databind.
