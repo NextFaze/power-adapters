@@ -58,9 +58,10 @@ TODO: Expand on this.
 
 Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
 
-|**Collection view**|**Converter**|
-|ListView|PowerAdapters.toListAdapter()|
-|RecyclerView|RecyclerPowerAdapters.toRecyclerAdapter()|
+|Collection view    |Converter                                |
+|:------------------|----------------------------------------:|
+|ListView           |            PowerAdapters.toListAdapter()|
+|RecyclerView       |RecyclerPowerAdapters.toRecyclerAdapter()|
 
 ## Binding
 
