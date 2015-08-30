@@ -10,7 +10,7 @@ object-oriented way of present collections of multiple types.
 This library provides universally compatible adapter classes that provide commonly required functionality, such as:
 
 * Present **multiple data types** within an adapter
-* Show **Headers** and **footers**
+* Show **headers** and **footers**
 * Show a **loading** to indicate a loading state
 * Show an **empty** item to indicate an empty underlying data set
 * **Concatenate** multiple adapters together
@@ -58,10 +58,10 @@ TODO: Expand on this.
 
 Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
 
-|Collection view    |Converter                                |
-|:------------------|----------------------------------------:|
-|ListView           |            PowerAdapters.toListAdapter()|
-|RecyclerView       |RecyclerPowerAdapters.toRecyclerAdapter()|
+|Collection view    |Converter                                  |
+|:------------------|------------------------------------------:|
+|`ListView`         |            `PowerAdapters.toListAdapter()`|
+|`RecyclerView`     |`RecyclerPowerAdapters.toRecyclerAdapter()`|
 
 ## Binding
 
