@@ -1,37 +1,41 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
-
-final class NewsIncrementalData extends IncrementalArrayData<Object> {
-
-    private static final int TOTAL = 30;
-    private static final int INCREMENT = 10;
+final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
 
     @NonNull
-    private final NewsService mNewsService;
+    private final NewsService mNewsService = new NewsService();
+
+    private final int mTotal;
+    private final int mIncrement;
 
     private volatile int mOffset;
 
-    NewsIncrementalData(@NonNull NewsService newsService) {
-        mNewsService = newsService;
+    NewsIncrementalData() {
+        this(100, 20);
+    }
+
+    NewsIncrementalData(int total, int increment) {
+        mTotal = total;
+        mIncrement = increment;
     }
 
     @Nullable
     @Override
-    protected Result<?> load() throws Throwable {
+    protected Result<? extends NewsItem> load() throws Throwable {
         int offset = mOffset;
-        if (mOffset >= TOTAL) {
+        if (mOffset >= mTotal) {
             return null;
         }
-        mOffset = offset + INCREMENT;
-        return new Result<>(mNewsService.getNews(offset, INCREMENT), TOTAL - mOffset);
+        mOffset = offset + mIncrement;
+        return new Result<>(mNewsService.getNews(offset, mIncrement), mTotal - mOffset);
     }
 
     @Override
-    protected void onInvalidate() {
+    protected void onLoadBegin() {
         mOffset = 0;
     }
 }

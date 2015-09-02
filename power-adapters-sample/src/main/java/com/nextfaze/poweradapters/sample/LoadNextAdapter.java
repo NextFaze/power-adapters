@@ -1,23 +1,26 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import com.nextfaze.asyncdata.AvailableObserver;
 import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.LoadingObserver;
-import com.nextfaze.poweradapters.ListAdapterWrapper;
+import com.nextfaze.asyncdata.SimpleDataObserver;
+import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.PowerAdapterWrapper;
+import com.nextfaze.poweradapters.ViewType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nullable;
-
 @Accessors(prefix = "m")
-public final class LoadNextAdapter extends ListAdapterWrapper {
+final class LoadNextAdapter extends PowerAdapterWrapper {
 
     @NonNull
     private final Data<?> mData;
@@ -27,10 +30,18 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
     private final int mLoadNextItemResource;
 
     @NonNull
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
+        @Override
+        public void onChange() {
+            updateVisible();
+        }
+    };
+
+    @NonNull
     private final LoadingObserver mLoadingObserver = new LoadingObserver() {
         @Override
         public void onLoadingChange() {
-            notifyDataSetChanged();
+            updateVisible();
         }
     };
 
@@ -38,88 +49,106 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
     private final AvailableObserver mAvailableObserver = new AvailableObserver() {
         @Override
         public void onAvailableChange() {
-            notifyDataSetChanged();
+            updateVisible();
         }
     };
+
+    @NonNull
+    private final ViewType mViewType = new ViewType();
 
     @Getter
     @Setter
     @Nullable
     private OnLoadNextClickListener mOnClickListener;
 
-    public LoadNextAdapter(@NonNull Data<?> data, @NonNull ListAdapter adapter, @LayoutRes int loadNextItemResource) {
+    private boolean mVisible;
+
+    LoadNextAdapter(@NonNull PowerAdapter adapter, @NonNull Data<?> data, @LayoutRes int loadNextItemResource) {
         super(adapter);
         mData = data;
         mLoadNextItemResource = loadNextItemResource;
+        updateVisible();
+    }
+
+    @Override
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mData.registerDataObserver(mDataObserver);
         mData.registerLoadingObserver(mLoadingObserver);
         mData.registerAvailableObserver(mAvailableObserver);
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mData.unregisterDataObserver(mDataObserver);
         mData.unregisterAvailableObserver(mAvailableObserver);
         mData.unregisterLoadingObserver(mLoadingObserver);
     }
 
     @Override
-    public final int getCount() {
-        if (isLoadNextShown()) {
-            return super.getCount() + 1;
+    public int getItemCount() {
+        if (mVisible) {
+            return super.getItemCount() + 1;
         }
-        return super.getCount();
+        return super.getItemCount();
     }
 
     @Override
-    public final boolean isEnabled(int position) {
-        //noinspection SimplifiableIfStatement
+    public long getItemId(int position) {
         if (isLoadNextItem(position)) {
-            return false;
-        }
-        return super.isEnabled(position);
-    }
-
-    @Override
-    public final long getItemId(int position) {
-        if (isLoadNextItem(position)) {
-            return -1;
+            return NO_ID;
         }
         return super.getItemId(position);
     }
 
+    @NonNull
     @Override
-    public final Object getItem(int position) {
+    public ViewType getItemViewType(int position) {
         if (isLoadNextItem(position)) {
-            return null;
-        }
-        return super.getItem(position);
-    }
-
-    @Override
-    public final int getViewTypeCount() {
-        return super.getViewTypeCount() + 1;
-    }
-
-    @Override
-    public final int getItemViewType(int position) {
-        if (isLoadNextItem(position)) {
-            return getLoadNextItemViewType();
+            return mViewType;
         }
         return super.getItemViewType(position);
     }
 
     @Override
-    public final View getView(int position, View convertView, ViewGroup parent) {
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
         if (isLoadNextItem(position)) {
-            if (convertView == null) {
-                convertView = newLoadNextView(parent);
-            }
-            return convertView;
+            return true;
         }
-        return super.getView(position, convertView, parent);
+        return super.isEnabled(position);
     }
 
-    public void loadNext() {
+    @NonNull
+    @Override
+    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        if (viewType == mViewType) {
+            return newLoadNextView(parent);
+        }
+        return super.newView(parent, viewType);
+    }
+
+    @Override
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        if (!isLoadNextItem(holder.getPosition())) {
+            super.bindView(view, holder);
+        }
+    }
+
+    @Override
+    protected int outerToInner(int outerPosition) {
+        // No conversion necessary, as loading item appears at the end.
+        return outerPosition;
+    }
+
+    @Override
+    protected int innerToOuter(int innerPosition) {
+        // No conversion necessary, as loading item appears at the end.
+        return super.innerToOuter(innerPosition);
+    }
+
+    void loadNext() {
         dispatchClick();
     }
 
@@ -129,16 +158,24 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
         }
     }
 
-    private boolean isLoadNextShown() {
-        return !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
+    private boolean isLoadNextVisible() {
+        return mLoadNextItemResource > 0 && !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
+    }
+
+    private void updateVisible() {
+        boolean visible = isLoadNextVisible();
+        if (visible != mVisible) {
+            mVisible = visible;
+            if (visible) {
+                notifyItemInserted(super.getItemCount());
+            } else {
+                notifyItemRemoved(super.getItemCount());
+            }
+        }
     }
 
     private boolean isLoadNextItem(int position) {
-        return position == super.getCount();
-    }
-
-    private int getLoadNextItemViewType() {
-        return super.getViewTypeCount();
+        return position == super.getItemCount();
     }
 
     @NonNull
@@ -153,7 +190,7 @@ public final class LoadNextAdapter extends ListAdapterWrapper {
         return v;
     }
 
-    public interface OnLoadNextClickListener {
+    interface OnLoadNextClickListener {
         void onClick();
     }
 }

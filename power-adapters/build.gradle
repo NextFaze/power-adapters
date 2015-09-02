@@ -2,20 +2,21 @@ apply plugin: 'com.android.library'
 apply from: '../nextfaze.gradle'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '21.1.2'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 22
+        minSdkVersion rootProject.ext.minSdkVersion
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.5'
-    compile 'com.nextfaze:concurrent:1.0.4'
-    compile 'com.nextfaze:async-data:0.1.0'
-    provided 'com.android.support:support-annotations:22.2.1'
-    provided 'com.google.code.findbugs:jsr305:2.0.3'
-    provided 'org.projectlombok:lombok:1.14.6'
+    compile rootProject.ext.slf4j
+    provided rootProject.ext.supportAnnotations
+    provided rootProject.ext.lombok
 }

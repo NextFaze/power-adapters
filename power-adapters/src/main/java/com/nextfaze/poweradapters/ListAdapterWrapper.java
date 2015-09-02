@@ -1,21 +1,21 @@
 package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
+import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ListAdapterWrapper extends BaseAdapter implements DisposableListAdapter {
+public class ListAdapterWrapper extends BaseAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(ListAdapterWrapper.class);
+    @NonNull
+    private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
 
     @NonNull
     protected final ListAdapter mAdapter;
@@ -33,48 +33,8 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         }
     };
 
-    private final boolean mTakeOwnership;
-
-    /**
-     * Create a list adapter wrapper, taking ownership of the wrapped adapter.
-     * @param adapter The adapter to be wrapped.
-     * @see #ListAdapterWrapper(ListAdapter, boolean)
-     */
     public ListAdapterWrapper(@NonNull ListAdapter adapter) {
-        this(adapter, true);
-    }
-
-    /**
-     * Create a list adapter wrapper, optionally taking ownership of the wrapped adapter.
-     * @param adapter The adapter to be wrapped.
-     * @param takeOwnership If {@code true}, this adapter assumes ownership of the wrapped adapter and must dispose of
-     * it.
-     */
-    public ListAdapterWrapper(@NonNull ListAdapter adapter, boolean takeOwnership) {
         mAdapter = adapter;
-        mTakeOwnership = takeOwnership;
-        mAdapter.registerDataSetObserver(mDataSetObserver);
-    }
-
-    @Override
-    public void dispose() {
-        mAdapter.unregisterDataSetObserver(mDataSetObserver);
-        if (mTakeOwnership) {
-            close(mAdapter);
-        }
-    }
-
-    private static void close(@Nullable ListAdapter adapter) {
-        if (adapter instanceof DisposableListAdapter) {
-            ((DisposableListAdapter) adapter).dispose();
-        }
-        if (adapter instanceof Closeable) {
-            try {
-                ((Closeable) adapter).close();
-            } catch (IOException e) {
-                log.warn("Error closing wrapped adapter", e);
-            }
-        }
     }
 
     @Override
@@ -123,9 +83,36 @@ public class ListAdapterWrapper extends BaseAdapter implements DisposableListAda
         return mAdapter.getItemViewType(position);
     }
 
-    /** Subclasses must always return the sum of the super call and any additional view types they provide. */
     @Override
     public int getViewTypeCount() {
         return mAdapter.getViewTypeCount();
+    }
+
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+        if (mDataSetObservers.add(observer) && mDataSetObservers.size() == 1) {
+            mAdapter.registerDataSetObserver(mDataSetObserver);
+            onFirstObserverRegistered();
+        }
+    }
+
+    @Override
+    public void unregisterDataSetObserver(DataSetObserver observer) {
+        super.unregisterDataSetObserver(observer);
+        if (mDataSetObservers.remove(observer) && mDataSetObservers.size() == 0) {
+            mAdapter.unregisterDataSetObserver(mDataSetObserver);
+            onLastObserverUnregistered();
+        }
+    }
+
+    /** Called when the first observer has registered with this adapter. */
+    @CallSuper
+    protected void onFirstObserverRegistered() {
+    }
+
+    /** Called when the last observer has unregistered from this adapter. */
+    @CallSuper
+    protected void onLastObserverUnregistered() {
     }
 }

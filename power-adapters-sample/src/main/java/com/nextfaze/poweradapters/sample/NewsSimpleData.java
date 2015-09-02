@@ -3,26 +3,16 @@ package com.nextfaze.poweradapters.sample;
 import com.nextfaze.asyncdata.ArrayData;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
-final class NewsSimpleData extends ArrayData<Object> {
+final class NewsSimpleData extends ArrayData<NewsItem> {
 
     @NonNull
-    private final NewsService mNewsService;
-
-    NewsSimpleData(@NonNull NewsService newsService) {
-        mNewsService = newsService;
-    }
+    private final NewsService mNewsService = new NewsService();
 
     @NonNull
     @Override
-    protected List<Object> load() throws Exception {
-        ArrayList<Object> data = new ArrayList<>();
-        data.add(new NewsSection("Latest News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        data.add(new NewsSection("Yesterdays News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        return data;
+    protected List<? extends NewsItem> load() throws Throwable {
+        return mNewsService.getNewsFlaky();
     }
 }

@@ -1,38 +1,41 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import javax.annotation.Nullable;
+final class Item implements ViewFactory {
 
-final class Item {
+    @NonNull
+    private final ViewType mViewType = new ViewType();
 
-    @LayoutRes
-    private final int mLayoutResource;
+    @NonNull
+    private final ViewFactory mViewFactory;
 
-    @Nullable
-    private final View mView;
+    private final boolean mEnabled;
 
-    Item(int layoutResource) {
-        mLayoutResource = layoutResource;
-        mView = null;
+    Item(@NonNull ViewFactory viewFactory, boolean enabled) {
+        mViewFactory = viewFactory;
+        mEnabled = enabled;
     }
 
-    @SuppressWarnings("NullableProblems")
-    Item(@NonNull View view) {
-        mLayoutResource = 0;
-        mView = view;
+    boolean isEnabled() {
+        return mEnabled;
     }
 
     @NonNull
-    View get(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-        if (mLayoutResource > 0) {
-            return layoutInflater.inflate(mLayoutResource, parent, false);
-        }
-        //noinspection ConstantConditions
-        return mView;
+    Item withEnabled(boolean enabled) {
+        return mEnabled == enabled ? this : new Item(mViewFactory, enabled);
+    }
+
+    @NonNull
+    ViewType getViewType() {
+        return mViewType;
+    }
+
+    @NonNull
+    @Override
+    public View create(@NonNull ViewGroup parent) {
+        return mViewFactory.create(parent);
     }
 }
