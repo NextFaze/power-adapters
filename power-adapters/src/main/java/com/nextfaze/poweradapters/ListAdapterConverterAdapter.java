@@ -52,7 +52,13 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return mPowerAdapter.getItemId(position);
+        long itemId = mPowerAdapter.getItemId(position);
+        // AdapterViews require this when items don't have a proper stable ID. Otherwise, the scroll position is not
+        // retained between config changes.
+        if (itemId == PowerAdapter.NO_ID) {
+            return position;
+        }
+        return itemId;
     }
 
     @Override
