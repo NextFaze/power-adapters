@@ -215,9 +215,11 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     public final void clear() {
         onClear();
         int size = mData.size();
-        mData.clear();
-        setAvailable(Integer.MAX_VALUE);
-        notifyItemRangeRemoved(0, size);
+        if (size > 0) {
+            mData.clear();
+            setAvailable(Integer.MAX_VALUE);
+            notifyItemRangeRemoved(0, size);
+        }
     }
 
     @Override

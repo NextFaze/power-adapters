@@ -25,6 +25,8 @@ import java.util.Iterator;
  * <h3>Threading</h3>
  * <p>
  * In general this class is not thread-safe. It's intended to be accessed from the UI thread only.
+ * <h3>Notifications</h3>
+ * Change notifications must be dispatched BEFORE the other notifications.
  * </p>
  */
 public interface Data<T> extends Iterable<T> {
