@@ -1,12 +1,12 @@
 package com.nextfaze.asyncdata;
 
-import com.nextfaze.concurrent.Task;
+import android.support.annotation.CallSuper;
+import android.support.annotation.Nullable;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.ListIterator;
  * @param <T> The type of element this data contains.
  */
 @Accessors(prefix = "m")
-public abstract class ArrayData<T> extends AbstractData<T> implements MutableData<T> {
+public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
     private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
@@ -47,11 +47,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     protected ArrayData() {
     }
 
-    /**
-     * Subclasses must call through to super.
-     * @see #close()
-     * @see #onClose()
-     */
+    @CallSuper
     @Override
     protected void onClose() throws Throwable {
         cancelTask();
@@ -87,14 +83,14 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final T remove(int index) {
         T removed = mData.remove(index);
-        notifyDataChanged();
+        notifyItemRemoved(index);
         return removed;
     }
 
     @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
-            notifyDataChanged();
+            notifyItemInserted(mData.size() - 1);
             return true;
         }
         return false;
@@ -103,31 +99,42 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
-        notifyDataChanged();
+        notifyItemInserted(index);
     }
 
     @Override
     public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(oldSize, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
     public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        boolean changed = mData.addAll(index, collection);
-        if (changed) {
-            notifyDataChanged();
+        int oldSize = mData.size();
+        mData.addAll(index, collection);
+        int newSize = mData.size();
+        if (newSize != oldSize) {
+            int count = mData.size() - oldSize;
+            notifyItemRangeInserted(index, count);
+            return true;
         }
-        return changed;
+        return false;
     }
 
     @Override
     public final boolean remove(@NonNull Object obj) {
-        if (mData.remove(obj)) {
-            notifyDataChanged();
+        //noinspection SuspiciousMethodCalls
+        int index = mData.indexOf(obj);
+        if (index != -1) {
+            mData.remove(index);
+            notifyItemRemoved(index);
             return true;
         }
         return false;
@@ -162,6 +169,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     public final boolean removeAll(@NonNull Collection<?> collection) {
         boolean removed = mData.removeAll(collection);
         if (removed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return removed;
@@ -171,6 +179,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     public final boolean retainAll(@NonNull Collection<?> collection) {
         boolean changed = mData.retainAll(collection);
         if (changed) {
+            // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
         return changed;
@@ -179,7 +188,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @Override
     public final T set(int index, T object) {
         T t = mData.set(index, object);
-        notifyDataChanged();
+        notifyItemChanged(index);
         return t;
     }
 
@@ -204,17 +213,31 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
     @Override
     public final void clear() {
-        mData.clear();
-        setAvailable(Integer.MAX_VALUE);
-        notifyDataChanged();
-        invalidate();
+        onClear();
+        int size = mData.size();
+        if (size > 0) {
+            mData.clear();
+            setAvailable(Integer.MAX_VALUE);
+            notifyItemRangeRemoved(0, size);
+        }
     }
 
-    /** Marks the existing loaded elements as dirty, such that they will be reloaded as soon as data is next shown. */
-    public final void invalidate() {
+    @Override
+    public final void refresh() {
         mDirty = true;
         cancelTask();
         loadDataIfAppropriate();
+    }
+
+    @Override
+    public final void reload() {
+        clear();
+        refresh();
+    }
+
+    @Override
+    public final void invalidate() {
+        mDirty = true;
     }
 
     @Override
@@ -240,19 +263,30 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
 
+    /** Called prior to elements being cleared. Always called from the UI thread. */
+    protected void onClear() {
+    }
+
+    @CallSuper
     @Override
     protected final void onShown(long millisHidden) {
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
             mDirty = true;
         }
+        if (mDirty) {
+            cancelTask();
+            clear();
+        }
         loadDataIfAppropriate();
     }
 
+    @CallSuper
     @Override
     protected final void onHidden(long millisShown) {
     }
 
+    @CallSuper
     @Override
     protected final void onHideTimeout() {
         cancelTask();
@@ -263,7 +297,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
         if (mDirty && mTask == null && isShown()) {
-            // TODO: Replace use of Task, so we stop depending on NextFaze Concurrent library.
+            // TODO: Replace use of Task with either a plain Thread or use of an Executor.
             mTask = new Task<List<? extends T>>() {
                 @Override
                 protected List<? extends T> call() throws Throwable {
@@ -272,6 +306,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
 
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
+                    onClear();
                     mDirty = false;
                     mData.clear();
                     for (T t : data) {
@@ -280,9 +315,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements MutableDat
                         }
                     }
                     mTask = null;
+                    notifyItemRangeInserted(0, data.size());
                     setAvailable(0);
                     notifyLoadingChanged();
-                    notifyDataChanged();
                     loadDataIfAppropriate();
                 }
 

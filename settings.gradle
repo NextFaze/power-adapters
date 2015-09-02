@@ -1,2 +1,2 @@
 rootProject.name = 'async-data-android'
-include ':async-data', ':async-data-sample'
+include ':async-data', ':async-data-rx', ':async-data-sample'

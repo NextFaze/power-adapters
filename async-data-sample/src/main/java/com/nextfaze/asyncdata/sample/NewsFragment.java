@@ -1,9 +1,10 @@
 package com.nextfaze.asyncdata.sample;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,8 +23,6 @@ import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.SimpleDataAdapter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import lombok.NonNull;
-
-import javax.annotation.Nullable;
 
 public final class NewsFragment extends Fragment {
 
@@ -53,7 +52,6 @@ public final class NewsFragment extends Fragment {
             });
         }
     };
-
 
     @NonNull
     private final ListAdapter mAutoIncrementalAdapter = new SimpleDataAdapter<NewsItem>(mAutoIncrementalData, android.R.layout.simple_list_item_1) {
@@ -151,24 +149,24 @@ public final class NewsFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Clear All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.add("Reload").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onClearAllClick();
+                onReloadClick();
                 return true;
             }
         });
-        menu.add("Invalidate All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.add("Refresh").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateAllClick();
+                onRefreshClick();
                 return true;
             }
         });
-        menu.add("Deferred Invalidate Incremental").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.add("Invalidate").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateIncrementalDeferredClick();
+                onInvalidateClick();
                 return true;
             }
         });
@@ -194,21 +192,22 @@ public final class NewsFragment extends Fragment {
         mManualIncrementalData.loadNext();
     }
 
-    void onClearAllClick() {
-        mSimpleData.clear();
-        mAutoIncrementalData.clear();
-        mManualIncrementalData.clear();
+    void onReloadClick() {
+        mSimpleData.reload();
+        mAutoIncrementalData.reload();
+        mManualIncrementalData.reload();
     }
 
-    void onInvalidateAllClick() {
+    void onRefreshClick() {
+        mSimpleData.refresh();
+        mAutoIncrementalData.refresh();
+        mManualIncrementalData.refresh();
+    }
+
+    void onInvalidateClick() {
         mSimpleData.invalidate();
         mAutoIncrementalData.invalidate();
         mManualIncrementalData.invalidate();
-    }
-
-    void onInvalidateIncrementalDeferredClick() {
-        mAutoIncrementalData.invalidateDeferred();
-        mManualIncrementalData.invalidateDeferred();
     }
 
     void onNewsItemClick(@NonNull NewsItem newsItem) {

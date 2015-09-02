@@ -1,6 +1,9 @@
 package com.nextfaze.asyncdata;
 
+import android.support.annotation.UiThread;
 import lombok.NonNull;
+
+import java.util.Iterator;
 
 /**
  * Provides access to an asynchronously loaded list of elements.
@@ -21,7 +24,9 @@ import lombok.NonNull;
  * </p>
  * <h3>Threading</h3>
  * <p>
- * In general this class is not thread-safe. It's intended to be accessed from the main thread only.
+ * In general this class is not thread-safe. It's intended to be accessed from the UI thread only.
+ * <h3>Notifications</h3>
+ * Change notifications must be dispatched BEFORE the other notifications.
  * </p>
  */
 public interface Data<T> extends Iterable<T> {
@@ -37,6 +42,7 @@ public interface Data<T> extends Iterable<T> {
      * @return The value at the specified position, never {@code null}.
      * @throws RuntimeException If the element is out of bounds or can't be retrieved.
      */
+    @UiThread
     @NonNull
     T get(int position);
 
@@ -52,6 +58,7 @@ public interface Data<T> extends Iterable<T> {
      * @return The value at the specified position, never {@code null}.
      * @throws RuntimeException If the element is out of bounds or can't be retrieved.
      */
+    @UiThread
     @NonNull
     T get(int position, int flags);
 
@@ -64,10 +71,12 @@ public interface Data<T> extends Iterable<T> {
      * </ul>
      * @return The number of elements, always {@code >= 0}.
      */
+    @UiThread
     int size();
 
     /**
-     * Indicates how many more elements are available to be loaded relative to the current data set. Implementations can
+     * Indicates how many more elements are available to be loaded relative to the current data set. Implementations
+     * can
      * override this if they wish to convey an incomplete data set to observers.
      * <p/>The return value must never change:
      * <ul>
@@ -77,21 +86,38 @@ public interface Data<T> extends Iterable<T> {
      * @return {@link #UNKNOWN} if the value is unknown, {@link Integer#MAX_VALUE} if it's known there are more elements
      * available, but not how many. {@code 0} indicates no more elements are available to be loaded.
      */
+    @UiThread
     int available();
 
     /** Simply returns if {@link #size()} {@code == 0}. The same threading constraints apply. */
+    @UiThread
     boolean isEmpty();
 
     /** If {@code true}, indicates the data is currently loading more elements. */
+    @UiThread
     boolean isLoading();
 
+    /** Marks existing elements as invalid, such that they will be reloaded next time the data is shown. */
+    @UiThread
+    void invalidate();
+
+    /** Reloads the elements without clearing them first. */
+    @UiThread
+    void refresh();
+
+    /** Clears then refreshes the elements. */
+    @UiThread
+    void reload();
+
     /** Close this instance. Other methods should not called after this. */
+    @UiThread
     void close();
 
     /**
      * Notify this data instance that is currently visibility presented to the user. This cue might be used to start
      * loading elements, or to refresh existing ones.
      */
+    @UiThread
     void notifyShown();
 
     /**
@@ -101,21 +127,34 @@ public interface Data<T> extends Iterable<T> {
      * such as during a configuration change, so any cancelation should probably occur after a short delay. {@code 3}
      * seconds should suffice.
      */
+    @UiThread
     void notifyHidden();
 
+    @UiThread
     void registerLoadingObserver(@NonNull LoadingObserver loadingObserver);
 
+    @UiThread
     void unregisterLoadingObserver(@NonNull LoadingObserver loadingObserver);
 
+    @UiThread
     void registerErrorObserver(@NonNull ErrorObserver errorObserver);
 
+    @UiThread
     void unregisterErrorObserver(@NonNull ErrorObserver errorObserver);
 
+    @UiThread
     void registerDataObserver(@NonNull DataObserver dataObserver);
 
+    @UiThread
     void unregisterDataObserver(@NonNull DataObserver dataObserver);
 
+    @UiThread
     void registerAvailableObserver(@NonNull AvailableObserver availableObserver);
 
+    @UiThread
     void unregisterAvailableObserver(@NonNull AvailableObserver availableObserver);
+
+    @UiThread
+    @Override
+    Iterator<T> iterator();
 }

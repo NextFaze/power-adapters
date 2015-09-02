@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
@@ -20,24 +21,44 @@ import android.widget.TextView;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.R;
-import com.nextfaze.asyncdata.util.DataWatcher;
+import com.nextfaze.asyncdata.internal.DataWatcher;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
+import static com.nextfaze.asyncdata.widget.SetUtils.newHashSet;
+import static com.nextfaze.asyncdata.widget.SetUtils.symmetricDifference;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 
 /**
- * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide child views based
- * on loading/empty/error state of the data.
- * <p/>Each {@link DataLayout} should contain an {@link AdapterView} of some
- * kind (although this is not mandatory, it can be any view), an empty view, a loading view, and an error view.
- * <p/>Each of these must be referenced by custom attributes for the layout to be able to manage them.
- * @author Ben Tilbrook
+ * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide child component views
+ * based on the loading/empty/error state of the data.
+ * <p/>Each {@link DataLayout} should usually contain the following components as child views:
+ *
+ * <h2>Content View</h2>
+ * An {@link AdapterView} of some kind, or a {@code RecyclerView} (although this is not mandatory, it can be any view).
+ * This view is assigned by specifying the {@link R.styleable#DataLayout_contentView} attribute.
+ *
+ * <h2>Empty View</h2>
+ * An empty view, which will be shown while the {@link Data} is empty. This view is assigned by specifying the
+ * {@link R.styleable#DataLayout_emptyView} attribute.
+ *
+ * <h2>Loading View</h2>
+ * A loading view, which will be shown while the {@link Data} is empty and loading. This view is assigned by specifying the
+ * {@link R.styleable#DataLayout_loadingView} attribute.
+ *
+ * <h2>Error View</h2>
+ * An error view, which will be shown if the {@link Data} emits an error. This view is assigned by specifying the
+ * {@link R.styleable#DataLayout_errorView} attribute.
  */
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
@@ -109,9 +130,12 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private Data<?> mData;
 
+    @NonNull
+    private final List<Data<?>> mDatas = new ArrayList<>();
+
     /** The current error message, if any. */
     @Nullable
-    private String mErrorMessage;
+    private CharSequence mErrorMessage;
 
     /** Formats error messages to be displayed in the error view. */
     @Nullable
@@ -146,7 +170,6 @@ public class DataLayout extends RelativeLayout {
     /** Indicates animations will run as inner views show and hide. */
     private boolean mAnimationEnabled = true;
 
-    @SuppressWarnings("UnusedDeclaration")
     public DataLayout(Context context) {
         this(context, null);
     }
@@ -197,7 +220,7 @@ public class DataLayout extends RelativeLayout {
             Bundle bundle = (Bundle) state;
             Parcelable superState = bundle.getParcelable(KEY_SUPER_STATE);
             super.onRestoreInstanceState(superState);
-            mErrorMessage = bundle.getString(KEY_ERROR_MESSAGE);
+            mErrorMessage = bundle.getCharSequence(KEY_ERROR_MESSAGE);
         }
         updateViews();
         updateErrorView();
@@ -207,7 +230,7 @@ public class DataLayout extends RelativeLayout {
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_SUPER_STATE, super.onSaveInstanceState());
-        bundle.putString(KEY_ERROR_MESSAGE, mErrorMessage);
+        bundle.putCharSequence(KEY_ERROR_MESSAGE, mErrorMessage);
         return bundle;
     }
 
@@ -258,27 +281,17 @@ public class DataLayout extends RelativeLayout {
     /**
      * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
      * view visibility accordingly.
-     * @param newData The data instance to observe, which may be {@code null} to cease observing anything.
+     * @param data The data instance to observe, which may be {@code null} to cease observing anything.
      */
-    public final void setData(@Nullable Data<?> newData) {
-        Data<?> oldData = mData;
-        mDataWatcher.setData(newData);
-        if (newData != oldData) {
-            mData = newData;
-            updateViews();
-            // Old data needs to be notified it's no longer shown.
-            if (oldData != null) {
-                oldData.notifyHidden();
-            }
-            // We may already be showing, so notify new data.
-            if (newData != null) {
-                if (mShown) {
-                    newData.notifyShown();
-                } else {
-                    newData.notifyHidden();
-                }
-            }
-        }
+    public final void setData(@Nullable Data<?> data) {
+        setDatas(singleton(data));
+    }
+
+    /**
+     * @see #setDatas(Iterable)
+     */
+    public final void setDatas(@NonNull Data<?>... datas) {
+        setDatas(asList(datas));
     }
 
     /** Get the data instance used to control child view visibility. */
@@ -287,7 +300,43 @@ public class DataLayout extends RelativeLayout {
         return mData;
     }
 
-    /** Set the error formatter used to present exceptions in the error child view. */
+    /**
+     * Connects this view to the specified {@link Data} instances, so it can observe their loading/error/empty state
+     * and adjust child view visibility accordingly.
+     * @param datas The data instances to observe, which may be empty to cease observing anything.
+     */
+    public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
+        mDataWatcher.setDatas(datas);
+        Set<Data<?>> oldDatas = new HashSet<>(mDatas);
+        Set<Data<?>> newDatas = newHashSet(datas);
+        Set<Data<?>> changed = symmetricDifference(newDatas, oldDatas);
+        if (!changed.isEmpty()) {
+            for (Data<?> data : changed) {
+                if (oldDatas.contains(data)) {
+                    // Old data needs to be notified it's no longer shown.
+                    data.notifyHidden();
+                } else if (newDatas.contains(data)) {
+                    // We may already be showing, so notify new data.
+                    if (mShown) {
+                        data.notifyShown();
+                    } else {
+                        data.notifyHidden();
+                    }
+                }
+            }
+            mDatas.clear();
+            mDatas.addAll(newDatas);
+            updateViews();
+        }
+    }
+
+    /** Returns a copy of the {@link Data} instances being observed. */
+    @NonNull
+    public final List<Data<?>> getDatas() {
+        return new ArrayList<>(mDatas);
+    }
+
+    /** Set the error formatter used to present {@link Throwable} objects in the error child view. */
     public final void setErrorFormatter(@Nullable ErrorFormatter errorFormatter) {
         if (errorFormatter != mErrorFormatter) {
             mErrorFormatter = errorFormatter;
@@ -295,17 +344,19 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    /** Get the error formatter used to present exceptions in the error child view. */
+    /** Get the error formatter used to present {@link Throwable} objects in the error child view. */
     @Nullable
     public final ErrorFormatter getErrorFormatter() {
         return mErrorFormatter;
     }
 
+    /** Get the policy used to determine the visibility of each child component view. */
     @NonNull
     public final VisibilityPolicy getVisibilityPolicy() {
         return mVisibilityPolicy;
     }
 
+    /** Set the policy used to determine the visibility of each child component view. */
     public final void setVisibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
         if (visibilityPolicy != mVisibilityPolicy) {
             mVisibilityPolicy = visibilityPolicy;
@@ -371,24 +422,46 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    /** Returns if any of the observed {@link Data} instances are loading. */
+    public boolean isLoading() {
+        if (mDatas.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < mDatas.size(); i++) {
+            if (mDatas.get(i).isLoading()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns if all of the observed {@link Data} instances are empty, or if none are being observed. */
+    public boolean isEmpty() {
+        if (mDatas.isEmpty()) {
+            return true;
+        }
+        for (int i = 0; i < mDatas.size(); i++) {
+            if (!mDatas.get(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void updateShown() {
         boolean shown = isThisViewShown();
         mDataWatcher.setEnabled(shown);
         if (shown != mShown) {
             mShown = shown;
-            if (shown) {
-                mShownTime = elapsedRealtime();
-            } else {
-                mShownTime = 0;
-            }
+            mShownTime = shown ? elapsedRealtime() : 0;
             updateViews();
             if (shown) {
-                if (mData != null) {
-                    mData.notifyShown();
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).notifyShown();
                 }
             } else {
-                if (mData != null) {
-                    mData.notifyHidden();
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).notifyHidden();
                 }
             }
         }
@@ -396,7 +469,8 @@ public class DataLayout extends RelativeLayout {
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
     private boolean isThisViewShown() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() && isEnabled();
+        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
+                isEnabled();
     }
 
     /** Returns whether now is an appropriate time to perform animations. */
@@ -445,9 +519,6 @@ public class DataLayout extends RelativeLayout {
 
     @Nullable
     private View viewToBeShown() {
-        if (mContentView != null && mVisibilityPolicy.shouldShow(this, mContentView)) {
-            return mContentView;
-        }
         if (mLoadingView != null && mVisibilityPolicy.shouldShow(this, mLoadingView)) {
             return mLoadingView;
         }
@@ -457,40 +528,27 @@ public class DataLayout extends RelativeLayout {
         if (mEmptyView != null && mVisibilityPolicy.shouldShow(this, mEmptyView)) {
             return mEmptyView;
         }
+        if (mContentView != null && mVisibilityPolicy.shouldShow(this, mContentView)) {
+            return mContentView;
+        }
         return null;
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
     private boolean shouldShow(@NonNull View v) {
-        if (v == mContentView) {
-            return shouldShowContents();
-        }
         if (v == mLoadingView) {
-            return shouldShowLoading();
+            return isLoading() && isEmpty();
         }
         if (v == mEmptyView) {
-            return shouldShowEmpty();
+            return isEmpty();
         }
         if (v == mErrorView) {
-            return shouldShowError();
+            return mErrorMessage != null;
+        }
+        if (v == mContentView) {
+            return !mDatas.isEmpty();
         }
         return false;
-    }
-
-    private boolean shouldShowContents() {
-        return mData != null && !mData.isEmpty();
-    }
-
-    private boolean shouldShowLoading() {
-        return mData != null && mData.isLoading();
-    }
-
-    private boolean shouldShowError() {
-        return mErrorMessage != null;
-    }
-
-    private boolean shouldShowEmpty() {
-        return mData == null || mData.isEmpty();
     }
 
     private void updateErrorView() {
@@ -501,12 +559,14 @@ public class DataLayout extends RelativeLayout {
     }
 
     @Nullable
-    private String formatErrorMessage(@NonNull Throwable e) {
+    private CharSequence formatErrorMessage(@NonNull Throwable e) {
         if (mErrorFormatter == null) {
             return null;
         }
         return mErrorFormatter.format(getContext(), e);
     }
+
+    //region Animation
 
     private void animateIn(@NonNull final View v, boolean immediately) {
         v.setVisibility(VISIBLE);
@@ -594,10 +654,7 @@ public class DataLayout extends RelativeLayout {
         return AnimatorInflater.loadAnimator(context, typedArray.getResourceId(index, defaultValue));
     }
 
-    @NonNull
-    private static String name(@NonNull View v) {
-        return v.getResources().getResourceEntryName(v.getId());
-    }
+    //endregion
 
     /** Allows control of visibility of each {@link DataLayout} component. */
     public interface VisibilityPolicy {
@@ -616,15 +673,15 @@ public class DataLayout extends RelativeLayout {
          * Called to determine whether or not to show the specified view. Callbacks are made to for each of the
          * following views in order:
          * <ol>
-         * <li>Content</li>
          * <li>Loading</li>
          * <li>Error</li>
          * <li>Empty</li>
+         * <li>Content</li>
          * </ol>
          * The view of the first callback to return {@code true} will be made visible.
-         * @param dataLayout The data layout view.
+         * @param dataLayout The parent {@link DataLayout}.
          * @param v The child component view being checked for visibility.
-         * @return {@code true} makes the view visible, {@code} makes it invisible.
+         * @return {@code true} makes the view visible, {@code false} makes it invisible.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
     }

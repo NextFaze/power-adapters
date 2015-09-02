@@ -1,23 +1,27 @@
 package com.nextfaze.asyncdata;
 
-public class SimpleDataObserver implements DataObserver {
+/** Forwards fine-grained calls to {@link #onChange()} by default. */
+public abstract class SimpleDataObserver implements DataObserver {
     @Override
-    public void onChange() {
-    }
+    public abstract void onChange();
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount) {
+        onChange();
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount) {
+        onChange();
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount) {
+        onChange();
     }
 
     @Override
     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+        onChange();
     }
 }
