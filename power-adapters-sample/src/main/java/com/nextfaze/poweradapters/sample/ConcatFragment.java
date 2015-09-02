@@ -2,13 +2,10 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -16,6 +13,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
+import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.FooterAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
@@ -38,12 +36,15 @@ import java.util.Random;
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
-public class ConcatFragment extends Fragment {
+public class ConcatFragment extends BaseFragment {
 
     private static final int ADAPTER_COUNT = 100;
 
     @NonNull
     private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
+
+    @Bind(R.id.data_layout)
+    DataLayout mDataLayout;
 
     @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
@@ -122,16 +123,18 @@ public class ConcatFragment extends Fragment {
         super.onDestroy();
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.news_recycler, container, false);
-    }
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        List<Data<?>> datas = FluentIterable.from(mPairs)
+                .transform(new Function<Pair<Data<?>, PowerAdapter>, Data<?>>() {
+                    @Override
+                    public Data<?> apply(Pair<Data<?>, PowerAdapter> pair) {
+                        return pair.first;
+                    }
+                })
+                .toList();
         List<PowerAdapter> adapters = FluentIterable.from(mPairs)
                 .transform(new Function<Pair<Data<?>, PowerAdapter>, PowerAdapter>() {
                     @Override
@@ -142,32 +145,8 @@ public class ConcatFragment extends Fragment {
                 .toList();
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(concat(adapters)));
-    }
-
-    /**
-     * @see BaseFragment#onDestroyView()
-     */
-    @Override
-    public void onDestroyView() {
-        mRecyclerView.setAdapter(null);
-        ButterKnife.unbind(this);
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        for (Pair<Data<?>, PowerAdapter> pair : mPairs) {
-            pair.first.notifyShown();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        for (Pair<Data<?>, PowerAdapter> pair : mPairs) {
-            pair.first.notifyHidden();
-        }
+        mDataLayout.setDatas(datas);
+        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     static final class ColoredBinder extends NewsItemBinder {
