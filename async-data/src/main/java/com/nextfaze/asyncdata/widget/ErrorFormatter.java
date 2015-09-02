@@ -1,8 +1,7 @@
-package com.nextfaze.asyncdata;
+package com.nextfaze.asyncdata.widget;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import lombok.NonNull;
 
 /** Converts a {@link Throwable} into a {@link CharSequence} for presentation in a {@link DataLayout}. */
