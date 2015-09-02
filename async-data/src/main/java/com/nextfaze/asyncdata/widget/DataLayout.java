@@ -76,8 +76,7 @@ public class DataLayout extends RelativeLayout {
 
         @Override
         public void onDataLoadingChange() {
-            Data<?> data = getData();
-            if (data != null && data.isLoading()) {
+            if (isLoading()) {
                 // Loading has started again, so clear error status.
                 mErrorMessage = null;
             }
