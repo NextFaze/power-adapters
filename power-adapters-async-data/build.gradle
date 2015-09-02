@@ -17,7 +17,7 @@ android {
 
 dependencies {
     compile project(':power-adapters')
-    compile 'com.nextfaze:async-data:0.2.4'
+    compile 'com.nextfaze:async-data:0.2.5'
     provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }

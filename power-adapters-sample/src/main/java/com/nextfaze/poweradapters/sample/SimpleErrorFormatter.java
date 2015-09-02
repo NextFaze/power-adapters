@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import com.nextfaze.asyncdata.ErrorFormatter;
+import com.nextfaze.asyncdata.widget.ErrorFormatter;
 import lombok.NonNull;
 
 final class SimpleErrorFormatter implements ErrorFormatter {
