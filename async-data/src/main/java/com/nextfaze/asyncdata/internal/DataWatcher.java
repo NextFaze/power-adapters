@@ -1,6 +1,5 @@
 package com.nextfaze.asyncdata.internal;
 
-import android.support.annotation.Nullable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.ErrorObserver;
@@ -20,7 +19,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 /**
- * Convenience class for observing a {@link Data} instance, and ensuring observers are correctly
+ * Convenience class for observing {@link Data} instances, and ensuring observers are correctly
  * registered/unregistered.
  */
 @Accessors(prefix = "m")
@@ -52,15 +51,8 @@ public abstract class DataWatcher {
         }
     };
 
-    @Nullable
-    private Data<?> mData;
-
     @NonNull
     private final Set<Data<?>> mDatas = new HashSet<>();
-
-    /** Keep track of the data instance registered against, so we can unregister easily later. */
-    @Nullable
-    private Data<?> mDataRegistered;
 
     @NonNull
     private final Map<Data<?>, Boolean> mRegistered = new HashMap<>();
@@ -68,21 +60,17 @@ public abstract class DataWatcher {
     private boolean mEnabled;
 
     /**
-     * Assigns a data instance, and updates the observer registration state based on {@link #isEnabled()}.
-     * @param data The data instance to observe, possibly {@code null}.
-     * @see #setEnabled(boolean)
+     * @see #setDatas(Iterable)
      */
-    public final void setData(@Nullable Data<?> data) {
-        if (data != mData) {
-            mData = data;
-            updateRegistration();
-        }
-    }
-
     public final void setDatas(@NonNull Data<?>... datas) {
         setDatas(asList(datas));
     }
 
+    /**
+     * Assigns data instances, and updates the observer registration state based on {@link #isEnabled()}.
+     * @param datas The data instances to observe, possibly empty.
+     * @see #setEnabled(boolean)
+     */
     public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
         mDatas.clear();
 
@@ -111,16 +99,10 @@ public abstract class DataWatcher {
         updateRegistration();
     }
 
-    /** Return the current data instance being observed, possibly {@code null}. */
-    @Nullable
-    public final Data<?> getData() {
-        return mData;
-    }
-
     /**
-     * Flags this watcher as active or inactive, which causes registration against the assigned {@link Data}. This can
-     * be called many times without triggering duplicate registrations, and can be called with or without {@link
-     * #setData(Data)} having been set beforehand.
+     * Flags this watcher as active or inactive, which causes registration against the assigned {@link Data} instances.
+     * This can be called many times without triggering duplicate registrations, and can be called with or without
+     * {@link #setDatas(Iterable)} having been set beforehand.
      * @param enabled If {@code true}, ensures observers are registered. If {@code false}, ensures observers are
      * unregistered.
      */
