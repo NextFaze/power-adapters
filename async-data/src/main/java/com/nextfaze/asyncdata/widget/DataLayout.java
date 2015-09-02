@@ -27,8 +27,17 @@ import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
+import static com.nextfaze.asyncdata.widget.SetUtils.newHashSet;
+import static com.nextfaze.asyncdata.widget.SetUtils.symmetricDifference;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 
 /**
  * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide child component views
@@ -120,6 +129,9 @@ public class DataLayout extends RelativeLayout {
     /** The data instance used to determine child view visibility. */
     @Nullable
     private Data<?> mData;
+
+    @NonNull
+    private final List<Data<?>> mDatas = new ArrayList<>();
 
     /** The current error message, if any. */
     @Nullable
@@ -269,33 +281,59 @@ public class DataLayout extends RelativeLayout {
     /**
      * Connects this view to a {@link Data} instance, so it can observe its loading/error/empty state and adjust child
      * view visibility accordingly.
-     * @param newData The data instance to observe, which may be {@code null} to cease observing anything.
+     * @param data The data instance to observe, which may be {@code null} to cease observing anything.
      */
-    public final void setData(@Nullable Data<?> newData) {
-        Data<?> oldData = mData;
-        mDataWatcher.setData(newData);
-        if (newData != oldData) {
-            mData = newData;
-            updateViews();
-            // Old data needs to be notified it's no longer shown.
-            if (oldData != null) {
-                oldData.notifyHidden();
-            }
-            // We may already be showing, so notify new data.
-            if (newData != null) {
-                if (mShown) {
-                    newData.notifyShown();
-                } else {
-                    newData.notifyHidden();
-                }
-            }
-        }
+    public final void setData(@Nullable Data<?> data) {
+        setDatas(singleton(data));
+    }
+
+    /**
+     * @see #setDatas(Iterable)
+     */
+    public final void setDatas(@NonNull Data<?>... datas) {
+        setDatas(asList(datas));
     }
 
     /** Get the data instance used to control child view visibility. */
     @Nullable
     public final Data<?> getData() {
         return mData;
+    }
+
+    /**
+     * Connects this view to the specified {@link Data} instances, so it can observe their loading/error/empty state
+     * and adjust child view visibility accordingly.
+     * @param datas The data instances to observe, which may be empty to cease observing anything.
+     */
+    public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
+        mDataWatcher.setDatas(datas);
+        Set<Data<?>> oldDatas = new HashSet<>(mDatas);
+        Set<Data<?>> newDatas = newHashSet(datas);
+        Set<Data<?>> changed = symmetricDifference(newDatas, oldDatas);
+        if (!changed.isEmpty()) {
+            for (Data<?> data : changed) {
+                if (oldDatas.contains(data)) {
+                    // Old data needs to be notified it's no longer shown.
+                    data.notifyHidden();
+                } else if (newDatas.contains(data)) {
+                    // We may already be showing, so notify new data.
+                    if (mShown) {
+                        data.notifyShown();
+                    } else {
+                        data.notifyHidden();
+                    }
+                }
+            }
+            mDatas.clear();
+            mDatas.addAll(newDatas);
+            updateViews();
+        }
+    }
+
+    /** Returns a copy of the {@link Data} instances being observed. */
+    @NonNull
+    public final List<Data<?>> getDatas() {
+        return new ArrayList<>(mDatas);
     }
 
     /** Set the error formatter used to present {@link Throwable} objects in the error child view. */
@@ -384,6 +422,32 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    /** Returns if any of the observed {@link Data} instances are loading. */
+    public boolean isLoading() {
+        if (mDatas.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < mDatas.size(); i++) {
+            if (mDatas.get(i).isLoading()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns if all of the observed {@link Data} instances are empty, or if none are being observed. */
+    public boolean isEmpty() {
+        if (mDatas.isEmpty()) {
+            return true;
+        }
+        for (int i = 0; i < mDatas.size(); i++) {
+            if (!mDatas.get(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void updateShown() {
         boolean shown = isThisViewShown();
         mDataWatcher.setEnabled(shown);
@@ -392,12 +456,12 @@ public class DataLayout extends RelativeLayout {
             mShownTime = shown ? elapsedRealtime() : 0;
             updateViews();
             if (shown) {
-                if (mData != null) {
-                    mData.notifyShown();
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).notifyShown();
                 }
             } else {
-                if (mData != null) {
-                    mData.notifyHidden();
+                for (int i = 0; i < mDatas.size(); i++) {
+                    mDatas.get(i).notifyHidden();
                 }
             }
         }
@@ -473,16 +537,16 @@ public class DataLayout extends RelativeLayout {
     @SuppressWarnings("SimplifiableIfStatement")
     private boolean shouldShow(@NonNull View v) {
         if (v == mLoadingView) {
-            return mData != null && mData.isLoading() && mData.isEmpty();
+            return isLoading() && isEmpty();
         }
         if (v == mEmptyView) {
-            return mData == null || mData.isEmpty();
+            return isEmpty();
         }
         if (v == mErrorView) {
             return mErrorMessage != null;
         }
         if (v == mContentView) {
-            return mData != null;
+            return !mDatas.isEmpty();
         }
         return false;
     }

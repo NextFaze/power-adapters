@@ -11,6 +11,14 @@ import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+
 /**
  * Convenience class for observing a {@link Data} instance, and ensuring observers are correctly
  * registered/unregistered.
@@ -47,9 +55,15 @@ public abstract class DataWatcher {
     @Nullable
     private Data<?> mData;
 
+    @NonNull
+    private final Set<Data<?>> mDatas = new HashSet<>();
+
     /** Keep track of the data instance registered against, so we can unregister easily later. */
     @Nullable
     private Data<?> mDataRegistered;
+
+    @NonNull
+    private final Map<Data<?>, Boolean> mRegistered = new HashMap<>();
 
     private boolean mEnabled;
 
@@ -63,6 +77,38 @@ public abstract class DataWatcher {
             mData = data;
             updateRegistration();
         }
+    }
+
+    public final void setDatas(@NonNull Data<?>... datas) {
+        setDatas(asList(datas));
+    }
+
+    public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
+        mDatas.clear();
+
+        for (Data<?> data : datas) {
+            mDatas.add(data);
+            // Add entry for each new data instance in our registration map.
+            if (!mRegistered.containsKey(data)) {
+                mRegistered.put(data, false);
+            }
+        }
+
+        // Remove and unregister any entries in our registration map that aren't in the new set.
+        Iterator<Map.Entry<Data<?>, Boolean>> it = mRegistered.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Data<?>, Boolean> entry = it.next();
+            Data<?> data = entry.getKey();
+            Boolean registered = entry.getValue();
+            if (!mDatas.contains(data) && registered) {
+                data.unregisterDataObserver(mDataObserver);
+                data.unregisterLoadingObserver(mLoadingObserver);
+                data.unregisterErrorObserver(mErrorObserver);
+                it.remove();
+            }
+        }
+
+        updateRegistration();
     }
 
     /** Return the current data instance being observed, possibly {@code null}. */
@@ -94,18 +140,19 @@ public abstract class DataWatcher {
     }
 
     private void updateRegistration() {
-        Data<?> dataToRegister = mEnabled ? mData : null;
-        if (dataToRegister != mDataRegistered) {
-            if (mDataRegistered != null) {
-                mDataRegistered.unregisterDataObserver(mDataObserver);
-                mDataRegistered.unregisterLoadingObserver(mLoadingObserver);
-                mDataRegistered.unregisterErrorObserver(mErrorObserver);
+        for (Map.Entry<Data<?>, Boolean> entry : mRegistered.entrySet()) {
+            Data<?> data = entry.getKey();
+            Boolean registered = entry.getValue();
+            boolean shouldRegister = mEnabled && mDatas.contains(data);
+            if (registered && !shouldRegister) {
+                data.unregisterDataObserver(mDataObserver);
+                data.unregisterLoadingObserver(mLoadingObserver);
+                data.unregisterErrorObserver(mErrorObserver);
             }
-            mDataRegistered = dataToRegister;
-            if (mDataRegistered != null) {
-                mDataRegistered.registerDataObserver(mDataObserver);
-                mDataRegistered.registerLoadingObserver(mLoadingObserver);
-                mDataRegistered.registerErrorObserver(mErrorObserver);
+            if (!registered && shouldRegister) {
+                data.registerDataObserver(mDataObserver);
+                data.registerLoadingObserver(mLoadingObserver);
+                data.registerErrorObserver(mErrorObserver);
             }
         }
     }
