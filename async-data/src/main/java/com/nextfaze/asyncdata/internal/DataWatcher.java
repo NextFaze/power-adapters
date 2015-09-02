@@ -148,11 +148,13 @@ public abstract class DataWatcher {
                 data.unregisterDataObserver(mDataObserver);
                 data.unregisterLoadingObserver(mLoadingObserver);
                 data.unregisterErrorObserver(mErrorObserver);
+                entry.setValue(false);
             }
             if (!registered && shouldRegister) {
                 data.registerDataObserver(mDataObserver);
                 data.registerLoadingObserver(mLoadingObserver);
                 data.registerErrorObserver(mErrorObserver);
+                entry.setValue(true);
             }
         }
     }
