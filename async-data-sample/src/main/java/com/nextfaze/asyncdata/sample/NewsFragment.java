@@ -19,9 +19,9 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.SimpleDataAdapter;
 import com.nextfaze.asyncdata.widget.DataLayout;
+import com.nextfaze.asyncdata.widget.ErrorFormatter;
 import lombok.NonNull;
 
 public final class NewsFragment extends Fragment {

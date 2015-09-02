@@ -19,7 +19,6 @@ import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.ErrorFormatter;
 import com.nextfaze.asyncdata.R;
 import com.nextfaze.asyncdata.internal.DataWatcher;
 import lombok.NonNull;
