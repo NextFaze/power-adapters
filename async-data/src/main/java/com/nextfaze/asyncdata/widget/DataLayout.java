@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,8 +77,7 @@ public class DataLayout extends RelativeLayout {
 
         @Override
         public void onDataLoadingChange() {
-            Data<?> data = getData();
-            if (data != null && data.isLoading()) {
+            if (isLoading()) {
                 // Loading has started again, so clear error status.
                 mErrorMessage = null;
             }
@@ -283,7 +283,7 @@ public class DataLayout extends RelativeLayout {
      * @param data The data instance to observe, which may be {@code null} to cease observing anything.
      */
     public final void setData(@Nullable Data<?> data) {
-        setDatas(singleton(data));
+        setDatas(data != null ? singleton(data) : Collections.<Data<?>>emptyList());
     }
 
     /**
