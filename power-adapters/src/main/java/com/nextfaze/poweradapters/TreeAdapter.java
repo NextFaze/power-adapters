@@ -60,7 +60,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final PowerAdapter mRootAdapter;
 
-    /** Reused to wrap an adapter and automatically offset all position calls. Not thread-safe obviously. */
+    /** Reused to wrap an adapter and automatically offset all position calls. */
     @NonNull
     private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
 
@@ -78,7 +78,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     private final SparseArray<Group> mGroups = new SparseArray<>();
 
-    boolean mDirty = true;
+    private boolean mDirty = true;
 
     public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
         mRootAdapter = rootAdapter;
@@ -115,73 +115,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     public boolean isExpanded(int position) {
         return mEntries.get(position) != null;
-    }
-
-    private final class Group {
-
-        private int mPosition;
-        private int mOuterStart;
-        private int mRootStart;
-
-        @NonNull
-        Group set(int position, int outerStart, int rootStart) {
-            mPosition = position;
-            mOuterStart = outerStart;
-            mRootStart = rootStart;
-            return this;
-        }
-
-        int entryToOuter(int entryPosition) {
-            return getEntryStart() + entryPosition;
-        }
-
-        int outerToEntry(int outerPosition) {
-            return outerPosition - getEntryStart();
-        }
-
-        /** Index of this group within the collection. */
-        int getPosition() {
-            return mPosition;
-        }
-
-        /** Offset of this group in outer adapter coordinate space. */
-        int getOuterStart() {
-            return mOuterStart;
-        }
-
-        /** Offset of this group in the root adapter coordinate space. */
-        int getRootStart() {
-            return mRootStart;
-        }
-
-        int getEntryStart() {
-            return mOuterStart + 1;
-        }
-
-        int size() {
-            int size = 1;
-            Entry entry = mEntries.get(getPosition());
-            if (entry != null) {
-                size += entry.getItemCount();
-            }
-            return size;
-        }
-
-        @NonNull
-        OffsetAdapter adapter(int outerPosition) {
-            // Does this outer position map to the root adapter?
-            if (outerPosition - getOuterStart() == 0) {
-                return mOffsetAdapter.set(mRootAdapter, mRootTransform, getRootStart());
-            }
-            // Outer position maps to the child adapter.
-            Entry entry = mEntries.get(getPosition());
-            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getEntryStart());
-        }
-
-        @Override
-        public String toString() {
-            return format("%s (%s)", mPosition, size());
-        }
     }
 
     @NonNull
@@ -380,11 +313,11 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             registerObserversIfNecessary();
         }
 
-        private int entryToOuter(int entryPosition) {
+        int entryToOuter(int entryPosition) {
             return mGroup.entryToOuter(entryPosition);
         }
 
-        private int outerToEntry(int outerPosition) {
+        int outerToEntry(int outerPosition) {
             return groupForPosition(outerPosition).outerToEntry(outerPosition);
         }
 
@@ -492,6 +425,73 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         void release(@NonNull Group group) {
             mGroups.add(group);
+        }
+    }
+
+    private final class Group {
+
+        private int mPosition;
+        private int mOuterStart;
+        private int mRootStart;
+
+        @NonNull
+        Group set(int position, int outerStart, int rootStart) {
+            mPosition = position;
+            mOuterStart = outerStart;
+            mRootStart = rootStart;
+            return this;
+        }
+
+        int entryToOuter(int entryPosition) {
+            return getEntryStart() + entryPosition;
+        }
+
+        int outerToEntry(int outerPosition) {
+            return outerPosition - getEntryStart();
+        }
+
+        /** Index of this group within the collection. */
+        int getPosition() {
+            return mPosition;
+        }
+
+        /** Offset of this group in outer adapter coordinate space. */
+        int getOuterStart() {
+            return mOuterStart;
+        }
+
+        /** Offset of this group in the root adapter coordinate space. */
+        int getRootStart() {
+            return mRootStart;
+        }
+
+        int getEntryStart() {
+            return mOuterStart + 1;
+        }
+
+        int size() {
+            int size = 1;
+            Entry entry = mEntries.get(getPosition());
+            if (entry != null) {
+                size += entry.getItemCount();
+            }
+            return size;
+        }
+
+        @NonNull
+        OffsetAdapter adapter(int outerPosition) {
+            // Does this outer position map to the root adapter?
+            if (outerPosition - getOuterStart() == 0) {
+                return mOffsetAdapter.set(mRootAdapter, mRootTransform, getRootStart());
+            }
+            // Outer position maps to the child adapter.
+            Entry entry = mEntries.get(getPosition());
+            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getEntryStart());
+        }
+
+        @Override
+        public String toString() {
+            return format("%s (%s)", mPosition, size());
         }
     }
 }

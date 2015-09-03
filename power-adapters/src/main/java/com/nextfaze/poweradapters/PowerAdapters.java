@@ -7,6 +7,8 @@ import lombok.NonNull;
 import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
+import static java.util.Arrays.asList;
+
 public final class PowerAdapters {
 
     private static final WeakHashMap<PowerAdapter, WeakReference<ListAdapterConverterAdapter>> sListConverterAdapters = new WeakHashMap<>();
@@ -31,7 +33,7 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull PowerAdapter... powerAdapters) {
-        return new ConcatAdapter(powerAdapters);
+        return new ConcatAdapter(asList(powerAdapters));
     }
 
     @CheckResult
