@@ -4,11 +4,12 @@ import android.support.annotation.CheckResult;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
+import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
 public final class PowerAdapters {
 
-    private static final WeakHashMap<PowerAdapter, ListAdapterConverterAdapter> sListConverterAdapters = new WeakHashMap<>();
+    private static final WeakHashMap<PowerAdapter, WeakReference<ListAdapterConverterAdapter>> sListConverterAdapters = new WeakHashMap<>();
 
     private PowerAdapters() {
     }
@@ -16,10 +17,13 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static ListAdapter toListAdapter(@NonNull PowerAdapter powerAdapter) {
-        ListAdapterConverterAdapter converterAdapter = sListConverterAdapters.get(powerAdapter);
+        WeakReference<ListAdapterConverterAdapter> ref = sListConverterAdapters.get(powerAdapter);
+        ListAdapterConverterAdapter converterAdapter = ref != null ? ref.get() : null;
         if (converterAdapter == null) {
             converterAdapter = new ListAdapterConverterAdapter(powerAdapter);
-            sListConverterAdapters.put(powerAdapter, converterAdapter);
+            ref = new WeakReference<>(converterAdapter);
+            sListConverterAdapters.put(powerAdapter, ref);
+            return converterAdapter;
         }
         return converterAdapter;
     }
