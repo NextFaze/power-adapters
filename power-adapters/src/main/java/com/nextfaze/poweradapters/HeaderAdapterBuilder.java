@@ -61,6 +61,9 @@ public final class HeaderAdapterBuilder {
     @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull final PowerAdapter adapter) {
+        if (mItems.isEmpty()) {
+            return adapter;
+        }
         return concat(new HeaderFooterHelperAdapter(mItems, new VisibilityPolicy() {
             @Override
             public boolean shouldShow() {

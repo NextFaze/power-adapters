@@ -60,6 +60,9 @@ public final class DividerAdapterBuilder {
     @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        if (mLeadingResource == 0 && mTrailingResource == 0 && mInnerResource == 0) {
+            return adapter;
+        }
         return new DividerAdapter(adapter, mEmptyPolicy, mLeadingResource, mTrailingResource,
                 mInnerResource);
     }

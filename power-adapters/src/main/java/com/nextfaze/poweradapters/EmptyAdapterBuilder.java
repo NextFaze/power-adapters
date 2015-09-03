@@ -56,7 +56,7 @@ public final class EmptyAdapterBuilder {
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
         if (mItem == null) {
-            throw new IllegalStateException("No empty item specified");
+            return adapter;
         }
         return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
     }

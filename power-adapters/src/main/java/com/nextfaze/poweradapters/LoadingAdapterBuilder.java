@@ -56,7 +56,7 @@ public final class LoadingAdapterBuilder {
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
         if (mItem == null) {
-            throw new IllegalStateException("No loading item specified");
+            return adapter;
         }
         return concat(adapter, new LoadingAdapter(delegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
     }

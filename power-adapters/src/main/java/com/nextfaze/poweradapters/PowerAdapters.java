@@ -33,6 +33,9 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull PowerAdapter... powerAdapters) {
+        if (powerAdapters.length == 1) {
+            return powerAdapters[0];
+        }
         return new ConcatAdapter(asList(powerAdapters));
     }
 
