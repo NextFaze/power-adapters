@@ -5,7 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
+import java.util.WeakHashMap;
+
 public final class RecyclerPowerAdapters {
+
+    private static final WeakHashMap<PowerAdapter, RecyclerConverterAdapter> sRecyclerConverterAdapters = new WeakHashMap<>();
 
     private RecyclerPowerAdapters() {
     }
@@ -13,6 +17,11 @@ public final class RecyclerPowerAdapters {
     @CheckResult
     @NonNull
     public static RecyclerView.Adapter<?> toRecyclerAdapter(@NonNull PowerAdapter powerAdapter) {
-        return new RecyclerConverterAdapter(powerAdapter);
+        RecyclerConverterAdapter recyclerConverterAdapter = sRecyclerConverterAdapters.get(powerAdapter);
+        if (recyclerConverterAdapter == null) {
+            recyclerConverterAdapter = new RecyclerConverterAdapter(powerAdapter);
+            sRecyclerConverterAdapters.put(powerAdapter, recyclerConverterAdapter);
+        }
+        return recyclerConverterAdapter;
     }
 }
