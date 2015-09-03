@@ -4,7 +4,7 @@ import lombok.NonNull;
 
 import java.util.Collection;
 
-final class HeaderFooterHelperAdapter extends PowerAdapterWrapper {
+final class HeaderFooterHelperAdapter extends ItemAdapter {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
@@ -34,25 +34,20 @@ final class HeaderFooterHelperAdapter extends PowerAdapterWrapper {
         }
     };
 
-    /** Items to be presented by this adapter. */
-    @NonNull
-    private final ItemAdapter mItemAdapter;
-
     /** The adapter whose contents we are observing. */
     @NonNull
     private final PowerAdapter mAdapter;
 
     /** Policy used to evaluate whether to show the items. */
     @NonNull
-    private final Policy mPolicy;
+    private final VisibilityPolicy mVisibilityPolicy;
 
     HeaderFooterHelperAdapter(@NonNull Collection<Item> items,
-                              @NonNull Policy policy,
+                              @NonNull VisibilityPolicy visibilityPolicy,
                               @NonNull PowerAdapter adapter) {
-        super(new ItemAdapter(items));
+        super(items);
         mAdapter = adapter;
-        mItemAdapter = (ItemAdapter) getAdapter();
-        mPolicy = policy;
+        mVisibilityPolicy = visibilityPolicy;
         updateVisibility();
     }
 
@@ -69,10 +64,10 @@ final class HeaderFooterHelperAdapter extends PowerAdapterWrapper {
     }
 
     private void updateVisibility() {
-        mItemAdapter.setAllVisible(mPolicy.shouldShow());
+        setAllVisible(mVisibilityPolicy.shouldShow());
     }
 
-    interface Policy {
+    interface VisibilityPolicy {
         boolean shouldShow();
     }
 }

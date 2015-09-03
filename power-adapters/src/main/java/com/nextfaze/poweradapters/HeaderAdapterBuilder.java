@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.view.View;
-import com.nextfaze.poweradapters.HeaderFooterHelperAdapter.Policy;
+import com.nextfaze.poweradapters.HeaderFooterHelperAdapter.VisibilityPolicy;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public final class HeaderAdapterBuilder {
     @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull final PowerAdapter adapter) {
-        return concat(new HeaderFooterHelperAdapter(mItems, new Policy() {
+        return concat(new HeaderFooterHelperAdapter(mItems, new VisibilityPolicy() {
             @Override
             public boolean shouldShow() {
                 return mEmptyPolicy.shouldShow(adapter);

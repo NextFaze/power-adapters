@@ -71,6 +71,7 @@ class ItemAdapter extends AbstractPowerAdapter {
 
     @Override
     public final void bindView(@NonNull View view, @NonNull Holder holder) {
+        // Nothing to bind. Each item represents a unique view.
     }
 
     @UiThread

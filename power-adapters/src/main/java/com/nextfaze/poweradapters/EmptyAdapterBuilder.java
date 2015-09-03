@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ListAdapter;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
@@ -57,7 +58,7 @@ public final class EmptyAdapterBuilder {
         if (mItem == null) {
             throw new IllegalStateException("No empty item specified");
         }
-        return PowerAdapters.concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
+        return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
     }
 
     /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
