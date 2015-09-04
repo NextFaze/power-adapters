@@ -1,13 +1,10 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
-import android.view.LayoutInflater;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-
-import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 @Accessors(prefix = "m")
 final class DividerAdapter extends PowerAdapterWrapper {
@@ -24,46 +21,25 @@ final class DividerAdapter extends PowerAdapterWrapper {
     @NonNull
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
-    @LayoutRes
-    private final int mLeadingItemResource;
+    @Nullable
+    private final Item mLeadingItemResource;
 
-    @LayoutRes
-    private final int mTrailingItemResource;
+    @Nullable
+    private final Item mTrailingItemResource;
 
-    @LayoutRes
-    private final int mInnerItemResource;
+    @Nullable
+    private final Item mInnerItemResource;
 
     DividerAdapter(@NonNull PowerAdapter adapter,
                    @NonNull DividerAdapterBuilder.EmptyPolicy emptyPolicy,
-                   @LayoutRes int leadingItemResource,
-                   @LayoutRes int trailingItemResource,
-                   @LayoutRes int innerItemResource) {
+                   @Nullable Item leadingItemResource,
+                   @Nullable Item trailingItemResource,
+                   @Nullable Item innerItemResource) {
         super(adapter);
         mLeadingItemResource = leadingItemResource;
         mTrailingItemResource = trailingItemResource;
         mInnerItemResource = innerItemResource;
         mEmptyPolicy = emptyPolicy;
-    }
-
-    @Override
-    public int getItemCount() {
-        int superCount = super.getItemCount();
-        if (mEmptyPolicy != DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING && superCount <= 0) {
-            return 0;
-        }
-        int count;
-        if (mInnerItemResource > 0) {
-            count = superCount * 2 - 1;
-        } else {
-            count = superCount;
-        }
-        if (mLeadingItemResource > 0) {
-            ++count;
-        }
-        if (mTrailingItemResource > 0) {
-            ++count;
-        }
-        return count;
     }
 
     @Override
@@ -102,13 +78,22 @@ final class DividerAdapter extends PowerAdapterWrapper {
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
         if (viewType == mInnerViewType) {
-            return newInnerDividerView(layoutInflater(parent), parent);
+            if (mInnerItemResource == null) {
+                throw new IllegalStateException();
+            }
+            return mInnerItemResource.create(parent);
         }
         if (viewType == mLeadingViewType) {
-            return newLeadingDividerView(layoutInflater(parent), parent);
+            if (mLeadingItemResource == null) {
+                throw new IllegalStateException();
+            }
+            return mLeadingItemResource.create(parent);
         }
         if (viewType == mTrailingViewType) {
-            return newTrailingDividerView(layoutInflater(parent), parent);
+            if (mTrailingItemResource == null) {
+                throw new IllegalStateException();
+            }
+            return mTrailingItemResource.create(parent);
         }
         return super.newView(parent, viewType);
     }
@@ -129,8 +114,54 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
+    public int getItemCount() {
+        int superCount = super.getItemCount();
+        int count;
+        if (isInnerVisible()) {
+            count = superCount * 2 - 1;
+        } else {
+            count = superCount;
+        }
+        if (isLeadingVisible()) {
+            ++count;
+        }
+        if (isTrailingVisible()) {
+            ++count;
+        }
+        return count;
+    }
+
+    private boolean isLeadingVisible() {
+        return isLeadingVisible(super.getItemCount());
+    }
+
+    private boolean isLeadingVisible(int itemCount) {
+        return mLeadingItemResource != null && mEmptyPolicy.shouldShowLeading(itemCount);
+    }
+
+    private boolean isTrailingVisible() {
+        return isTrailingVisible(super.getItemCount());
+    }
+
+    private boolean isTrailingVisible(int itemCount) {
+        return mTrailingItemResource != null && mEmptyPolicy.shouldShowTrailing(itemCount);
+    }
+
+    private boolean isInnerVisible() {
+        return isInnerVisible(super.getItemCount());
+    }
+
+    private boolean isInnerVisible(int itemCount) {
+        return mInnerItemResource != null && mEmptyPolicy.shouldShowInner(itemCount);
+    }
+
+    @Override
     protected int outerToInner(int outerPosition) {
-        if (mLeadingItemResource > 0) {
+        return outerToInner(outerPosition, super.getItemCount());
+    }
+
+    private int outerToInner(int outerPosition, int itemCount) {
+        if (isLeadingVisible(itemCount)) {
             return (outerPosition - 1) / 2;
         }
         return outerPosition / 2;
@@ -138,25 +169,71 @@ final class DividerAdapter extends PowerAdapterWrapper {
 
     @Override
     protected int innerToOuter(int innerPosition) {
-        if (mLeadingItemResource > 0) {
+        return innerToOuter(innerPosition, super.getItemCount());
+    }
+
+    private int innerToOuter(int innerPosition, int itemCount) {
+        if (isLeadingVisible(itemCount)) {
             return (innerPosition * 2) + 1;
         }
         return innerPosition * 2;
     }
 
-    @NonNull
-    private View newLeadingDividerView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-        return layoutInflater.inflate(mLeadingItemResource, parent, false);
+    private int innerToOuterCount(int innerPositionStart, int innerItemCount, int innerTotalItemCount) {
+        int itemCount = innerItemCount;
+        boolean rangeIncludesFirstItem = innerPositionStart == 0;
+        boolean rangeIncludesLastItem = innerPositionStart + itemCount >= innerTotalItemCount;
+        if (isLeadingVisible(innerTotalItemCount) && rangeIncludesFirstItem && rangeIncludesLastItem) {
+            itemCount++;
+        }
+        if (isInnerVisible(innerTotalItemCount)) {
+            itemCount += innerItemCount;
+        }
+        if (!isTrailingVisible(innerTotalItemCount) && rangeIncludesLastItem) {
+            itemCount--;
+        }
+        return itemCount;
     }
 
-    @NonNull
-    private View newTrailingDividerView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-        return layoutInflater.inflate(mTrailingItemResource, parent, false);
+    @Override
+    protected void forwardChanged() {
+        notifyDataSetChanged();
     }
 
-    @NonNull
-    private View newInnerDividerView(@NonNull LayoutInflater layoutInflater, @NonNull ViewGroup parent) {
-        return layoutInflater.inflate(mInnerItemResource, parent, false);
+    @Override
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+        int innerTotalItemCountCurrent = super.getItemCount();
+        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountCurrent);
+        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountCurrent);
+//        notifyItemRangeChanged(outerPositionStart, outerItemCount);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
+        int innerTotalItemCountPostInsertion = super.getItemCount();
+        int innerTotalItemCountPreInsertion = super.getItemCount() - innerItemCount;
+        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountPostInsertion);
+        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPostInsertion);
+//        notifyItemRangeInserted(outerPositionStart, outerItemCount);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
+        int innerTotalItemCountPreRemoval = super.getItemCount() + innerItemCount;
+        int innerTotalItemCountPostRemoval = super.getItemCount();
+        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountPreRemoval);
+        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPreRemoval);
+//        notifyItemRangeRemoved(outerPositionStart, outerItemCount);
+        notifyDataSetChanged();
+    }
+
+    @Override
+    protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
+        // TODO: forwardItemRangeMoved
+//        notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
+        notifyDataSetChanged();
     }
 
     private boolean isDivider(int position) {
@@ -170,21 +247,21 @@ final class DividerAdapter extends PowerAdapterWrapper {
         if (isTrailingDivider(position)) {
             return false;
         }
-        if (mLeadingItemResource <= 0) {
+        if (!isLeadingVisible()) {
             ++position;
         }
         //noinspection SimplifiableIfStatement
-        if (mInnerItemResource > 0) {
+        if (isInnerVisible()) {
             return position % 2 == 0;
         }
         return false;
     }
 
     private boolean isLeadingDivider(int position) {
-        return mLeadingItemResource > 0 && position == 0;
+        return isLeadingVisible() && position == 0;
     }
 
     private boolean isTrailingDivider(int position) {
-        return mTrailingItemResource > 0 && position == getItemCount() - 1;
+        return isTrailingVisible() && position == getItemCount() - 1;
     }
 }
