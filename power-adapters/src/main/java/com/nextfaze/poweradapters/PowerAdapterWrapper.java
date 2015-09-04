@@ -19,27 +19,27 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
     private final DataObserver mDataSetObserver = new DataObserver() {
         @Override
         public void onChanged() {
-            notifyDataSetChanged();
+            forwardChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(innerToOuter(positionStart), itemCount);
+            forwardItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            notifyItemRangeInserted(innerToOuter(positionStart), itemCount);
+            forwardItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            notifyItemRangeRemoved(innerToOuter(positionStart), itemCount);
+            forwardItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            notifyItemRangeMoved(innerToOuter(fromPosition), innerToOuter(toPosition), itemCount);
+            forwardItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
 
@@ -150,5 +150,25 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
         mAdapter.unregisterDataObserver(mDataSetObserver);
+    }
+
+    protected void forwardChanged() {
+        notifyDataSetChanged();
+    }
+
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeChanged(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeInserted(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeRemoved(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
+        notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
     }
 }
