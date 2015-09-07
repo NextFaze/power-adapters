@@ -115,7 +115,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         }
     }
 
-    final class Holder extends RecyclerView.ViewHolder {
+    static final class Holder extends RecyclerView.ViewHolder {
 
         @NonNull
         private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
