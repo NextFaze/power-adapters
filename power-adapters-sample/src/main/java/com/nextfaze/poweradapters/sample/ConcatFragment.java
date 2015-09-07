@@ -1,8 +1,10 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -14,6 +16,7 @@ import com.google.common.collect.FluentIterable;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import com.nextfaze.asyncdata.widget.DataLayout;
+import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.FooterAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
@@ -30,6 +33,7 @@ import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -38,7 +42,7 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class ConcatFragment extends BaseFragment {
 
-    private static final int ADAPTER_COUNT = 100;
+    private static final int ADAPTER_COUNT = 2;
 
     @NonNull
     private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
@@ -50,7 +54,7 @@ public class ConcatFragment extends BaseFragment {
     RecyclerView mRecyclerView;
 
     public ConcatFragment() {
-        Random random = new Random();
+        Random random = new Random(1);
         for (int i = 0; i < ADAPTER_COUNT; i++) {
             NewsIncrementalData data = new NewsIncrementalData(random.nextInt(10), 3);
             ColoredBinder binder = new ColoredBinder(random.nextInt());
@@ -59,16 +63,23 @@ public class ConcatFragment extends BaseFragment {
     }
 
     @NonNull
-    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<?> data,
+    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<NewsItem> data,
                                                    @NonNull Binder newsItemBinder) {
         Binder removeItemBinder = new BinderWrapper(newsItemBinder) {
             @Override
-            public void bindView(@NonNull final Object item, @NonNull View v, @NonNull Holder holder) {
+            public void bindView(@NonNull final Object item, @NonNull View v, @NonNull final Holder holder) {
                 super.bindView(item, v, holder);
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         data.remove(item);
+                    }
+                });
+                v.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        showEditDialog(data, holder.getPosition());
+                        return true;
                     }
                 });
             }
@@ -77,6 +88,12 @@ public class ConcatFragment extends BaseFragment {
                 .bind(NewsItem.class, removeItemBinder)
                 .build();
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
+
+        adapter = new DividerAdapterBuilder()
+                .innerResource(R.layout.list_divider_item)
+                .outerResource(R.layout.list_divider_item)
+                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING)
+                .build(adapter);
 
         adapter = new HeaderAdapterBuilder()
                 .addResource(R.layout.news_header_item)
@@ -107,6 +124,51 @@ public class ConcatFragment extends BaseFragment {
                 .build(adapter, new DataEmptyDelegate(data));
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
+    }
+
+    private void showEditDialog(@NonNull final IncrementalArrayData<NewsItem> data, final int position) {
+        new AlertDialog.Builder(getActivity())
+                .setItems(new CharSequence[] {
+                        "Add 1 Before",
+                        "Add 1 After",
+                        "Change 1",
+                        "Add 3 Before",
+                        "Add 3 After",
+                }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                data.add(position, new NewsItem("Foobar"));
+                                break;
+
+                            case 1:
+                                data.add(position + 1, new NewsItem("Foobar"));
+                                break;
+
+                            case 2:
+                                data.set(position, new NewsItem("Changed"));
+                                break;
+
+                            case 3:
+                                data.addAll(position, Arrays.asList(
+                                        new NewsItem("Foobar"),
+                                        new NewsItem("Foobar"),
+                                        new NewsItem("Foobar")
+                                ));
+                                break;
+
+                            case 4:
+                                data.addAll(position + 1, Arrays.asList(
+                                        new NewsItem("Foobar"),
+                                        new NewsItem("Foobar"),
+                                        new NewsItem("Foobar")
+                                ));
+                                break;
+                        }
+                    }
+                })
+                .show();
     }
 
     @Override
