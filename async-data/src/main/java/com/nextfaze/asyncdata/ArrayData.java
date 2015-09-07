@@ -308,6 +308,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     onClear();
                     mDirty = false;
+                    int oldSize = mData.size();
                     mData.clear();
                     for (T t : data) {
                         if (t != null) {
@@ -315,6 +316,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                         }
                     }
                     mTask = null;
+                    notifyItemRangeRemoved(0, oldSize);
                     notifyItemRangeInserted(0, data.size());
                     setAvailable(0);
                     notifyLoadingChanged();
@@ -343,6 +345,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         if (mTask != null) {
             mTask.cancel();
             mTask = null;
+            notifyLoadingChanged();
         }
     }
 
