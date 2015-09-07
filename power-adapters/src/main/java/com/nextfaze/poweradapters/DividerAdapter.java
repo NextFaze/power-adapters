@@ -202,37 +202,49 @@ final class DividerAdapter extends PowerAdapterWrapper {
 
     @Override
     protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
-        int innerTotalItemCountCurrent = super.getItemCount();
-        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountCurrent);
-        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountCurrent);
-//        notifyItemRangeChanged(outerPositionStart, outerItemCount);
-        notifyDataSetChanged();
+        int innerTotalItemCount = super.getItemCount();
+        for (int i = 0; i < innerItemCount; i++) {
+            int outerPositionStart = innerPositionStart * 2;
+            if (isLeadingVisible(innerTotalItemCount)) {
+                outerPositionStart++;
+            }
+            notifyItemRangeChanged(outerPositionStart, 1);
+        }
     }
 
     @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
         int innerTotalItemCountPostInsertion = super.getItemCount();
         int innerTotalItemCountPreInsertion = super.getItemCount() - innerItemCount;
-        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountPostInsertion);
+        int outerPositionStart = innerPositionStart * 2;
+        if (isLeadingVisible(innerTotalItemCountPreInsertion)) {
+            outerPositionStart++;
+        }
+        if (!isLeadingVisible(innerTotalItemCountPostInsertion)) {
+            outerPositionStart--;
+        }
         int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPostInsertion);
-//        notifyItemRangeInserted(outerPositionStart, outerItemCount);
-        notifyDataSetChanged();
+        notifyItemRangeInserted(outerPositionStart, outerItemCount);
     }
 
     @Override
     protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
         int innerTotalItemCountPreRemoval = super.getItemCount() + innerItemCount;
         int innerTotalItemCountPostRemoval = super.getItemCount();
-        int outerPositionStart = innerToOuter(innerPositionStart, innerTotalItemCountPreRemoval);
+        int outerPositionStart = innerPositionStart * 2;
+        if (isLeadingVisible(innerTotalItemCountPreRemoval)) {
+            outerPositionStart++;
+        }
+        if (!isLeadingVisible(innerTotalItemCountPostRemoval)) {
+            outerPositionStart--;
+        }
         int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPreRemoval);
-//        notifyItemRangeRemoved(outerPositionStart, outerItemCount);
-        notifyDataSetChanged();
+        notifyItemRangeRemoved(outerPositionStart, outerItemCount);
     }
 
     @Override
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
-        // TODO: forwardItemRangeMoved
-//        notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
+        // TODO: Implement proper fine-grained notifications for bulk moves.
         notifyDataSetChanged();
     }
 
