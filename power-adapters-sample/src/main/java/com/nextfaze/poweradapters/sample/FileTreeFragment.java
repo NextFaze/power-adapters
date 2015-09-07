@@ -32,6 +32,8 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
+import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS;
+import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
@@ -143,6 +145,7 @@ public class FileTreeFragment extends BaseFragment {
         adapter = treeAdapterRef.get();
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
+                .emptyPolicy(depth == 0 ? SHOW_ONLY_IF_NON_EMPTY : SHOW_ALWAYS)
                 .build(adapter, new DataLoadingDelegate(data));
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.file_list_empty_item)
