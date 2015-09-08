@@ -21,7 +21,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -261,7 +261,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @UiThread
     @Override
     public final void clear() {
-        clearElementsAndNotify();
+        clearElementsWithCallback(true);
     }
 
     @Override
@@ -335,7 +335,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
         if (mDirty) {
             stopThread();
-            clearElementsAndNotify();
+            clearElementsWithCallback(true);
         }
         startThreadIfNeeded();
     }
@@ -350,7 +350,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     protected final void onHideTimeout() {
         log.trace("Hide timeout elapsed ({} ms); clearing and stopping thread", getHideTimeout());
-        clearElementsAndNotify();
+        clearElementsWithCallback(true);
         stopThread();
     }
 
@@ -374,12 +374,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     protected void onLoadBegin() {
     }
 
-    private void clearElementsAndNotify() {
+    private void clearElementsWithCallback(boolean notifyRemoved) {
         int size = mData.size();
         if (size > 0) {
             onClear();
             mData.clear();
-            notifyItemRangeRemoved(0, size);
+            if (notifyRemoved) {
+                notifyItemRangeRemoved(0, size);
+            }
         }
     }
 
@@ -449,19 +451,26 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            int oldSize = mData.size();
                             if (needToClear) {
-                                clearElementsAndNotify();
+                                clearElementsWithCallback(false);
                             }
-                            int positionStart = mData.size();
-                            int insertCount = 0;
-                            for (T t : result.getElements()) {
+                            List<? extends T> elements = result.getElements();
+                            for (T t : elements) {
                                 if (t != null) {
                                     mData.add(t);
-                                    insertCount++;
                                 }
                             }
-                            if (insertCount > 0) {
-                                notifyItemRangeInserted(positionStart, insertCount);
+                            int newSize = mData.size();
+                            int deltaSize = newSize - oldSize;
+                            int changed = min(oldSize, newSize);
+                            if (changed > 0) {
+                                notifyItemRangeChanged(0, changed);
+                            }
+                            if (deltaSize < 0) {
+                                notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
+                            } else if (deltaSize > 0) {
+                                notifyItemRangeInserted(oldSize, abs(deltaSize));
                             }
                         }
                     });

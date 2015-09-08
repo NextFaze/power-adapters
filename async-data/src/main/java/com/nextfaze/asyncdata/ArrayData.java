@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.min;
+
 /**
  * Simple mutable {@link Data} implementation backed by an {@link ArrayList}. Cannot contain {@code null} elements. Not
  * thread-safe.
@@ -309,16 +312,27 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                     onClear();
                     mDirty = false;
                     int oldSize = mData.size();
+                    int newSize = data.size();
+                    int deltaSize = newSize - oldSize;
+
                     mData.clear();
                     for (T t : data) {
                         if (t != null) {
                             mData.add(t);
                         }
                     }
-                    mTask = null;
-                    notifyItemRangeRemoved(0, oldSize);
-                    notifyItemRangeInserted(0, data.size());
+
+                    int changed = min(oldSize, newSize);
+                    if (changed > 0) {
+                        notifyItemRangeChanged(0, changed);
+                    }
+                    if (deltaSize < 0) {
+                        notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
+                    } else if (deltaSize > 0) {
+                        notifyItemRangeInserted(oldSize, abs(deltaSize));
+                    }
                     setAvailable(0);
+                    mTask = null;
                     notifyLoadingChanged();
                     loadDataIfAppropriate();
                 }
