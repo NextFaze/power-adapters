@@ -91,6 +91,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         Entry entry = mEntries.get(position);
         if (expanded) {
             if (entry == null) {
+                rebuildGroupsIfNecessary();
                 entry = new Entry(getChildAdapter(position), mGroups.valueAt(position));
                 mEntries.put(position, entry);
                 invalidateGroups();
@@ -98,6 +99,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             }
         } else {
             if (entry != null) {
+                rebuildGroupsIfNecessary();
                 int itemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
@@ -179,6 +181,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     private int rootToOuter(int rootPosition) {
+        rebuildGroupsIfNecessary();
         if (mGroups.size() == 0) {
             return rootPosition;
         }
