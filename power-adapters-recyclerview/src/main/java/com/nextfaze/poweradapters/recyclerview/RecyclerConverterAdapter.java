@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.recyclerview;
 
+import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +9,6 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -55,10 +55,10 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     };
 
     @NonNull
-    private final Map<ViewType, Integer> mViewTypeObjectToInt = new HashMap<>();
+    private final Map<ViewType, Integer> mViewTypeObjectToInt = new ArrayMap<>();
 
     @NonNull
-    private final Map<Integer, ViewType> mViewTypeIntToObject = new HashMap<>();
+    private final Map<Integer, ViewType> mViewTypeIntToObject = new ArrayMap<>();
 
     private int mNextViewTypeInt;
 
@@ -115,7 +115,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         }
     }
 
-    final class Holder extends RecyclerView.ViewHolder {
+    static final class Holder extends RecyclerView.ViewHolder {
 
         @NonNull
         private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
