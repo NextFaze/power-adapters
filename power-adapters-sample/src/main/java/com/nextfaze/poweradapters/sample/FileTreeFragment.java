@@ -1,9 +1,11 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.Bind;
@@ -11,7 +13,9 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
+import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
+import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -32,6 +36,7 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING;
 import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS;
 import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
@@ -39,7 +44,10 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 
 public class FileTreeFragment extends BaseFragment {
 
-    private static final int LIMIT = Integer.MAX_VALUE;
+    private static final int MAX_DISPLAYED_FILES_PER_DIR = Integer.MAX_VALUE;
+
+    @NonNull
+    private final File mRootFile = new File("/");
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
@@ -47,27 +55,29 @@ public class FileTreeFragment extends BaseFragment {
     @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
 
-    @NonNull
+    @Nullable
     private Data<File> mRootData;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mRootData = new DirectoryData(new File("/"), LIMIT);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        PowerAdapter adapter = createFilesAdapter(mRootData, 0);
-//        PowerAdapter adapter = createFilesAdapterSimple(new File("/"), 0, true);
-        mDataLayout.setData(mRootData);
+//        PowerAdapter adapter = concat(
+//                createFilesAdapterSimple(mRootFile, 0, true),
+//                createFilesAdapter(mRootData, mRootFile, 0)
+//        );
+        PowerAdapter adapter = createFilesAdapter(mRootFile, 0);
+        adapter = new DividerAdapterBuilder()
+                .leadingResource(R.layout.list_divider_item)
+                .trailingResource(R.layout.list_divider_item)
+                .innerResource(R.layout.list_divider_item)
+                .emptyPolicy(SHOW_NOTHING)
+                .build(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
         showCollectionView(CollectionView.RECYCLER_VIEW);
@@ -94,7 +104,7 @@ public class FileTreeFragment extends BaseFragment {
         };
         File[] filesArray = file.listFiles();
         final List<File> files = FluentIterable.from(filesArray != null ? Lists.newArrayList(filesArray) : Collections.<File>emptyList())
-                .limit(LIMIT)
+                .limit(MAX_DISPLAYED_FILES_PER_DIR)
                 .toList();
         PowerAdapter adapter = new FileAdapter(files, singletonMapper(binder));
         treeAdapterRef.set(new TreeAdapter(adapter) {
@@ -112,7 +122,12 @@ public class FileTreeFragment extends BaseFragment {
     }
 
     @NonNull
-    private PowerAdapter createFilesAdapter(@NonNull final Data<File> data, final int depth) {
+    private PowerAdapter createFilesAdapter(@NonNull final File file, final int depth) {
+        final Data<File> data = new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
+        if (mRootData == null) {
+            mRootData = data;
+            mDataLayout.setData(data);
+        }
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
@@ -136,20 +151,32 @@ public class FileTreeFragment extends BaseFragment {
             @Override
             protected PowerAdapter getChildAdapter(int position) {
                 File file = data.get(position);
-                Data<File> data = new DirectoryData(file, 3);
                 // TODO: Call Show/hide from an adapter, based on registered observers?
                 data.notifyShown();
-                return createFilesAdapter(data, depth + 1);
+                return createFilesAdapter(file, depth + 1);
             }
         });
         adapter = treeAdapterRef.get();
+
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
                 .emptyPolicy(depth == 0 ? SHOW_ONLY_IF_NON_EMPTY : SHOW_ALWAYS)
                 .build(adapter, new DataLoadingDelegate(data));
+
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.file_list_empty_item)
                 .build(adapter, new DataEmptyDelegate(data));
+
+        TextView headerView = (TextView) LayoutInflater.from(getActivity())
+                .inflate(android.R.layout.simple_list_item_1, mRecyclerView, false);
+        headerView.setBackgroundColor(0x20FFFFFF);
+        headerView.setText(repeat("    ", depth) + file.getName() + ":");
+        headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+
+        adapter = new HeaderAdapterBuilder()
+                .addView(headerView)
+                .build(adapter);
+
         return adapter;
     }
 }
