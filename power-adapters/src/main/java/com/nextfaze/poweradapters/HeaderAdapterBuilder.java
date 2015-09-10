@@ -81,7 +81,7 @@ public final class HeaderAdapterBuilder implements Decorator {
     /** Evaluated to determine whether to show the headers. */
     public enum EmptyPolicy {
         /** Show the headers when the wrapped adapter is empty. */
-        SHOW() {
+        SHOW {
             @Override
             boolean shouldShow(@NonNull PowerAdapter adapter) {
                 return true;

@@ -7,6 +7,60 @@ import lombok.NonNull;
 
 public interface PowerAdapter {
 
+    /** An adapter with no elements. */
+    PowerAdapter EMPTY = new PowerAdapter() {
+        @Override
+        public int getItemCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            throw new UnsupportedOperationException();
+        }
+
+        @NonNull
+        @Override
+        public ViewType getItemViewType(int position) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            throw new UnsupportedOperationException();
+        }
+
+        @NonNull
+        @Override
+        public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void bindView(@NonNull View view, @NonNull Holder holder) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void registerDataObserver(@NonNull DataObserver dataObserver) {
+        }
+
+        @Override
+        public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
+        }
+
+        @NonNull
+        @Override
+        public PowerAdapter decorate(@NonNull Decorator decorator) {
+            return decorator.decorate(this);
+        }
+    };
+
     int NO_ID = -1;
 
     /**

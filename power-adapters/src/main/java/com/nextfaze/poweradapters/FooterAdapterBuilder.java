@@ -80,7 +80,7 @@ public final class FooterAdapterBuilder implements Decorator {
     /** Evaluated to determine whether to show the footers. */
     public enum EmptyPolicy {
         /** Show the footers when the wrapped adapter is empty. */
-        SHOW() {
+        SHOW {
             @Override
             boolean shouldShow(@NonNull PowerAdapter adapter) {
                 return true;
