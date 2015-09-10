@@ -66,7 +66,11 @@ class ItemAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        return mItemsByViewType.get(viewType).create(parent);
+        View view = mItemsByViewType.get(viewType).create(parent);
+        if (view.getParent() == parent) {
+            parent.removeView(view);
+        }
+        return view;
     }
 
     @Override
