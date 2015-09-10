@@ -12,7 +12,7 @@ import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
-public final class EmptyAdapterBuilder {
+public final class EmptyAdapterBuilder implements Decorator {
 
     @Nullable
     private Item mItem;
@@ -59,6 +59,12 @@ public final class EmptyAdapterBuilder {
             return adapter;
         }
         return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
+    }
+
+    @NonNull
+    @Override
+    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+        return build(adapter);
     }
 
     /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */

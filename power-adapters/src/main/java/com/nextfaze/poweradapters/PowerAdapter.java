@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.CheckResult;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
@@ -57,4 +58,9 @@ public interface PowerAdapter {
     void registerDataObserver(@NonNull DataObserver dataObserver);
 
     void unregisterDataObserver(@NonNull DataObserver dataObserver);
+
+    /** Wraps this adapter using the specified decorator, and returns the result. */
+    @CheckResult
+    @NonNull
+    PowerAdapter decorate(@NonNull Decorator decorator);
 }

@@ -13,7 +13,7 @@ import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
-public final class HeaderAdapterBuilder {
+public final class HeaderAdapterBuilder implements Decorator {
 
     @NonNull
     private final ArrayList<Item> mItems = new ArrayList<>();
@@ -70,6 +70,12 @@ public final class HeaderAdapterBuilder {
                 return mEmptyPolicy.shouldShow(adapter);
             }
         }, adapter), adapter);
+    }
+
+    @NonNull
+    @Override
+    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+        return build(adapter);
     }
 
     /** Evaluated to determine whether to show the headers. */
