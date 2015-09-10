@@ -13,7 +13,10 @@ import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
-public final class LoadingAdapterBuilder {
+public final class LoadingAdapterBuilder implements Decorator {
+
+    @Nullable
+    private Delegate mDelegate;
 
     @Nullable
     private Item mItem;
@@ -45,6 +48,12 @@ public final class LoadingAdapterBuilder {
         return this;
     }
 
+    @NonNull
+    public LoadingAdapterBuilder delegate(@NonNull Delegate delegate) {
+        mDelegate = delegate;
+        return this;
+    }
+
     /** If {@code true}, loading item is only shown while {@link Adapter#isEmpty()} is {@code true}. */
     @NonNull
     public LoadingAdapterBuilder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
@@ -54,11 +63,27 @@ public final class LoadingAdapterBuilder {
 
     @CheckResult
     @NonNull
-    public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
         if (mItem == null) {
             return adapter;
         }
-        return concat(adapter, new LoadingAdapter(delegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
+        if (mDelegate == null) {
+            throw new IllegalStateException("Delegate is required");
+        }
+        return concat(adapter, new LoadingAdapter(mDelegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
+    }
+
+    @CheckResult
+    @NonNull
+    public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
+        mDelegate = delegate;
+        return build(adapter);
+    }
+
+    @NonNull
+    @Override
+    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+        return build(adapter);
     }
 
     /** Determines when the loading item is shown while empty. Item is never shown if not loading. */

@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CallSuper;
+import android.support.annotation.CheckResult;
 import lombok.NonNull;
 
 public abstract class AbstractPowerAdapter implements PowerAdapter {
@@ -208,6 +209,13 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
      */
     public final void notifyItemRangeRemoved(int positionStart, int itemCount) {
         mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
+    }
+
+    @CheckResult
+    @NonNull
+    @Override
+    public final PowerAdapter decorate(@NonNull Decorator decorator) {
+        return decorator.decorate(this);
     }
 
     /** Called when the first observer has registered with this adapter. */

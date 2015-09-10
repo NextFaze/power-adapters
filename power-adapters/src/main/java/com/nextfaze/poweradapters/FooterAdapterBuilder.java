@@ -12,7 +12,7 @@ import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
-public final class FooterAdapterBuilder {
+public final class FooterAdapterBuilder implements Decorator {
 
     @NonNull
     private final ArrayList<Item> mItems = new ArrayList<>();
@@ -71,10 +71,16 @@ public final class FooterAdapterBuilder {
         }, adapter));
     }
 
+    @NonNull
+    @Override
+    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+        return build(adapter);
+    }
+
     /** Evaluated to determine whether to show the footers. */
     public enum EmptyPolicy {
         /** Show the footers when the wrapped adapter is empty. */
-        SHOW() {
+        SHOW {
             @Override
             boolean shouldShow(@NonNull PowerAdapter adapter) {
                 return true;

@@ -91,7 +91,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         Entry entry = mEntries.get(position);
         if (expanded) {
             if (entry == null) {
-                entry = new Entry(getChildAdapter(position), mGroups.valueAt(position));
+                entry = new Entry(getChildAdapter(position));
                 mEntries.put(position, entry);
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
@@ -179,6 +179,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     private int rootToOuter(int rootPosition) {
+        rebuildGroupsIfNecessary();
         if (mGroups.size() == 0) {
             return rootPosition;
         }
@@ -307,9 +308,8 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         @NonNull
         private Group mGroup;
 
-        Entry(@NonNull PowerAdapter adapter, @NonNull Group group) {
+        Entry(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
-            mGroup = group;
             registerObserversIfNecessary();
         }
 

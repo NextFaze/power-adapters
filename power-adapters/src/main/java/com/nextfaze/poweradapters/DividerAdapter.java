@@ -204,7 +204,7 @@ final class DividerAdapter extends PowerAdapterWrapper {
     protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
         int innerTotalItemCount = super.getItemCount();
         for (int i = 0; i < innerItemCount; i++) {
-            int outerPositionStart = innerPositionStart * 2;
+            int outerPositionStart = (innerPositionStart + i) * 2;
             if (isLeadingVisible(innerTotalItemCount)) {
                 outerPositionStart++;
             }

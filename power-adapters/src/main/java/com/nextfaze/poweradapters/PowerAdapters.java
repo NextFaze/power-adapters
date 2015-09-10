@@ -44,4 +44,5 @@ public final class PowerAdapters {
     public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> powerAdapters) {
         return new ConcatAdapter(powerAdapters);
     }
+
 }
