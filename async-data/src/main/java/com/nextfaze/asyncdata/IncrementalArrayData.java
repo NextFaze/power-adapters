@@ -447,30 +447,13 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                     // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading.
                     final boolean needToClear = firstItem;
                     firstItem = false;
-
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            int oldSize = mData.size();
                             if (needToClear) {
-                                clearElementsWithCallback(false);
-                            }
-                            List<? extends T> elements = result.getElements();
-                            for (T t : elements) {
-                                if (t != null) {
-                                    mData.add(t);
-                                }
-                            }
-                            int newSize = mData.size();
-                            int deltaSize = newSize - oldSize;
-                            int changed = min(oldSize, newSize);
-                            if (changed > 0) {
-                                notifyItemRangeChanged(0, changed);
-                            }
-                            if (deltaSize < 0) {
-                                notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
-                            } else if (deltaSize > 0) {
-                                notifyItemRangeInserted(oldSize, abs(deltaSize));
+                                overwriteResult(result);
+                            } else {
+                                appendResult(result);
                             }
                         }
                     });
@@ -488,6 +471,41 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             // Block until instructed to continue, even if an error occurred.
             // In this case, loading must be explicitly resumed.
             block();
+        }
+    }
+
+    private void overwriteResult(@NonNull Result<? extends T> result) {
+        int oldSize = mData.size();
+        clearElementsWithCallback(false);
+        appendNonNullElements(result);
+        int newSize = mData.size();
+        int deltaSize = newSize - oldSize;
+        int changed = min(oldSize, newSize);
+        if (changed > 0) {
+            notifyItemRangeChanged(0, changed);
+        }
+        if (deltaSize < 0) {
+            notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
+        } else if (deltaSize > 0) {
+            notifyItemRangeInserted(oldSize, abs(deltaSize));
+        }
+    }
+
+    private void appendResult(@NonNull Result<? extends T> result) {
+        int oldSize = mData.size();
+        appendNonNullElements(result);
+        int deltaSize = mData.size() - oldSize;
+        if (deltaSize > 0) {
+            notifyItemRangeInserted(oldSize, deltaSize);
+        }
+    }
+
+    private void appendNonNullElements(@NonNull Result<? extends T> result) {
+        List<? extends T> elements = result.getElements();
+        for (T t : elements) {
+            if (t != null) {
+                mData.add(t);
+            }
         }
     }
 
@@ -538,6 +556,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Accessors(prefix = "m")
     public static final class Result<T> {
 
+        @SuppressWarnings("unchecked")
+        private static final Result NONE_REMAINING = new Result(Collections.emptyList(), 0);
+
         @NonNull
         private final List<? extends T> mElements;
 
@@ -554,9 +575,10 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             return new Result<>(list, Integer.MAX_VALUE);
         }
 
+        @SuppressWarnings("unchecked")
         @NonNull
         public static <T> Result<T> noneRemaining() {
-            return new Result<>(Collections.<T>emptyList(), 0);
+            return NONE_REMAINING;
         }
     }
 }
