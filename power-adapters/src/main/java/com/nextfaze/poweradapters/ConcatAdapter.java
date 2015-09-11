@@ -216,7 +216,6 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
         Entry(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
-            registerObserversIfNecessary();
         }
 
         int entryToOuter(int entryPosition) {
