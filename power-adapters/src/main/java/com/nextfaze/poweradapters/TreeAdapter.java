@@ -310,7 +310,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         Entry(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
-            registerObserversIfNecessary();
+            // Only register child observer if parent has at least 1 observer.
+            if (getObserverCount() > 0) {
+                registerObserversIfNecessary();
+            }
         }
 
         int entryToOuter(int entryPosition) {
