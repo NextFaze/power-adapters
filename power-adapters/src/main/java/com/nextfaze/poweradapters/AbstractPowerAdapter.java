@@ -218,6 +218,11 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
         return decorator.decorate(this);
     }
 
+    /** Returns the number of registered observers. */
+    protected final int getObserverCount() {
+        return mDataObservable.size();
+    }
+
     /** Called when the first observer has registered with this adapter. */
     @CallSuper
     protected void onFirstObserverRegistered() {
