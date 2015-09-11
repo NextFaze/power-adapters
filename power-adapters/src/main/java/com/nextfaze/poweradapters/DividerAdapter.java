@@ -22,23 +22,23 @@ final class DividerAdapter extends PowerAdapterWrapper {
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     @Nullable
-    private final Item mLeadingItemResource;
+    private final Item mLeadingItem;
 
     @Nullable
-    private final Item mTrailingItemResource;
+    private final Item mTrailingItem;
 
     @Nullable
-    private final Item mInnerItemResource;
+    private final Item mInnerItem;
 
     DividerAdapter(@NonNull PowerAdapter adapter,
                    @NonNull DividerAdapterBuilder.EmptyPolicy emptyPolicy,
-                   @Nullable Item leadingItemResource,
-                   @Nullable Item trailingItemResource,
-                   @Nullable Item innerItemResource) {
+                   @Nullable Item leadingItem,
+                   @Nullable Item trailingItem,
+                   @Nullable Item innerItem) {
         super(adapter);
-        mLeadingItemResource = leadingItemResource;
-        mTrailingItemResource = trailingItemResource;
-        mInnerItemResource = innerItemResource;
+        mLeadingItem = leadingItem;
+        mTrailingItem = trailingItem;
+        mInnerItem = innerItem;
         mEmptyPolicy = emptyPolicy;
     }
 
@@ -48,6 +48,15 @@ final class DividerAdapter extends PowerAdapterWrapper {
             return NO_ID;
         }
         return super.getItemId(position);
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        //noinspection SimplifiableIfStatement
+        if (isDivider(position)) {
+            return false;
+        }
+        return super.isEnabled(position);
     }
 
     @NonNull
@@ -65,35 +74,26 @@ final class DividerAdapter extends PowerAdapterWrapper {
         return super.getItemViewType(position);
     }
 
-    @Override
-    public boolean isEnabled(int position) {
-        //noinspection SimplifiableIfStatement
-        if (isDivider(position)) {
-            return false;
-        }
-        return super.isEnabled(position);
-    }
-
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
         if (viewType == mInnerViewType) {
-            if (mInnerItemResource == null) {
+            if (mInnerItem == null) {
                 throw new IllegalStateException();
             }
-            return mInnerItemResource.create(parent);
+            return mInnerItem.create(parent);
         }
         if (viewType == mLeadingViewType) {
-            if (mLeadingItemResource == null) {
+            if (mLeadingItem == null) {
                 throw new IllegalStateException();
             }
-            return mLeadingItemResource.create(parent);
+            return mLeadingItem.create(parent);
         }
         if (viewType == mTrailingViewType) {
-            if (mTrailingItemResource == null) {
+            if (mTrailingItem == null) {
                 throw new IllegalStateException();
             }
-            return mTrailingItemResource.create(parent);
+            return mTrailingItem.create(parent);
         }
         return super.newView(parent, viewType);
     }
@@ -115,17 +115,17 @@ final class DividerAdapter extends PowerAdapterWrapper {
 
     @Override
     public int getItemCount() {
-        int superCount = super.getItemCount();
+        int innerItemCount = super.getItemCount();
         int count;
-        if (isInnerVisible()) {
-            count = superCount * 2 - 1;
+        if (isInnerVisible(innerItemCount)) {
+            count = innerItemCount * 2 - 1;
         } else {
-            count = superCount;
+            count = innerItemCount;
         }
-        if (isLeadingVisible()) {
+        if (isLeadingVisible(innerItemCount)) {
             ++count;
         }
-        if (isTrailingVisible()) {
+        if (isTrailingVisible(innerItemCount)) {
             ++count;
         }
         return count;
@@ -136,7 +136,31 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     private boolean isLeadingVisible(int itemCount) {
-        return mLeadingItemResource != null && mEmptyPolicy.shouldShowLeading(itemCount);
+        return mLeadingItem != null && mEmptyPolicy.shouldShowLeading(itemCount);
+    }
+
+    private boolean didLeadingBecomeVisible(int itemCountBefore, int itemCountAfter) {
+        return !isLeadingVisible(itemCountBefore) && isLeadingVisible(itemCountAfter);
+    }
+
+    private boolean didLeadingBecomeInvisible(int itemCountBefore, int itemCountAfter) {
+        return isLeadingVisible(itemCountBefore) && !isLeadingVisible(itemCountAfter);
+    }
+
+    private boolean isLeadingStillVisible(int itemCountBefore, int itemCountAfter) {
+        return isLeadingVisible(itemCountBefore) && isLeadingVisible(itemCountAfter);
+    }
+
+    private boolean didTrailingBecomeVisible(int itemCountBefore, int itemCountAfter) {
+        return !isTrailingVisible(itemCountBefore) && isTrailingVisible(itemCountAfter);
+    }
+
+    private boolean didTrailingBecomeInvisible(int itemCountBefore, int itemCountAfter) {
+        return isTrailingVisible(itemCountBefore) && !isTrailingVisible(itemCountAfter);
+    }
+
+    private boolean isTrailingStillVisible(int itemCountBefore, int itemCountAfter) {
+        return isTrailingVisible(itemCountBefore) && isTrailingVisible(itemCountAfter);
     }
 
     private boolean isTrailingVisible() {
@@ -144,7 +168,7 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     private boolean isTrailingVisible(int itemCount) {
-        return mTrailingItemResource != null && mEmptyPolicy.shouldShowTrailing(itemCount);
+        return mTrailingItem != null && mEmptyPolicy.shouldShowTrailing(itemCount);
     }
 
     private boolean isInnerVisible() {
@@ -152,7 +176,7 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     private boolean isInnerVisible(int itemCount) {
-        return mInnerItemResource != null && mEmptyPolicy.shouldShowInner(itemCount);
+        return mInnerItem != null && mEmptyPolicy.shouldShowInner(itemCount);
     }
 
     @Override
@@ -160,40 +184,78 @@ final class DividerAdapter extends PowerAdapterWrapper {
         return outerToInner(outerPosition, super.getItemCount());
     }
 
-    private int outerToInner(int outerPosition, int itemCount) {
-        if (isLeadingVisible(itemCount)) {
-            return (outerPosition - 1) / 2;
-        }
-        return outerPosition / 2;
-    }
-
     @Override
     protected int innerToOuter(int innerPosition) {
         return innerToOuter(innerPosition, super.getItemCount());
     }
 
-    private int innerToOuter(int innerPosition, int itemCount) {
+    private int outerToInner(final int outerPosition, final int itemCount) {
+        int innerPosition = outerPosition;
         if (isLeadingVisible(itemCount)) {
-            return (innerPosition * 2) + 1;
+            innerPosition--;
         }
-        return innerPosition * 2;
+        if (isInnerVisible(itemCount)) {
+            innerPosition /= 2;
+        }
+        // TODO: Account for trailing?
+        return innerPosition;
     }
 
-    private int innerToOuterCount(int innerPositionStart, int innerItemCount, int innerTotalItemCount) {
-        int itemCount = innerItemCount;
-        boolean rangeIncludesFirstItem = innerPositionStart == 0;
-        boolean rangeIncludesLastItem = innerPositionStart + itemCount >= innerTotalItemCount;
-        if (isLeadingVisible(innerTotalItemCount) && rangeIncludesFirstItem && rangeIncludesLastItem) {
-            itemCount++;
+    private int innerToOuter(final int innerPosition, final int itemCount) {
+        int outerPosition = innerPosition;
+        if (isInnerVisible(itemCount)) {
+            outerPosition *= 2;
         }
-        if (isInnerVisible(innerTotalItemCount)) {
-            itemCount += innerItemCount;
+        if (isLeadingVisible(itemCount)) {
+            outerPosition++;
         }
-        if (!isTrailingVisible(innerTotalItemCount) && rangeIncludesLastItem) {
-            itemCount--;
-        }
-        return itemCount;
+        // TODO: Account for trailing?
+        return outerPosition;
     }
+
+    private int innerToOuterCount(int innerPositionStart,
+                                  int innerItemCount,
+                                  int innerTotalItemCountBefore,
+                                  int innerTotalItemCountAfter,
+                                  boolean insertion) {
+        if (insertion) {
+            int itemCount = innerItemCount;
+            boolean rangeIncludesFirstItem = innerPositionStart == 0;
+            boolean rangeIncludesLastItem = innerPositionStart + itemCount >= innerTotalItemCountAfter;
+            if (!isLeadingVisible(innerTotalItemCountBefore) && isLeadingVisible(innerTotalItemCountAfter) && rangeIncludesFirstItem) {
+                itemCount++;
+            }
+            if (!isTrailingVisible(innerTotalItemCountAfter) && rangeIncludesLastItem) {
+                itemCount++;
+            }
+            if (isInnerVisible(innerTotalItemCountAfter)) {
+                itemCount += innerItemCount;
+            }
+            if (!isTrailingVisible(innerTotalItemCountAfter) && rangeIncludesLastItem) {
+                itemCount--;
+            }
+            return itemCount;
+        } else {
+            int itemCount = innerItemCount;
+            boolean rangeIncludesFirstItem = innerPositionStart == 0;
+            boolean rangeIncludesLastItem = innerPositionStart + itemCount >= innerTotalItemCountBefore;
+            if (isLeadingVisible(innerTotalItemCountBefore) && !isLeadingVisible(innerTotalItemCountAfter) && rangeIncludesFirstItem) {
+                itemCount++;
+            }
+            if (!isTrailingVisible(innerTotalItemCountBefore) && rangeIncludesLastItem) {
+                itemCount++;
+            }
+            if (isInnerVisible(innerTotalItemCountBefore)) {
+                itemCount += innerItemCount;
+            }
+            if (!isTrailingVisible(innerTotalItemCountBefore) && rangeIncludesLastItem) {
+                itemCount--;
+            }
+            return itemCount;
+        }
+    }
+
+    // TODO: Account for when an inner turns into a leading/trailing, and vice versa. If we don't, it will appear as if an additional item is being removed/inserted.
 
     @Override
     protected void forwardChanged() {
@@ -201,7 +263,7 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(final int innerPositionStart, final int innerItemCount) {
         int innerTotalItemCount = super.getItemCount();
         for (int i = 0; i < innerItemCount; i++) {
             int outerPositionStart = (innerPositionStart + i) * 2;
@@ -213,37 +275,66 @@ final class DividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
-        int innerTotalItemCountPostInsertion = super.getItemCount();
-        int innerTotalItemCountPreInsertion = super.getItemCount() - innerItemCount;
-        int outerPositionStart = innerPositionStart * 2;
-        if (isLeadingVisible(innerTotalItemCountPreInsertion)) {
-            outerPositionStart++;
+    protected void forwardItemRangeInserted(final int innerPositionStart, final int innerItemCount) {
+        int innerTotalItemCountBefore = super.getItemCount() - innerItemCount;
+        int innerTotalItemCountAfter = super.getItemCount();
+        int outerPositionStart = innerPositionStart;
+        if (isInnerVisible(innerTotalItemCountAfter)) {
+            outerPositionStart *= 2;
         }
-        if (!isLeadingVisible(innerTotalItemCountPostInsertion)) {
+        if (!isTrailingVisible(innerTotalItemCountAfter)) {
             outerPositionStart--;
         }
-        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPostInsertion);
+        if (isLeadingStillVisible(innerTotalItemCountBefore, innerTotalItemCountAfter)) {
+            outerPositionStart++;
+        }
+        int outerItemCount = innerItemCount;
+        boolean rangeIncludesFirstItem = innerPositionStart == 0;
+        boolean rangeIncludesLastItem = innerPositionStart + outerItemCount >= innerTotalItemCountAfter;
+        if (!isLeadingVisible(innerTotalItemCountBefore) && isLeadingVisible(innerTotalItemCountAfter) && rangeIncludesFirstItem) {
+            outerItemCount++;
+        }
+        if (!isTrailingVisible(innerTotalItemCountBefore) && isTrailingVisible(innerTotalItemCountAfter) && rangeIncludesLastItem) {
+            outerItemCount++;
+        }
+        if (isInnerVisible(innerTotalItemCountAfter)) {
+            outerItemCount += innerItemCount;
+        }
         notifyItemRangeInserted(outerPositionStart, outerItemCount);
     }
 
     @Override
-    protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
-        int innerTotalItemCountPreRemoval = super.getItemCount() + innerItemCount;
-        int innerTotalItemCountPostRemoval = super.getItemCount();
-        int outerPositionStart = innerPositionStart * 2;
-        if (isLeadingVisible(innerTotalItemCountPreRemoval)) {
-            outerPositionStart++;
+    protected void forwardItemRangeRemoved(final int innerPositionStart, final int innerItemCount) {
+        int innerTotalItemCountBefore = super.getItemCount() + innerItemCount;
+        int innerTotalItemCountAfter = super.getItemCount();
+        int outerPositionStart = innerPositionStart;
+        if (isInnerVisible(innerTotalItemCountBefore)) {
+            outerPositionStart *= 2;
         }
-        if (!isLeadingVisible(innerTotalItemCountPostRemoval)) {
+        if (!isTrailingVisible(innerTotalItemCountBefore)) {
             outerPositionStart--;
         }
-        int outerItemCount = innerToOuterCount(innerPositionStart, innerItemCount, innerTotalItemCountPreRemoval);
+        if (isLeadingStillVisible(innerTotalItemCountBefore, innerTotalItemCountAfter)) {
+            outerPositionStart++;
+        }
+        int outerItemCount = innerItemCount;
+        boolean rangeIncludesFirstItem = innerPositionStart == 0;
+        boolean rangeIncludesLastItem = innerPositionStart + outerItemCount >= innerTotalItemCountBefore;
+        if (isLeadingVisible(innerTotalItemCountBefore) && !isLeadingVisible(innerTotalItemCountAfter) &&
+                rangeIncludesFirstItem) {
+            outerItemCount++;
+        }
+        if (isTrailingVisible(innerTotalItemCountBefore) && !isTrailingVisible(innerTotalItemCountAfter) && rangeIncludesLastItem) {
+            outerItemCount++;
+        }
+        if (isInnerVisible(innerTotalItemCountBefore)) {
+            outerItemCount += innerItemCount;
+        }
         notifyItemRangeRemoved(outerPositionStart, outerItemCount);
     }
 
     @Override
-    protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
+    protected void forwardItemRangeMoved(final int innerFromPosition, final int innerToPosition, final int innerItemCount) {
         // TODO: Implement proper fine-grained notifications for bulk moves.
         notifyDataSetChanged();
     }
