@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.ViewType;
+import com.nextfaze.poweradapters.ViewTypes;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
@@ -14,7 +15,7 @@ import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 public abstract class TypedBinder<T, V extends View> implements Binder {
 
     @NonNull
-    private final ViewType mViewType = new ViewType();
+    private final ViewType mViewType = ViewTypes.create();
 
     @NonNull
     private final ViewFactory mViewFactory;

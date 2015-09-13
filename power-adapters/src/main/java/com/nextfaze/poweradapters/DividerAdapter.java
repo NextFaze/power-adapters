@@ -10,15 +10,6 @@ import lombok.experimental.Accessors;
 final class DividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final ViewType mLeadingViewType = new ViewType();
-
-    @NonNull
-    private final ViewType mTrailingViewType = new ViewType();
-
-    @NonNull
-    private final ViewType mInnerViewType = new ViewType();
-
-    @NonNull
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     @Nullable
@@ -62,14 +53,14 @@ final class DividerAdapter extends PowerAdapterWrapper {
     @NonNull
     @Override
     public ViewType getItemViewType(int position) {
-        if (isInnerDivider(position)) {
-            return mInnerViewType;
+        if (mInnerItem != null && isInnerDivider(position)) {
+            return mInnerItem;
         }
-        if (isLeadingDivider(position)) {
-            return mLeadingViewType;
+        if (mLeadingItem != null && isLeadingDivider(position)) {
+            return mLeadingItem;
         }
-        if (isTrailingDivider(position)) {
-            return mTrailingViewType;
+        if (mTrailingItem != null && isTrailingDivider(position)) {
+            return mTrailingItem;
         }
         return super.getItemViewType(position);
     }
@@ -77,22 +68,13 @@ final class DividerAdapter extends PowerAdapterWrapper {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        if (viewType == mInnerViewType) {
-            if (mInnerItem == null) {
-                throw new IllegalStateException();
-            }
+        if (viewType == mInnerItem) {
             return mInnerItem.create(parent);
         }
-        if (viewType == mLeadingViewType) {
-            if (mLeadingItem == null) {
-                throw new IllegalStateException();
-            }
+        if (viewType == mLeadingItem) {
             return mLeadingItem.create(parent);
         }
-        if (viewType == mTrailingViewType) {
-            if (mTrailingItem == null) {
-                throw new IllegalStateException();
-            }
+        if (viewType == mTrailingItem) {
             return mTrailingItem.create(parent);
         }
         return super.newView(parent, viewType);
@@ -101,13 +83,13 @@ final class DividerAdapter extends PowerAdapterWrapper {
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
         ViewType viewType = getItemViewType(holder.getPosition());
-        if (viewType == mInnerViewType) {
+        if (viewType == mInnerItem) {
             return;
         }
-        if (viewType == mLeadingViewType) {
+        if (viewType == mLeadingItem) {
             return;
         }
-        if (viewType == mTrailingViewType) {
+        if (viewType == mTrailingItem) {
             return;
         }
         super.bindView(view, holder);

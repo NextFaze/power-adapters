@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;
 
-final class DataLifecycleAdapter extends PowerAdapterWrapper {
+public final class DataLifecycleAdapter extends PowerAdapterWrapper {
 
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
@@ -16,7 +16,7 @@ final class DataLifecycleAdapter extends PowerAdapterWrapper {
     @NonNull
     private final Data<?> mData;
 
-    DataLifecycleAdapter(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
+    public DataLifecycleAdapter(@NonNull PowerAdapter adapter, @NonNull Data<?> data) {
         super(adapter);
         mData = data;
     }

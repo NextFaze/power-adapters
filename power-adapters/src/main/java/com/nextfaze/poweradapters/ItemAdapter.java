@@ -8,20 +8,14 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 
 class ItemAdapter extends AbstractPowerAdapter {
 
     @NonNull
     private final List<Item> mItems;
-
-    @NonNull
-    private final Map<ViewType, Item> mItemsByViewType;
 
     /**
      * Indicates the visibility of each item. They're visible by default.
@@ -33,17 +27,14 @@ class ItemAdapter extends AbstractPowerAdapter {
 
     ItemAdapter(@NonNull Item item) {
         mItems = singletonList(item);
-        mItemsByViewType = singletonMap(item.getViewType(), item);
         mVisibleItems.put(0, item);
     }
 
     ItemAdapter(@NonNull Collection<Item> items) {
         mItems = new ArrayList<>(items);
-        mItemsByViewType = new HashMap<>(items.size());
         for (int i = 0; i < mItems.size(); i++) {
             Item item = mItems.get(i);
             mVisibleItems.put(i, item);
-            mItemsByViewType.put(item.getViewType(), item);
         }
     }
 
@@ -55,7 +46,7 @@ class ItemAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public final ViewType getItemViewType(int position) {
-        return mVisibleItems.valueAt(position).getViewType();
+        return mVisibleItems.valueAt(position);
     }
 
     @Override
@@ -66,7 +57,8 @@ class ItemAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        View view = mItemsByViewType.get(viewType).create(parent);
+        Item item = (Item) viewType;
+        View view = item.create(parent);
         if (view.getParent() == parent) {
             parent.removeView(view);
         }

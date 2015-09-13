@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
@@ -14,15 +15,12 @@ import com.google.common.collect.Lists;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
-import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
+import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
-import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
-import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
@@ -36,9 +34,7 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
-import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING;
-import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS;
-import static com.nextfaze.poweradapters.LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
@@ -72,12 +68,14 @@ public class FileTreeFragment extends BaseFragment {
 //                createFilesAdapter(mRootData, mRootFile, 0)
 //        );
         PowerAdapter adapter = createFilesAdapter(mRootFile, 0);
-        adapter = new DividerAdapterBuilder()
-                .leadingResource(R.layout.list_divider_item)
-                .trailingResource(R.layout.list_divider_item)
-                .innerResource(R.layout.list_divider_item)
-                .emptyPolicy(SHOW_NOTHING)
-                .build(adapter);
+//        PowerAdapter adapter = createFilesAdapterSimple(mRootFile, 0, true);
+//        mDataLayout.setData(new DirectoryData(mRootFile, MAX_DISPLAYED_FILES_PER_DIR));
+//        adapter = new DividerAdapterBuilder()
+//                .leadingResource(R.layout.list_divider_item)
+//                .trailingResource(R.layout.list_divider_item)
+//                .innerResource(R.layout.list_divider_item)
+//                .emptyPolicy(SHOW_NOTHING)
+//                .build(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
         showCollectionView(CollectionView.RECYCLER_VIEW);
@@ -89,8 +87,7 @@ public class FileTreeFragment extends BaseFragment {
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
             protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
-                String label = file.isDirectory() ? file.getName() + "/" : file.getName();
-                v.setText(repeat("    ", depth) + label);
+                v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -118,6 +115,18 @@ public class FileTreeFragment extends BaseFragment {
         if (tree) {
             adapter = treeAdapterRef.get();
         }
+
+        adapter = new HeaderAdapterBuilder()
+                .addView(directoryHeader(file, depth))
+                .build(adapter);
+
+        if (depth == 1) {
+            adapter = new DividerAdapterBuilder()
+                    .innerResource(R.layout.list_divider_item)
+                    .emptyPolicy(SHOW_LEADING)
+                    .build(adapter);
+        }
+
         return adapter;
     }
 
@@ -128,55 +137,91 @@ public class FileTreeFragment extends BaseFragment {
             mRootData = data;
             mDataLayout.setData(data);
         }
+
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
+
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
             protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
-                String label = file.isDirectory() ? file.getName() + "/" : file.getName();
-                v.setText(repeat("    ", depth) + label);
+                v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (file.isDirectory()) {
-                            treeAdapterRef.get().toggleExpanded(holder.getPosition());
+                if (file.isDirectory()) {
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TreeAdapter treeAdapter = treeAdapterRef.get();
+                            int position = holder.getPosition();
+                            if (treeAdapter.isExpanded(position)) {
+                                treeAdapter.setExpanded(position, false);
+                            } else {
+                                treeAdapter.setExpanded(position, true);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         };
+
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(binder));
         treeAdapterRef.set(new TreeAdapter(adapter) {
             @NonNull
             @Override
             protected PowerAdapter getChildAdapter(int position) {
-                File file = data.get(position);
-                // TODO: Call Show/hide from an adapter, based on registered observers?
-                data.notifyShown();
-                return createFilesAdapter(file, depth + 1);
+                return createFilesAdapter(data.get(position), depth + 1);
             }
         });
         adapter = treeAdapterRef.get();
 
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .emptyPolicy(depth == 0 ? SHOW_ONLY_IF_NON_EMPTY : SHOW_ALWAYS)
-                .build(adapter, new DataLoadingDelegate(data));
+//        adapter = new LoadingAdapterBuilder()
+//                .resource(R.layout.list_loading_item)
+//                .emptyPolicy(depth == 0 ? SHOW_ONLY_IF_NON_EMPTY : SHOW_ALWAYS)
+//                .build(adapter, new DataLoadingDelegate(data));
 
-        adapter = new EmptyAdapterBuilder()
-                .resource(R.layout.file_list_empty_item)
-                .build(adapter, new DataEmptyDelegate(data));
+//        adapter = new EmptyAdapterBuilder()
+//                .resource(R.layout.file_list_empty_item)
+//                .build(adapter, new DataEmptyDelegate(data));
 
-        TextView headerView = (TextView) LayoutInflater.from(getActivity())
-                .inflate(android.R.layout.simple_list_item_1, mRecyclerView, false);
-        headerView.setBackgroundColor(0x20FFFFFF);
-        headerView.setText(repeat("    ", depth) + file.getName() + ":");
-        headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+//        adapter = new HeaderAdapterBuilder()
+//                .addView(directoryHeader(file, depth))
+//                .build(adapter);
 
-        adapter = new HeaderAdapterBuilder()
-                .addView(headerView)
-                .build(adapter);
+        adapter = new DataLifecycleAdapter(adapter, data);
+
+        if (depth == 1) {
+            adapter = new DividerAdapterBuilder()
+//                    .innerResource(R.layout.list_divider_item)
+                    .leadingResource(R.layout.list_divider_item)
+                    .trailingResource(R.layout.list_divider_item)
+                    .emptyPolicy(SHOW_LEADING)
+                    .build(adapter);
+        }
 
         return adapter;
+    }
+
+    @NonNull
+    private ViewFactory directoryHeader(@NonNull final File file, final int depth) {
+        return new ViewFactory() {
+            @NonNull
+            @Override
+            public View create(@NonNull ViewGroup parent) {
+                TextView headerView = (TextView) LayoutInflater.from(getActivity())
+                        .inflate(android.R.layout.simple_list_item_1, mRecyclerView, false);
+                headerView.setBackgroundColor(0x20FFFFFF);
+                headerView.setText(formatDir(file, depth));
+                headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+                return headerView;
+            }
+        };
+    }
+
+    @NonNull
+    private static String formatFile(@NonNull File file, int depth) {
+        return repeat("    ", depth) + (file.isDirectory() ? file.getName() + "/" : file.getName());
+    }
+
+    @NonNull
+    private static String formatDir(@NonNull File dir, int depth) {
+        return repeat("    ", depth) + dir.getName() + ":";
     }
 }
