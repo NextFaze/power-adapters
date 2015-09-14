@@ -93,21 +93,30 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     protected abstract PowerAdapter getChildAdapter(int position);
 
+    /** Returns the parcelable state of the adapter. */
     @NonNull
     public Parcelable saveInstanceState() {
         return mState;
     }
 
-    public void restoreInstanceState(@NonNull Parcelable parcelable) {
-        mState = (TreeState) parcelable;
-        applyExpandedState();
+    /**
+     * Restores the state of the adapter from a previous state parcelable. Only effective when root adapter {@link
+     * PowerAdapter#hasStableIds()}
+     */
+    public void restoreInstanceState(@Nullable Parcelable parcelable) {
+        if (parcelable != null) {
+            mState = (TreeState) parcelable;
+            applyExpandedState();
+        }
     }
 
     private void applyExpandedState() {
-        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
-            long itemId = mRootAdapter.getItemId(i);
-            if (itemId != NO_ID) {
-                setExpanded(i, mState.isExpanded(itemId));
+        if (mRootAdapter.hasStableIds()) {
+            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+                long itemId = mRootAdapter.getItemId(i);
+                if (itemId != NO_ID) {
+                    setExpanded(i, mState.isExpanded(itemId));
+                }
             }
         }
     }
@@ -223,14 +232,17 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return outerPosition - groupForPosition(outerPosition).getRootStart();
     }
 
+    /**
+     * By default returns {@code false}, because we don't know all our adapters ahead of time, so can't assume they're
+     * stable.
+     */
     @Override
     public boolean hasStableIds() {
-        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
         return false;
     }
 
     @Override
-    public int getItemCount() {
+    public final int getItemCount() {
         rebuildGroupsIfNecessary();
         if (mGroups.size() == 0) {
             return 0;
@@ -240,18 +252,18 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     @Override
-    public long getItemId(int position) {
+    public final long getItemId(int position) {
         return adapterForPosition(position).getItemId(position);
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         return adapterForPosition(position).isEnabled(position);
     }
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public final ViewType getItemViewType(int position) {
         OffsetAdapter offsetAdapter = adapterForPosition(position);
         ViewType viewType = offsetAdapter.getViewType(position);
         mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
@@ -260,12 +272,12 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
         return adapterForViewType(viewType).newView(parent, viewType);
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         adapterForPosition(holder.getPosition()).bindView(view, holder);
     }
 
