@@ -7,7 +7,7 @@ import lombok.NonNull;
 public abstract class AbstractPowerAdapter implements PowerAdapter {
 
     @NonNull
-    private final ViewType mViewType = new ViewType();
+    private final ViewType mViewType = ViewTypes.create();
 
     @NonNull
     private final DataObservable mDataObservable = new DataObservable();

@@ -1,8 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.asyncdata.AvailableObserver;
@@ -13,7 +11,9 @@ import com.nextfaze.asyncdata.SimpleDataObserver;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.PowerAdapterWrapper;
+import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.ViewType;
+import com.nextfaze.poweradapters.ViewTypes;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -26,8 +26,8 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     private final Data<?> mData;
 
     @Getter
-    @LayoutRes
-    private final int mLoadNextItemResource;
+    @NonNull
+    private final ViewFactory mLoadNextViewFactory;
 
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
@@ -54,7 +54,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     };
 
     @NonNull
-    private final ViewType mViewType = new ViewType();
+    private final ViewType mViewType = ViewTypes.create();
 
     @Getter
     @Setter
@@ -63,10 +63,10 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
 
     private boolean mVisible;
 
-    LoadNextAdapter(@NonNull PowerAdapter adapter, @NonNull Data<?> data, @LayoutRes int loadNextItemResource) {
+    LoadNextAdapter(@NonNull PowerAdapter adapter, @NonNull Data<?> data, @NonNull ViewFactory loadNextViewFactory) {
         super(adapter);
         mData = data;
-        mLoadNextItemResource = loadNextItemResource;
+        mLoadNextViewFactory = loadNextViewFactory;
         updateVisible();
     }
 
@@ -159,7 +159,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     }
 
     private boolean isLoadNextVisible() {
-        return mLoadNextItemResource > 0 && !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
+        return !mData.isLoading() && !mData.isEmpty() && mData.available() > 0;
     }
 
     private void updateVisible() {
@@ -180,7 +180,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
 
     @NonNull
     private View newLoadNextView(@NonNull ViewGroup parent) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(mLoadNextItemResource, parent, false);
+        View v = mLoadNextViewFactory.create(parent);
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
