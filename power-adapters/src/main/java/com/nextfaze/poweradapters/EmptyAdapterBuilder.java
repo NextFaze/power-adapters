@@ -5,7 +5,6 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.view.View;
-import android.widget.ListAdapter;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
@@ -38,7 +37,7 @@ public final class EmptyAdapterBuilder implements Decorator {
     /**
      * Sets whether the empty item should be enabled in the list, allowing it to be clicked or not.
      * @param enabled {@code true} to make it enabled, otherwise {@code false} to make it disabled.
-     * @see ListAdapter#isEnabled(int)
+     * @see PowerAdapter#isEnabled(int)
      */
     @NonNull
     public EmptyAdapterBuilder enabled(boolean enabled) {

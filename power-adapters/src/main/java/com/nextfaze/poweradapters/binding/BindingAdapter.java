@@ -54,18 +54,25 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     @NonNull
     @Override
     public final ViewType getItemViewType(int position) {
-        Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        assertBinder(binder, position, item);
-        return binder.getViewType();
+        return binder(position).getViewType();
     }
 
     @Override
     public final boolean isEnabled(int position) {
+        return binder(position).isEnabled(position);
+    }
+
+    @Override
+    public final long getItemId(int position) {
+        return binder(position).getItemId(position);
+    }
+
+    @NonNull
+    private Binder binder(int position) {
         Object item = getItem(position);
         Binder binder = mMapper.getBinder(item, position);
         assertBinder(binder, position, item);
-        return binder.isEnabled(position);
+        return binder;
     }
 
     private void assertBinder(@Nullable Binder binder, int position, Object item) {
