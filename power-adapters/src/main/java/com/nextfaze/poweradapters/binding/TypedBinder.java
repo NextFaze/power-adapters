@@ -49,7 +49,23 @@ public abstract class TypedBinder<T, V extends View> extends AbstractBinder {
     }
 
     @Override
-    public boolean isEnabled(@NonNull Object obj, int position) {
+    public final boolean isEnabled(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return isEnabledChecked((T) obj, position);
+    }
+
+    @Override
+    public final long getItemId(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return getItemIdChecked((T) obj, position);
+    }
+
+    protected long getItemIdChecked(@NonNull T t, int position) {
+        return super.getItemId(t, position);
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    protected boolean isEnabledChecked(@NonNull T t, int position) {
         return mEnabled;
     }
 

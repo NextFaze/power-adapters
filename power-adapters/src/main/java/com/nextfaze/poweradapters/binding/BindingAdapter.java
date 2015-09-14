@@ -45,37 +45,30 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     public final void bindView(@NonNull View view, @NonNull Holder holder) {
         int position = holder.getPosition();
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        if (binder != null) {
-            binder.bindView(item, view, holder);
-        }
+        binderOrThrow(item, position).bindView(item, view, holder);
     }
 
     @NonNull
     @Override
     public final ViewType getItemViewType(int position) {
-        return binder(position).getViewType();
+        Object item = getItem(position);
+        return binderOrThrow(item, position).getViewType();
     }
 
     @Override
     public final boolean isEnabled(int position) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        assertBinder(binder, position, item);
-        return binder.isEnabled(item, position);
+        return binderOrThrow(item, position).isEnabled(item, position);
     }
 
     @Override
     public final long getItemId(int position) {
         Object item = getItem(position);
-        Binder binder = mMapper.getBinder(item, position);
-        assertBinder(binder, position, item);
-        return binder.getItemId(item, position);
+        return binderOrThrow(item, position).getItemId(item, position);
     }
 
     @NonNull
-    private Binder binder(int position) {
-        Object item = getItem(position);
+    private Binder binderOrThrow(@NonNull Object item, int position) {
         Binder binder = mMapper.getBinder(item, position);
         assertBinder(binder, position, item);
         return binder;
