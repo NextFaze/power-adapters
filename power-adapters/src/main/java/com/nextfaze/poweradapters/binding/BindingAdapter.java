@@ -67,6 +67,11 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
         return binderOrThrow(item, position).getItemId(item, position);
     }
 
+    @Override
+    public boolean hasStableIds() {
+        return mMapper.hasStableIds();
+    }
+
     @NonNull
     private Binder binderOrThrow(@NonNull Object item, int position) {
         Binder binder = mMapper.getBinder(item, position);
