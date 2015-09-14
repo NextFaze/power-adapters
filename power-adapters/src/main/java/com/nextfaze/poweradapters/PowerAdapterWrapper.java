@@ -10,7 +10,7 @@ import java.util.WeakHashMap;
 public class PowerAdapterWrapper extends AbstractPowerAdapter {
 
     @NonNull
-    private final WeakHashMap<View, HolderWrapper> mHolders = new WeakHashMap<>();
+    private final WeakHashMap<Holder, HolderWrapper> mHolders = new WeakHashMap<>();
 
     @NonNull
     private final PowerAdapter mAdapter;
@@ -101,7 +101,7 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        HolderWrapper holderWrapper = mHolders.get(view);
+        HolderWrapper holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapper(holder) {
                 @Override
@@ -109,7 +109,7 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
                     return outerToInner(super.getPosition());
                 }
             };
-            mHolders.put(view, holderWrapper);
+            mHolders.put(holder, holderWrapper);
         }
         mAdapter.bindView(view, holderWrapper);
     }

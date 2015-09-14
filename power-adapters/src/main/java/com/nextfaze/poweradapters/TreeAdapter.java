@@ -624,6 +624,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
 
         boolean isExpanded(long itemId) {
+            //noinspection SimplifiableIfStatement
             if (itemId == NO_ID) {
                 return false;
             }
