@@ -17,9 +17,15 @@ import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.IncrementalArrayData;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
+import com.nextfaze.poweradapters.EmptyAdapterBuilder;
+import com.nextfaze.poweradapters.FooterAdapterBuilder;
+import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
+import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
+import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.binding.Mapper;
@@ -32,6 +38,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends BaseFragment {
@@ -84,40 +91,41 @@ public class ConcatFragment extends BaseFragment {
         PowerAdapter adapter = new DataBindingAdapter(data, mapper);
 
         adapter = new DividerAdapterBuilder()
-//                .innerResource(R.layout.list_divider_item)
+                .innerResource(R.layout.list_divider_item)
                 .leadingResource(R.layout.list_divider_item)
                 .trailingResource(R.layout.list_divider_item)
                 .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING)
                 .build(adapter);
 
-//        adapter = new HeaderAdapterBuilder()
-//                .addResource(R.layout.news_header_item)
-//                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.SHOW)
-//                .build(adapter);
+        adapter = new HeaderAdapterBuilder()
+                .addResource(R.layout.news_header_item)
+                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.SHOW)
+                .build(adapter);
 
-//        adapter = new LoadingAdapterBuilder()
-//                .resource(R.layout.list_loading_item)
-//                .build(adapter, new DataLoadingDelegate(data));
+        adapter = new LoadingAdapterBuilder()
+                .resource(R.layout.list_loading_item)
+                .build(adapter, new DataLoadingDelegate(data));
 
         data.setLookAheadRowCount(-1);
 
-//        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, R.layout.list_load_next_item);
-//        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-//            @Override
-//            public void onClick() {
-//                data.loadNext();
-//            }
-//        });
-//        adapter = loadNextAdapter;
+        LoadNextAdapter loadNextAdapter =
+                new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
+        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
+            @Override
+            public void onClick() {
+                data.loadNext();
+            }
+        });
+        adapter = loadNextAdapter;
 
-//        adapter = new FooterAdapterBuilder()
-//                .addResource(R.layout.news_footer_item)
-//                .emptyPolicy(FooterAdapterBuilder.EmptyPolicy.HIDE)
-//                .build(adapter);
+        adapter = new FooterAdapterBuilder()
+                .addResource(R.layout.news_footer_item)
+                .emptyPolicy(FooterAdapterBuilder.EmptyPolicy.HIDE)
+                .build(adapter);
 
-//        adapter = new EmptyAdapterBuilder()
-//                .resource(R.layout.list_empty_item)
-//                .build(adapter, new DataEmptyDelegate(data));
+        adapter = new EmptyAdapterBuilder()
+                .resource(R.layout.list_empty_item)
+                .build(adapter, new DataEmptyDelegate(data));
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
     }
