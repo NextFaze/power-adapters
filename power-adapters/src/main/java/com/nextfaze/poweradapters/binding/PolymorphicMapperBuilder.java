@@ -21,6 +21,8 @@ public final class PolymorphicMapperBuilder {
     @NonNull
     private final Map<Class<?>, Binder> mBinders = new HashMap<>();
 
+    private boolean mStableIds;
+
     /** Map an item class to the specified binder, overriding the layout resource used to inflate the item view. */
     @NonNull
     public PolymorphicMapperBuilder bind(@NonNull Class<?> itemClass,
@@ -37,10 +39,16 @@ public final class PolymorphicMapperBuilder {
         return this;
     }
 
+    @NonNull
+    public PolymorphicMapperBuilder stableIds(boolean stableIds) {
+        mStableIds = stableIds;
+        return this;
+    }
+
     @CheckResult
     @NonNull
     public Mapper build() {
-        return new PolymorphicMapper(mBinders);
+        return new PolymorphicMapper(mBinders, mStableIds);
     }
 
     @NonNull
@@ -60,8 +68,11 @@ public final class PolymorphicMapperBuilder {
         @NonNull
         private final Map<Class<?>, Binder> mBinders = new HashMap<>();
 
-        PolymorphicMapper(@NonNull Map<Class<?>, Binder> binders) {
+        private final boolean mStableIds;
+
+        PolymorphicMapper(@NonNull Map<Class<?>, Binder> binders, boolean stableIds) {
             mBinders.putAll(binders);
+            mStableIds = stableIds;
         }
 
         @Nullable
@@ -81,6 +92,11 @@ public final class PolymorphicMapperBuilder {
         @Override
         public Collection<? extends Binder> getAllBinders() {
             return unmodifiableCollection(mBinders.values());
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return mStableIds;
         }
     }
 }

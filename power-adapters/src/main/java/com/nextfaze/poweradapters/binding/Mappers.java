@@ -18,7 +18,7 @@ public final class Mappers {
         return new SingletonMapper(binder);
     }
 
-    private static class SingletonMapper implements Mapper {
+    private static class SingletonMapper extends AbstractMapper {
 
         @NonNull
         private final Binder mBinder;

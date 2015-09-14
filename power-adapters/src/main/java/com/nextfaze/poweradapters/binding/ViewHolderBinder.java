@@ -5,24 +5,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
-import com.nextfaze.poweradapters.ViewType;
-import com.nextfaze.poweradapters.ViewTypes;
 import lombok.NonNull;
 
 import java.util.WeakHashMap;
 
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 
-public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binder {
+public abstract class ViewHolderBinder<T, H extends ViewHolder> extends AbstractBinder {
 
     @NonNull
     private final WeakHashMap<View, H> mViewHolders = new WeakHashMap<>();
 
     @NonNull
     private final ViewFactory mViewFactory;
-
-    @NonNull
-    private final ViewType mViewType = ViewTypes.create();
 
     private final boolean mEnabled;
 
@@ -57,12 +52,6 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binde
         // Infrastructure ensures only the correct type is passed here.
         //noinspection unchecked
         bindViewHolder((T) obj, h, holder);
-    }
-
-    @NonNull
-    @Override
-    public final ViewType getViewType() {
-        return mViewType;
     }
 
     @Override

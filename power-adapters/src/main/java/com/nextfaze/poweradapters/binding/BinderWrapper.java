@@ -31,9 +31,19 @@ public abstract class BinderWrapper implements Binder {
         return mBinder.isEnabled(position);
     }
 
+    @Override
+    public long getItemId(int position) {
+        return mBinder.getItemId(position);
+    }
+
     @NonNull
     @Override
     public ViewType getViewType() {
         return mBinder.getViewType();
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return mBinder.hasStableIds();
     }
 }
