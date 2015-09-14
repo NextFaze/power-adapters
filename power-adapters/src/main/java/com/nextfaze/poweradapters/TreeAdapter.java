@@ -121,6 +121,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
     }
 
+    public boolean isExpanded(int position) {
+        return mEntries.get(position) != null;
+    }
+
     public void setExpanded(int position, boolean expanded) {
         Entry entry = mEntries.get(position);
         long itemId = mRootAdapter.getItemId(position);
@@ -128,9 +132,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             if (entry == null) {
                 entry = new Entry(getChildAdapter(position));
                 mEntries.put(position, entry);
-                if (itemId != NO_ID) {
-                    mState.setExpanded(itemId, true);
-                }
+                mState.setExpanded(itemId, true);
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
             }
@@ -139,9 +141,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 int preDisposeItemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
-                if (itemId != NO_ID) {
-                    mState.setExpanded(itemId, false);
-                }
+                mState.setExpanded(itemId, false);
                 invalidateGroups();
                 notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
             }
@@ -154,8 +154,47 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return !expanded;
     }
 
-    public boolean isExpanded(int position) {
-        return mEntries.get(position) != null;
+    public void setAllExpanded(boolean expanded) {
+        ArrayList<Runnable> notifications = new ArrayList<>();
+        if (!expanded) {
+            for (int i = 0; i < mEntries.size(); i++) {
+                Entry entry = mEntries.valueAt(i);
+                final int position = entry.getPosition();
+                final int preDisposeItemCount = entry.getItemCount();
+                entry.dispose();
+                notifications.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
+                    }
+                });
+            }
+            mEntries.clear();
+            mState.clear();
+        } else {
+            int rootItemCount = mRootAdapter.getItemCount();
+            for (int position = 0; position < rootItemCount; position++) {
+                Entry entry = mEntries.get(position);
+                long itemId = mRootAdapter.getItemId(position);
+                if (entry == null) {
+                    entry = new Entry(getChildAdapter(position));
+                    mEntries.put(position, entry);
+                    mState.setExpanded(itemId, true);
+                    final int itemCount = entry.getItemCount();
+                    final int finalPosition = position;
+                    notifications.add(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyItemRangeInserted(rootToOuter(finalPosition) + 1, itemCount);
+                        }
+                    });
+                }
+            }
+        }
+        invalidateGroups();
+        for (Runnable runnable : notifications) {
+            runnable.run();
+        }
     }
 
     @NonNull
@@ -383,6 +422,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             }
         }
 
+        int getPosition() {
+            return mGroup.getPosition();
+        }
+
         int getItemCount() {
             return mAdapter.getItemCount();
         }
@@ -587,8 +630,8 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             return mExpanded.contains(itemId);
         }
 
-        int size() {
-            return mExpanded.size();
+        void clear() {
+            mExpanded.clear();
         }
 
         @Override
