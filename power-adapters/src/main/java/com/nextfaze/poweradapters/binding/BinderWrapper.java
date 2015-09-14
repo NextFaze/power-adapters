@@ -27,13 +27,13 @@ public abstract class BinderWrapper implements Binder {
     }
 
     @Override
-    public boolean isEnabled(int position) {
-        return mBinder.isEnabled(position);
+    public boolean isEnabled(@NonNull Object obj, int position) {
+        return mBinder.isEnabled(obj, position);
     }
 
     @Override
-    public long getItemId(int position) {
-        return mBinder.getItemId(position);
+    public long getItemId(@NonNull Object obj, int position) {
+        return mBinder.getItemId(obj, position);
     }
 
     @NonNull

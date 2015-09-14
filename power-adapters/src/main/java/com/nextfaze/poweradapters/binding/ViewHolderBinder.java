@@ -55,7 +55,7 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Abstract
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public boolean isEnabled(@NonNull Object obj, int position) {
         return mEnabled;
     }
 

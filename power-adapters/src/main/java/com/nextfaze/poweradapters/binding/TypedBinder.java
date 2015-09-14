@@ -49,7 +49,7 @@ public abstract class TypedBinder<T, V extends View> extends AbstractBinder {
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public boolean isEnabled(@NonNull Object obj, int position) {
         return mEnabled;
     }
 

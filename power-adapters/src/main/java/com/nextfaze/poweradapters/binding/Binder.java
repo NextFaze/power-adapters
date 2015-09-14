@@ -36,12 +36,12 @@ public interface Binder {
     /**
      * @see PowerAdapter#isEnabled(int)
      */
-    boolean isEnabled(int position);
+    boolean isEnabled(@NonNull Object obj, int position);
 
     /**
      * @see PowerAdapter#getItemId(int)
      */
-    long getItemId(int position);
+    long getItemId(@NonNull Object obj, int position);
 
     /**
      * @see PowerAdapter#hasStableIds()

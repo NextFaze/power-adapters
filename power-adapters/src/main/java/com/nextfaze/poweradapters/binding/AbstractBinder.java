@@ -11,12 +11,12 @@ public abstract class AbstractBinder implements Binder {
     private final ViewType mViewType = ViewTypes.create();
 
     @Override
-    public boolean isEnabled(int position) {
+    public boolean isEnabled(@NonNull Object obj, int position) {
         return true;
     }
 
     @Override
-    public long getItemId(int position) {
+    public long getItemId(@NonNull Object obj, int position) {
         return PowerAdapter.NO_ID;
     }
 

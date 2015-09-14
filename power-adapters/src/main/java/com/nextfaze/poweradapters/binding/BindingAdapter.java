@@ -59,12 +59,18 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @Override
     public final boolean isEnabled(int position) {
-        return binder(position).isEnabled(position);
+        Object item = getItem(position);
+        Binder binder = mMapper.getBinder(item, position);
+        assertBinder(binder, position, item);
+        return binder.isEnabled(item, position);
     }
 
     @Override
     public final long getItemId(int position) {
-        return binder(position).getItemId(position);
+        Object item = getItem(position);
+        Binder binder = mMapper.getBinder(item, position);
+        assertBinder(binder, position, item);
+        return binder.getItemId(item, position);
     }
 
     @NonNull
