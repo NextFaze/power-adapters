@@ -1,5 +1,7 @@
 package com.nextfaze.poweradapters;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
@@ -9,6 +11,7 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -50,6 +53,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     };
 
     @NonNull
+    private TreeState mState = new TreeState();
+
+    @NonNull
     private final Transform mRootTransform = new Transform() {
         @Override
         public int transform(int position) {
@@ -87,22 +93,48 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     protected abstract PowerAdapter getChildAdapter(int position);
 
+    @NonNull
+    public Parcelable saveInstanceState() {
+        return mState;
+    }
+
+    public void restoreInstanceState(@NonNull Parcelable parcelable) {
+        mState = (TreeState) parcelable;
+        applyExpandedState();
+    }
+
+    private void applyExpandedState() {
+        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+            long itemId = mRootAdapter.getItemId(i);
+            if (itemId != NO_ID) {
+                setExpanded(i, mState.isExpanded(itemId));
+            }
+        }
+    }
+
     public void setExpanded(int position, boolean expanded) {
         Entry entry = mEntries.get(position);
+        long itemId = mRootAdapter.getItemId(position);
         if (expanded) {
             if (entry == null) {
                 entry = new Entry(getChildAdapter(position));
                 mEntries.put(position, entry);
+                if (itemId != NO_ID) {
+                    mState.setExpanded(itemId, true);
+                }
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
             }
         } else {
             if (entry != null) {
-                int itemCount = entry.getItemCount();
+                int preDisposeItemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
+                if (itemId != NO_ID) {
+                    mState.setExpanded(itemId, false);
+                }
                 invalidateGroups();
-                notifyItemRangeRemoved(rootToOuter(position) + 1, itemCount);
+                notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
             }
         }
     }
@@ -125,6 +157,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     private void invalidateGroups() {
         mDirty = true;
         rebuildGroupsIfNecessary();
+        applyExpandedState();
     }
 
     private void rebuildGroupsIfNecessary() {
@@ -495,6 +528,65 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         @Override
         public String toString() {
             return format("%s (%s)", mPosition, size());
+        }
+    }
+
+    static final class TreeState implements Parcelable {
+
+        public static final Creator<TreeState> CREATOR = new Creator<TreeState>() {
+
+            @NonNull
+            public TreeState createFromParcel(@NonNull Parcel parcel) {
+                return new TreeState(parcel);
+            }
+
+            @NonNull
+            public TreeState[] newArray(int size) {
+                return new TreeState[size];
+            }
+        };
+
+        @NonNull
+        private final HashSet<Long> mExpanded;
+
+        TreeState(@NonNull Parcel parcel) {
+            //noinspection unchecked
+            mExpanded = (HashSet<Long>) parcel.readSerializable();
+        }
+
+        TreeState() {
+            mExpanded = new HashSet<>();
+        }
+
+        void setExpanded(long itemId, boolean expanded) {
+            if (itemId != NO_ID) {
+                if (expanded) {
+                    mExpanded.add(itemId);
+                } else {
+                    mExpanded.remove(itemId);
+                }
+            }
+        }
+
+        boolean isExpanded(long itemId) {
+            if (itemId == NO_ID) {
+                return false;
+            }
+            return mExpanded.contains(itemId);
+        }
+
+        int size() {
+            return mExpanded.size();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeSerializable(mExpanded);
         }
     }
 }
