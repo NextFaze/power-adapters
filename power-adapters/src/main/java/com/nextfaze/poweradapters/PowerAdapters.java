@@ -2,16 +2,14 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
 import android.widget.ListAdapter;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.lang.ref.WeakReference;
-import java.util.WeakHashMap;
 
 import static java.util.Arrays.asList;
 
 public final class PowerAdapters {
 
-    private static final WeakHashMap<PowerAdapter, WeakReference<ListAdapterConverterAdapter>> sListConverterAdapters = new WeakHashMap<>();
+    private static final WeakMap<PowerAdapter, ListAdapterConverterAdapter> sListConverterAdapters = new WeakMap<>();
 
     private PowerAdapters() {
     }
@@ -19,13 +17,10 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static ListAdapter toListAdapter(@NonNull PowerAdapter powerAdapter) {
-        WeakReference<ListAdapterConverterAdapter> ref = sListConverterAdapters.get(powerAdapter);
-        ListAdapterConverterAdapter converterAdapter = ref != null ? ref.get() : null;
+        ListAdapterConverterAdapter converterAdapter = sListConverterAdapters.get(powerAdapter);
         if (converterAdapter == null) {
             converterAdapter = new ListAdapterConverterAdapter(powerAdapter);
-            ref = new WeakReference<>(converterAdapter);
-            sListConverterAdapters.put(powerAdapter, ref);
-            return converterAdapter;
+            sListConverterAdapters.put(powerAdapter, converterAdapter);
         }
         return converterAdapter;
     }

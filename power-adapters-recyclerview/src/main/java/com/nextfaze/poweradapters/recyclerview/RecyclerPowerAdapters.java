@@ -3,14 +3,12 @@ package com.nextfaze.poweradapters.recyclerview;
 import android.support.annotation.CheckResult;
 import android.support.v7.widget.RecyclerView;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.lang.ref.WeakReference;
-import java.util.WeakHashMap;
 
 public final class RecyclerPowerAdapters {
 
-    private static final WeakHashMap<PowerAdapter, WeakReference<RecyclerConverterAdapter>> sRecyclerConverterAdapters = new WeakHashMap<>();
+    private static final WeakMap<PowerAdapter, RecyclerConverterAdapter> sRecyclerConverterAdapters = new WeakMap<>();
 
     private RecyclerPowerAdapters() {
     }
@@ -18,13 +16,10 @@ public final class RecyclerPowerAdapters {
     @CheckResult
     @NonNull
     public static RecyclerView.Adapter<?> toRecyclerAdapter(@NonNull PowerAdapter powerAdapter) {
-        WeakReference<RecyclerConverterAdapter> ref = sRecyclerConverterAdapters.get(powerAdapter);
-        RecyclerConverterAdapter converterAdapter = ref != null ? ref.get() : null;
+        RecyclerConverterAdapter converterAdapter = sRecyclerConverterAdapters.get(powerAdapter);
         if (converterAdapter == null) {
             converterAdapter = new RecyclerConverterAdapter(powerAdapter);
-            ref = new WeakReference<>(converterAdapter);
-            sRecyclerConverterAdapters.put(powerAdapter, ref);
-            return converterAdapter;
+            sRecyclerConverterAdapters.put(powerAdapter, converterAdapter);
         }
         return converterAdapter;
     }

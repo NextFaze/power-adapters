@@ -100,7 +100,13 @@ final class ConcatAdapter extends AbstractPowerAdapter {
 
     @Override
     public boolean hasStableIds() {
-        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
+        //noinspection SimplifiableIfStatement
+        if (mEntries.size() == 1) {
+            // Only a single entry, so it's safe to forward it's value directly.
+            return mEntries.valueAt(0).mAdapter.hasStableIds();
+        }
+        // Otherwise, must return false because IDs returned by multiple
+        // child adapters may collide, falsely indicating equality.
         return false;
     }
 

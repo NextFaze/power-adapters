@@ -5,17 +5,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
-import com.nextfaze.poweradapters.ViewType;
-import com.nextfaze.poweradapters.ViewTypes;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 
 /** A "type safe" binder implementation that performs the casts for you. */
-public abstract class TypedBinder<T, V extends View> implements Binder {
-
-    @NonNull
-    private final ViewType mViewType = ViewTypes.create();
+public abstract class TypedBinder<T, V extends View> extends AbstractBinder {
 
     @NonNull
     private final ViewFactory mViewFactory;
@@ -53,14 +48,24 @@ public abstract class TypedBinder<T, V extends View> implements Binder {
         bind((T) obj, (V) v, holder);
     }
 
-    @NonNull
     @Override
-    public final ViewType getViewType() {
-        return mViewType;
+    public final boolean isEnabled(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return isEnabledChecked((T) obj, position);
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final long getItemId(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return getItemIdChecked((T) obj, position);
+    }
+
+    protected long getItemIdChecked(@NonNull T t, int position) {
+        return super.getItemId(t, position);
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    protected boolean isEnabledChecked(@NonNull T t, int position) {
         return mEnabled;
     }
 

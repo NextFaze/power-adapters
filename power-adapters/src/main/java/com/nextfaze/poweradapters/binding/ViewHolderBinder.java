@@ -5,24 +5,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
-import com.nextfaze.poweradapters.ViewType;
-import com.nextfaze.poweradapters.ViewTypes;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.util.WeakHashMap;
 
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 
-public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binder {
+public abstract class ViewHolderBinder<T, H extends ViewHolder> extends AbstractBinder {
 
     @NonNull
-    private final WeakHashMap<View, H> mViewHolders = new WeakHashMap<>();
+    private final WeakMap<View, H> mViewHolders = new WeakMap<>();
 
     @NonNull
     private final ViewFactory mViewFactory;
-
-    @NonNull
-    private final ViewType mViewType = ViewTypes.create();
 
     private final boolean mEnabled;
 
@@ -46,27 +40,38 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> implements Binde
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent) {
-        H h = newViewHolder(mViewFactory.create(parent));
-        mViewHolders.put(h.view, h);
-        return h.view;
+        return mViewFactory.create(parent);
     }
 
     @Override
     public final void bindView(@NonNull Object obj, @NonNull View v, @NonNull Holder holder) {
         H h = mViewHolders.get(v);
-        // Infrastructure ensures only the correct type is passed here.
+        if (h == null) {
+            h = newViewHolder(v);
+            mViewHolders.put(v, h);
+        }
         //noinspection unchecked
         bindViewHolder((T) obj, h, holder);
     }
 
-    @NonNull
     @Override
-    public final ViewType getViewType() {
-        return mViewType;
+    public final boolean isEnabled(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return isEnabledChecked((T) obj, position);
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final long getItemId(@NonNull Object obj, int position) {
+        //noinspection unchecked
+        return getItemIdChecked((T) obj, position);
+    }
+
+    protected long getItemIdChecked(@NonNull T t, int position) {
+        return super.getItemId(t, position);
+    }
+
+    @SuppressWarnings("UnusedParameters")
+    protected boolean isEnabledChecked(@NonNull T t, int position) {
         return mEnabled;
     }
 

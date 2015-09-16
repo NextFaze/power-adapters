@@ -63,13 +63,13 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        HolderImpl holder;
         if (convertView == null) {
-            holder = new HolderImpl();
             convertView = mPowerAdapter.newView(parent, mPowerAdapter.getItemViewType(position));
+        }
+        HolderImpl holder = mHolders.get(convertView);
+        if (holder == null) {
+            holder = new HolderImpl();
             mHolders.put(convertView, holder);
-        } else {
-            holder = mHolders.get(convertView);
         }
         holder.position = position;
         mPowerAdapter.bindView(convertView, holder);

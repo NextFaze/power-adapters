@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -15,12 +18,16 @@ import com.google.common.collect.Lists;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
+import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
+import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
+import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.NonNull;
@@ -54,6 +61,9 @@ public class FileTreeFragment extends BaseFragment {
     @Nullable
     private Data<File> mRootData;
 
+    @Nullable
+    private TreeAdapter mRootTreeAdapter;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,22 +73,36 @@ public class FileTreeFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        PowerAdapter adapter = concat(
-//                createFilesAdapterSimple(mRootFile, 0, true),
-//                createFilesAdapter(mRootData, mRootFile, 0)
-//        );
+
+        // Async adapter.
         PowerAdapter adapter = createFilesAdapter(mRootFile, 0);
+        mDataLayout.setData(mRootData);
+
+        // Simple, non-async adapter.
 //        PowerAdapter adapter = createFilesAdapterSimple(mRootFile, 0, true);
-//        mDataLayout.setData(new DirectoryData(mRootFile, MAX_DISPLAYED_FILES_PER_DIR));
-//        adapter = new DividerAdapterBuilder()
-//                .leadingResource(R.layout.list_divider_item)
-//                .trailingResource(R.layout.list_divider_item)
-//                .innerResource(R.layout.list_divider_item)
-//                .emptyPolicy(SHOW_NOTHING)
-//                .build(adapter);
+
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
         showCollectionView(CollectionView.RECYCLER_VIEW);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.add("Expand All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                expandAll();
+                return true;
+            }
+        });
+        menu.add("Collapse All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                collapseAll();
+                return true;
+            }
+        });
     }
 
     @NonNull
@@ -109,7 +133,10 @@ public class FileTreeFragment extends BaseFragment {
             @Override
             protected PowerAdapter getChildAdapter(int position) {
                 File file = files.get(position);
-                return createFilesAdapterSimple(file, depth + 1, true);
+                if (file.isDirectory()) {
+                    return createFilesAdapterSimple(file, depth + 1, true);
+                }
+                return PowerAdapter.EMPTY;
             }
         });
         if (tree) {
@@ -167,34 +194,43 @@ public class FileTreeFragment extends BaseFragment {
             @NonNull
             @Override
             protected PowerAdapter getChildAdapter(int position) {
-                return createFilesAdapter(data.get(position), depth + 1);
+                File file = data.get(position);
+                if (file.isDirectory()) {
+                    return createFilesAdapter(file, depth + 1);
+                }
+                return PowerAdapter.EMPTY;
             }
         });
         adapter = treeAdapterRef.get();
 
-//        adapter = new LoadingAdapterBuilder()
-//                .resource(R.layout.list_loading_item)
-//                .emptyPolicy(depth == 0 ? SHOW_ONLY_IF_NON_EMPTY : SHOW_ALWAYS)
-//                .build(adapter, new DataLoadingDelegate(data));
+        if (mRootTreeAdapter == null) {
+            mRootTreeAdapter = treeAdapterRef.get();
+        }
 
-//        adapter = new EmptyAdapterBuilder()
-//                .resource(R.layout.file_list_empty_item)
-//                .build(adapter, new DataEmptyDelegate(data));
+        adapter = new HeaderAdapterBuilder()
+                .addView(directoryHeader(file, depth))
+                .build(adapter);
 
-//        adapter = new HeaderAdapterBuilder()
-//                .addView(directoryHeader(file, depth))
-//                .build(adapter);
+        adapter = new LoadingAdapterBuilder()
+                .resource(R.layout.list_loading_item)
+                .emptyPolicy(depth == 0 ? LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY :
+                        LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS)
+                .build(adapter, new DataLoadingDelegate(data));
+
+        adapter = new EmptyAdapterBuilder()
+                .resource(R.layout.file_list_empty_item)
+                .build(adapter, new DataEmptyDelegate(data));
 
         adapter = new DataLifecycleAdapter(adapter, data);
 
-        if (depth == 1) {
-            adapter = new DividerAdapterBuilder()
+//        if (depth == 1) {
+//            adapter = new DividerAdapterBuilder()
 //                    .innerResource(R.layout.list_divider_item)
-                    .leadingResource(R.layout.list_divider_item)
-                    .trailingResource(R.layout.list_divider_item)
-                    .emptyPolicy(SHOW_LEADING)
-                    .build(adapter);
-        }
+//                    .leadingResource(R.layout.list_divider_item)
+//                    .trailingResource(R.layout.list_divider_item)
+//                    .emptyPolicy(SHOW_LEADING)
+//                    .build(adapter);
+//        }
 
         return adapter;
     }
@@ -213,6 +249,18 @@ public class FileTreeFragment extends BaseFragment {
                 return headerView;
             }
         };
+    }
+
+    private void expandAll() {
+        if (mRootTreeAdapter != null) {
+            mRootTreeAdapter.setAllExpanded(true);
+        }
+    }
+
+    private void collapseAll() {
+        if (mRootTreeAdapter != null) {
+            mRootTreeAdapter.setAllExpanded(false);
+        }
     }
 
     @NonNull

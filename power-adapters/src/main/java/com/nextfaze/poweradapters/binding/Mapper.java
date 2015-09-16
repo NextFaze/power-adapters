@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.Nullable;
 import android.view.View;
+import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
 import java.util.Collection;
@@ -21,4 +22,10 @@ public interface Mapper {
     /** Return a collection containing all of the possible binders this mapper could respond with. */
     @NonNull
     Collection<? extends Binder> getAllBinders();
+
+    /**
+     * Returns whether the IDs supplied by all binders are considered stable.
+     * @see PowerAdapter#hasStableIds()
+     */
+    boolean hasStableIds();
 }

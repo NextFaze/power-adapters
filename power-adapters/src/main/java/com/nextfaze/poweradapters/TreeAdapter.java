@@ -1,5 +1,7 @@
 package com.nextfaze.poweradapters;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
@@ -9,6 +11,7 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -50,6 +53,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     };
 
     @NonNull
+    private TreeState mState = new TreeState();
+
+    @NonNull
     private final Transform mRootTransform = new Transform() {
         @Override
         public int transform(int position) {
@@ -87,22 +93,57 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     @NonNull
     protected abstract PowerAdapter getChildAdapter(int position);
 
+    /** Returns the parcelable state of the adapter. */
+    @NonNull
+    public Parcelable saveInstanceState() {
+        return mState;
+    }
+
+    /**
+     * Restores the state of the adapter from a previous state parcelable. Only effective when root adapter {@link
+     * PowerAdapter#hasStableIds()}
+     */
+    public void restoreInstanceState(@Nullable Parcelable parcelable) {
+        if (parcelable != null) {
+            mState = (TreeState) parcelable;
+            applyExpandedState();
+        }
+    }
+
+    private void applyExpandedState() {
+        if (mRootAdapter.hasStableIds()) {
+            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+                long itemId = mRootAdapter.getItemId(i);
+                if (itemId != NO_ID) {
+                    setExpanded(i, mState.isExpanded(itemId));
+                }
+            }
+        }
+    }
+
+    public boolean isExpanded(int position) {
+        return mEntries.get(position) != null;
+    }
+
     public void setExpanded(int position, boolean expanded) {
         Entry entry = mEntries.get(position);
+        long itemId = mRootAdapter.getItemId(position);
         if (expanded) {
             if (entry == null) {
                 entry = new Entry(getChildAdapter(position));
                 mEntries.put(position, entry);
+                mState.setExpanded(itemId, true);
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
             }
         } else {
             if (entry != null) {
-                int itemCount = entry.getItemCount();
+                int preDisposeItemCount = entry.getItemCount();
                 entry.dispose();
                 mEntries.remove(position);
+                mState.setExpanded(itemId, false);
                 invalidateGroups();
-                notifyItemRangeRemoved(rootToOuter(position) + 1, itemCount);
+                notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
             }
         }
     }
@@ -113,8 +154,47 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return !expanded;
     }
 
-    public boolean isExpanded(int position) {
-        return mEntries.get(position) != null;
+    public void setAllExpanded(boolean expanded) {
+        ArrayList<Runnable> notifications = new ArrayList<>();
+        if (!expanded) {
+            for (int i = 0; i < mEntries.size(); i++) {
+                Entry entry = mEntries.valueAt(i);
+                final int position = entry.getPosition();
+                final int preDisposeItemCount = entry.getItemCount();
+                entry.dispose();
+                notifications.add(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
+                    }
+                });
+            }
+            mEntries.clear();
+            mState.clear();
+        } else {
+            int rootItemCount = mRootAdapter.getItemCount();
+            for (int position = 0; position < rootItemCount; position++) {
+                Entry entry = mEntries.get(position);
+                long itemId = mRootAdapter.getItemId(position);
+                if (entry == null) {
+                    entry = new Entry(getChildAdapter(position));
+                    mEntries.put(position, entry);
+                    mState.setExpanded(itemId, true);
+                    final int itemCount = entry.getItemCount();
+                    final int finalPosition = position;
+                    notifications.add(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyItemRangeInserted(rootToOuter(finalPosition) + 1, itemCount);
+                        }
+                    });
+                }
+            }
+        }
+        invalidateGroups();
+        for (Runnable runnable : notifications) {
+            runnable.run();
+        }
     }
 
     @NonNull
@@ -125,6 +205,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     private void invalidateGroups() {
         mDirty = true;
         rebuildGroupsIfNecessary();
+        applyExpandedState();
     }
 
     private void rebuildGroupsIfNecessary() {
@@ -190,14 +271,17 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         return outerPosition - groupForPosition(outerPosition).getRootStart();
     }
 
+    /**
+     * By default returns {@code false}, because we don't know all our adapters ahead of time, so can't assume they're
+     * stable.
+     */
     @Override
     public boolean hasStableIds() {
-        // We don't know all our adapters ahead of time, so we can never truly have stable IDs.
         return false;
     }
 
     @Override
-    public int getItemCount() {
+    public final int getItemCount() {
         rebuildGroupsIfNecessary();
         if (mGroups.size() == 0) {
             return 0;
@@ -207,18 +291,18 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     @Override
-    public long getItemId(int position) {
+    public final long getItemId(int position) {
         return adapterForPosition(position).getItemId(position);
     }
 
     @Override
-    public boolean isEnabled(int position) {
+    public final boolean isEnabled(int position) {
         return adapterForPosition(position).isEnabled(position);
     }
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public final ViewType getItemViewType(int position) {
         OffsetAdapter offsetAdapter = adapterForPosition(position);
         ViewType viewType = offsetAdapter.getViewType(position);
         mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
@@ -227,12 +311,12 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
         return adapterForViewType(viewType).newView(parent, viewType);
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public final void bindView(@NonNull View view, @NonNull Holder holder) {
         adapterForPosition(holder.getPosition()).bindView(view, holder);
     }
 
@@ -336,6 +420,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 mAdapter.unregisterDataObserver(mRegisteredDataObserver);
                 mRegisteredDataObserver = null;
             }
+        }
+
+        int getPosition() {
+            return mGroup.getPosition();
         }
 
         int getItemCount() {
@@ -495,6 +583,66 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         @Override
         public String toString() {
             return format("%s (%s)", mPosition, size());
+        }
+    }
+
+    static final class TreeState implements Parcelable {
+
+        public static final Creator<TreeState> CREATOR = new Creator<TreeState>() {
+
+            @NonNull
+            public TreeState createFromParcel(@NonNull Parcel parcel) {
+                return new TreeState(parcel);
+            }
+
+            @NonNull
+            public TreeState[] newArray(int size) {
+                return new TreeState[size];
+            }
+        };
+
+        @NonNull
+        private final HashSet<Long> mExpanded;
+
+        TreeState(@NonNull Parcel parcel) {
+            //noinspection unchecked
+            mExpanded = (HashSet<Long>) parcel.readSerializable();
+        }
+
+        TreeState() {
+            mExpanded = new HashSet<>();
+        }
+
+        void setExpanded(long itemId, boolean expanded) {
+            if (itemId != NO_ID) {
+                if (expanded) {
+                    mExpanded.add(itemId);
+                } else {
+                    mExpanded.remove(itemId);
+                }
+            }
+        }
+
+        boolean isExpanded(long itemId) {
+            //noinspection SimplifiableIfStatement
+            if (itemId == NO_ID) {
+                return false;
+            }
+            return mExpanded.contains(itemId);
+        }
+
+        void clear() {
+            mExpanded.clear();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeSerializable(mExpanded);
         }
     }
 }

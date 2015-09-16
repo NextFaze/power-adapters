@@ -30,4 +30,9 @@ public class MapperWrapper implements Mapper {
     public Collection<? extends Binder> getAllBinders() {
         return mMapper.getAllBinders();
     }
+
+    @Override
+    public boolean hasStableIds() {
+        return mMapper.hasStableIds();
+    }
 }
