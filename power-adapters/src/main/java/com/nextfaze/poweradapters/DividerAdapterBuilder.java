@@ -102,7 +102,7 @@ public final class DividerAdapterBuilder implements Decorator {
         if (mLeadingItem == null && mTrailingItem == null && mInnerItem == null) {
             return adapter;
         }
-        return new DividerAdapter(adapter, mEmptyPolicy, mLeadingItem, mTrailingItem, mInnerItem);
+        return new WrappingDividerAdapter(adapter, mEmptyPolicy, mLeadingItem, mTrailingItem, mInnerItem);
     }
 
     @NonNull
