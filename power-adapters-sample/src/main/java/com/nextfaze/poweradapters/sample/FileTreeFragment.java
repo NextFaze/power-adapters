@@ -207,6 +207,10 @@ public class FileTreeFragment extends BaseFragment {
             mRootTreeAdapter = treeAdapterRef.get();
         }
 
+        adapter = new HeaderAdapterBuilder()
+                .addView(directoryHeader(file, depth))
+                .build(adapter);
+
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
                 .emptyPolicy(depth == 0 ? LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY :
@@ -216,10 +220,6 @@ public class FileTreeFragment extends BaseFragment {
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.file_list_empty_item)
                 .build(adapter, new DataEmptyDelegate(data));
-
-        adapter = new HeaderAdapterBuilder()
-                .addView(directoryHeader(file, depth))
-                .build(adapter);
 
         adapter = new DataLifecycleAdapter(adapter, data);
 

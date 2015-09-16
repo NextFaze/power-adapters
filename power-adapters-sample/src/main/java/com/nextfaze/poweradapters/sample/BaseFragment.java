@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import static android.view.View.VISIBLE;
 abstract class BaseFragment extends Fragment {
 
     private static final int SCROLL_TO_END_DELAY = 50;
+    private static final int ANIMATION_DURATION = 150;
 
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
@@ -56,6 +58,12 @@ abstract class BaseFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setAddDuration(ANIMATION_DURATION);
+        animator.setRemoveDuration(ANIMATION_DURATION);
+        animator.setChangeDuration(ANIMATION_DURATION);
+        animator.setMoveDuration(ANIMATION_DURATION);
+        mRecyclerView.setItemAnimator(animator);
         mDataLayout.setErrorFormatter(new SimpleErrorFormatter());
         showCollectionView(CollectionView.LIST_VIEW);
     }

@@ -28,8 +28,6 @@ import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
 import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
-import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -39,11 +37,12 @@ import java.util.Random;
 
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends BaseFragment {
 
-    private static final int ADAPTER_COUNT = 1;
+    private static final int ADAPTER_COUNT = 10;
 
     @NonNull
     private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
@@ -85,16 +84,13 @@ public class ConcatFragment extends BaseFragment {
                 });
             }
         };
-        Mapper mapper = new PolymorphicMapperBuilder()
-                .bind(NewsItem.class, removeItemBinder)
-                .build();
-        PowerAdapter adapter = new DataBindingAdapter(data, mapper);
+        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(removeItemBinder));
 
         adapter = new DividerAdapterBuilder()
-                .innerResource(R.layout.list_divider_item)
+                .innerResource(R.layout.list_divider_item_inner)
                 .leadingResource(R.layout.list_divider_item)
-                .trailingResource(R.layout.list_divider_item)
-                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING)
+                .trailingResource(R.layout.list_divider_item_trailing)
+                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
                 .build(adapter);
 
         adapter = new HeaderAdapterBuilder()
@@ -138,6 +134,7 @@ public class ConcatFragment extends BaseFragment {
                         "Change 1",
                         "Add 3 Before",
                         "Add 3 After",
+                        "Remove all"
                 }, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -168,6 +165,10 @@ public class ConcatFragment extends BaseFragment {
                                         new NewsItem("Foobar"),
                                         new NewsItem("Foobar")
                                 ));
+                                break;
+
+                            case 5:
+                                data.clear();
                                 break;
                         }
                     }
