@@ -37,7 +37,10 @@ public final class ViewFactories {
         };
     }
 
-    /** Warning: returned view {@link LayoutParams} might not match those of parent. */
+    /**
+     * Warning: this is included for flexibility, but is not safe for use with a {@code RecyclerView}. In addition, the
+     * view {@link LayoutParams} might not match those of parent collection view, leading to a crash.
+     */
     @NonNull
     public static ViewFactory viewFactoryForView(@NonNull final View view) {
         return new ViewFactory() {

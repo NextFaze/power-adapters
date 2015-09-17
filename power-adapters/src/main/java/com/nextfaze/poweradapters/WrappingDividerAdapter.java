@@ -134,7 +134,6 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
         super.forwardItemRangeInserted(innerPositionStart, innerItemCount);
-        final int innerTotalItemCountBefore = super.getItemCount() - innerItemCount;
         final int innerTotalItemCountAfter = super.getItemCount();
         final boolean rangeIncludesFirstItem = innerPositionStart == 0;
         final boolean rangeIncludesLastItem = innerPositionStart + innerItemCount >= innerTotalItemCountAfter;
@@ -150,7 +149,6 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
         super.forwardItemRangeRemoved(innerPositionStart, innerItemCount);
         final int innerTotalItemCountBefore = super.getItemCount() + innerItemCount;
-        final int innerTotalItemCountAfter = super.getItemCount();
         final boolean rangeIncludesFirstItem = innerPositionStart == 0;
         final boolean rangeIncludesLastItem = innerPositionStart + innerItemCount >= innerTotalItemCountBefore;
         if (rangeIncludesFirstItem && innerTotalItemCountBefore > 1) {

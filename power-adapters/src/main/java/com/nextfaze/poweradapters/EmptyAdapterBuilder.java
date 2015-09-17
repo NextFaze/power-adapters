@@ -23,6 +23,11 @@ public final class EmptyAdapterBuilder implements Decorator {
         return view(viewFactoryForResource(resource));
     }
 
+    /**
+     * Not safe for use in a {@code RecyclerView}.
+     * @see ViewFactories#viewFactoryForView(View)
+     */
+    @Deprecated
     @NonNull
     public EmptyAdapterBuilder view(@NonNull View view) {
         return view(viewFactoryForView(view));
