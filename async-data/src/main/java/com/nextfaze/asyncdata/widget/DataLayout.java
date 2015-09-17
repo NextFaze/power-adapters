@@ -125,10 +125,7 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private View mErrorView;
 
-    /** The data instance used to determine child view visibility. */
-    @Nullable
-    private Data<?> mData;
-
+    /** The data instances used to determine child view visibility. */
     @NonNull
     private final List<Data<?>> mDatas = new ArrayList<>();
 
@@ -291,12 +288,6 @@ public class DataLayout extends RelativeLayout {
      */
     public final void setDatas(@NonNull Data<?>... datas) {
         setDatas(asList(datas));
-    }
-
-    /** Get the data instance used to control child view visibility. */
-    @Nullable
-    public final Data<?> getData() {
-        return mData;
     }
 
     /**
