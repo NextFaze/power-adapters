@@ -111,7 +111,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     private void applyExpandedState() {
-        if (mRootAdapter.hasStableIds()) {
+        if (mRootAdapter.hasStableIds() && !mState.isEmpty()) {
             for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
                 long itemId = mRootAdapter.getItemId(i);
                 if (itemId != NO_ID) {
@@ -633,6 +633,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         void clear() {
             mExpanded.clear();
+        }
+
+        boolean isEmpty() {
+            return mExpanded.isEmpty();
         }
 
         @Override
