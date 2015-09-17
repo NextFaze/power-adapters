@@ -21,11 +21,21 @@ public final class HeaderAdapterBuilder implements Decorator {
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
 
+    /**
+     * Not safe for use in a {@code RecyclerView}.
+     * @see ViewFactories#viewFactoryForView(View)
+     */
+    @Deprecated
     @NonNull
     public HeaderAdapterBuilder addView(@NonNull View view) {
         return addView(view, false);
     }
 
+    /**
+     * Not safe for use in a {@code RecyclerView}.
+     * @see ViewFactories#viewFactoryForView(View)
+     */
+    @Deprecated
     @NonNull
     public HeaderAdapterBuilder addView(@NonNull View view, boolean enabled) {
         return addView(viewFactoryForView(view), enabled);

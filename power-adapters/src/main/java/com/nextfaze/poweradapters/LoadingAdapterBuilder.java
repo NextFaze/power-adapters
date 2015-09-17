@@ -26,6 +26,11 @@ public final class LoadingAdapterBuilder implements Decorator {
 
     private boolean mEnabled;
 
+    /**
+     * Not safe for use in a {@code RecyclerView}.
+     * @see ViewFactories#viewFactoryForView(View)
+     */
+    @Deprecated
     @NonNull
     public LoadingAdapterBuilder view(@NonNull View view) {
         return view(viewFactoryForView(view));
@@ -154,14 +159,14 @@ public final class LoadingAdapterBuilder implements Decorator {
         @UiThread
         protected final void notifyLoadingChanged() {
             if (mAdapter != null) {
-                mAdapter.updateVisible();
+                mAdapter.notifyLoadingChanged();
             }
         }
 
         /** Must be called when the value of {@link #isEmpty()} changes. */
         protected final void notifyEmptyChanged() {
             if (mAdapter != null) {
-                mAdapter.updateVisible();
+                mAdapter.notifyEmptyChanged();
             }
         }
 
