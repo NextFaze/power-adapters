@@ -22,10 +22,11 @@
 
     <declare-styleable name="DataLayout_Layout">
         <attr name="layout_component" format="enum">
-            <enum name="content" value="0"/>
-            <enum name="empty" value="1"/>
-            <enum name="loading" value="2"/>
-            <enum name="error" value="3"/>
+            <enum name="none" value="0"/>
+            <enum name="content" value="1"/>
+            <enum name="empty" value="2"/>
+            <enum name="loading" value="3"/>
+            <enum name="error" value="4"/>
         </attr>
     </declare-styleable>
 

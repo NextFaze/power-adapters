@@ -178,10 +178,10 @@ public class DataLayout extends RelativeLayout {
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
-    /** Indicates this view is visible to the user. */
+    /** Indicates this view is visible to the user and active for the purpose of showing the data. */
     private boolean mActive;
 
-    /** Track when this view became shown. */
+    /** Track when this view became active. */
     private long mActiveStartTime;
 
     /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
@@ -508,7 +508,7 @@ public class DataLayout extends RelativeLayout {
             ViewGroup.LayoutParams params = v.getLayoutParams();
             if (params instanceof LayoutParams) {
                 LayoutParams layoutParams = (LayoutParams) params;
-                changed = changed || assignComponent(layoutParams.getComponent(), v);
+                changed = assignComponent(layoutParams.getComponent(), v) || changed;
             }
         }
         return changed;
