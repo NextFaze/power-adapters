@@ -3,6 +3,7 @@ package com.nextfaze.asyncdata.widget;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,10 +12,12 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,9 +26,9 @@ import com.nextfaze.asyncdata.R;
 import com.nextfaze.asyncdata.internal.DataWatcher;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,33 +43,48 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 /**
- * A container view that, when hooked up to a {@link Data} instance, will automatically show/hide child component views
- * based on the loading/empty/error state of the data.
- * <p/>Each {@link DataLayout} should usually contain the following components as child views:
- *
+ * A container view that, when hooked up to {@link Data} instance(s), will automatically show/hide child component
+ * views based on the loading/empty/error state of the data.
+ * Child views are assigned components using the {@link R.styleable#DataLayout_Layout_layout_component} attribute.
+ * <p/>Each {@link DataLayout} can optionally contain the following components as child views:
+ * <p/>
  * <h2>Content View</h2>
- * An {@link AdapterView} of some kind, or a {@code RecyclerView} (although this is not mandatory, it can be any view).
- * This view is assigned by specifying the {@link R.styleable#DataLayout_contentView} attribute.
- *
+ * An {@link AdapterView} of some kind, or a {@code RecyclerView} (the type is not checked, it can be any view).
+ * It can be assigned using {@link DataLayout#CONTENT}.
+ * <p/>
  * <h2>Empty View</h2>
- * An empty view, which will be shown while the {@link Data} is empty. This view is assigned by specifying the
- * {@link R.styleable#DataLayout_emptyView} attribute.
- *
+ * An empty view, which will be shown while the {@link Data} is empty. It can be assigned using {@link
+ * DataLayout#EMPTY}.
+ * <p/>
  * <h2>Loading View</h2>
- * A loading view, which will be shown while the {@link Data} is empty and loading. This view is assigned by specifying the
- * {@link R.styleable#DataLayout_loadingView} attribute.
- *
+ * A loading view, which will be shown while the {@link Data} is empty and loading. It can be assigned using {@link
+ * DataLayout#LOADING}.
+ * <p/>
  * <h2>Error View</h2>
- * An error view, which will be shown if the {@link Data} emits an error. This view is assigned by specifying the
- * {@link R.styleable#DataLayout_errorView} attribute.
+ * An error view, which will be shown if the {@link Data} emits an error. It can be assigned using {@link
+ * DataLayout#ERROR}.
+ * <p/>
+ * Components can also be updated programmatically by configuring the child view {@link DataLayout.LayoutParams}.
+ * @see DataLayout.LayoutParams
+ * @see DataLayout#invalidateComponentMapping()
  */
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
 
-    private static final Logger log = LoggerFactory.getLogger(DataLayout.class);
-
     private static final String KEY_SUPER_STATE = "superState";
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
+
+    public static final int NONE = 0;
+    public static final int CONTENT = 1;
+    public static final int EMPTY = 2;
+    public static final int LOADING = 3;
+    public static final int ERROR = 4;
+
+    @AnimatorRes
+    private static final int DEFAULT_ANIMATION_IN = R.animator.data_layout_default_in;
+
+    @AnimatorRes
+    private static final int DEFAULT_ANIMATION_OUT = R.animator.data_layout_default_out;
 
     @NonNull
     private final DataWatcher mDataWatcher = new DataWatcher() {
@@ -93,42 +111,39 @@ public class DataLayout extends RelativeLayout {
         }
     };
 
-    /** Child view ID for displaying contents of {@link #mData}. */
+    /** Child view ID for displaying contents of {@link #mDatas}. */
     @IdRes
     private final int mContentViewId;
 
-    /** Child view ID shown while {@link #mData} is empty. */
+    /** Child view ID shown while {@link #isEmpty()}. */
     @IdRes
     private final int mEmptyViewId;
 
-    /** Child view ID shown while {@link #mData} is loading. */
+    /** Child view ID shown while {@link #isLoading()}. */
     @IdRes
     private final int mLoadingViewId;
 
-    /** Child view ID shown when {@link #mData} reports an error. */
+    /** Child view ID shown when {@link #mDatas} report an error. */
     @IdRes
     private final int mErrorViewId;
 
-    /** Child view for displaying contents of {@link #mData}. */
+    /** Child view for displaying contents of the data. */
     @Nullable
     private View mContentView;
 
-    /** Child view shown while {@link #mData} is empty. */
+    /** Child view shown while {@link #isEmpty()}. */
     @Nullable
     private View mEmptyView;
 
-    /** Child view shown while {@link #mData} is loading. */
+    /** Child view shown while {@link #isLoading()}. */
     @Nullable
     private View mLoadingView;
 
-    /** Child view shown when {@link #mData} reports an error. */
+    /** Child view shown when {@link #mDatas} report an error. */
     @Nullable
     private View mErrorView;
 
-    /** The data instance used to determine child view visibility. */
-    @Nullable
-    private Data<?> mData;
-
+    /** The data instances used to determine child view visibility. */
     @NonNull
     private final List<Data<?>> mDatas = new ArrayList<>();
 
@@ -142,6 +157,12 @@ public class DataLayout extends RelativeLayout {
 
     @NonNull
     private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.DEFAULT;
+
+    @Nullable
+    private OnActiveChangeListener mOnActiveChangeListener;
+
+    @Nullable
+    private OnErrorListener mOnErrorListener;
 
     /** Animator used to show views. */
     @Nullable
@@ -157,11 +178,11 @@ public class DataLayout extends RelativeLayout {
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
-    /** Indicates this view is visible to the user. */
-    private boolean mShown;
+    /** Indicates this view is visible to the user and active for the purpose of showing the data. */
+    private boolean mActive;
 
-    /** Track when this view became shown. */
-    private long mShownTime;
+    /** Track when this view became active. */
+    private long mActiveStartTime;
 
     /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
     private boolean mInflated;
@@ -180,37 +201,72 @@ public class DataLayout extends RelativeLayout {
     public DataLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DataLayout, defStyle, 0);
-        mContentViewId = a.getResourceId(R.styleable.DataLayout_contentView, -1);
-        mEmptyViewId = a.getResourceId(R.styleable.DataLayout_emptyView, -1);
-        mLoadingViewId = a.getResourceId(R.styleable.DataLayout_loadingView, -1);
-        mErrorViewId = a.getResourceId(R.styleable.DataLayout_errorView, -1);
-        mAnimatorIn = loadAnimator(context, a, R.styleable.DataLayout_animatorIn, R.animator.data_layout_default_in);
-        mAnimatorOut = loadAnimator(context, a, R.styleable.DataLayout_animatorOut, R.animator.data_layout_default_out);
-        mAnimationEnabled = a.getBoolean(R.styleable.DataLayout_animationsEnabled, mAnimationEnabled);
-        a.recycle();
+        try {
+            mContentViewId = a.getResourceId(R.styleable.DataLayout_contentView, -1);
+            mEmptyViewId = a.getResourceId(R.styleable.DataLayout_emptyView, -1);
+            mLoadingViewId = a.getResourceId(R.styleable.DataLayout_loadingView, -1);
+            mErrorViewId = a.getResourceId(R.styleable.DataLayout_errorView, -1);
+            // Use old deprecated attributes as fallbacks.
+            mAnimatorIn = loadAnimator(context, a, R.styleable.DataLayout_data_layout_animatorIn,
+                    R.styleable.DataLayout_animatorIn, DEFAULT_ANIMATION_IN);
+            mAnimatorOut = loadAnimator(context, a, R.styleable.DataLayout_data_layout_animatorOut,
+                    R.styleable.DataLayout_animatorOut, DEFAULT_ANIMATION_OUT);
+            mAnimationEnabled = a.getBoolean(R.styleable.DataLayout_data_layout_animationsEnabled,
+                    a.getBoolean(R.styleable.DataLayout_animationsEnabled, mAnimationEnabled));
+        } finally {
+            a.recycle();
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mInflated = true;
+
+        // Assign components based on deprecated view ID attributes first.
         mContentView = findViewById(mContentViewId);
+        mEmptyView = findViewById(mEmptyViewId);
+        mLoadingView = findViewById(mLoadingViewId);
+        mErrorView = findViewById(mErrorViewId);
+
+        // Now use the layout params and possibly override.
+        detectAndAssignComponents();
+
+        // All components are initially invisible.
         if (mContentView != null) {
             mContentView.setVisibility(INVISIBLE);
         }
-        mEmptyView = findViewById(mEmptyViewId);
         if (mEmptyView != null) {
             mEmptyView.setVisibility(INVISIBLE);
         }
-        mLoadingView = findViewById(mLoadingViewId);
         if (mLoadingView != null) {
             mLoadingView.setVisibility(INVISIBLE);
         }
-        mErrorView = findViewById(mErrorViewId);
         if (mErrorView != null) {
             mErrorView.setVisibility(INVISIBLE);
         }
+
         updateViews();
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(super.generateDefaultLayoutParams());
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(@NonNull ViewGroup.LayoutParams p) {
+        return new LayoutParams(super.generateLayoutParams(p));
+    }
+
+    @Override
+    public RelativeLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams;
     }
 
     @Override
@@ -237,21 +293,21 @@ public class DataLayout extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAttachedToWindow = true;
-        updateShown();
+        updateActive();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAttachedToWindow = false;
-        updateShown();
+        updateActive();
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         if (visibility == VISIBLE) {
-            updateShown();
+            updateActive();
         }
     }
 
@@ -259,7 +315,7 @@ public class DataLayout extends RelativeLayout {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (mInflated && visibility == VISIBLE) {
-            updateShown();
+            updateActive();
         }
     }
 
@@ -267,14 +323,14 @@ public class DataLayout extends RelativeLayout {
     protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (mInflated) {
-            updateShown();
+            updateActive();
         }
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        updateShown();
+        updateActive();
     }
 
     /**
@@ -291,12 +347,6 @@ public class DataLayout extends RelativeLayout {
      */
     public final void setDatas(@NonNull Data<?>... datas) {
         setDatas(asList(datas));
-    }
-
-    /** Get the data instance used to control child view visibility. */
-    @Nullable
-    public final Data<?> getData() {
-        return mData;
     }
 
     /**
@@ -316,7 +366,7 @@ public class DataLayout extends RelativeLayout {
                     data.notifyHidden();
                 } else if (newDatas.contains(data)) {
                     // We may already be showing, so notify new data.
-                    if (mShown) {
+                    if (mActive) {
                         data.notifyShown();
                     } else {
                         data.notifyHidden();
@@ -363,6 +413,28 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    @Nullable
+    public final OnActiveChangeListener getOnActiveChangeListener() {
+        return mOnActiveChangeListener;
+    }
+
+    public final void setOnActiveChangeListener(@Nullable OnActiveChangeListener onActiveChangeListener) {
+        if (onActiveChangeListener != mOnActiveChangeListener) {
+            mOnActiveChangeListener = onActiveChangeListener;
+        }
+    }
+
+    @Nullable
+    public final OnErrorListener getOnErrorListener() {
+        return mOnErrorListener;
+    }
+
+    public final void setOnErrorListener(@Nullable OnErrorListener onErrorListener) {
+        if (onErrorListener != mOnErrorListener) {
+            mOnErrorListener = onErrorListener;
+        }
+    }
+
     /** Indicates whether animations will run on child views. */
     public final boolean isAnimationEnabled() {
         return mAnimationEnabled;
@@ -379,10 +451,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setContentView(@Nullable View contentView) {
-        if (contentView != mContentView) {
-            mContentView = contentView;
-            updateViews();
-        }
+        setComponent(CONTENT, contentView);
     }
 
     @Nullable
@@ -391,10 +460,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setEmptyView(@Nullable View emptyView) {
-        if (emptyView != mEmptyView) {
-            mEmptyView = emptyView;
-            updateViews();
-        }
+        setComponent(EMPTY, emptyView);
     }
 
     @Nullable
@@ -403,10 +469,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setLoadingView(@Nullable View loadingView) {
-        if (loadingView != mLoadingView) {
-            mLoadingView = loadingView;
-            updateViews();
-        }
+        setComponent(LOADING, loadingView);
     }
 
     @Nullable
@@ -415,14 +478,77 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setErrorView(@Nullable View errorView) {
-        if (errorView != mErrorView) {
-            mErrorView = errorView;
+        setComponent(ERROR, errorView);
+    }
+
+    public final void setComponent(@Component int component, @Nullable View v) {
+        if (assignComponent(component, v)) {
             updateViews();
         }
     }
 
+    @Component
+    public final int getComponent(@NonNull View v) {
+        if (v == mContentView) {
+            return CONTENT;
+        } else if (v == mEmptyView) {
+            return EMPTY;
+        } else if (v == mLoadingView) {
+            return LOADING;
+        } else if (v == mErrorView) {
+            return ERROR;
+        }
+        return NONE;
+    }
+
+    private boolean detectAndAssignComponents() {
+        boolean changed = false;
+        for (int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            ViewGroup.LayoutParams params = v.getLayoutParams();
+            if (params instanceof LayoutParams) {
+                LayoutParams layoutParams = (LayoutParams) params;
+                changed = assignComponent(layoutParams.getComponent(), v) || changed;
+            }
+        }
+        return changed;
+    }
+
+    private boolean assignComponent(@Component int component, @Nullable View v) {
+        switch (component) {
+            case CONTENT:
+                if (v != mContentView) {
+                    mContentView = v;
+                    return true;
+                }
+                break;
+
+            case EMPTY:
+                if (v != mEmptyView) {
+                    mEmptyView = v;
+                    return true;
+                }
+                break;
+
+            case LOADING:
+                if (v != mLoadingView) {
+                    mLoadingView = v;
+                    return true;
+                }
+                break;
+
+            case ERROR:
+                if (v != mErrorView) {
+                    mErrorView = v;
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
     /** Returns if any of the observed {@link Data} instances are loading. */
-    public boolean isLoading() {
+    public final boolean isLoading() {
         if (mDatas.isEmpty()) {
             return false;
         }
@@ -435,7 +561,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     /** Returns if all of the observed {@link Data} instances are empty, or if none are being observed. */
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         if (mDatas.isEmpty()) {
             return true;
         }
@@ -447,14 +573,56 @@ public class DataLayout extends RelativeLayout {
         return true;
     }
 
-    private void updateShown() {
-        boolean shown = isThisViewShown();
-        mDataWatcher.setEnabled(shown);
-        if (shown != mShown) {
-            mShown = shown;
-            mShownTime = shown ? elapsedRealtime() : 0;
+    /** Re-assigns the component mapping by inspecting the {@link DataLayout.LayoutParams} of child views. */
+    public final void invalidateComponentMapping() {
+        if (detectAndAssignComponents()) {
             updateViews();
-            if (shown) {
+        }
+    }
+
+    /** Indicates if this view is active. The {@link Data} instances are notified as shown while active. */
+    public final boolean isActive() {
+        return mActive;
+    }
+
+    /**
+     * Called when the active state of this view changes. The {@link Data} instances are notified as shown while this
+     * view is active.
+     * @see #isActive()
+     * @see #setOnActiveChangeListener(OnActiveChangeListener)
+     */
+    protected void onActiveChanged(boolean active) {
+    }
+
+    private void dispatchActiveChanged(boolean active) {
+        if (mOnActiveChangeListener != null) {
+            mOnActiveChangeListener.onActiveChanged(active);
+        }
+    }
+
+    /** Called to apply an error message when an error occurs. Assigns the text to the error view by default. */
+    protected void applyErrorMessage(@Nullable CharSequence errorMessage) {
+        if (mErrorView instanceof TextView) {
+            ((TextView) mErrorView).setText(errorMessage);
+        }
+    }
+
+    private void dispatchError(@Nullable CharSequence errorMessage) {
+        if (mOnErrorListener != null) {
+            mOnErrorListener.onError(errorMessage);
+        }
+    }
+
+    private void updateActive() {
+        boolean active = isThisViewActive();
+        mDataWatcher.setEnabled(active);
+        if (active != mActive) {
+            mActive = active;
+            onActiveChanged(active);
+            dispatchActiveChanged(active);
+            mActiveStartTime = active ? elapsedRealtime() : 0;
+            updateViews();
+            if (active) {
                 for (int i = 0; i < mDatas.size(); i++) {
                     mDatas.get(i).notifyShown();
                 }
@@ -467,7 +635,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
-    private boolean isThisViewShown() {
+    private boolean isThisViewActive() {
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
                 isEnabled();
     }
@@ -481,12 +649,12 @@ public class DataLayout extends RelativeLayout {
         if (display == null) {
             return false;
         }
-        if (mShownTime <= 0) {
+        if (mActiveStartTime <= 0) {
             return false;
         }
         long threshold = (long) (1000 / display.getRefreshRate());
-        long millisShown = elapsedRealtime() - mShownTime;
-        return millisShown > threshold;
+        long millisActive = elapsedRealtime() - mActiveStartTime;
+        return millisActive > threshold;
     }
 
     /** Get a {@link Display} object suitable for checking the refresh rate. */
@@ -551,10 +719,8 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateErrorView() {
-        if (mErrorView instanceof TextView) {
-            TextView errorView = (TextView) mErrorView;
-            errorView.setText(mErrorMessage);
-        }
+        applyErrorMessage(mErrorMessage);
+        dispatchError(mErrorMessage);
     }
 
     @Nullable
@@ -649,8 +815,10 @@ public class DataLayout extends RelativeLayout {
     private static Animator loadAnimator(@NonNull Context context,
                                          @NonNull TypedArray typedArray,
                                          int index,
+                                         int fallbackIndex,
                                          @AnimatorRes int defaultValue) {
-        return AnimatorInflater.loadAnimator(context, typedArray.getResourceId(index, defaultValue));
+        return AnimatorInflater.loadAnimator(context,
+                typedArray.getResourceId(index, typedArray.getResourceId(fallbackIndex, defaultValue)));
     }
 
     //endregion
@@ -683,5 +851,86 @@ public class DataLayout extends RelativeLayout {
          * @return {@code true} makes the view visible, {@code false} makes it invisible.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
+    }
+
+    /** Callback interface for when the active state of this view changes. */
+    public interface OnActiveChangeListener {
+        void onActiveChanged(boolean active);
+    }
+
+    /** Callback interface for when an error message is to be applied to the view hierarchy. */
+    public interface OnErrorListener {
+        void onError(@Nullable CharSequence errorMessage);
+    }
+
+    /** Indicates an integer value is one of the {@link DataLayout} child components. */
+    @IntDef({ NONE, CONTENT, EMPTY, LOADING, ERROR })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Component {
+    }
+
+    /**
+     * Layout params for {@link DataLayout} children, which is used to specified the component of the child.
+     * @see DataLayout#CONTENT
+     * @see DataLayout#EMPTY
+     * @see DataLayout#LOADING
+     * @see DataLayout#ERROR
+     * @see DataLayout.Component
+     */
+    @SuppressWarnings("unused")
+    public static class LayoutParams extends RelativeLayout.LayoutParams {
+
+        @Component
+        private int mComponent = NONE;
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.DataLayout_Layout);
+            try {
+                //noinspection ResourceType
+                mComponent = a.getInt(R.styleable.DataLayout_Layout_layout_component, mComponent);
+            } finally {
+                a.recycle();
+            }
+        }
+
+        public LayoutParams(int w, int h) {
+            super(w, h);
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
+
+        public LayoutParams(MarginLayoutParams source) {
+            super(source);
+        }
+
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        public LayoutParams(RelativeLayout.LayoutParams source) {
+            super(source);
+        }
+
+        /** Copy constructor. */
+        @TargetApi(Build.VERSION_CODES.KITKAT)
+        public LayoutParams(LayoutParams source) {
+            super(source);
+            mComponent = source.mComponent;
+        }
+
+        /** @see #setComponent(int) */
+        @Component
+        public int getComponent() {
+            return mComponent;
+        }
+
+        /**
+         * Set the component represented by the child view attributed with these layout params. A change to the
+         * component will only take effect after a call to {@link DataLayout#invalidateComponentMapping()}.
+         * @param component The component enum int.
+         */
+        public void setComponent(@Component int component) {
+            mComponent = component;
+        }
     }
 }
