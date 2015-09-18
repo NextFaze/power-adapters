@@ -75,7 +75,7 @@ public class DataLayout extends RelativeLayout {
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
 
     public static final int NONE = 0;
-    public static final int CONTENT =1;
+    public static final int CONTENT = 1;
     public static final int EMPTY = 2;
     public static final int LOADING = 3;
     public static final int ERROR = 4;
@@ -158,6 +158,12 @@ public class DataLayout extends RelativeLayout {
     @NonNull
     private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.DEFAULT;
 
+    @Nullable
+    private OnActiveChangeListener mOnActiveChangeListener;
+
+    @Nullable
+    private OnErrorListener mOnErrorListener;
+
     /** Animator used to show views. */
     @Nullable
     private Animator mAnimatorIn;
@@ -173,10 +179,10 @@ public class DataLayout extends RelativeLayout {
     private boolean mAttachedToWindow;
 
     /** Indicates this view is visible to the user. */
-    private boolean mShown;
+    private boolean mActive;
 
     /** Track when this view became shown. */
-    private long mShownTime;
+    private long mActiveStartTime;
 
     /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
     private boolean mInflated;
@@ -287,21 +293,21 @@ public class DataLayout extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAttachedToWindow = true;
-        updateShown();
+        updateActive();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAttachedToWindow = false;
-        updateShown();
+        updateActive();
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         if (visibility == VISIBLE) {
-            updateShown();
+            updateActive();
         }
     }
 
@@ -309,7 +315,7 @@ public class DataLayout extends RelativeLayout {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (mInflated && visibility == VISIBLE) {
-            updateShown();
+            updateActive();
         }
     }
 
@@ -317,14 +323,14 @@ public class DataLayout extends RelativeLayout {
     protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (mInflated) {
-            updateShown();
+            updateActive();
         }
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        updateShown();
+        updateActive();
     }
 
     /**
@@ -360,7 +366,7 @@ public class DataLayout extends RelativeLayout {
                     data.notifyHidden();
                 } else if (newDatas.contains(data)) {
                     // We may already be showing, so notify new data.
-                    if (mShown) {
+                    if (mActive) {
                         data.notifyShown();
                     } else {
                         data.notifyHidden();
@@ -404,6 +410,28 @@ public class DataLayout extends RelativeLayout {
         if (visibilityPolicy != mVisibilityPolicy) {
             mVisibilityPolicy = visibilityPolicy;
             updateViews();
+        }
+    }
+
+    @Nullable
+    public final OnActiveChangeListener getOnActiveChangeListener() {
+        return mOnActiveChangeListener;
+    }
+
+    public final void setOnActiveChangeListener(@Nullable OnActiveChangeListener onActiveChangeListener) {
+        if (onActiveChangeListener != mOnActiveChangeListener) {
+            mOnActiveChangeListener = onActiveChangeListener;
+        }
+    }
+
+    @Nullable
+    public final OnErrorListener getOnErrorListener() {
+        return mOnErrorListener;
+    }
+
+    public final void setOnErrorListener(@Nullable OnErrorListener onErrorListener) {
+        if (onErrorListener != mOnErrorListener) {
+            mOnErrorListener = onErrorListener;
         }
     }
 
@@ -552,14 +580,49 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    private void updateShown() {
-        boolean shown = isThisViewShown();
-        mDataWatcher.setEnabled(shown);
-        if (shown != mShown) {
-            mShown = shown;
-            mShownTime = shown ? elapsedRealtime() : 0;
+    /** Indicates if this view is active. The {@link Data} instances are notified as shown while active. */
+    public final boolean isActive() {
+        return mActive;
+    }
+
+    /**
+     * Called when the active state of this view changes. The {@link Data} instances are notified as shown while this
+     * view is active.
+     * @see #isActive()
+     * @see #setOnActiveChangeListener(OnActiveChangeListener)
+     */
+    protected void onActiveChanged(boolean active) {
+    }
+
+    private void dispatchActiveChanged(boolean active) {
+        if (mOnActiveChangeListener != null) {
+            mOnActiveChangeListener.onActiveChanged(active);
+        }
+    }
+
+    /** Called to apply an error message when an error occurs. Assigns the text to the error view by default. */
+    protected void applyErrorMessage(@Nullable CharSequence errorMessage) {
+        if (mErrorView instanceof TextView) {
+            ((TextView) mErrorView).setText(errorMessage);
+        }
+    }
+
+    private void dispatchError(@Nullable CharSequence errorMessage) {
+        if (mOnErrorListener != null) {
+            mOnErrorListener.onError(errorMessage);
+        }
+    }
+
+    private void updateActive() {
+        boolean active = isThisViewActive();
+        mDataWatcher.setEnabled(active);
+        if (active != mActive) {
+            mActive = active;
+            onActiveChanged(active);
+            dispatchActiveChanged(active);
+            mActiveStartTime = active ? elapsedRealtime() : 0;
             updateViews();
-            if (shown) {
+            if (active) {
                 for (int i = 0; i < mDatas.size(); i++) {
                     mDatas.get(i).notifyShown();
                 }
@@ -572,7 +635,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     /** Returns if this view is currently considered "shown" based on various attributes. */
-    private boolean isThisViewShown() {
+    private boolean isThisViewActive() {
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
                 isEnabled();
     }
@@ -586,12 +649,12 @@ public class DataLayout extends RelativeLayout {
         if (display == null) {
             return false;
         }
-        if (mShownTime <= 0) {
+        if (mActiveStartTime <= 0) {
             return false;
         }
         long threshold = (long) (1000 / display.getRefreshRate());
-        long millisShown = elapsedRealtime() - mShownTime;
-        return millisShown > threshold;
+        long millisActive = elapsedRealtime() - mActiveStartTime;
+        return millisActive > threshold;
     }
 
     /** Get a {@link Display} object suitable for checking the refresh rate. */
@@ -656,10 +719,8 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateErrorView() {
-        if (mErrorView instanceof TextView) {
-            TextView errorView = (TextView) mErrorView;
-            errorView.setText(mErrorMessage);
-        }
+        applyErrorMessage(mErrorMessage);
+        dispatchError(mErrorMessage);
     }
 
     @Nullable
@@ -790,6 +851,16 @@ public class DataLayout extends RelativeLayout {
          * @return {@code true} makes the view visible, {@code false} makes it invisible.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
+    }
+
+    /** Callback interface for when the active state of this view changes. */
+    public interface OnActiveChangeListener {
+        void onActiveChanged(boolean active);
+    }
+
+    /** Callback interface for when an error message is to be applied to the view hierarchy. */
+    public interface OnErrorListener {
+        void onError(@Nullable CharSequence errorMessage);
     }
 
     /** Indicates an integer value is one of the {@link DataLayout} child components. */
