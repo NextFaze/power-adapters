@@ -47,18 +47,15 @@
             android:id="@+id/news_fragment_data_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            app:contentView="@+id/news_fragment_list"
-            app:loadingView="@+id/news_fragment_loading"
-            app:emptyView="@+id/news_fragment_empty"
-            app:errorView="@+id/news_fragment_error">
+            android:layout_weight="1">
 
         <!-- List -->
 
         <ListView
                 android:id="@+id/news_fragment_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                app:layout_component="content"/>
 
         <!-- Loading -->
 
@@ -67,7 +64,8 @@
                 android:id="@+id/news_fragment_loading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"/>
+                android:layout_centerInParent="true"
+                app:layout_component="loading"/>
 
         <!-- Empty -->
 
@@ -76,6 +74,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                app:layout_component="empty"
                 android:text="No news today!"
                 tools:ignore="HardcodedText"/>
 
@@ -86,6 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                app:layout_component="error"
                 android:textColor="#ffff0000"
                 android:textStyle="italic"/>
 
