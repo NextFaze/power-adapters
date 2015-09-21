@@ -44,6 +44,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     /** Indicates the currently loaded data is invalid and needs to be reloaded next opportunity. */
     private boolean mDirty = true;
 
+    /** Causes elements to be cleared next time we become shown. */
+    private boolean mClear;
+
     /** @see #available() */
     private int mAvailable = Integer.MAX_VALUE;
 
@@ -223,6 +226,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
             setAvailable(Integer.MAX_VALUE);
             notifyItemRangeRemoved(0, size);
         }
+        mClear = false;
     }
 
     @Override
@@ -240,7 +244,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
     @Override
     public final void invalidate() {
+        cancelTask();
         mDirty = true;
+        mClear = true;
     }
 
     @Override
@@ -275,10 +281,11 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected final void onShown(long millisHidden) {
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-            mDirty = true;
-        }
-        if (mDirty) {
             cancelTask();
+            mDirty = true;
+            mClear = true;
+        }
+        if (mClear) {
             clear();
         }
         loadDataIfAppropriate();
@@ -311,6 +318,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
                     onClear();
                     mDirty = false;
+                    mClear = false;
                     int oldSize = mData.size();
                     int newSize = data.size();
                     int deltaSize = newSize - oldSize;
