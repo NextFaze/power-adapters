@@ -65,6 +65,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private boolean mLoading;
     private int mAvailable = Integer.MAX_VALUE;
     private boolean mDirty = true;
+    private boolean mClear;
 
     protected IncrementalArrayData() {
         this(DEFAULT_THREAD_FACTORY);
@@ -266,14 +267,16 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     @Override
     public final void invalidate() {
+        stopThread();
         mDirty = true;
+        mClear = true;
     }
 
     @Override
     public final void refresh() {
+        stopThread();
         mDirty = true;
         setAvailable(Integer.MAX_VALUE);
-        stopThread();
         startThreadIfNeeded();
     }
 
@@ -331,10 +334,10 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
         if (millisHidden >= mAutoInvalidateDelay) {
             log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
+            stopThread();
             mDirty = true;
         }
-        if (mDirty) {
-            stopThread();
+        if (mClear) {
             clearElementsWithCallback(true);
         }
         startThreadIfNeeded();
@@ -375,6 +378,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void clearElementsWithCallback(boolean notifyRemoved) {
+        mClear = false;
         int size = mData.size();
         if (size > 0) {
             onClear();
