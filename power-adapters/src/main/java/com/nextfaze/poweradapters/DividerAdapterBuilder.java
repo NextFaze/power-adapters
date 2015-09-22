@@ -119,6 +119,25 @@ public final class DividerAdapterBuilder implements Decorator {
                 return true;
             }
         },
+        /** The trailing divider will be shown if the wrapped adapter is empty. */
+        SHOW_TRAILING {
+            @Override
+            boolean shouldShowTrailing(int itemCount) {
+                return true;
+            }
+        },
+        /** The leading and trailing dividers will be shown if the wrapped adapter is empty. */
+        SHOW_LEADING_AND_TRAILING {
+            @Override
+            boolean shouldShowLeading(int itemCount) {
+                return true;
+            }
+
+            @Override
+            boolean shouldShowTrailing(int itemCount) {
+                return true;
+            }
+        },
         /** No dividers are shown if the wrapped adapter is empty. */
         SHOW_NOTHING;
 
