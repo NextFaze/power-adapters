@@ -47,6 +47,9 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     /** Causes elements to be cleared next time we become shown. */
     private boolean mClear;
 
+    /** Indicates more elements are currently loading. */
+    private boolean mLoading;
+
     /** @see #available() */
     private int mAvailable = Integer.MAX_VALUE;
 
@@ -234,12 +237,14 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         mDirty = true;
         cancelTask();
         loadDataIfAppropriate();
+        updateLoading();
     }
 
     @Override
     public final void reload() {
         clear();
         refresh();
+        updateLoading();
     }
 
     @Override
@@ -247,11 +252,12 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         cancelTask();
         mDirty = true;
         mClear = true;
+        updateLoading();
     }
 
     @Override
     public final boolean isLoading() {
-        return mTask != null;
+        return mLoading;
     }
 
     @Override
@@ -289,6 +295,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
             clear();
         }
         loadDataIfAppropriate();
+        updateLoading();
     }
 
     @CallSuper
@@ -300,6 +307,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     @Override
     protected final void onHideTimeout() {
         cancelTask();
+        updateLoading();
     }
 
     private void loadDataIfAppropriate() {
@@ -341,24 +349,17 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
                     }
                     setAvailable(0);
                     mTask = null;
-                    notifyLoadingChanged();
                     loadDataIfAppropriate();
-                }
-
-                @Override
-                protected void onCanceled() throws Throwable {
-                    mTask = null;
-                    notifyLoadingChanged();
+                    updateLoading();
                 }
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
                     mTask = null;
-                    notifyLoadingChanged();
+                    updateLoading();
                     notifyError(e);
                 }
             };
-            notifyLoadingChanged();
             mTask.execute();
         }
     }
@@ -367,8 +368,23 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         if (mTask != null) {
             mTask.cancel();
             mTask = null;
-            notifyLoadingChanged();
         }
+    }
+
+    private void updateLoading() {
+        setLoading(mTask != null);
+    }
+
+    private void setLoading(final boolean loading) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mLoading != loading) {
+                    mLoading = loading;
+                    notifyLoadingChanged();
+                }
+            }
+        });
     }
 
     private void setAvailable(final int available) {
