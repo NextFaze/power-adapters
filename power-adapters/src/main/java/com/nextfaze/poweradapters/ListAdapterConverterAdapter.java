@@ -45,10 +45,8 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
             // possible subsequent notifications are fully executed before it does so.
             // This ensures it doesn't try to access ranges of this PowerAdapter that may be in a dirty state, such as
             // children of ConcatAdapter.
-//            mHandler.removeCallbacks(mNotifyDataSetChangedRunnable);
-//            mHandler.postAtFrontOfQueue(mNotifyDataSetChangedRunnable);
-            // Hack disabled for now.
-            mNotifyDataSetChangedRunnable.run();
+            mHandler.removeCallbacks(mNotifyDataSetChangedRunnable);
+            mHandler.postAtFrontOfQueue(mNotifyDataSetChangedRunnable);
         }
     };
 
