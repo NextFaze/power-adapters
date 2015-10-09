@@ -122,15 +122,26 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     public boolean isEnabled(int position) {
         if (super.getItemCount() == 0) {
             if (isLeadingVisible() && position == 0) {
-                //noinspection ConstantConditions
                 return false;
             }
             if (isTrailingVisible() && position == getItemCount() - 1) {
-                //noinspection ConstantConditions
                 return false;
             }
         }
         return super.isEnabled(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        if (super.getItemCount() == 0) {
+            if (isLeadingVisible() && position == 0) {
+                return NO_ID;
+            }
+            if (isTrailingVisible() && position == getItemCount() - 1) {
+                return NO_ID;
+            }
+        }
+        return super.getItemId(position);
     }
 
     private boolean isLeadingVisible() {

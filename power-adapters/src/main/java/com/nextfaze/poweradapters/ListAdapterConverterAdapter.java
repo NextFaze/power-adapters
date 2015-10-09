@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -12,7 +13,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import static android.os.Looper.getMainLooper;
+
 final class ListAdapterConverterAdapter extends BaseAdapter {
+
+    @NonNull
+    private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
@@ -24,10 +30,25 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
 
     @NonNull
+    private final Runnable mNotifyDataSetChangedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            notifyDataSetChanged();
+        }
+    };
+
+    @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
-            notifyDataSetChanged();
+            // AdapterView will act on this notification immediately, so we use the following risky technique to ensure
+            // possible subsequent notifications are fully executed before it does so.
+            // This ensures it doesn't try to access ranges of this PowerAdapter that may be in a dirty state, such as
+            // children of ConcatAdapter.
+//            mHandler.removeCallbacks(mNotifyDataSetChangedRunnable);
+//            mHandler.postAtFrontOfQueue(mNotifyDataSetChangedRunnable);
+            // Hack disabled for now.
+            mNotifyDataSetChangedRunnable.run();
         }
     };
 
