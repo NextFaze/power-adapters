@@ -9,25 +9,18 @@ import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 @Accessors(prefix = "m")
 public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @NonNull
-    private final Map<ViewType, Binder> mBinders;
+    private final WeakHashMap<ViewType, Binder> mBinders = new WeakHashMap<>();
 
     @NonNull
     private final Mapper mMapper;
 
     public BindingAdapter(@NonNull Mapper mapper) {
-        Collection<? extends Binder> allBinders = mapper.getAllBinders();
-        mBinders = new HashMap<>(allBinders.size());
-        for (Binder binder : allBinders) {
-            mBinders.put(binder.getViewType(), binder);
-        }
         mMapper = mapper;
     }
 
@@ -38,6 +31,10 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     @Override
     public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
         Binder binder = mBinders.get(viewType);
+        if (binder == null) {
+            // Should never happen, as callers are required to invoke getItemViewType(int) before invoking this method.
+            throw new AssertionError("No binder associated with view type");
+        }
         return binder.newView(parent);
     }
 
@@ -52,7 +49,10 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
     @Override
     public final ViewType getItemViewType(int position) {
         Object item = getItem(position);
-        return binderOrThrow(item, position).getViewType();
+        Binder binder = binderOrThrow(item, position);
+        ViewType viewType = binder.getViewType(item, position);
+        mBinders.put(viewType, binder);
+        return viewType;
     }
 
     @Override
