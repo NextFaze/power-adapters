@@ -38,8 +38,8 @@ public abstract class BinderWrapper implements Binder {
 
     @NonNull
     @Override
-    public ViewType getViewType() {
-        return mBinder.getViewType();
+    public ViewType getViewType(@NonNull Object obj, int position) {
+        return mBinder.getViewType(obj, position);
     }
 
     @Override

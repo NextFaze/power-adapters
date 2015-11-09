@@ -27,7 +27,7 @@ public abstract class AbstractBinder implements Binder {
 
     @NonNull
     @Override
-    public ViewType getViewType() {
+    public ViewType getViewType(@NonNull Object obj, int position) {
         return mViewType;
     }
 }

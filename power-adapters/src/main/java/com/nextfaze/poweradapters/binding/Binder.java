@@ -43,11 +43,11 @@ public interface Binder {
      */
     long getItemId(@NonNull Object obj, int position);
 
+    @NonNull
+    ViewType getViewType(@NonNull Object obj, int position);
+
     /**
      * @see PowerAdapter#hasStableIds()
      */
     boolean hasStableIds();
-
-    @NonNull
-    ViewType getViewType();
 }
