@@ -169,6 +169,7 @@ public abstract class AbstractData<T> implements Data<T> {
     @Override
     public void close() {
         if (!mClosed) {
+            mPoster.dispose();
             mHandler.removeCallbacks(mHideTimeoutRunnable);
             mClosed = true;
             dispatchClose();

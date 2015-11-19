@@ -43,6 +43,10 @@ final class CoalescingPoster {
         }
     }
 
+    void dispose() {
+        mHandler.removeCallbacks(mFlushRunnable);
+    }
+
     private void flush() {
         Runnable runnable;
         while ((runnable = mRunnableQueue.poll()) != null) {
