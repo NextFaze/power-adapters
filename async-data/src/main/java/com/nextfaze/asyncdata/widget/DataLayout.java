@@ -181,6 +181,8 @@ public class DataLayout extends RelativeLayout {
     /** Indicates this view is visible to the user and active for the purpose of showing the data. */
     private boolean mActive;
 
+    // TODO: Mark when view is visible, rather than active.
+
     /** Track when this view became active. */
     private long mActiveStartTime;
 
@@ -663,7 +665,11 @@ public class DataLayout extends RelativeLayout {
         if (Build.VERSION.SDK_INT >= JELLY_BEAN_MR1) {
             return getDisplay();
         } else {
-            return ((Activity) getContext()).getWindowManager().getDefaultDisplay();
+            Context context = getContext();
+            if (!(context instanceof Activity)) {
+                return null;
+            }
+            return ((Activity) context).getWindowManager().getDefaultDisplay();
         }
     }
 
