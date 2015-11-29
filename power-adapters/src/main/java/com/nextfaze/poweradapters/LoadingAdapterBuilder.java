@@ -157,14 +157,14 @@ public final class LoadingAdapterBuilder implements Decorator {
 
         /** Must be called when the value of {@link #isLoading()} changes. */
         @UiThread
-        protected final void notifyLoadingChanged() {
+        public final void notifyLoadingChanged() {
             if (mAdapter != null) {
                 mAdapter.notifyLoadingChanged();
             }
         }
 
         /** Must be called when the value of {@link #isEmpty()} changes. */
-        protected final void notifyEmptyChanged() {
+        public final void notifyEmptyChanged() {
             if (mAdapter != null) {
                 mAdapter.notifyEmptyChanged();
             }

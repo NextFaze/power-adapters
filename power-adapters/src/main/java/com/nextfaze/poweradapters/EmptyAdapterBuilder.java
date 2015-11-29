@@ -101,7 +101,7 @@ public final class EmptyAdapterBuilder implements Decorator {
 
         /** Must be called when the value of {@link #isEmpty()} changes. */
         @UiThread
-        protected final void notifyEmptyChanged() {
+        public final void notifyEmptyChanged() {
             if (mAdapter != null) {
                 mAdapter.updateVisible();
             }
