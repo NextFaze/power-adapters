@@ -16,6 +16,9 @@ public final class EmptyAdapterBuilder implements Decorator {
     @Nullable
     private Item mItem;
 
+    @Nullable
+    private Delegate mDelegate;
+
     private boolean mEnabled;
 
     @NonNull
@@ -50,17 +53,25 @@ public final class EmptyAdapterBuilder implements Decorator {
         return this;
     }
 
-    @CheckResult
+    /**
+     * Sets the delegated used to determine the empty state. If {@code null}, a default implementation is provided that
+     * checks the size of the wrapped adapter.
+     */
     @NonNull
-    public PowerAdapter build(@NonNull PowerAdapter adapter) {
-        return build(adapter, new DefaultDelegate(adapter));
+    public EmptyAdapterBuilder delegate(@Nullable Delegate delegate) {
+        mDelegate = delegate;
+        return this;
     }
 
     @CheckResult
     @NonNull
-    public PowerAdapter build(@NonNull PowerAdapter adapter, @NonNull Delegate delegate) {
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
         if (mItem == null) {
             return adapter;
+        }
+        Delegate delegate = mDelegate;
+        if (delegate == null) {
+            delegate = new DefaultDelegate(adapter);
         }
         return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
     }

@@ -121,7 +121,8 @@ public class ConcatFragment extends BaseFragment {
 
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.list_empty_item)
-                .build(adapter, new DataEmptyDelegate(data));
+                .delegate(new DataEmptyDelegate(data))
+                .build(adapter);
 
         return new Pair<Data<?>, PowerAdapter>(data, adapter);
     }
