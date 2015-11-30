@@ -219,7 +219,8 @@ public class FileTreeFragment extends BaseFragment {
 
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.file_list_empty_item)
-                .build(adapter, new DataEmptyDelegate(data));
+                .delegate(new DataEmptyDelegate(data))
+                .build(adapter);
 
         adapter = new DataLifecycleAdapter(adapter, data);
 
