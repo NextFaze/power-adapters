@@ -38,6 +38,7 @@ final class LoadingAdapter extends ItemAdapter {
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         mDelegate.onFirstObserverRegistered();
+        updateVisible();
     }
 
     @CallSuper
@@ -45,6 +46,7 @@ final class LoadingAdapter extends ItemAdapter {
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
         mDelegate.onLastObserverUnregistered();
+        updateVisible();
     }
 
     void notifyEmptyChanged() {
