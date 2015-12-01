@@ -63,13 +63,13 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
                 }
             }
             mDelegate = delegate;
+            updateObservers();
             if (mDelegate != null) {
                 int itemCount = mDelegate.getItemCount();
                 if (itemCount > 0) {
                     notifyItemRangeInserted(0, itemCount);
                 }
             }
-            updateObservers();
         }
     }
 
