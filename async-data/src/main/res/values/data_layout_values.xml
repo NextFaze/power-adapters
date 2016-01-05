@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Styleables -->
-
     <declare-styleable name="DataLayout">
         <!-- Deprecated in favour of "layout_component" layout attribute -->
         <attr name="contentView" format="reference"/>
@@ -18,6 +16,12 @@
         <attr name="data_layout_animatorIn" format="reference"/>
         <attr name="data_layout_animatorOut" format="reference"/>
         <attr name="data_layout_animationsEnabled" format="boolean"/>
+
+        <attr name="data_layout_componentVisibilityWhenHidden" format="enum">
+            <enum name="invisible" value="4"/>
+            <enum name="gone" value="8"/>
+        </attr>
+
     </declare-styleable>
 
     <declare-styleable name="DataLayout_Layout">
@@ -29,8 +33,6 @@
             <enum name="error" value="4"/>
         </attr>
     </declare-styleable>
-
-    <!-- IDs -->
 
     <item name="data_layout_animator" type="id"/>
 

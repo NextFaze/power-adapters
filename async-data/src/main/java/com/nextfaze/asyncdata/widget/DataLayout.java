@@ -175,6 +175,8 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private View mVisibleView;
 
+    private int mComponentVisibilityWhenHidden = INVISIBLE;
+
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
@@ -215,6 +217,8 @@ public class DataLayout extends RelativeLayout {
                     R.styleable.DataLayout_animatorOut, DEFAULT_ANIMATION_OUT);
             mAnimationEnabled = a.getBoolean(R.styleable.DataLayout_data_layout_animationsEnabled,
                     a.getBoolean(R.styleable.DataLayout_animationsEnabled, mAnimationEnabled));
+            mComponentVisibilityWhenHidden = a.getInt(R.styleable.DataLayout_data_layout_componentVisibilityWhenHidden,
+                    mComponentVisibilityWhenHidden);
         } finally {
             a.recycle();
         }
@@ -236,16 +240,16 @@ public class DataLayout extends RelativeLayout {
 
         // All components are initially invisible.
         if (mContentView != null) {
-            mContentView.setVisibility(INVISIBLE);
+            mContentView.setVisibility(mComponentVisibilityWhenHidden);
         }
         if (mEmptyView != null) {
-            mEmptyView.setVisibility(INVISIBLE);
+            mEmptyView.setVisibility(mComponentVisibilityWhenHidden);
         }
         if (mLoadingView != null) {
-            mLoadingView.setVisibility(INVISIBLE);
+            mLoadingView.setVisibility(mComponentVisibilityWhenHidden);
         }
         if (mErrorView != null) {
-            mErrorView.setVisibility(INVISIBLE);
+            mErrorView.setVisibility(mComponentVisibilityWhenHidden);
         }
 
         updateViews();
@@ -503,6 +507,23 @@ public class DataLayout extends RelativeLayout {
         return NONE;
     }
 
+    @ComponentVisibilityWhenHidden
+    public final int getComponentVisibilityWhenHidden() {
+        return mComponentVisibilityWhenHidden;
+    }
+
+    /** Sets the visibility mode to apply when hiding a component view, which is {@link View#INVISIBLE} by default. */
+    public final void setComponentVisibilityWhenHidden(@ComponentVisibilityWhenHidden int componentVisibilityWhenHidden) {
+        assertValidComponentVisibilityWhenHidden(componentVisibilityWhenHidden);
+        mComponentVisibilityWhenHidden = componentVisibilityWhenHidden;
+    }
+
+    private void assertValidComponentVisibilityWhenHidden(int componentVisibilityWhenHidden) {
+        if (componentVisibilityWhenHidden != INVISIBLE && componentVisibilityWhenHidden != GONE) {
+            throw new IllegalArgumentException("componentVisibilityWhenHidden must be INVISIBLE or GONE");
+        }
+    }
+
     private boolean detectAndAssignComponents() {
         boolean changed = false;
         for (int i = 0; i < getChildCount(); i++) {
@@ -593,6 +614,7 @@ public class DataLayout extends RelativeLayout {
      * @see #isActive()
      * @see #setOnActiveChangeListener(OnActiveChangeListener)
      */
+    @SuppressWarnings("UnusedParameters")
     protected void onActiveChanged(boolean active) {
     }
 
@@ -770,11 +792,11 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    private static void onAnimateOutEnd(Animator animation, @NonNull View v) {
+    private void onAnimateOutEnd(Animator animation, @NonNull View v) {
         // Check the animator here to prevent canceled animations from unintentionally hiding the view.
         // Animations that are canceled will have had their animator reassigned, and this check won't pass.
         if (getAnimator(v) == animation) {
-            v.setVisibility(INVISIBLE);
+            v.setVisibility(mComponentVisibilityWhenHidden);
         }
         setAnimator(v, null);
     }
@@ -854,7 +876,8 @@ public class DataLayout extends RelativeLayout {
          * The view of the first callback to return {@code true} will be made visible.
          * @param dataLayout The parent {@link DataLayout}.
          * @param v The child component view being checked for visibility.
-         * @return {@code true} makes the view visible, {@code false} makes it invisible.
+         * @return {@code true} makes the view visible, {@code false} hides it, using the visibility specified in {@link
+         * #setComponentVisibilityWhenHidden(int)}.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
     }
@@ -869,10 +892,16 @@ public class DataLayout extends RelativeLayout {
         void onError(@Nullable CharSequence errorMessage);
     }
 
-    /** Indicates an integer value is one of the {@link DataLayout} child components. */
+    /** Denotes an integer value that should be one of the {@link DataLayout} child components. */
     @IntDef({ NONE, CONTENT, EMPTY, LOADING, ERROR })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Component {
+    }
+
+    /** Denotes an integer value corresponding to one of the {@link View} hidden visibility constants. */
+    @IntDef({ INVISIBLE, GONE })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ComponentVisibilityWhenHidden {
     }
 
     /**
