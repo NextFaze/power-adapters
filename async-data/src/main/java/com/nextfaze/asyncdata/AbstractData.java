@@ -23,10 +23,6 @@ public abstract class AbstractData<T> implements Data<T> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractData.class);
 
-    public static final long NEVER = -1;
-
-    private static final long HIDE_TIMEOUT_DEFAULT = NEVER;
-
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
 
@@ -45,50 +41,16 @@ public abstract class AbstractData<T> implements Data<T> {
     @NonNull
     private final CoalescingPoster mPoster = new CoalescingPoster(mHandler);
 
-    @NonNull
-    private final Runnable mHideTimeoutRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (!mClosed) {
-                dispatchHideTimeout();
-            }
-        }
-    };
-
     private boolean mShown;
     private boolean mClosed;
     private long mShowTime;
     private long mHideTime;
 
-    // TODO: Remove hide timeout.
-
-    private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
-
-    /** @see #setHideTimeout(long) */
-    @UiThread
-    public final long getHideTimeout() {
-        return mHideTimeout;
-    }
-
-    /**
-     * Set the number of milliseconds before {@link #onHideTimeout()} is called after being hidden. This feature is
-     * disabled by default. A negative value or {@link #NEVER} disables the hide timeout callback.
-     * @param hideTimeout The hide timeout in milliseconds.
-     */
-    @UiThread
-    public final void setHideTimeout(long hideTimeout) {
-        mHideTimeout = hideTimeout;
-    }
-
     //region Observer Registration
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        boolean firstAdded;
-        synchronized (mDataObservers) {
-            mDataObservers.register(dataObserver);
-            firstAdded = mDataObservers.size() == 1;
-        }
-        if (firstAdded) {
+        mDataObservers.register(dataObserver);
+        if (mDataObservers.size() == 1) {
             notifyShown();
             onFirstDataObserverRegistered();
         }
@@ -96,12 +58,8 @@ public abstract class AbstractData<T> implements Data<T> {
 
     @Override
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        boolean lastRemoved;
-        synchronized (mDataObservers) {
-            mDataObservers.unregister(dataObserver);
-            lastRemoved = mDataObservers.size() == 0;
-        }
-        if (lastRemoved) {
+        mDataObservers.unregister(dataObserver);
+        if (mDataObservers.size() == 0) {
             onLastDataObserverUnregistered();
             notifyHidden();
         }
@@ -163,7 +121,6 @@ public abstract class AbstractData<T> implements Data<T> {
             mShowTime = elapsedRealtime();
             mShown = true;
             dispatchShown(elapsedRealtime() - mHideTime);
-            mHandler.removeCallbacks(mHideTimeoutRunnable);
         }
     }
 
@@ -172,10 +129,6 @@ public abstract class AbstractData<T> implements Data<T> {
             mHideTime = elapsedRealtime();
             mShown = false;
             dispatchHidden(elapsedRealtime() - mShowTime);
-            mHandler.removeCallbacks(mHideTimeoutRunnable);
-            if (mHideTimeout >= 0 && !mClosed) {
-                mHandler.postDelayed(mHideTimeoutRunnable, mHideTimeout);
-            }
         }
     }
 
@@ -184,7 +137,6 @@ public abstract class AbstractData<T> implements Data<T> {
     public void close() {
         if (!mClosed) {
             mPoster.dispose();
-            mHandler.removeCallbacks(mHideTimeoutRunnable);
             mClosed = true;
             dispatchClose();
         }
@@ -324,13 +276,6 @@ public abstract class AbstractData<T> implements Data<T> {
     protected void onHidden(long millisShown) {
     }
 
-    /**
-     * Called when the hide timeout duration has elapsed.
-     * @see #setHideTimeout(long)
-     */
-    protected void onHideTimeout() {
-    }
-
     /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
     protected void runOnUiThread(@NonNull Runnable runnable) {
         if (Looper.myLooper() == mHandler.getLooper()) {
@@ -353,14 +298,6 @@ public abstract class AbstractData<T> implements Data<T> {
             onHidden(millisShown);
         } catch (Throwable e) {
             log.error("Error during hidden callback", e);
-        }
-    }
-
-    private void dispatchHideTimeout() {
-        try {
-            onHideTimeout();
-        } catch (Throwable e) {
-            log.error("Error during hide timeout callback", e);
         }
     }
 

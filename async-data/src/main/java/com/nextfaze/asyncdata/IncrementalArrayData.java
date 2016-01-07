@@ -349,14 +349,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         log.trace("Hidden after being shown for {} ms", millisShown);
     }
 
-    @CallSuper
-    @Override
-    protected final void onHideTimeout() {
-        log.trace("Hide timeout elapsed ({} ms); clearing and stopping thread", getHideTimeout());
-        clearElementsWithCallback(true);
-        stopThread();
-    }
-
     /**
      * Called from a worker thread to load the next increment of items.
      * @return A result containing the next set of elements to be appended, or {@code null} if there are no more items.

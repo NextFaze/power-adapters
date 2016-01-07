@@ -303,13 +303,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected final void onHidden(long millisShown) {
     }
 
-    @CallSuper
-    @Override
-    protected final void onHideTimeout() {
-        cancelTask();
-        updateLoading();
-    }
-
     private void loadDataIfAppropriate() {
         // We only start loading the data if it's not already loading, and we're shown.
         // If we're not shown we don't care about the data.
