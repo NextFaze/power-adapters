@@ -17,4 +17,8 @@ abstract class Observers<T> {
     final void unregister(@NonNull T t) {
         mObservers.remove(t);
     }
+
+    final int size() {
+        return mObservers.size();
+    }
 }

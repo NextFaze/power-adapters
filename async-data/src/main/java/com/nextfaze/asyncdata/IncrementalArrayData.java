@@ -390,7 +390,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void startThreadIfNeeded() {
-        if (mDirty && mThread == null && isShown()) {
+        if (mDirty && mThread == null && getDataObserverCount() > 0) {
             mDirty = false;
             log.trace("Starting thread");
             onLoadBegin();

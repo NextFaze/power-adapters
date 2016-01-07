@@ -31,20 +31,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
-import static com.nextfaze.asyncdata.widget.SetUtils.newHashSet;
-import static com.nextfaze.asyncdata.widget.SetUtils.symmetricDifference;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 /**
  * A container view that, when hooked up to {@link Data} instance(s), will automatically show/hide child component
- * views based on the loading/empty/error state of the data.
+ * views based on the state of the data.
  * Child views are assigned components using the {@link R.styleable#DataLayout_Layout_layout_component} attribute.
  * <p/>Each {@link DataLayout} can optionally contain the following components as child views:
  * <p/>
@@ -159,7 +155,7 @@ public class DataLayout extends RelativeLayout {
     private VisibilityPolicy mVisibilityPolicy = VisibilityPolicy.DEFAULT;
 
     @Nullable
-    private OnActiveChangeListener mOnActiveChangeListener;
+    private OnVisibleChangeListener mOnVisibleChangeListener;
 
     @Nullable
     private OnErrorListener mOnErrorListener;
@@ -180,13 +176,11 @@ public class DataLayout extends RelativeLayout {
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
 
-    /** Indicates this view is visible to the user and active for the purpose of showing the data. */
-    private boolean mActive;
+    /** Indicates this view is visible to the user. */
+    private boolean mVisible;
 
-    // TODO: Mark when view is visible, rather than active.
-
-    /** Track when this view became active. */
-    private long mActiveStartTime;
+    /** Track when this view became visible. */
+    private long mVisibleStartTime;
 
     /** Used to work around NPE caused by {@link #onVisibilityChanged(View, int)} self call in super class. */
     private boolean mInflated;
@@ -299,21 +293,21 @@ public class DataLayout extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAttachedToWindow = true;
-        updateActive();
+        updateVisible();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mAttachedToWindow = false;
-        updateActive();
+        updateVisible();
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         if (visibility == VISIBLE) {
-            updateActive();
+            updateVisible();
         }
     }
 
@@ -321,7 +315,7 @@ public class DataLayout extends RelativeLayout {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (mInflated && visibility == VISIBLE) {
-            updateActive();
+            updateVisible();
         }
     }
 
@@ -329,14 +323,14 @@ public class DataLayout extends RelativeLayout {
     protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (mInflated) {
-            updateActive();
+            updateVisible();
         }
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        updateActive();
+        updateVisible();
     }
 
     /**
@@ -362,27 +356,11 @@ public class DataLayout extends RelativeLayout {
      */
     public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
         mDataWatcher.setDatas(datas);
-        Set<Data<?>> oldDatas = new HashSet<>(mDatas);
-        Set<Data<?>> newDatas = newHashSet(datas);
-        Set<Data<?>> changed = symmetricDifference(newDatas, oldDatas);
-        if (!changed.isEmpty()) {
-            for (Data<?> data : changed) {
-                if (oldDatas.contains(data)) {
-                    // Old data needs to be notified it's no longer shown.
-                    data.notifyHidden();
-                } else if (newDatas.contains(data)) {
-                    // We may already be showing, so notify new data.
-                    if (mActive) {
-                        data.notifyShown();
-                    } else {
-                        data.notifyHidden();
-                    }
-                }
-            }
-            mDatas.clear();
-            mDatas.addAll(newDatas);
-            updateViews();
+        mDatas.clear();
+        for (Data<?> data : datas) {
+            mDatas.add(data);
         }
+        updateViews();
     }
 
     /** Returns a copy of the {@link Data} instances being observed. */
@@ -420,13 +398,13 @@ public class DataLayout extends RelativeLayout {
     }
 
     @Nullable
-    public final OnActiveChangeListener getOnActiveChangeListener() {
-        return mOnActiveChangeListener;
+    public final OnVisibleChangeListener getOnVisibleChangeListener() {
+        return mOnVisibleChangeListener;
     }
 
-    public final void setOnActiveChangeListener(@Nullable OnActiveChangeListener onActiveChangeListener) {
-        if (onActiveChangeListener != mOnActiveChangeListener) {
-            mOnActiveChangeListener = onActiveChangeListener;
+    public final void setOnVisibleChangeListener(@Nullable OnVisibleChangeListener onVisibleChangeListener) {
+        if (onVisibleChangeListener != mOnVisibleChangeListener) {
+            mOnVisibleChangeListener = onVisibleChangeListener;
         }
     }
 
@@ -603,24 +581,24 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    /** Indicates if this view is active. The {@link Data} instances are notified as shown while active. */
-    public final boolean isActive() {
-        return mActive;
+    /** Indicates if this view is visible. The {@link Data} instances are observed while visible. */
+    public final boolean isVisible() {
+        return mVisible;
     }
 
     /**
-     * Called when the active state of this view changes. The {@link Data} instances are notified as shown while this
-     * view is active.
-     * @see #isActive()
-     * @see #setOnActiveChangeListener(OnActiveChangeListener)
+     * Called when the visible state of this view changes. The {@link Data} instances are observed while this
+     * view is visible.
+     * @see #isVisible()
+     * @see #setOnVisibleChangeListener(OnVisibleChangeListener)
      */
     @SuppressWarnings("UnusedParameters")
-    protected void onActiveChanged(boolean active) {
+    protected void onVisibleChanged(boolean visible) {
     }
 
-    private void dispatchActiveChanged(boolean active) {
-        if (mOnActiveChangeListener != null) {
-            mOnActiveChangeListener.onActiveChanged(active);
+    private void dispatchVisibleChanged(boolean visible) {
+        if (mOnVisibleChangeListener != null) {
+            mOnVisibleChangeListener.onVisibleChanged(visible);
         }
     }
 
@@ -637,29 +615,20 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    private void updateActive() {
-        boolean active = isThisViewActive();
-        mDataWatcher.setEnabled(active);
-        if (active != mActive) {
-            mActive = active;
-            onActiveChanged(active);
-            dispatchActiveChanged(active);
-            mActiveStartTime = active ? elapsedRealtime() : 0;
+    private void updateVisible() {
+        boolean visible = isThisViewVisible();
+        mDataWatcher.setEnabled(visible);
+        if (visible != mVisible) {
+            mVisible = visible;
+            onVisibleChanged(visible);
+            dispatchVisibleChanged(visible);
+            mVisibleStartTime = visible ? elapsedRealtime() : 0;
             updateViews();
-            if (active) {
-                for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).notifyShown();
-                }
-            } else {
-                for (int i = 0; i < mDatas.size(); i++) {
-                    mDatas.get(i).notifyHidden();
-                }
-            }
         }
     }
 
-    /** Returns if this view is currently considered "shown" based on various attributes. */
-    private boolean isThisViewActive() {
+    /** Returns if this view is currently visible, based on various attributes. */
+    private boolean isThisViewVisible() {
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
                 isEnabled();
     }
@@ -673,12 +642,12 @@ public class DataLayout extends RelativeLayout {
         if (display == null) {
             return false;
         }
-        if (mActiveStartTime <= 0) {
+        if (mVisibleStartTime <= 0) {
             return false;
         }
         long threshold = (long) (1000 / display.getRefreshRate());
-        long millisActive = elapsedRealtime() - mActiveStartTime;
-        return millisActive > threshold;
+        long millisVisible = elapsedRealtime() - mVisibleStartTime;
+        return millisVisible > threshold;
     }
 
     /** Get a {@link Display} object suitable for checking the refresh rate. */
@@ -882,9 +851,9 @@ public class DataLayout extends RelativeLayout {
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
     }
 
-    /** Callback interface for when the active state of this view changes. */
-    public interface OnActiveChangeListener {
-        void onActiveChanged(boolean active);
+    /** Callback interface for when the visible state of this view changes. */
+    public interface OnVisibleChangeListener {
+        void onVisibleChanged(boolean visible);
     }
 
     /** Callback interface for when an error message is to be applied to the view hierarchy. */

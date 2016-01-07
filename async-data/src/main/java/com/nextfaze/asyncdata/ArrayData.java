@@ -314,7 +314,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         // We only start loading the data if it's not already loading, and we're shown.
         // If we're not shown we don't care about the data.
         // Only load if data is marked as dirty.
-        if (mDirty && mTask == null && isShown()) {
+        if (mDirty && mTask == null && getDataObserverCount() > 0) {
             // TODO: Replace use of Task with either a plain Thread or use of an Executor.
             mTask = new Task<List<? extends T>>() {
                 @Override

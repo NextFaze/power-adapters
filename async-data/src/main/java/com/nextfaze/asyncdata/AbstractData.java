@@ -60,6 +60,8 @@ public abstract class AbstractData<T> implements Data<T> {
     private long mShowTime;
     private long mHideTime;
 
+    // TODO: Remove hide timeout.
+
     private long mHideTimeout = HIDE_TIMEOUT_DEFAULT;
 
     /** @see #setHideTimeout(long) */
@@ -81,12 +83,28 @@ public abstract class AbstractData<T> implements Data<T> {
     //region Observer Registration
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservers.register(dataObserver);
+        boolean firstAdded;
+        synchronized (mDataObservers) {
+            mDataObservers.register(dataObserver);
+            firstAdded = mDataObservers.size() == 1;
+        }
+        if (firstAdded) {
+            notifyShown();
+            onFirstDataObserverRegistered();
+        }
     }
 
     @Override
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservers.unregister(dataObserver);
+        boolean lastRemoved;
+        synchronized (mDataObservers) {
+            mDataObservers.unregister(dataObserver);
+            lastRemoved = mDataObservers.size() == 0;
+        }
+        if (lastRemoved) {
+            onLastDataObserverUnregistered();
+            notifyHidden();
+        }
     }
 
     @Override
@@ -140,9 +158,7 @@ public abstract class AbstractData<T> implements Data<T> {
         return size() <= 0;
     }
 
-    @CallSuper
-    @Override
-    public void notifyShown() {
+    private void notifyShown() {
         if (!mShown) {
             mShowTime = elapsedRealtime();
             mShown = true;
@@ -151,9 +167,7 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     }
 
-    @CallSuper
-    @Override
-    public void notifyHidden() {
+    private void notifyHidden() {
         if (mShown) {
             mHideTime = elapsedRealtime();
             mShown = false;
@@ -181,22 +195,27 @@ public abstract class AbstractData<T> implements Data<T> {
         return new DataIterator<>(this);
     }
 
+    @UiThread
+    @CallSuper
+    protected void onFirstDataObserverRegistered() {
+    }
+
+    @UiThread
+    @CallSuper
+    protected void onLastDataObserverUnregistered() {
+    }
+
+    /** Returns the number of registered data observers. */
+    protected final int getDataObserverCount() {
+        return mDataObservers.size();
+    }
+
     /**
      * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
      * the caller.
      * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
      */
     protected void onClose() throws Throwable {
-    }
-
-    /**
-     * Indicates if this instance is in a shown state, ie, {@link #notifyShown()} was called without any subsequent
-     * {@link #notifyHidden()} call.
-     * @return {@code true} is this data instance is in the shown state.
-     */
-    @UiThread
-    protected boolean isShown() {
-        return mShown;
     }
 
     /** Dispatch a data change notification on the UI thread. */

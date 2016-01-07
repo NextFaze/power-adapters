@@ -97,16 +97,4 @@ public class DataWrapper<T> extends AbstractData<T> {
     public void reload() {
         mData.reload();
     }
-
-    @CallSuper
-    @Override
-    protected void onShown(long millisHidden) {
-        mData.notifyShown();
-    }
-
-    @CallSuper
-    @Override
-    protected void onHidden(long millisShown) {
-        mData.notifyHidden();
-    }
 }

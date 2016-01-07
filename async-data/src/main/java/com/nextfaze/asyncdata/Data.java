@@ -14,13 +14,7 @@ import java.util.Iterator;
  * </p>
  * <h3>Errors</h3>
  * <p>
- * It also broadcasts errors it encounters while loading.
- * </p>
- * <h3>Showing</h3>
- * <p>
- * It may also be in a shown or hidden state. When hidden, the data may opt to release any internal resources. This way
- * the user does not need to necessarily free them manually. It's not recommended that resources be freed immediately
- * upon being hidden, however, because often it is only hidden temporarily. Release them after a short delay instead.
+ * It also broadcasts errors it encounters while loading. The occurrence of an error doesn't imply any change in state.
  * </p>
  * <h3>Threading</h3>
  * <p>
@@ -112,23 +106,6 @@ public interface Data<T> extends Iterable<T> {
     /** Close this instance. Other methods should not called after this. */
     @UiThread
     void close();
-
-    /**
-     * Notify this data instance that is currently visibility presented to the user. This cue might be used to start
-     * loading elements, or to refresh existing ones.
-     */
-    @UiThread
-    void notifyShown();
-
-    /**
-     * Notify this data instance that is no longer presented to the user. This cue might be used to cancel any active
-     * loading operations.
-     * <p/>Note that it's common for the data to be in a "hidden" state for a very short interval,
-     * such as during a configuration change, so any cancelation should probably occur after a short delay. {@code 3}
-     * seconds should suffice.
-     */
-    @UiThread
-    void notifyHidden();
 
     @UiThread
     void registerLoadingObserver(@NonNull LoadingObserver loadingObserver);
