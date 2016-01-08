@@ -102,8 +102,6 @@ public final class NewsFragment extends Fragment {
         mAutoIncrementalData.setLookAheadRowCount(10);
         // Never pre-load; let the user click 'load next' instead.
         mManualIncrementalData.setLookAheadRowCount(-1);
-        // Reload data if hidden for a short time.
-        mSimpleData.setAutoInvalidateDelay(3000);
     }
 
     @Override

@@ -36,11 +36,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     @Nullable
     private Task<?> mTask;
 
-    // TODO: It makes more sense to auto invalidate after X millis since last load, rather than duration hidden.
-
-    /** Automatically invalidate contents if data is hidden for the specified duration. */
-    private long mAutoInvalidateDelay = Long.MAX_VALUE;
-
     /** Indicates the currently loaded data is invalid and needs to be reloaded next opportunity. */
     private boolean mDirty = true;
 
@@ -265,15 +260,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
         return mAvailable;
     }
 
-    public final long getAutoInvalidateDelay() {
-        return mAutoInvalidateDelay;
-    }
-
-    /** Automatically invalidate contents if data is hidden for the specified duration. */
-    public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
-        mAutoInvalidateDelay = autoInvalidateDelay;
-    }
-
     /** Called in a background thread to load the data set. */
     @NonNull
     protected abstract List<? extends T> load() throws Throwable;
@@ -282,15 +268,10 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected void onClear() {
     }
 
+    @CallSuper
     @Override
     protected void onFirstDataObserverRegistered() {
         super.onFirstDataObserverRegistered();
-//        if (millisHidden >= mAutoInvalidateDelay) {
-//            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-//            cancelTask();
-//            mDirty = true;
-//            mClear = true;
-//        }
         if (mClear) {
             clear();
         }

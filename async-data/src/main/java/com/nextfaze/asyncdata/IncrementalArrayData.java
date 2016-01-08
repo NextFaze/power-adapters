@@ -54,11 +54,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Nullable
     private Thread mThread;
 
-    // TODO: It makes more sense to auto invalidate after X millis since last load, rather than duration hidden.
-
-    /** Automatically invalidate contents if data is hidden for the specified duration. */
-    private long mAutoInvalidateDelay = Long.MAX_VALUE;
-
     /** Indicates the last attempt to load a page failed. */
     private volatile boolean mError;
 
@@ -303,17 +298,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         mLookAheadRowCount = lookAheadRowCount;
     }
 
-    @UiThread
-    public final long getAutoInvalidateDelay() {
-        return mAutoInvalidateDelay;
-    }
-
-    /** Automatically invalidate contents if data is hidden for the specified duration. */
-    @UiThread
-    public final void setAutoInvalidateDelay(long autoInvalidateDelay) {
-        mAutoInvalidateDelay = autoInvalidateDelay;
-    }
-
     @Override
     public final boolean isLoading() {
         return mLoading;
@@ -324,6 +308,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mAvailable;
     }
 
+    @CallSuper
     @Override
     protected void onFirstDataObserverRegistered() {
         super.onFirstDataObserverRegistered();
@@ -331,11 +316,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             // Last attempt to load an increment failed, so try again now we've become visible again.
             proceed();
         }
-//        if (millisHidden >= mAutoInvalidateDelay) {
-//            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-//            stopThread();
-//            mDirty = true;
-//        }
         if (mClear) {
             clearElementsWithCallback(true);
         }
