@@ -1,6 +1,5 @@
 package com.nextfaze.asyncdata;
 
-import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -10,9 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-
-import static android.os.Looper.getMainLooper;
-import static android.os.SystemClock.elapsedRealtime;
 
 /**
  * Skeleton {@link Data} implementation that provides observer management, hide timeout functionality, shown/hidden
@@ -36,22 +32,15 @@ public abstract class AbstractData<T> implements Data<T> {
     private final ErrorObservers mErrorObservers = new ErrorObservers();
 
     @NonNull
-    private final Handler mHandler = new Handler(getMainLooper());
+    private final CoalescingPoster mPoster = new CoalescingPoster();
 
-    @NonNull
-    private final CoalescingPoster mPoster = new CoalescingPoster(mHandler);
-
-    private boolean mShown;
     private boolean mClosed;
-    private long mShowTime;
-    private long mHideTime;
 
     //region Observer Registration
     @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
         mDataObservers.register(dataObserver);
         if (mDataObservers.size() == 1) {
-            notifyShown();
             onFirstDataObserverRegistered();
         }
     }
@@ -61,7 +50,6 @@ public abstract class AbstractData<T> implements Data<T> {
         mDataObservers.unregister(dataObserver);
         if (mDataObservers.size() == 0) {
             onLastDataObserverUnregistered();
-            notifyHidden();
         }
     }
 
@@ -116,22 +104,6 @@ public abstract class AbstractData<T> implements Data<T> {
         return size() <= 0;
     }
 
-    private void notifyShown() {
-        if (!mShown) {
-            mShowTime = elapsedRealtime();
-            mShown = true;
-            dispatchShown(elapsedRealtime() - mHideTime);
-        }
-    }
-
-    private void notifyHidden() {
-        if (mShown) {
-            mHideTime = elapsedRealtime();
-            mShown = false;
-            dispatchHidden(elapsedRealtime() - mShowTime);
-        }
-    }
-
     @CallSuper
     @Override
     public void close() {
@@ -147,11 +119,13 @@ public abstract class AbstractData<T> implements Data<T> {
         return new DataIterator<>(this);
     }
 
+    /** Called when the first {@link DataObserver} is registered with this instance. */
     @UiThread
     @CallSuper
     protected void onFirstDataObserverRegistered() {
     }
 
+    /** Called when the last {@link DataObserver} is unregistered from this instance. */
     @UiThread
     @CallSuper
     protected void onLastDataObserverUnregistered() {
@@ -165,8 +139,10 @@ public abstract class AbstractData<T> implements Data<T> {
     /**
      * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
      * the caller.
+     * @deprecated This callback is deprecated. Just override {@link #close()} instead.
      * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
      */
+    @Deprecated
     protected void onClose() throws Throwable {
     }
 
@@ -262,42 +238,12 @@ public abstract class AbstractData<T> implements Data<T> {
         });
     }
 
-    /**
-     * Called when the data enters the shown state. Never called twice without an intervening {@link #onHidden(long)}
-     * call.
-     */
-    protected void onShown(long millisHidden) {
-    }
-
-    /**
-     * Called when the data enters the hidden state. Never called twice without an intervening {@link #onShown(long)}
-     * call.
-     */
-    protected void onHidden(long millisShown) {
-    }
-
     /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
     protected void runOnUiThread(@NonNull Runnable runnable) {
-        if (Looper.myLooper() == mHandler.getLooper()) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
             runnable.run();
         } else {
             mPoster.post(runnable);
-        }
-    }
-
-    private void dispatchShown(long millisHidden) {
-        try {
-            onShown(millisHidden);
-        } catch (Throwable e) {
-            log.error("Error during shown callback", e);
-        }
-    }
-
-    private void dispatchHidden(long millisShown) {
-        try {
-            onHidden(millisShown);
-        } catch (Throwable e) {
-            log.error("Error during hidden callback", e);
         }
     }
 

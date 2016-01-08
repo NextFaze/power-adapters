@@ -324,29 +324,22 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mAvailable;
     }
 
-    @CallSuper
     @Override
-    protected final void onShown(long millisHidden) {
-        log.trace("Shown after being hidden for {} ms", millisHidden);
+    protected void onFirstDataObserverRegistered() {
+        super.onFirstDataObserverRegistered();
         if (mError) {
             // Last attempt to load an increment failed, so try again now we've become visible again.
             proceed();
         }
-        if (millisHidden >= mAutoInvalidateDelay) {
-            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-            stopThread();
-            mDirty = true;
-        }
+//        if (millisHidden >= mAutoInvalidateDelay) {
+//            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
+//            stopThread();
+//            mDirty = true;
+//        }
         if (mClear) {
             clearElementsWithCallback(true);
         }
         startThreadIfNeeded();
-    }
-
-    @CallSuper
-    @Override
-    protected final void onHidden(long millisShown) {
-        log.trace("Hidden after being shown for {} ms", millisShown);
     }
 
     /**

@@ -12,10 +12,10 @@ import static android.os.Looper.getMainLooper;
 final class CoalescingPoster {
 
     @NonNull
-    private final Handler mHandler;
+    private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
-    private final Queue<Runnable> mRunnableQueue = new ConcurrentLinkedQueue<Runnable>();
+    private final Queue<Runnable> mRunnableQueue = new ConcurrentLinkedQueue<>();
 
     @NonNull
     private final Runnable mFlushRunnable = new Runnable() {
@@ -27,14 +27,6 @@ final class CoalescingPoster {
 
     @NonNull
     private final AtomicBoolean mPosted = new AtomicBoolean();
-
-    CoalescingPoster() {
-        this(new Handler(getMainLooper()));
-    }
-
-    CoalescingPoster(@NonNull Handler handler) {
-        mHandler = handler;
-    }
 
     void post(@NonNull Runnable runnable) {
         mRunnableQueue.offer(runnable);

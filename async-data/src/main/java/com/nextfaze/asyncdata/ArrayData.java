@@ -282,25 +282,20 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     protected void onClear() {
     }
 
-    @CallSuper
     @Override
-    protected final void onShown(long millisHidden) {
-        if (millisHidden >= mAutoInvalidateDelay) {
-            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
-            cancelTask();
-            mDirty = true;
-            mClear = true;
-        }
+    protected void onFirstDataObserverRegistered() {
+        super.onFirstDataObserverRegistered();
+//        if (millisHidden >= mAutoInvalidateDelay) {
+//            log.trace("Automatically invalidating due to auto-invalidate delay being reached or exceeded");
+//            cancelTask();
+//            mDirty = true;
+//            mClear = true;
+//        }
         if (mClear) {
             clear();
         }
         loadDataIfAppropriate();
         updateLoading();
-    }
-
-    @CallSuper
-    @Override
-    protected final void onHidden(long millisShown) {
     }
 
     private void loadDataIfAppropriate() {
