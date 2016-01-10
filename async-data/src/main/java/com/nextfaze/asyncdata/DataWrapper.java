@@ -1,12 +1,12 @@
 package com.nextfaze.asyncdata;
 
-import android.support.annotation.CallSuper;
 import lombok.NonNull;
 
-public class DataWrapper<T> extends AbstractData<T> {
+@SuppressWarnings("Convert2MethodRef")
+public abstract class DataWrapper<T> extends AbstractData<T> {
 
     @NonNull
-    private final Data<? extends T> mData;
+    private final Data<?> mData;
 
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
@@ -32,40 +32,62 @@ public class DataWrapper<T> extends AbstractData<T> {
         }
     };
 
+    @NonNull
+    private final AvailableObserver mAvailableObserver = new AvailableObserver() {
+        @Override
+        public void onAvailableChange() {
+            notifyAvailableChanged();
+        }
+    };
+
     private final boolean mTakeOwnership;
 
-    public DataWrapper(@NonNull Data<? extends T> data) {
+    private boolean mObservingData;
+    private boolean mObservingLoading;
+    private boolean mObservingError;
+    private boolean mObservingAvailable;
+
+    public DataWrapper(@NonNull Data<?> data) {
         this(data, true);
     }
 
-    public DataWrapper(@NonNull Data<? extends T> data, boolean takeOwnership) {
+    public DataWrapper(@NonNull Data<?> data, boolean takeOwnership) {
         mData = data;
         mTakeOwnership = takeOwnership;
-        mData.registerDataObserver(mDataObserver);
-        mData.registerLoadingObserver(mLoadingObserver);
-        mData.registerErrorObserver(mErrorObserver);
     }
 
-    @CallSuper
     @Override
-    protected void onClose() throws Throwable {
-        mData.unregisterDataObserver(mDataObserver);
-        mData.unregisterLoadingObserver(mLoadingObserver);
-        mData.unregisterErrorObserver(mErrorObserver);
+    public void close() {
+        unregisterAll();
         if (mTakeOwnership) {
             mData.close();
         }
+        super.close();
     }
 
-    @NonNull
     @Override
-    public T get(int position, int flags) {
-        return mData.get(position, flags);
+    public void invalidate() {
+        mData.invalidate();
+    }
+
+    @Override
+    public void refresh() {
+        mData.reload();
+    }
+
+    @Override
+    public void reload() {
+        mData.reload();
     }
 
     @Override
     public int size() {
         return mData.size();
+    }
+
+    @Override
+    public boolean isLoading() {
+        return mData.isLoading();
     }
 
     @Override
@@ -79,22 +101,110 @@ public class DataWrapper<T> extends AbstractData<T> {
     }
 
     @Override
-    public boolean isLoading() {
-        return mData.isLoading();
+    public void registerDataObserver(@NonNull DataObserver dataObserver) {
+        super.registerDataObserver(dataObserver);
+        updateDataObserver();
     }
 
     @Override
-    public void invalidate() {
-        mData.invalidate();
+    public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
+        super.unregisterDataObserver(dataObserver);
+        updateDataObserver();
     }
 
     @Override
-    public void refresh() {
-        mData.refresh();
+    public void registerAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        super.registerAvailableObserver(availableObserver);
+        updateAvailableObserver();
     }
 
     @Override
-    public void reload() {
-        mData.reload();
+    public void unregisterAvailableObserver(@NonNull AvailableObserver availableObserver) {
+        super.unregisterAvailableObserver(availableObserver);
+        updateAvailableObserver();
+    }
+
+    @Override
+    public void registerLoadingObserver(@NonNull LoadingObserver loadingObserver) {
+        super.registerLoadingObserver(loadingObserver);
+        updateLoadingObserver();
+    }
+
+    @Override
+    public void unregisterLoadingObserver(@NonNull LoadingObserver loadingObserver) {
+        super.unregisterLoadingObserver(loadingObserver);
+        updateLoadingObserver();
+    }
+
+    @Override
+    public void registerErrorObserver(@NonNull ErrorObserver errorObserver) {
+        super.registerErrorObserver(errorObserver);
+        updateErrorObserver();
+    }
+
+    @Override
+    public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
+        super.unregisterErrorObserver(errorObserver);
+        updateErrorObserver();
+    }
+
+    private void updateDataObserver() {
+        if (mObservingData && getDataObserverCount() <= 0) {
+            mData.unregisterDataObserver(mDataObserver);
+            mObservingData = false;
+        } else if (!mObservingData && getDataObserverCount() > 0) {
+            mData.registerDataObserver(mDataObserver);
+            mObservingData = true;
+        }
+    }
+
+    private void updateLoadingObserver() {
+        if (mObservingLoading && getLoadingObserverCount() <= 0) {
+            mData.unregisterLoadingObserver(mLoadingObserver);
+            mObservingLoading = false;
+        } else if (!mObservingLoading && getLoadingObserverCount() > 0) {
+            mData.registerLoadingObserver(mLoadingObserver);
+            mObservingLoading = true;
+        }
+    }
+
+    private void updateAvailableObserver() {
+        if (mObservingAvailable && getAvailableObserverCount() <= 0) {
+            mData.unregisterAvailableObserver(mAvailableObserver);
+            mObservingAvailable = false;
+        } else if (!mObservingAvailable && getAvailableObserverCount() > 0) {
+            mData.registerAvailableObserver(mAvailableObserver);
+            mObservingAvailable = true;
+        }
+    }
+
+    private void updateErrorObserver() {
+        if (mObservingError && getErrorObserverCount() <= 0) {
+            mData.unregisterErrorObserver(mErrorObserver);
+            mObservingError = false;
+        } else if (!mObservingError && getErrorObserverCount() > 0) {
+            mData.registerErrorObserver(mErrorObserver);
+            mObservingError = true;
+        }
+    }
+
+    private void unregisterAll() {
+        if (mObservingData) {
+            mData.unregisterDataObserver(mDataObserver);
+            mObservingData = false;
+        }
+        if (mObservingLoading) {
+            mData.unregisterLoadingObserver(mLoadingObserver);
+            mObservingLoading = false;
+        }
+        if (mObservingAvailable) {
+            mData.unregisterAvailableObserver(mAvailableObserver);
+            mObservingAvailable = false;
+        }
+        if (mObservingError) {
+            mData.unregisterErrorObserver(mErrorObserver);
+            mObservingError = false;
+        }
     }
 }
+
