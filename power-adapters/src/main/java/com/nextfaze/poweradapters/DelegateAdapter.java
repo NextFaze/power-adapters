@@ -56,19 +56,15 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
 
     public void setDelegate(@Nullable PowerAdapter delegate) {
         if (delegate != mDelegate) {
-            if (mDelegate != null) {
-                int itemCount = mDelegate.getItemCount();
-                if (itemCount > 0) {
-                    notifyItemRangeRemoved(0, itemCount);
-                }
-            }
+            int removeCount = mDelegate != null ? mDelegate.getItemCount() : 0;
             mDelegate = delegate;
             updateObservers();
-            if (mDelegate != null) {
-                int itemCount = mDelegate.getItemCount();
-                if (itemCount > 0) {
-                    notifyItemRangeInserted(0, itemCount);
-                }
+            int insertCount = mDelegate != null ? mDelegate.getItemCount() : 0;
+            if (removeCount > 0) {
+                notifyItemRangeRemoved(0, removeCount);
+            }
+            if (insertCount > 0) {
+                notifyItemRangeInserted(0, insertCount);
             }
         }
     }
