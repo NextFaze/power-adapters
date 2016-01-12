@@ -9,6 +9,8 @@ apply from: '../nextfaze.gradle'
 
 dependencies {
     compile rootProject.ext.slf4j
+    testCompile rootProject.ext.robolectric
+    testCompile rootProject.ext.mockito
     provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
