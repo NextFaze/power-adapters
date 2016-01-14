@@ -12,6 +12,8 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @NonNull
     private final ArrayList<T> mData = new ArrayList<>();
 
+    private boolean mNotificationsEnabled = true;
+
     private int mAvailable = UNKNOWN;
 
     private boolean mLoading;
@@ -44,14 +46,18 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final T remove(int index) {
         T removed = mData.remove(index);
-        notifyItemRemoved(index);
+        if (mNotificationsEnabled) {
+            notifyItemRemoved(index);
+        }
         return removed;
     }
 
     @Override
     public final boolean add(@NonNull T t) {
         if (mData.add(t)) {
-            notifyItemInserted(mData.size() - 1);
+            if (mNotificationsEnabled) {
+                notifyItemInserted(mData.size() - 1);
+            }
             return true;
         }
         return false;
@@ -60,7 +66,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
-        notifyItemInserted(index);
+        if (mNotificationsEnabled) {
+            notifyItemInserted(index);
+        }
     }
 
     @Override
@@ -70,7 +78,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         int newSize = mData.size();
         if (newSize != oldSize) {
             int count = mData.size() - oldSize;
-            notifyItemRangeInserted(oldSize, count);
+            if (mNotificationsEnabled) {
+                notifyItemRangeInserted(oldSize, count);
+            }
             return true;
         }
         return false;
@@ -83,7 +93,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         int newSize = mData.size();
         if (newSize != oldSize) {
             int count = mData.size() - oldSize;
-            notifyItemRangeInserted(index, count);
+            if (mNotificationsEnabled) {
+                notifyItemRangeInserted(index, count);
+            }
             return true;
         }
         return false;
@@ -95,7 +107,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         int index = mData.indexOf(obj);
         if (index != -1) {
             mData.remove(index);
-            notifyItemRemoved(index);
+            if (mNotificationsEnabled) {
+                notifyItemRemoved(index);
+            }
             return true;
         }
         return false;
@@ -129,7 +143,7 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final boolean removeAll(@NonNull Collection<?> collection) {
         boolean removed = mData.removeAll(collection);
-        if (removed) {
+        if (removed && mNotificationsEnabled) {
             // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
@@ -139,7 +153,7 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final boolean retainAll(@NonNull Collection<?> collection) {
         boolean changed = mData.retainAll(collection);
-        if (changed) {
+        if (changed && mNotificationsEnabled) {
             // TODO: Fine-grained change notification.
             notifyDataChanged();
         }
@@ -149,7 +163,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final T set(int index, T object) {
         T t = mData.set(index, object);
-        notifyItemChanged(index);
+        if (mNotificationsEnabled) {
+            notifyItemChanged(index);
+        }
         return t;
     }
 
@@ -177,7 +193,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         int size = mData.size();
         if (size > 0) {
             mData.clear();
-            notifyItemRangeRemoved(0, size);
+            if (mNotificationsEnabled) {
+                notifyItemRangeRemoved(0, size);
+            }
         }
     }
 
@@ -189,7 +207,9 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         for (int i = 0; i < itemCount; i++) {
             mData.add(toPosition + i, copy.get(i));
         }
-        notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        if (mNotificationsEnabled) {
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
     }
 
     @Override
@@ -226,6 +246,14 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
             mLoading = loading;
             notifyLoadingChanged();
         }
+    }
+
+    public boolean isNotificationsEnabled() {
+        return mNotificationsEnabled;
+    }
+
+    public void setNotificationsEnabled(boolean notificationsEnabled) {
+        mNotificationsEnabled = notificationsEnabled;
     }
 
     @Override

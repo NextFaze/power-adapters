@@ -3,10 +3,13 @@ package com.nextfaze.asyncdata;
 import com.android.internal.util.Predicate;
 import lombok.NonNull;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -18,6 +21,9 @@ import static org.mockito.Mockito.*;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 public class FilterDataTest {
+
+    @Rule
+    public MockitoRule mMockito = MockitoJUnit.rule();
 
     @Mock
     private Data<?> mMockData;
@@ -48,8 +54,6 @@ public class FilterDataTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mData = new FakeData<>();
 
         // Mocks
@@ -114,9 +118,7 @@ public class FilterDataTest {
         mData.notifyError(exception);
         verify(mFilterErrorObserver).onError(exception);
         verifyNoMoreInteractions(mFilterErrorObserver);
-        verifyZeroInteractions(mFilterDataObserver);
-        verifyZeroInteractions(mFilterLoadingObserver);
-        verifyZeroInteractions(mFilterAvailableObserver);
+        verifyZeroInteractions(mFilterDataObserver, mFilterLoadingObserver, mFilterAvailableObserver);
     }
 
     @Test
@@ -126,10 +128,7 @@ public class FilterDataTest {
         mData.setAvailable(9);
         mData.setLoading(true);
         mData.notifyError(new RuntimeException());
-        verifyZeroInteractions(mFilterDataObserver);
-        verifyZeroInteractions(mFilterLoadingObserver);
-        verifyZeroInteractions(mFilterAvailableObserver);
-        verifyZeroInteractions(mFilterErrorObserver);
+        verifyZeroObserverInteractions();
     }
 
     @Test
@@ -150,6 +149,19 @@ public class FilterDataTest {
     @Test(expected = IllegalStateException.class)
     public void getWithoutObservingDataThrows() {
         new FilterData<>(mData, always()).get(0);
+    }
+
+    @Test
+    public void coarseGrainedChangeDecomposedIntoFineGrained() {
+        mData.setNotificationsEnabled(false);
+        mData.add("bass");
+        mData.notifyDataChanged();
+        verify(mFilterDataObserver).onItemRangeChanged(0, 1);
+        verify(mFilterDataObserver).onItemRangeChanged(1, 1);
+        verify(mFilterDataObserver).onItemRangeChanged(2, 1);
+        verify(mFilterDataObserver).onItemRangeInserted(3, 1);
+        verifyNoMoreInteractions(mFilterDataObserver);
+        verifyZeroInteractions(mFilterLoadingObserver, mFilterAvailableObserver, mFilterErrorObserver);
     }
 
     @Test
@@ -208,22 +220,20 @@ public class FilterDataTest {
 
     @Test
     public void moveForwardsSingle() {
-        // "bear", "cat", "foo", "bar", "baz", "fish" / "bear", "bar", "baz" to
-        // "cat", "foo", "bar", "baz", "fish", "bear" / "bar", "baz", "bear"
         mData.move(0, 5, 1);
         assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
         assertThat(mFilterData).containsExactly("bar", "baz", "bear").inOrder();
         verify(mFilterDataObserver).onItemRangeMoved(0, 2, 1);
+        verifyNoMoreObserverInteractions();
     }
 
     @Test
     public void moveForwardsMultiple() {
-        //  "bear", "cat", "foo", "bar", "baz", "fish" / "bear", "bar", "baz" to
-        // "foo", "bar", "bear", "cat", "baz", "fish" / "bar", "bear", "baz"
         mData.move(0, 2, 2);
         assertThat(mData).containsExactly("foo", "bar", "bear", "cat", "baz", "fish").inOrder();
         assertThat(mFilterData).containsExactly("bar", "bear", "baz").inOrder();
         verify(mFilterDataObserver).onItemRangeMoved(0, 1, 1);
+        verifyNoMoreObserverInteractions();
     }
 
     @Test
@@ -232,16 +242,16 @@ public class FilterDataTest {
         assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
         assertThat(mFilterData).containsExactly("bar", "baz", "bear").inOrder();
         verify(mFilterDataObserver).onItemRangeMoved(0, 2, 1);
+        verifyNoMoreObserverInteractions();
     }
 
     @Test
     public void moveBackwardsMultiple() {
-        // "bear", "cat", "foo", "bar", "baz", "fish" / "bear", "bar", "baz" to
-        // "bar", "baz", "bear", "cat", "foo", "fish" / "bar", "baz", "bear"
         mData.move(3, 0, 2);
         assertThat(mData).containsExactly("bar", "baz", "bear", "cat", "foo", "fish").inOrder();
         assertThat(mFilterData).containsExactly("bar", "baz", "bear").inOrder();
         verify(mFilterDataObserver).onItemRangeMoved(1, 0, 2);
+        verifyNoMoreObserverInteractions();
     }
 
     @Test
@@ -249,7 +259,158 @@ public class FilterDataTest {
         mData.move(5, 0, 1);
         assertThat(mData).containsExactly("fish", "bear", "cat", "foo", "bar", "baz").inOrder();
         assertThat(mFilterData).containsExactly("bear", "bar", "baz").inOrder();
+        verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void dataObserverRegistration() {
+        DataObserver dataObserver = mock(DataObserver.class);
+        mFilterData.registerDataObserver(dataObserver);
+        mData.add("boo");
+        verify(dataObserver).onItemRangeInserted(3, 1);
+        verifyNoMoreInteractions(dataObserver);
+    }
+
+    @Test
+    public void dataObserverUnregistration() {
+        DataObserver dataObserver = mock(DataObserver.class);
+        mFilterData.registerDataObserver(dataObserver);
+        mFilterData.unregisterDataObserver(dataObserver);
+        mData.add("bass");
+        verifyZeroInteractions(dataObserver);
+    }
+
+    @Test
+    public void registersWithWrappedDataWhileExternalDataObserversPresent() {
+        Data<?> data = mock(Data.class);
+        FilterData<?> filter = new FilterData<>(data, always());
+        DataObserver dataObserver1 = mock(DataObserver.class);
+        DataObserver dataObserver2 = mock(DataObserver.class);
+        filter.registerDataObserver(dataObserver1);
+        filter.registerDataObserver(dataObserver2);
+        filter.unregisterDataObserver(dataObserver1);
+        filter.unregisterDataObserver(dataObserver2);
+        ArgumentCaptor<DataObserver> captor = ArgumentCaptor.forClass(DataObserver.class);
+        verify(data).registerDataObserver(captor.capture());
+        verify(data).unregisterDataObserver(eq(captor.getValue()));
+        assertThat(captor.getValue()).isNotNull();
+    }
+
+    @Test
+    public void registersWithWrappedDataWhileExternalLoadingObserversPresent() {
+        Data<?> data = mock(Data.class);
+        FilterData<?> filter = new FilterData<>(data, always());
+        LoadingObserver loadingObserver1 = mock(LoadingObserver.class);
+        LoadingObserver loadingObserver2 = mock(LoadingObserver.class);
+        filter.registerLoadingObserver(loadingObserver1);
+        filter.registerLoadingObserver(loadingObserver2);
+        filter.unregisterLoadingObserver(loadingObserver1);
+        filter.unregisterLoadingObserver(loadingObserver2);
+        ArgumentCaptor<LoadingObserver> captor = ArgumentCaptor.forClass(LoadingObserver.class);
+        verify(data).registerLoadingObserver(captor.capture());
+        verify(data).unregisterLoadingObserver(eq(captor.getValue()));
+        assertThat(captor.getValue()).isNotNull();
+    }
+
+    @Test
+    public void registersWithWrappedDataWhileExternalAvailableObserversPresent() {
+        Data<?> data = mock(Data.class);
+        FilterData<?> filter = new FilterData<>(data, always());
+        AvailableObserver availableObserver1 = mock(AvailableObserver.class);
+        AvailableObserver availableObserver2 = mock(AvailableObserver.class);
+        filter.registerAvailableObserver(availableObserver1);
+        filter.registerAvailableObserver(availableObserver2);
+        filter.unregisterAvailableObserver(availableObserver1);
+        filter.unregisterAvailableObserver(availableObserver2);
+        ArgumentCaptor<AvailableObserver> captor = ArgumentCaptor.forClass(AvailableObserver.class);
+        verify(data).registerAvailableObserver(captor.capture());
+        verify(data).unregisterAvailableObserver(eq(captor.getValue()));
+        assertThat(captor.getValue()).isNotNull();
+    }
+
+    @Test
+    public void registersWithWrappedDataWhileExternalErrorObserversPresent() {
+        Data<?> data = mock(Data.class);
+        FilterData<?> filter = new FilterData<>(data, always());
+        ErrorObserver errorObserver1 = mock(ErrorObserver.class);
+        ErrorObserver errorObserver2 = mock(ErrorObserver.class);
+        filter.registerErrorObserver(errorObserver1);
+        filter.registerErrorObserver(errorObserver2);
+        filter.unregisterErrorObserver(errorObserver1);
+        filter.unregisterErrorObserver(errorObserver2);
+        ArgumentCaptor<ErrorObserver> captor = ArgumentCaptor.forClass(ErrorObserver.class);
+        verify(data).registerErrorObserver(captor.capture());
+        verify(data).unregisterErrorObserver(eq(captor.getValue()));
+        assertThat(captor.getValue()).isNotNull();
+    }
+
+    @Test
+    public void loadingObserverRegistration() {
+        LoadingObserver loadingObserver = mock(LoadingObserver.class);
+        mFilterData.registerLoadingObserver(loadingObserver);
+        mData.setLoading(true);
+        verify(loadingObserver).onLoadingChange();
+        verifyNoMoreInteractions(loadingObserver);
+    }
+
+    @Test
+    public void loadingObserverUnregistration() {
+        LoadingObserver loadingObserver = mock(LoadingObserver.class);
+        mFilterData.registerLoadingObserver(loadingObserver);
+        mFilterData.unregisterLoadingObserver(loadingObserver);
+        mData.setLoading(true);
+        verifyZeroInteractions(loadingObserver);
+    }
+
+    @Test
+    public void availableObserverRegistration() {
+        AvailableObserver availableObserver = mock(AvailableObserver.class);
+        mFilterData.registerAvailableObserver(availableObserver);
+        mData.setAvailable(92);
+        verify(availableObserver).onAvailableChange();
+        verifyNoMoreInteractions(availableObserver);
+    }
+
+    @Test
+    public void availableObserverUnregistration() {
+        AvailableObserver availableObserver = mock(AvailableObserver.class);
+        mFilterData.registerAvailableObserver(availableObserver);
+        mFilterData.unregisterAvailableObserver(availableObserver);
+        mData.setAvailable(92);
+        verifyZeroInteractions(availableObserver);
+    }
+
+    @Test
+    public void errorObserverRegistration() {
+        ErrorObserver errorObserver = mock(ErrorObserver.class);
+        mFilterData.registerErrorObserver(errorObserver);
+        RuntimeException exception = new RuntimeException();
+        mData.notifyError(exception);
+        verify(errorObserver).onError(exception);
+        verifyNoMoreInteractions(errorObserver);
+    }
+
+    @Test
+    public void errorObserverUnregistration() {
+        ErrorObserver errorObserver = mock(ErrorObserver.class);
+        mFilterData.registerErrorObserver(errorObserver);
+        mFilterData.unregisterErrorObserver(errorObserver);
+        mData.notifyError(new RuntimeException());
+        verifyZeroInteractions(errorObserver);
+    }
+
+    private void verifyNoMoreObserverInteractions() {
+        verifyNoMoreInteractions(mFilterDataObserver);
+        verifyNoMoreInteractions(mFilterLoadingObserver);
+        verifyNoMoreInteractions(mFilterAvailableObserver);
+        verifyNoMoreInteractions(mFilterErrorObserver);
+    }
+
+    private void verifyZeroObserverInteractions() {
         verifyZeroInteractions(mFilterDataObserver);
+        verifyZeroInteractions(mFilterLoadingObserver);
+        verifyZeroInteractions(mFilterAvailableObserver);
+        verifyZeroInteractions(mFilterErrorObserver);
     }
 
     @NonNull

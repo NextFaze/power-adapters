@@ -6,9 +6,6 @@ import com.android.internal.util.Predicate;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static android.os.Looper.getMainLooper;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
@@ -341,12 +338,16 @@ final class FilterData<T> extends AbstractData<T> {
     }
 
     private void insertIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {
+        // Take advantage of indexOfKey() binary search result value to find out what the mapping should be.
         int idx = mIndex.indexOfKey(innerPositionStart);
         int insertionIndex = idx >= 0 ? idx : -idx - 1;
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             T t = mData.get(innerPosition);
             if (apply(t)) {
-                insert(innerPosition, insertionIndex, notify);
+                mIndex.put(innerPosition);
+                if (notify) {
+                    notifyItemInserted(insertionIndex);
+                }
                 insertionIndex++;
             }
         }
@@ -354,28 +355,32 @@ final class FilterData<T> extends AbstractData<T> {
 
     private void removeIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
-            remove(innerPosition, notify);
+            int outerPosition = mIndex.indexOfKey(innerPosition);
+            if (outerPosition >= 0) {
+                mIndex.delete(innerPosition);
+                if (notify) {
+                    notifyItemRemoved(outerPosition);
+                }
+            }
         }
     }
 
     private void moveIndexRange(final int innerFromPosition, final int innerToPosition, final int itemCount, boolean notify) {
-
+        // Calculate outer "from" position by skipping past excluded items.
         int outerFromPosition = -1;
-        int outerItemCount = 0;
         for (int i = 0; i < itemCount; i++) {
             int outerPosition = mIndex.indexOfKey(innerFromPosition + i);
-            if (outerPosition >= 0) {
-                outerItemCount++;
-            }
             if (outerFromPosition == -1) {
                 outerFromPosition = outerPosition;
             }
         }
 
+        // Remove indexes from "from" range.
         for (int i = 0; i < itemCount; i++) {
             mIndex.delete(innerFromPosition + i);
         }
 
+        // Offset the items between "from" and "to" ranges.
         if (innerToPosition > innerFromPosition) {
             int start = innerFromPosition + itemCount;
             int count = abs(innerToPosition - innerFromPosition);
@@ -386,13 +391,18 @@ final class FilterData<T> extends AbstractData<T> {
             mIndex.offsetReverse(start, count, sign(innerFromPosition - innerToPosition) * itemCount);
         }
 
+        // Add indexes to "to" range.
+        // Also count the number of included items that were moved.
+        int outerItemCount = 0;
         for (int i = 0; i < itemCount; i++) {
             T t = mData.get(innerToPosition + i);
             if (apply(t)) {
                 mIndex.put(innerToPosition + i);
+                outerItemCount++;
             }
         }
 
+        // Calculate the outer "to" position by skipping past excluded items.
         int outerToPosition = -1;
         for (int innerPosition = innerToPosition; innerPosition < innerToPosition + itemCount; innerPosition++) {
             int outerPosition = mIndex.indexOfKey(innerPosition);
@@ -407,33 +417,6 @@ final class FilterData<T> extends AbstractData<T> {
         }
     }
 
-    private void insert(int innerPosition, int outerPosition, boolean notify) {
-        if (innerPosition < 0) {
-            throw new IllegalArgumentException("innerPosition");
-        }
-        if (outerPosition < 0) {
-            throw new IllegalArgumentException("outerPosition");
-        }
-        // Shift elements forward to make room for inserted entry.
-        mIndex.put(innerPosition);
-        if (notify) {
-            notifyItemInserted(outerPosition);
-        }
-    }
-
-    private void remove(int innerPosition, boolean notify) {
-        if (innerPosition < 0) {
-            throw new IllegalArgumentException("innerPosition");
-        }
-        int outerPosition = mIndex.indexOfKey(innerPosition);
-        if (outerPosition >= 0) {
-            mIndex.delete(innerPosition);
-            if (notify) {
-                notifyItemRemoved(outerPosition);
-            }
-        }
-    }
-
     private boolean apply(@NonNull T t) {
         return mPredicate.apply(t);
     }
@@ -445,16 +428,6 @@ final class FilterData<T> extends AbstractData<T> {
             return -1;
         }
         return 0;
-    }
-
-    @NonNull
-    private List<T> contents() {
-        ArrayList<T> list = new ArrayList<>();
-        for (int i = 0; i < size(); i++) {
-            T t = get(i);
-            list.add(t);
-        }
-        return list;
     }
 
     private static final class Index {
