@@ -136,6 +136,21 @@ public abstract class AbstractData<T> implements Data<T> {
         return mDataObservers.size();
     }
 
+    /** Returns the number of registered loading observers. */
+    protected final int getLoadingObserverCount() {
+        return mLoadingObservers.size();
+    }
+
+    /** Returns the number of registered available observers. */
+    protected final int getAvailableObserverCount() {
+        return mAvailableObservers.size();
+    }
+
+    /** Returns the number of registered error observers. */
+    protected final int getErrorObserverCount() {
+        return mErrorObservers.size();
+    }
+
     /**
      * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
      * the caller.
