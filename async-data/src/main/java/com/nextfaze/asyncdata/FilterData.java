@@ -12,7 +12,7 @@ import static java.lang.String.format;
 
 /** Maintains an index into the wrapped data instance. */
 @Slf4j
-final class FilterData<T> extends AbstractData<T> {
+final class FilterData<T> extends DataWrapper<T> {
 
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
@@ -25,34 +25,6 @@ final class FilterData<T> extends AbstractData<T> {
 
     @NonNull
     private final Index mIndex = new Index();
-
-    @NonNull
-    private final DataObserver mDataObserver = new SimpleDataObserver() {
-        @Override
-        public void onChange() {
-            changeIndexRange(0, mData.size(), true);
-        }
-
-        @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            changeIndexRange(positionStart, itemCount, true);
-        }
-
-        @Override
-        public void onItemRangeInserted(int positionStart, int itemCount) {
-            insertIndexRange(positionStart, itemCount, true);
-        }
-
-        @Override
-        public void onItemRangeRemoved(int positionStart, int itemCount) {
-            removeIndexRange(positionStart, itemCount, true);
-        }
-
-        @Override
-        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            moveIndexRange(fromPosition, toPosition, itemCount, true);
-        }
-    };
 
     @NonNull
     private final LoadingObserver mLoadingObserver = new LoadingObserver() {
@@ -70,17 +42,8 @@ final class FilterData<T> extends AbstractData<T> {
         }
     };
 
-    @NonNull
-    private final ErrorObserver mErrorObserver = new ErrorObserver() {
-        @Override
-        public void onError(@NonNull Throwable e) {
-            notifyError(e);
-        }
-    };
-
     private boolean mObservingData;
     private boolean mObservingLoading;
-    private boolean mObservingError;
     private boolean mObservingAvailable;
 
     private boolean mLoading;
@@ -89,6 +52,7 @@ final class FilterData<T> extends AbstractData<T> {
     private boolean mEntireIndexDirty = true;
 
     FilterData(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
+        super(data, false);
         mData = data;
         mPredicate = predicate;
     }
@@ -145,21 +109,6 @@ final class FilterData<T> extends AbstractData<T> {
     }
 
     @Override
-    public void invalidate() {
-        mData.invalidate();
-    }
-
-    @Override
-    public void refresh() {
-        mData.refresh();
-    }
-
-    @Override
-    public void reload() {
-        mData.reload();
-    }
-
-    @Override
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
         super.registerDataObserver(dataObserver);
         updateDataObserver();
@@ -195,18 +144,6 @@ final class FilterData<T> extends AbstractData<T> {
         updateLoadingObserver();
     }
 
-    @Override
-    public void registerErrorObserver(@NonNull ErrorObserver errorObserver) {
-        super.registerErrorObserver(errorObserver);
-        updateErrorObserver();
-    }
-
-    @Override
-    public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
-        super.unregisterErrorObserver(errorObserver);
-        updateErrorObserver();
-    }
-
     private void invalidateEntireIndex() {
         mEntireIndexDirty = true;
         rebuildIndexIfNeeded();
@@ -237,10 +174,8 @@ final class FilterData<T> extends AbstractData<T> {
 
     private void updateDataObserver() {
         if (mObservingData && getDataObserverCount() <= 0) {
-            mData.unregisterDataObserver(mDataObserver);
             mObservingData = false;
         } else if (!mObservingData && getDataObserverCount() > 0) {
-            mData.registerDataObserver(mDataObserver);
             mObservingData = true;
             invalidateEntireIndex();
         }
@@ -268,21 +203,8 @@ final class FilterData<T> extends AbstractData<T> {
         }
     }
 
-    private void updateErrorObserver() {
-        if (mObservingError && getErrorObserverCount() <= 0) {
-            mData.unregisterErrorObserver(mErrorObserver);
-            mObservingError = false;
-        } else if (!mObservingError && getErrorObserverCount() > 0) {
-            mData.registerErrorObserver(mErrorObserver);
-            mObservingError = true;
-        }
-    }
-
     private void unregisterAll() {
-        if (mObservingData) {
-            mData.unregisterDataObserver(mDataObserver);
-            mObservingData = false;
-        }
+        mObservingData = false;
         if (mObservingLoading) {
             mData.unregisterLoadingObserver(mLoadingObserver);
             mObservingLoading = false;
@@ -291,14 +213,43 @@ final class FilterData<T> extends AbstractData<T> {
             mData.unregisterAvailableObserver(mAvailableObserver);
             mObservingAvailable = false;
         }
-        if (mObservingError) {
-            mData.unregisterErrorObserver(mErrorObserver);
-            mObservingError = false;
-        }
     }
 
     private void buildCompleteIndex() {
         changeIndexRange(0, mData.size(), false);
+    }
+
+    @Override
+    protected void forwardChanged() {
+        changeIndexRange(0, mData.size(), true);
+    }
+
+    @Override
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+        changeIndexRange(innerPositionStart, innerItemCount, true);
+    }
+
+    @Override
+    protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
+        insertIndexRange(innerPositionStart, innerItemCount, true);
+    }
+
+    @Override
+    protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
+        removeIndexRange(innerPositionStart, innerItemCount, true);
+    }
+
+    @Override
+    protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
+        moveIndexRange(innerFromPosition, innerToPosition, innerItemCount, true);
+    }
+
+    @Override
+    protected void forwardLoadingChanged() {
+    }
+
+    @Override
+    protected void forwardAvailableChanged() {
     }
 
     private void changeIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {

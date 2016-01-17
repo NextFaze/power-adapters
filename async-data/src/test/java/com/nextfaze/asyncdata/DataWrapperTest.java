@@ -114,6 +114,26 @@ public final class DataWrapperTest {
     }
 
     @Test
+    public void forwardDataChange() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void forwardLoadingChange() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void forwardAvailableChange() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    public void forwardErrorChange() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
     public void dataObserverRegistration() {
         DataObserver dataObserver = mock(DataObserver.class);
         mDataWrapper.registerDataObserver(dataObserver);

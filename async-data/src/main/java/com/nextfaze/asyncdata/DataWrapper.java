@@ -40,15 +40,7 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     private final LoadingObserver mLoadingObserver = new LoadingObserver() {
         @Override
         public void onLoadingChange() {
-            notifyLoadingChanged();
-        }
-    };
-
-    @NonNull
-    private final ErrorObserver mErrorObserver = new ErrorObserver() {
-        @Override
-        public void onError(@NonNull Throwable e) {
-            notifyError(e);
+            forwardLoadingChanged();
         }
     };
 
@@ -56,7 +48,15 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     private final AvailableObserver mAvailableObserver = new AvailableObserver() {
         @Override
         public void onAvailableChange() {
-            notifyAvailableChanged();
+            forwardAvailableChanged();
+        }
+    };
+
+    @NonNull
+    private final ErrorObserver mErrorObserver = new ErrorObserver() {
+        @Override
+        public void onError(@NonNull Throwable e) {
+            forwardError(e);
         }
     };
 
@@ -186,6 +186,18 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
 
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
         notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
+    }
+
+    protected void forwardLoadingChanged() {
+        notifyLoadingChanged();
+    }
+
+    protected void forwardError(@NonNull Throwable e) {
+        notifyError(e);
+    }
+
+    protected void forwardAvailableChanged() {
+        notifyAvailableChanged();
     }
 
     protected int outerToInner(int outerPosition) {
