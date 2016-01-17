@@ -9,10 +9,30 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     private final Data<?> mData;
 
     @NonNull
-    private final DataObserver mDataObserver = new SimpleDataObserver() {
+    private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChange() {
-            notifyDataChanged();
+            forwardChanged();
+        }
+
+        @Override
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            forwardItemRangeChanged(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            forwardItemRangeInserted(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            forwardItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            forwardItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
 
@@ -72,7 +92,7 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
 
     @Override
     public void refresh() {
-        mData.reload();
+        mData.refresh();
     }
 
     @Override
@@ -146,6 +166,34 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
         super.unregisterErrorObserver(errorObserver);
         updateErrorObserver();
+    }
+
+    protected void forwardChanged() {
+        notifyDataChanged();
+    }
+
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeChanged(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeInserted(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
+        notifyItemRangeRemoved(innerToOuter(innerPositionStart), innerItemCount);
+    }
+
+    protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
+        notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
+    }
+
+    protected int outerToInner(int outerPosition) {
+        return outerPosition;
+    }
+
+    protected int innerToOuter(int innerPosition) {
+        return innerPosition;
     }
 
     private void updateDataObserver() {
