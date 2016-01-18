@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public class FilterDataTest {
+public final class FilterDataTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();

@@ -12,7 +12,7 @@ import static java.util.Collections.addAll;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public class OffsetDataTest {
+public final class OffsetDataTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();

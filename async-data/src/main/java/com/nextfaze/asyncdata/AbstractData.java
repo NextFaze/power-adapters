@@ -10,8 +10,7 @@ import lombok.experimental.Accessors;
 import java.util.Iterator;
 
 /**
- * Skeleton {@link Data} implementation that provides observer management, hide timeout functionality, shown/hidden
- * state tracking, and other sensible default method implementations.
+ * Skeleton {@link Data} implementation that provides observer management and sensible default method implementations.
  */
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
