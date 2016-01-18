@@ -19,6 +19,9 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.android.internal.util.Predicate;
+import com.nextfaze.asyncdata.Data;
+import com.nextfaze.asyncdata.Datas;
 import com.nextfaze.asyncdata.SimpleDataAdapter;
 import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.asyncdata.widget.ErrorFormatter;
@@ -30,7 +33,12 @@ public final class NewsFragment extends Fragment {
     private final NewsService mNewsService = new NewsService();
 
     @NonNull
-    private final NewsSimpleData mSimpleData = new NewsSimpleData(mNewsService);
+    private final Data<NewsItem> mSimpleData = Datas.filter(new NewsSimpleData(mNewsService), new Predicate<NewsItem>() {
+        @Override
+        public boolean apply(NewsItem newsItem) {
+            return newsItem.getTitle().endsWith("#2") || newsItem.getTitle().endsWith("#7");
+        }
+    });
 
     @NonNull
     private final NewsIncrementalData mAutoIncrementalData = new NewsIncrementalData(mNewsService);

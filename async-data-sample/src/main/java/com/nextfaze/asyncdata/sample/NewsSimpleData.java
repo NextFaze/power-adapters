@@ -17,6 +17,6 @@ final class NewsSimpleData extends ArrayData<NewsItem> {
     @NonNull
     @Override
     protected List<NewsItem> load() throws Exception {
-        return mNewsService.getNewsFlaky();
+        return mNewsService.getNews(0, 10);
     }
 }
