@@ -1,5 +1,6 @@
 package com.nextfaze.asyncdata.internal;
 
+import android.util.Log;
 import com.nextfaze.asyncdata.Data;
 import com.nextfaze.asyncdata.DataObserver;
 import com.nextfaze.asyncdata.ErrorObserver;
@@ -7,8 +8,6 @@ import com.nextfaze.asyncdata.LoadingObserver;
 import com.nextfaze.asyncdata.SimpleDataObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +24,7 @@ import static java.util.Arrays.asList;
 @Accessors(prefix = "m")
 public abstract class DataWatcher {
 
-    private static final Logger log = LoggerFactory.getLogger(DataWatcher.class);
+    private static final String TAG = DataWatcher.class.getSimpleName();
 
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
@@ -145,7 +144,7 @@ public abstract class DataWatcher {
         try {
             onDataChange();
         } catch (Throwable e) {
-            log.error("Error dispatching data change callback", e);
+            Log.e(TAG, "Error dispatching data change callback", e);
         }
     }
 
@@ -153,7 +152,7 @@ public abstract class DataWatcher {
         try {
             onDataLoadingChange();
         } catch (Throwable e) {
-            log.error("Error dispatching loading change callback", e);
+            Log.e(TAG, "Error dispatching loading change callback", e);
         }
     }
 
@@ -161,7 +160,7 @@ public abstract class DataWatcher {
         try {
             onDataError(e);
         } catch (Throwable t) {
-            log.error("Error dispatching error callback", t);
+            Log.e(TAG, "Error dispatching error callback", t);
         }
     }
 

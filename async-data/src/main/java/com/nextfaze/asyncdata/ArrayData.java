@@ -4,8 +4,6 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,8 +20,6 @@ import static java.lang.Math.min;
  */
 @Accessors(prefix = "m")
 public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
-
-    private static final Logger log = LoggerFactory.getLogger(ArrayData.class);
 
     /** The backing array of non-null elements. */
     @NonNull

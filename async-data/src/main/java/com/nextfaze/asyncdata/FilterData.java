@@ -4,14 +4,12 @@ import android.os.Handler;
 import android.util.SparseIntArray;
 import com.android.internal.util.Predicate;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
 import static android.os.Looper.getMainLooper;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
 
 /** Maintains an index into the wrapped data instance. */
-@Slf4j
 final class FilterData<T> extends DataWrapper<T> {
 
     @NonNull

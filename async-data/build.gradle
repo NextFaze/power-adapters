@@ -8,7 +8,6 @@ apply plugin: 'com.android.library'
 apply from: '../nextfaze.gradle'
 
 dependencies {
-    compile rootProject.ext.slf4j
     testCompile rootProject.ext.robolectric
     testCompile rootProject.ext.mockito
     testCompile rootProject.ext.truth

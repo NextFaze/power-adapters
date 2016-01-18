@@ -3,10 +3,9 @@ package com.nextfaze.asyncdata;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
+import android.util.Log;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
@@ -17,7 +16,7 @@ import java.util.Iterator;
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractData.class);
+    private static final String TAG = AbstractData.class.getSimpleName();
 
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
@@ -262,11 +261,12 @@ public abstract class AbstractData<T> implements Data<T> {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void dispatchClose() {
         try {
             onClose();
         } catch (Throwable e) {
-            log.error("Error during close callback", e);
+            Log.e(TAG, "Error during close callback", e);
         }
     }
 }

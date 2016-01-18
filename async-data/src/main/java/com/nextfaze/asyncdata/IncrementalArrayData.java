@@ -7,8 +7,6 @@ import android.support.annotation.WorkerThread;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
@@ -31,8 +29,6 @@ import static java.lang.Thread.currentThread;
  */
 @Accessors(prefix = "m")
 public abstract class IncrementalArrayData<T> extends AbstractData<T> implements List<T> {
-
-    private static final Logger log = LoggerFactory.getLogger(IncrementalArrayData.class);
 
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
 
@@ -357,7 +353,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private void startThreadIfNeeded() {
         if (mDirty && mThread == null && getDataObserverCount() > 0) {
             mDirty = false;
-            log.trace("Starting thread");
             onLoadBegin();
             setLoading(true);
             mThread = mThreadFactory.newThread(new Runnable() {
@@ -372,7 +367,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     private void stopThread() {
         if (mThread != null) {
-            log.trace("Stopping thread");
             mThread.interrupt();
             mThread = null;
         }
@@ -383,7 +377,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             loadLoop();
         } catch (InterruptedException e) {
             // Normal thread termination.
-            log.trace("Thread terminated normally with an InterruptedException");
         }
     }
 
@@ -392,7 +385,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
      * proceed.
      */
     private void loadLoop() throws InterruptedException {
-        log.trace("Start load loop");
         boolean firstItem = true;
         boolean moreAvailable = true;
 
@@ -404,8 +396,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             }
             try {
                 setLoading(true);
-
-                log.trace("Loading next increment");
 
                 // Load next increment of items.
                 final Result<? extends T> result = load();
@@ -430,7 +420,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             } catch (InterruptedException | InterruptedIOException e) {
                 throw new InterruptedException();
             } catch (Throwable e) {
-                log.error("Error loading", e);
                 notifyError(e);
                 mError = true;
             } finally {

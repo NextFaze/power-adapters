@@ -4,11 +4,11 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
@@ -21,9 +21,10 @@ import java.util.concurrent.FutureTask;
 
 import static android.os.Looper.getMainLooper;
 
-@Slf4j
 @Accessors(prefix = "m")
 abstract class Task<T> {
+
+    private static final String TAG = Task.class.getSimpleName();
 
     private interface Action {
         void run() throws Throwable;
@@ -348,11 +349,11 @@ abstract class Task<T> {
         if (mLaunchStackTrace != null) {
             concatStackTrace(e, mLaunchStackTrace);
         }
-        log.error(callbackName + " error", e);
+        Log.e(TAG, callbackName + " error", e);
     }
 
     private static void concatStackTrace(Throwable e, StackTraceElement[] stackTraceElements) {
-        final ArrayList<StackTraceElement> stack = new ArrayList<StackTraceElement>(Arrays.asList(e.getStackTrace()));
+        ArrayList<StackTraceElement> stack = new ArrayList<>(Arrays.asList(e.getStackTrace()));
         stack.addAll(Arrays.asList(stackTraceElements));
         e.setStackTrace(stack.toArray(new StackTraceElement[stack.size()]));
     }
