@@ -113,6 +113,8 @@ public final class DataWrapperTest {
         verifyZeroObserverInteractions();
     }
 
+    // TODO: Test the forward callbacks.
+
     @Test
     public void forwardDataChange() {
         throw new UnsupportedOperationException();
@@ -271,14 +273,8 @@ public final class DataWrapperTest {
     }
 
     @NonNull
-    private static DataWrapper<?> newDataWrapper(@NonNull final Data<?> data) {
-        return new DataWrapper<Object>(data) {
-            @NonNull
-            @Override
-            public Object get(int position, int flags) {
-                return data.get(position, flags);
-            }
-        };
+    private static DataWrapper<?> newDataWrapper(@NonNull Data<?> data) {
+        return new TestDataWrapper<>(data);
     }
 
     private void verifyZeroObserverInteractions() {
@@ -286,5 +282,22 @@ public final class DataWrapperTest {
         verifyZeroInteractions(mWrapperLoadingObserver);
         verifyZeroInteractions(mWrapperAvailableObserver);
         verifyZeroInteractions(mWrapperErrorObserver);
+    }
+
+    static class TestDataWrapper<T> extends DataWrapper<T> {
+
+        @NonNull
+        private final Data<T> mData;
+
+        TestDataWrapper(@NonNull Data<T> data) {
+            super(data);
+            mData = data;
+        }
+
+        @NonNull
+        @Override
+        public T get(int position, int flags) {
+            return mData.get(position, flags);
+        }
     }
 }

@@ -403,9 +403,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setOnVisibleChangeListener(@Nullable OnVisibleChangeListener onVisibleChangeListener) {
-        if (onVisibleChangeListener != mOnVisibleChangeListener) {
-            mOnVisibleChangeListener = onVisibleChangeListener;
-        }
+        mOnVisibleChangeListener = onVisibleChangeListener;
     }
 
     @Nullable
