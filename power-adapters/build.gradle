@@ -8,7 +8,6 @@ apply plugin: 'com.android.library'
 apply from: '../nextfaze.gradle'
 
 dependencies {
-    compile rootProject.ext.slf4j
     provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }

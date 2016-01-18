@@ -17,6 +17,5 @@ ext {
     rxJava = 'io.reactivex:rxjava:1.1.0'
     rxAndroid = 'io.reactivex:rxandroid:1.1.0'
     junit = 'junit:junit:4.12'
-    slf4j = 'org.slf4j:slf4j-api:1.7.5'
     lombok = 'org.projectlombok:lombok:1.14.6'
 }
