@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/power-adapters-async-data" />
             <option value="$PROJECT_DIR$/power-adapters-recyclerview" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
+            <option value="$PROJECT_DIR$/power-adapters-support" />
           </set>
         </option>
       </GradleProjectSettings>
