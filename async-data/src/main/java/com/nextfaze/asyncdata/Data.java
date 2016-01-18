@@ -70,8 +70,7 @@ public interface Data<T> extends Iterable<T> {
 
     /**
      * Indicates how many more elements are available to be loaded relative to the current data set. Implementations
-     * can
-     * override this if they wish to convey an incomplete data set to observers.
+     * can override this if they wish to convey an incomplete data set to observers.
      * <p/>The return value must never change:
      * <ul>
      * <li>Outside the UI thread</li>
@@ -87,11 +86,11 @@ public interface Data<T> extends Iterable<T> {
     @UiThread
     boolean isEmpty();
 
-    /** If {@code true}, indicates the data is currently loading more elements. */
+    /** If {@code true}, indicates the data is currently loading more elements, or updating existing ones. */
     @UiThread
     boolean isLoading();
 
-    /** Marks existing elements as invalid, such that they will be reloaded next time the data is shown. */
+    /** Marks existing elements as invalid, such that they are not reloaded immediately, but at the next suitable time, such as when clients resume observation. */
     @UiThread
     void invalidate();
 
