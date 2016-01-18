@@ -229,17 +229,17 @@ final class FilterData<T> extends DataWrapper<T> {
 
     @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
-        insertIndexRange(innerPositionStart, innerItemCount, true);
+        insertIndexRange(innerPositionStart, innerItemCount);
     }
 
     @Override
     protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
-        removeIndexRange(innerPositionStart, innerItemCount, true);
+        removeIndexRange(innerPositionStart, innerItemCount);
     }
 
     @Override
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
-        moveIndexRange(innerFromPosition, innerToPosition, innerItemCount, true);
+        moveIndexRange(innerFromPosition, innerToPosition, innerItemCount);
     }
 
     @Override
@@ -286,7 +286,7 @@ final class FilterData<T> extends DataWrapper<T> {
         }
     }
 
-    private void insertIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {
+    private void insertIndexRange(final int innerPositionStart, final int itemCount) {
         // Take advantage of indexOfKey() binary search result value to find out what the mapping should be.
         int idx = mIndex.indexOfKey(innerPositionStart);
         int insertionIndex = idx >= 0 ? idx : -idx - 1;
@@ -294,27 +294,25 @@ final class FilterData<T> extends DataWrapper<T> {
             T t = mData.get(innerPosition);
             if (apply(t)) {
                 mIndex.put(innerPosition);
-                if (notify) {
-                    notifyItemInserted(insertionIndex);
-                }
+                notifyItemInserted(insertionIndex);
                 insertionIndex++;
             }
         }
     }
 
-    private void removeIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {
+    private void removeIndexRange(final int innerPositionStart, final int itemCount) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             int outerPosition = mIndex.indexOfKey(innerPosition);
             if (outerPosition >= 0) {
                 mIndex.delete(innerPosition);
-                if (notify) {
-                    notifyItemRemoved(outerPosition);
-                }
+                notifyItemRemoved(outerPosition);
             }
         }
     }
 
-    private void moveIndexRange(final int innerFromPosition, final int innerToPosition, final int itemCount, boolean notify) {
+    private void moveIndexRange(final int innerFromPosition,
+                                final int innerToPosition,
+                                final int itemCount) {
         // Calculate outer "from" position by skipping past excluded items.
         int outerFromPosition = -1;
         for (int i = 0; i < itemCount; i++) {
@@ -331,13 +329,11 @@ final class FilterData<T> extends DataWrapper<T> {
 
         // Offset the items between "from" and "to" ranges.
         if (innerToPosition > innerFromPosition) {
-            int start = innerFromPosition + itemCount;
-            int count = abs(innerToPosition - innerFromPosition);
-            mIndex.offset(start, count, sign(innerFromPosition - innerToPosition) * itemCount);
+            mIndex.offset(innerFromPosition + itemCount, abs(innerToPosition - innerFromPosition),
+                    sign(innerFromPosition - innerToPosition) * itemCount);
         } else {
-            int start = innerToPosition;
-            int count = abs(innerToPosition - innerFromPosition);
-            mIndex.offsetReverse(start, count, sign(innerFromPosition - innerToPosition) * itemCount);
+            mIndex.offsetReverse(innerToPosition, abs(innerToPosition - innerFromPosition),
+                    sign(innerFromPosition - innerToPosition) * itemCount);
         }
 
         // Add indexes to "to" range.
@@ -361,7 +357,7 @@ final class FilterData<T> extends DataWrapper<T> {
             }
         }
 
-        if (notify && outerItemCount > 0) {
+        if (outerItemCount > 0) {
             notifyItemRangeMoved(outerFromPosition, outerToPosition, outerItemCount);
         }
     }

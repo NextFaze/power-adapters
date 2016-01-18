@@ -7,7 +7,7 @@
             android:allowBackup="true"
             android:label="Async Data Sample"
             android:theme="@style/Theme.AppCompat"
-            tools:ignore="MissingApplicationIcon">
+            tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
 
         <activity
                 android:name=".SampleActivity">
