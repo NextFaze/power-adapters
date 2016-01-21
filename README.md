@@ -3,14 +3,16 @@
 # Motivation
 
 Implementing a UI for presenting the contents of a remote collection, like a list of comments or products, requires
-several important mechanics. Among them are:
+several different mechanics. Among them are:
 * Perform requests asynchronously to avoid blocking the UI thread
 * Presenting a loading indicator to give the user feedback on progress
 * Allow the user to page through results
 * Handle and present errors as they occur
 * Dispatch change notifications to your adapter so your `RecyclerView` or `ListView` can present content changes in real-time.
 
-Async Data aims to simplify this by encapsulating the above concerns into a single object: `Data<T>`
+Async Data aims to simplify this by encapsulating the above concerns into a single object: `Data<T>`. In doing so, it allows
+you to retain one object when a config change occurs, like an orientation change. This way you don't need to reload or
+parcel/unparcel all of your list results when that occurs.
 
 This library provides `Data` implementations that cover some of the most common use cases, as well as basic adapters
 for connecting your `Data` instances to your `RecyclerView` or `ListView`.
@@ -64,7 +66,7 @@ At some stage you'll want to request a reload of the elements from the remote so
 `refresh()`, or `invalidate()`. The behaviour of these methods differ slightly, but ultimately they all resulting your
 items being reloaded from the source. See the `Data` javadoc for how they differ.
 
-# DataLayout
+## DataLayout
 
 `DataLayout` aids in presenting the various states of a `Data` instance, by hiding and showing contents, empty, error,
 and loading child views.
@@ -112,11 +114,33 @@ Here's an example of how to declare a `DataLayout` in XML:
 </com.nextfaze.asyncdata.widget.DataLayout>
 ```
 
-TODO: Explain principle of registering an observer at all times to indicate interest in Data contents
+Now you need to connect to your `DataLayout` and `ListView` in Java code:
+
+```java
+@Override
+public void onViewCreated(View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    mListView.setAdapter(new DataAdapter(mProducts));
+    mDataLayout.setData(mProducts);
+}
+```
+
+# RxJava Module
+
+An RxJava module is provided: `async-data-rx`. This is a simple adapter library that provides `Observable`s for properties of `Data`:
+
+```java
+
+RxData.changes(mProducts).subscribe(new Action1<Change>() {
+    @Override
+    public void call(Change change) {
+        ...
+    }
+});
+
+```
 
 TODO: Transforming, filtering
-
-TODO: RxJava module
 
 TODO: Synergy with Power Adapters
 
