@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/async-data" />
+            <option value="$PROJECT_DIR$/async-data-recyclerview" />
             <option value="$PROJECT_DIR$/async-data-rx" />
             <option value="$PROJECT_DIR$/async-data-sample" />
           </set>
