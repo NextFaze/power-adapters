@@ -4,15 +4,13 @@ buildscript {
     }
 }
 
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply from: '../nextfaze.gradle'
 
 dependencies {
-    compile rootProject.ext.supportAppCompat
-    compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.google.guava:guava:18.0'
-    compile rootProject.ext.supportAnnotations
-    compile project(':async-data')
+    compile rootProject.ext.rxAndroid
+    compile project(':power-data')
+    provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
 
@@ -22,9 +20,6 @@ android {
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion 23
-        versionCode 1
-        versionName '1.0'
     }
 
     compileOptions {

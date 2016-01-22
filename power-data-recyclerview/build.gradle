@@ -8,8 +8,8 @@ apply plugin: 'com.android.library'
 apply from: '../nextfaze.gradle'
 
 dependencies {
-    compile rootProject.ext.rxAndroid
-    compile project(':async-data')
+    compile rootProject.ext.supportRecyclerView
+    compile project(':power-data')
     provided rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }

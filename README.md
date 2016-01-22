@@ -1,4 +1,4 @@
-# Async Data
+# Power Data
 
 # Motivation
 
@@ -10,7 +10,7 @@ several different mechanics. Among them are:
 * Handle and present errors as they occur
 * Dispatch change notifications to your adapter so your `RecyclerView` or `ListView` can present content changes in real-time.
 
-Async Data aims to simplify this by encapsulating the above concerns into a single object: `Data<T>`. In doing so, it allows
+Power Data aims to simplify this by encapsulating the above concerns into a single object: `Data<T>`. In doing so, it allows
 you to retain one object when a config change occurs, like an orientation change. This way you don't need to reload or
 parcel/unparcel all of your list results when that occurs.
 
@@ -127,7 +127,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 
 # RxJava Module
 
-An RxJava module is provided: `async-data-rx`. This is a simple adapter library that provides `Observable`s for properties of `Data`:
+An RxJava module is provided: `power-data-rx`. This is a simple adapter library that provides `Observable`s for properties of `Data`:
 
 ```java
 
@@ -150,7 +150,7 @@ TODO: Data is not the authority for your data. It's a UI-layer object. Don't use
 
 Earlier iterations of this library assigned different meaning to `clear()`, `invalidate()`, etc. Below is a conversion table:
 
-|Databind              |Async Data      |Description|
+|Databind              |Power Data      |Description|
 |----------------------|----------------|-----------|
 |`clear() `            |`reload()`      |Clears the existing elements, then reloads them asynchronously.|
 |`invalidate()`        |`refresh()`     |Reloads elements asynchronously, without clearing them first.|
