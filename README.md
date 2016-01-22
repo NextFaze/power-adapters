@@ -130,14 +130,12 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 An RxJava module is provided: `power-data-rx`. This is a simple adapter library that provides `Observable`s for properties of `Data`:
 
 ```java
-
 RxData.changes(mProducts).subscribe(new Action1<Change>() {
     @Override
     public void call(Change change) {
         ...
     }
 });
-
 ```
 
 TODO: Transforming, filtering
