@@ -78,7 +78,7 @@ to suite the needs of your application.
 Here's an example of how to declare a `DataLayout` in XML:
 
 ```xml
-<com.nextfaze.asyncdata.widget.DataLayout
+<com.nextfaze.powerdata.widget.DataLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/news_fragment_data_layout"
@@ -111,7 +111,7 @@ Here's an example of how to declare a `DataLayout` in XML:
             app:layout_component="error"
             android:textColor="#ffff0000"/>
 
-</com.nextfaze.asyncdata.widget.DataLayout>
+</com.nextfaze.powerdata.widget.DataLayout>
 ```
 
 Now you need to connect to your `DataLayout` and `ListView` in Java code:
