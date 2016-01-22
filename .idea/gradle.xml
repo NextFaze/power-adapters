@@ -10,7 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-data" />
-            <option value="$PROJECT_DIR$/power-data-recyclerview" />
+            <option value="$PROJECT_DIR$/power-data-recyclerview-v7" />
             <option value="$PROJECT_DIR$/power-data-rx" />
             <option value="$PROJECT_DIR$/power-data-sample" />
           </set>
