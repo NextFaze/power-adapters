@@ -1,4 +1,4 @@
-rootProject.name = 'power-adapters-android'
+rootProject.name = 'power-adapters-root'
 include ':power-adapters'
 include ':power-adapters-recyclerview'
 include ':power-adapters-support'

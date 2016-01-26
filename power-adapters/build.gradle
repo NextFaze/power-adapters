@@ -1,11 +1,11 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.library'
-apply from: '../nextfaze.gradle'
 
 dependencies {
     provided rootProject.ext.supportAnnotations
@@ -30,3 +30,5 @@ android {
         textOutput 'stdout'
     }
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

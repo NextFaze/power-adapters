@@ -1,11 +1,11 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.library'
-apply from: '../nextfaze.gradle'
 
 dependencies {
     compile project(':power-adapters')
@@ -32,3 +32,5 @@ android {
         textOutput 'stdout'
     }
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
