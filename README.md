@@ -17,6 +17,14 @@ parcel/unparcel all of your list results when that occurs.
 This library provides `Data` implementations that cover some of the most common use cases, as well as basic adapters
 for connecting your `Data` instances to your `RecyclerView` or `ListView`.
 
+# Download
+
+Get it from Maven Central, using Gradle:
+
+```groovy
+compile 'com.nextfaze.powerdata:power-data:0.4.0-SNAPSHOT'
+```
+
 # Usage
 
 ## Basic
