@@ -8,7 +8,7 @@ buildscript {
 apply plugin: 'com.android.library'
 
 dependencies {
-    provided rootProject.ext.supportAnnotations
+    compile rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
 
