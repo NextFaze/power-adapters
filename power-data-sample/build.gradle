@@ -1,11 +1,11 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.application'
-apply from: '../nextfaze.gradle'
 
 dependencies {
     compile rootProject.ext.supportAppCompat

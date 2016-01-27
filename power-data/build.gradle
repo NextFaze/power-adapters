@@ -1,11 +1,11 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.library'
-apply from: '../nextfaze.gradle'
 
 dependencies {
     testCompile rootProject.ext.robolectric
