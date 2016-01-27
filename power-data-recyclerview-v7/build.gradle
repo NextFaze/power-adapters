@@ -10,7 +10,7 @@ apply plugin: 'com.android.library'
 dependencies {
     compile rootProject.ext.supportRecyclerView
     compile project(':power-data')
-    provided rootProject.ext.supportAnnotations
+    compile rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
 

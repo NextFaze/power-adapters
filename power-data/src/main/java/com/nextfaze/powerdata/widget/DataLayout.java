@@ -42,24 +42,19 @@ import static java.util.Collections.singleton;
  * A container view that, when hooked up to {@link Data} instance(s), will automatically show/hide child component
  * views based on the state of the data.
  * Child views are assigned components using the {@link R.styleable#DataLayout_Layout_layout_component} attribute.
- * <p/>Each {@link DataLayout} can optionally contain the following components as child views:
- * <p/>
+ * Each {@link DataLayout} can optionally contain the following components as child views:
  * <h2>Content View</h2>
  * An {@link AdapterView} of some kind, or a {@code RecyclerView} (the type is not checked, it can be any view).
  * It can be assigned using {@link DataLayout#CONTENT}.
- * <p/>
  * <h2>Empty View</h2>
  * An empty view, which will be shown while the {@link Data} is empty. It can be assigned using {@link
  * DataLayout#EMPTY}.
- * <p/>
  * <h2>Loading View</h2>
  * A loading view, which will be shown while the {@link Data} is empty and loading. It can be assigned using {@link
  * DataLayout#LOADING}.
- * <p/>
  * <h2>Error View</h2>
  * An error view, which will be shown if the {@link Data} emits an error. It can be assigned using {@link
  * DataLayout#ERROR}.
- * <p/>
  * Components can also be updated programmatically by configuring the child view {@link DataLayout.LayoutParams}.
  * @see DataLayout.LayoutParams
  * @see DataLayout#invalidateComponentMapping()

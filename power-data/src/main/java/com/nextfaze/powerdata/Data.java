@@ -42,7 +42,7 @@ public interface Data<T> extends Iterable<T> {
 
     /**
      * Retrieve the element at the specified position.
-     * <p/>The return value for a given {@code position} must never change:
+     * The return value for a given {@code position} must never change:
      * <ul>
      * <li>Outside the UI thread</li>
      * <li>Without a corresponding change notification</li>
@@ -58,7 +58,7 @@ public interface Data<T> extends Iterable<T> {
 
     /**
      * The number of elements in this data instance.
-     * <p/>The return value must never change:
+     * The return value must never change:
      * <ul>
      * <li>Outside the UI thread</li>
      * <li>Without a corresponding change notification</li>
@@ -71,7 +71,7 @@ public interface Data<T> extends Iterable<T> {
     /**
      * Indicates how many more elements are available to be loaded relative to the current data set. Implementations
      * can override this if they wish to convey an incomplete data set to observers.
-     * <p/>The return value must never change:
+     * The return value must never change:
      * <ul>
      * <li>Outside the UI thread</li>
      * <li>Without a corresponding available notification</li>

@@ -15,19 +15,13 @@ public final class Datas {
         return new ImmutableData<>(Collections.<T>emptyList());
     }
 
-    /**
-     * Filters the specified data based on a predicate. Does not assume ownership of wrapped data, so caller
-     * must {@link Data#close()} the passed instance.
-     */
+    /** Filters the specified data based on a predicate. */
     @NonNull
     public static <T> Data<T> filter(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
         return new FilterData<>(data, predicate);
     }
 
-    /**
-     * Filter the specified data by class. The resulting elements are guaranteed to be of the given type. Does not close
-     * the wrapped data.
-     */
+    /** Filter the specified data by class. The resulting elements are guaranteed to be of the given type. */
     @NonNull
     public static <T> Data<T> filter(@NonNull Data<?> data, @NonNull final Class<T> type) {
         //noinspection unchecked

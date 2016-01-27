@@ -11,7 +11,7 @@ dependencies {
     testCompile rootProject.ext.robolectric
     testCompile rootProject.ext.mockito
     testCompile rootProject.ext.truth
-    provided rootProject.ext.supportAnnotations
+    compile rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
 
