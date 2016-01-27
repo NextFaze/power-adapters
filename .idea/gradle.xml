@@ -10,10 +10,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-adapters" />
-            <option value="$PROJECT_DIR$/power-adapters-async-data" />
-            <option value="$PROJECT_DIR$/power-adapters-recyclerview" />
+            <option value="$PROJECT_DIR$/power-adapters-power-data" />
+            <option value="$PROJECT_DIR$/power-adapters-recyclerview-v7" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
-            <option value="$PROJECT_DIR$/power-adapters-support" />
+            <option value="$PROJECT_DIR$/power-adapters-support-v4" />
           </set>
         </option>
       </GradleProjectSettings>
