@@ -8,11 +8,12 @@ several different mechanics. Among them are:
 * Presenting a loading indicator to give the user feedback on progress
 * Allow the user to page through results
 * Handle and present errors as they occur
-* Dispatch change notifications to your adapter so your `RecyclerView` or `ListView` can present content changes in real-time.
+* Dispatch change notifications to your adapter so your `RecyclerView` or `ListView` can react to content changes
 
 Power Data aims to simplify this by encapsulating the above concerns into a single object: `Data<T>`. In doing so, it allows
 you to retain one object when a config change occurs, like an orientation change. This way you don't need to reload or
-parcel/unparcel all of your list results when that occurs.
+parcel/unparcel all of your list results when that occurs. The `Data<T>` object comprises much of the repetitive
+asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 This library provides `Data` implementations that cover some of the most common use cases, as well as basic adapters
 for connecting your `Data` instances to your `RecyclerView` or `ListView`.
@@ -71,7 +72,7 @@ public void onDestroyView() {
 ## Invalidating and reloading
 
 At some stage you'll want to request a reload of the elements from the remote source. You can do this using `reload()`,
-`refresh()`, or `invalidate()`. The behaviour of these methods differ slightly, but ultimately they all resulting your
+`refresh()`, or `invalidate()`. The behaviour of these methods differ slightly, but ultimately they all result in your
 items being reloaded from the source. See the `Data` javadoc for how they differ.
 
 ## DataLayout
@@ -133,7 +134,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 }
 ```
 
-# RxJava Module
+## RxJava Module
 
 An RxJava module is provided: `power-data-rx`. This is a simple adapter library that provides `Observable`s for properties of `Data`:
 
@@ -146,11 +147,37 @@ RxData.changes(mProducts).subscribe(new Action1<Change>() {
 });
 ```
 
-TODO: Transforming, filtering
+## Data Views
 
-TODO: Synergy with Power Adapters
+`Data` instances can be represented as a view, much like a relational database. The `Datas` utility class provides
+static factory methods for wrapping an existing `Data` object, and providing a filtered or transformed view of its contents.
 
-TODO: Data is not the authority for your data. It's a UI-layer object. Don't use it as a database.
+```java
+Data<String> names = ...
+Data<Integer> lengths = Datas.transform(names, new Function<String, Integer>() {
+    @NonNull
+    @Override
+    public Integer apply(@NonNull String name) {
+        return name.length;
+    }
+});
+```
+
+```java
+Data<Post> allPosts = ...
+Data<Post> todaysPosts = Datas.filter(names, new Predicate<Post>() {
+    @Override
+    public boolean apply(@NonNull Post post) {
+        return isToday(post.getDate());
+    }
+});
+```
+
+# Integration with Power Adapters
+
+This library was designed to work best with its sister library, [Power Adapters][power-adapters]. Using both, you can
+present lists of varying items types, with independently-loading asynchronous data sources. Power Adapters provides
+the tools for showing loading indicators, empty messages, headers and footers, and more.
 
 # Migrating from Databind
 
@@ -177,3 +204,5 @@ Earlier iterations of this library assigned different meaning to `clear()`, `inv
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+ [power-adapters]: https://github.com/NextFaze/power-adapters
