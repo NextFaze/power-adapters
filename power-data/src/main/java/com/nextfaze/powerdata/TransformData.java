@@ -11,7 +11,7 @@ final class TransformData<F, T> extends DataWrapper<T> {
     private final Function<? super F, ? extends T> mFunction;
 
     TransformData(@NonNull Data<? extends F> data, @NonNull Function<? super F, ? extends T> function) {
-        super(data, false);
+        super(data);
         mData = data;
         mFunction = function;
     }

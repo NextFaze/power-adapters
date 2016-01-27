@@ -3,7 +3,6 @@ package com.nextfaze.powerdata;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
-import android.util.Log;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 
@@ -14,8 +13,6 @@ import java.util.Iterator;
  */
 @Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
-
-    private static final String TAG = AbstractData.class.getSimpleName();
 
     @NonNull
     private final DataObservers mDataObservers = new DataObservers();
@@ -31,8 +28,6 @@ public abstract class AbstractData<T> implements Data<T> {
 
     @NonNull
     private final CoalescingPoster mPoster = new CoalescingPoster();
-
-    private boolean mClosed;
 
     //region Observer Registration
     @Override
@@ -102,16 +97,6 @@ public abstract class AbstractData<T> implements Data<T> {
         return size() <= 0;
     }
 
-    @CallSuper
-    @Override
-    public void close() {
-        if (!mClosed) {
-            mPoster.dispose();
-            mClosed = true;
-            dispatchClose();
-        }
-    }
-
     @Override
     public Iterator<T> iterator() {
         return new DataIterator<>(this);
@@ -147,16 +132,6 @@ public abstract class AbstractData<T> implements Data<T> {
     /** Returns the number of registered error observers. */
     protected final int getErrorObserverCount() {
         return mErrorObservers.size();
-    }
-
-    /**
-     * Called when this instance is closed. Only one invocation is ever made per-instance. Any exceptions are caught by
-     * the caller.
-     * @deprecated This callback is deprecated. Just override {@link #close()} instead.
-     * @throws Throwable If any error occurs. These exceptions are caught by the caller and logged.
-     */
-    @Deprecated
-    protected void onClose() throws Throwable {
     }
 
     /** Dispatch a data change notification on the UI thread. */
@@ -257,15 +232,6 @@ public abstract class AbstractData<T> implements Data<T> {
             runnable.run();
         } else {
             mPoster.post(runnable);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private void dispatchClose() {
-        try {
-            onClose();
-        } catch (Throwable e) {
-            Log.e(TAG, "Error during close callback", e);
         }
     }
 }

@@ -102,10 +102,6 @@ public interface Data<T> extends Iterable<T> {
     @UiThread
     void reload();
 
-    /** Close this instance. Other methods should not called after this. */
-    @UiThread
-    void close();
-
     @UiThread
     void registerLoadingObserver(@NonNull LoadingObserver loadingObserver);
 

@@ -103,16 +103,6 @@ public final class DataWrapperTest {
         verifyZeroInteractions(mWrapperDataObserver, mWrapperLoadingObserver, mWrapperAvailableObserver);
     }
 
-    @Test
-    public void doesNotActOnNotificationsAfterClose() {
-        mDataWrapper.close();
-        mData.add("a");
-        mData.setAvailable(9);
-        mData.setLoading(true);
-        mData.notifyError(new RuntimeException());
-        verifyZeroObserverInteractions();
-    }
-
     // TODO: Test the forward callbacks.
 
     @Test

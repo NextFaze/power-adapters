@@ -2,7 +2,6 @@ package com.nextfaze.powerdata;
 
 import lombok.NonNull;
 
-@SuppressWarnings("Convert2MethodRef")
 public abstract class DataWrapper<T> extends AbstractData<T> {
 
     @NonNull
@@ -60,29 +59,13 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
         }
     };
 
-    private final boolean mTakeOwnership;
-
     private boolean mObservingData;
     private boolean mObservingLoading;
     private boolean mObservingError;
     private boolean mObservingAvailable;
 
     public DataWrapper(@NonNull Data<?> data) {
-        this(data, true);
-    }
-
-    public DataWrapper(@NonNull Data<?> data, boolean takeOwnership) {
         mData = data;
-        mTakeOwnership = takeOwnership;
-    }
-
-    @Override
-    public void close() {
-        unregisterAll();
-        if (mTakeOwnership) {
-            mData.close();
-        }
-        super.close();
     }
 
     @Override
@@ -245,25 +228,6 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
         } else if (!mObservingError && getErrorObserverCount() > 0) {
             mData.registerErrorObserver(mErrorObserver);
             mObservingError = true;
-        }
-    }
-
-    private void unregisterAll() {
-        if (mObservingData) {
-            mData.unregisterDataObserver(mDataObserver);
-            mObservingData = false;
-        }
-        if (mObservingLoading) {
-            mData.unregisterLoadingObserver(mLoadingObserver);
-            mObservingLoading = false;
-        }
-        if (mObservingAvailable) {
-            mData.unregisterAvailableObserver(mAvailableObserver);
-            mObservingAvailable = false;
-        }
-        if (mObservingError) {
-            mData.unregisterErrorObserver(mErrorObserver);
-            mObservingError = false;
         }
     }
 }

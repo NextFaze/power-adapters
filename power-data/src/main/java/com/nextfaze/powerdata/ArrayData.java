@@ -48,8 +48,7 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     }
 
     @CallSuper
-    @Override
-    protected void onClose() throws Throwable {
+    public void close() {
         cancelTask();
         mData.clear();
         mData.trimToSize();

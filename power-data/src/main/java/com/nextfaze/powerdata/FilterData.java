@@ -50,15 +50,9 @@ final class FilterData<T> extends DataWrapper<T> {
     private boolean mEntireIndexDirty = true;
 
     FilterData(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
-        super(data, false);
+        super(data);
         mData = data;
         mPredicate = predicate;
-    }
-
-    @Override
-    public void close() {
-        unregisterAll();
-        super.close();
     }
 
     @NonNull
