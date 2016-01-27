@@ -22,6 +22,14 @@ Power adapters are compatible with `ListView`, `GridView` (technically anything 
 
 Its design promotes reuse via composition.
 
+# Download
+
+Get it from Maven Central, using Gradle:
+
+```groovy
+compile 'com.nextfaze.poweradapters:power-adapters:0.8.3-SNAPSHOT'
+```
+
 # Usage
 
 ## Adapter decoration
