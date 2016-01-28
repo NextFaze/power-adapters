@@ -27,7 +27,7 @@ Its design promotes reuse via composition.
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters:0.9.0'
+compile 'com.nextfaze.poweradapters:power-adapters:0.9.1-SNAPSHOT'
 ```
 
 # Usage
