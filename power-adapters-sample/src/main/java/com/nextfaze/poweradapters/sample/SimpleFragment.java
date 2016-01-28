@@ -5,9 +5,9 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ListView;
 import butterknife.Bind;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;

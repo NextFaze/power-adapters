@@ -1,14 +1,14 @@
 package com.nextfaze.poweradapters.asyncdata;
 
-import com.nextfaze.asyncdata.Data;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
+import com.nextfaze.powerdata.Data;
 import lombok.NonNull;
 
 public final class DataBindingAdapter extends BindingAdapter {
 
     @NonNull
-    private final com.nextfaze.asyncdata.DataObserver mDataObserver = new com.nextfaze.asyncdata.DataObserver() {
+    private final com.nextfaze.powerdata.DataObserver mDataObserver = new com.nextfaze.powerdata.DataObserver() {
         @Override
         public void onChange() {
             notifyDataSetChanged();

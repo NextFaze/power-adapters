@@ -6,14 +6,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ListView;
 import butterknife.Bind;
-import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
 import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.powerdata.Data;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;

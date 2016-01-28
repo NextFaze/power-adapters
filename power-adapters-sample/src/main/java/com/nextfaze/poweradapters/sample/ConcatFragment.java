@@ -13,9 +13,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.IncrementalArrayData;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.FooterAdapterBuilder;
@@ -28,6 +25,9 @@ import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
 import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
+import com.nextfaze.powerdata.Data;
+import com.nextfaze.powerdata.IncrementalArrayData;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class ConcatFragment extends BaseFragment {
     private static final int ADAPTER_COUNT = 10;
 
     @NonNull
-    private final List<Pair<Data<?>, PowerAdapter>> mPairs = new ArrayList<>();
+    private final List<Pair<NewsIncrementalData, PowerAdapter>> mPairs = new ArrayList<>();
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
@@ -63,8 +63,8 @@ public class ConcatFragment extends BaseFragment {
     }
 
     @NonNull
-    private Pair<Data<?>, PowerAdapter> createPair(@NonNull final IncrementalArrayData<NewsItem> data,
-                                                   @NonNull Binder newsItemBinder) {
+    private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull final NewsIncrementalData data,
+                                                               @NonNull Binder newsItemBinder) {
         Binder removeItemBinder = new BinderWrapper(newsItemBinder) {
             @Override
             public void bindView(@NonNull final Object item, @NonNull View v, @NonNull final Holder holder) {
@@ -124,7 +124,7 @@ public class ConcatFragment extends BaseFragment {
                 .delegate(new DataEmptyDelegate(data))
                 .build(adapter);
 
-        return new Pair<Data<?>, PowerAdapter>(data, adapter);
+        return new Pair<NewsIncrementalData, PowerAdapter>(data, adapter);
     }
 
     private void showEditDialog(@NonNull final IncrementalArrayData<NewsItem> data, final int position) {
@@ -185,7 +185,7 @@ public class ConcatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        for (Pair<Data<?>, PowerAdapter> pair : mPairs) {
+        for (Pair<NewsIncrementalData, PowerAdapter> pair : mPairs) {
             pair.first.close();
         }
         super.onDestroy();
@@ -196,17 +196,17 @@ public class ConcatFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         List<Data<?>> datas = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<Data<?>, PowerAdapter>, Data<?>>() {
+                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, Data<?>>() {
                     @Override
-                    public Data<?> apply(Pair<Data<?>, PowerAdapter> pair) {
+                    public Data<?> apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
                         return pair.first;
                     }
                 })
                 .toList();
         List<PowerAdapter> adapters = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<Data<?>, PowerAdapter>, PowerAdapter>() {
+                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, PowerAdapter>() {
                     @Override
-                    public PowerAdapter apply(Pair<Data<?>, PowerAdapter> pair) {
+                    public PowerAdapter apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
                         return pair.second;
                     }
                 })

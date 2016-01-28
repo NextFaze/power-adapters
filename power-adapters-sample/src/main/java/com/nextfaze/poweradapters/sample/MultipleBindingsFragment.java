@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.Bind;
-import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
@@ -18,6 +16,8 @@ import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.binding.ViewHolderBinder;
+import com.nextfaze.powerdata.Data;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
