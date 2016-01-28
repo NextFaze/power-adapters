@@ -6,6 +6,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     testCompile rootProject.ext.robolectric
