@@ -1,23 +1,14 @@
 package com.nextfaze.poweradapters;
 
-import android.os.Handler;
 import android.support.annotation.CallSuper;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-
-import static android.os.Looper.getMainLooper;
 
 @Accessors(prefix = "m")
 final class LoadingAdapter extends ItemAdapter {
 
     @NonNull
-    private final Handler mHandler = new Handler(getMainLooper());
-
-    @NonNull
     private LoadingAdapterBuilder.Delegate mDelegate;
-
-    @NonNull
-    private Item mItem;
 
     @NonNull
     private LoadingAdapterBuilder.EmptyPolicy mEmptyPolicy;
@@ -26,7 +17,6 @@ final class LoadingAdapter extends ItemAdapter {
                    @NonNull Item item,
                    @NonNull LoadingAdapterBuilder.EmptyPolicy emptyPolicy) {
         super(item);
-        mItem = item;
         mEmptyPolicy = emptyPolicy;
         mDelegate = delegate;
         mDelegate.setAdapter(this);
