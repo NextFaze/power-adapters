@@ -17,7 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import com.nextfaze.asyncdata.widget.DataLayout;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;

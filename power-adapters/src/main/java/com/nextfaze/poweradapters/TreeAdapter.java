@@ -135,6 +135,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 mState.setExpanded(itemId, true);
                 invalidateGroups();
                 notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
+                entry.updateObserver();
             }
         } else {
             if (entry != null) {
@@ -191,6 +192,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
                 }
             }
         }
+        updateEntryObservers();
         invalidateGroups();
         for (Runnable runnable : notifications) {
             runnable.run();
@@ -325,9 +327,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         mRootAdapter.registerDataObserver(mRootDataObserver);
-        for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).registerObserversIfNecessary();
-        }
+        updateEntryObservers();
     }
 
     @CallSuper
@@ -335,8 +335,12 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
         mRootAdapter.unregisterDataObserver(mRootDataObserver);
+        updateEntryObservers();
+    }
+
+    private void updateEntryObservers() {
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).unregisterObserversIfNecessary();
+            mEntries.valueAt(i).updateObserver();
         }
     }
 
@@ -395,9 +399,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         Entry(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
             // Only register child observer if parent has at least 1 observer.
-            if (getObserverCount() > 0) {
-                registerObserversIfNecessary();
-            }
+//            if (getObserverCount() > 0) {
+//                registerObserversIfNecessary();
+//            }
         }
 
         int entryToOuter(int entryPosition) {
@@ -408,17 +412,26 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             return groupForPosition(outerPosition).outerToEntry(outerPosition);
         }
 
+        void updateObserver() {
+            if (getObserverCount() > 0) {
+                registerObserversIfNecessary();
+            } else {
+                unregisterObserversIfNecessary();
+            }
+        }
+
         void registerObserversIfNecessary() {
             if (mRegisteredDataObserver == null) {
-                mAdapter.registerDataObserver(mDataObserver);
                 mRegisteredDataObserver = mDataObserver;
+                mAdapter.registerDataObserver(mDataObserver);
             }
         }
 
         void unregisterObserversIfNecessary() {
-            if (mRegisteredDataObserver != null) {
-                mAdapter.unregisterDataObserver(mRegisteredDataObserver);
+            DataObserver observer = mRegisteredDataObserver;
+            if (observer != null) {
                 mRegisteredDataObserver = null;
+                mAdapter.unregisterDataObserver(observer);
             }
         }
 

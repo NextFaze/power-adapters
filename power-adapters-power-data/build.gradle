@@ -1,16 +1,17 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.library'
-apply from: '../nextfaze.gradle'
+apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     compile project(':power-adapters')
-    compile rootProject.ext.supportRecyclerView
-    provided rootProject.ext.supportAnnotations
+    compile 'com.nextfaze.powerdata:power-data:0.4.0'
+    compile rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }
 
@@ -32,3 +33,5 @@ android {
         textOutput 'stdout'
     }
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

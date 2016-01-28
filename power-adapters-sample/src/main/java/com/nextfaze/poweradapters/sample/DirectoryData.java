@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import com.google.common.collect.FluentIterable;
-import com.nextfaze.asyncdata.ArrayData;
+import com.nextfaze.powerdata.ArrayData;
 import lombok.NonNull;
 
 import java.io.File;

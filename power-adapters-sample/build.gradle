@@ -1,5 +1,12 @@
+buildscript {
+    dependencies {
+        classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
+    }
+}
+
 apply plugin: 'com.android.application'
-apply from: '../nextfaze.gradle'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -24,9 +31,8 @@ android {
 }
 
 dependencies {
-    compile project(':power-adapters-recyclerview')
-    compile project(':power-adapters-async-data')
-    compile rootProject.ext.slf4j
+    compile project(':power-adapters-recyclerview-v7')
+    compile project(':power-adapters-power-data')
     compile rootProject.ext.supportAppCompat
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'com.jakewharton:butterknife:7.0.1'

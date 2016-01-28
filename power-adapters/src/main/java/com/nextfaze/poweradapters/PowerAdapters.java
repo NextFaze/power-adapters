@@ -1,10 +1,12 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.LayoutRes;
 import android.widget.ListAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.Item.toItems;
 import static java.util.Arrays.asList;
 
 public final class PowerAdapters {
@@ -40,4 +42,21 @@ public final class PowerAdapters {
         return new ConcatAdapter(powerAdapters);
     }
 
+    @CheckResult
+    @NonNull
+    public static PowerAdapter create(@NonNull ViewFactory... views) {
+        return new ItemAdapter(toItems(asList(views)));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter create(@NonNull Iterable<ViewFactory> views) {
+        return new ItemAdapter(toItems(views));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter create(@NonNull @LayoutRes int... resources) {
+        return new ItemAdapter(toItems(resources));
+    }
 }

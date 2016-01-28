@@ -15,8 +15,6 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.nextfaze.asyncdata.Data;
-import com.nextfaze.asyncdata.widget.DataLayout;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
@@ -30,6 +28,8 @@ import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
 import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
+import com.nextfaze.powerdata.Data;
+import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
 import java.io.File;
@@ -221,8 +221,6 @@ public class FileTreeFragment extends BaseFragment {
                 .resource(R.layout.file_list_empty_item)
                 .delegate(new DataEmptyDelegate(data))
                 .build(adapter);
-
-        adapter = new DataLifecycleAdapter(adapter, data);
 
 //        if (depth == 1) {
 //            adapter = new DividerAdapterBuilder()
