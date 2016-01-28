@@ -23,7 +23,7 @@ for connecting your `Data` instances to your `RecyclerView` or `ListView`.
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.powerdata:power-data:0.4.0'
+compile 'com.nextfaze.powerdata:power-data:0.4.1-SNAPSHOT'
 ```
 
 # Usage
