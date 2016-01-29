@@ -112,7 +112,7 @@ Check the included sample project for a wide array of usage pattern examples.
 Building instructions:
 
 ```bash
-$ git clone <github_repo_url>
+$ git clone https://github.com/NextFaze/power-adapters.git
 $ cd power-adapters
 $ ./gradlew clean build
 
