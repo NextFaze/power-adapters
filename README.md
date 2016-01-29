@@ -122,7 +122,7 @@ $ ./gradlew clean build
 
 ## Why introduce another Adapter interface?
 
-One of the goals of this library is first-class support for both `AdapterView` and `RecyclerView`. Using `Adapter` or
+One of the goals of this library is first-class support for both `ListView` and `RecyclerView`. Using `Adapter` or
 `RecyclerView.Adapter` as base wouldn't satisfy that goal.
 Also, the two interfaces are largely incompatible, because of method signatures used for view reuse. By providing a
 common custom base interface, `PowerAdapter`, we can resolve this.
