@@ -32,6 +32,47 @@ compile 'com.nextfaze.poweradapters:power-adapters:0.9.1-SNAPSHOT'
 
 # Usage
 
+## Binding
+
+The core of any PowerAdapter is the ability to bind elements in your data set to views in a reusable and readable manner.
+This is done using a `BindingAdapter`.
+
+### Binder
+
+The primary type needed to achieve this is a `Binder`. These have a couple of responsibilities:
+
+* Construct a `View` to be bound, and re-used by the adapter/recycler view
+* Bind an object and/or data set index to the `View`
+
+Multiple types of commonly required binders are supplied: `TypedBinder` and `ViewHolderBinder`.
+
+### Mapper
+
+The second class involved is the `Mapper`. It is consulted to determine which `Binder` to use for presenting a
+particular element in your data set. The most common type of `Mapper` you're likely to use is `PolymorphicMapperBuilder`.
+This class allows you to specify a binder based on the `Class` of the object. If no binder is found, it will walk upwards
+through the class hierarchy attempting to find a suitable binder.
+
+Example:
+
+```java
+Mapper mapper = new PolymorphicMapperBuilder()
+    .bind(Tweet.class, new TweetBinder())
+    .build();
+PowerAdapter adapter = new BindingAdapter(mapper) {
+    // your implementation
+}
+```
+
+## Conversion
+
+Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
+
+|Collection view    |Converter                                  |
+|:------------------|------------------------------------------:|
+|`ListView`         |            `PowerAdapters.toListAdapter()`|
+|`RecyclerView`     |`RecyclerPowerAdapters.toRecyclerAdapter()`|
+
 ## Adapter decoration
 
 All adapters are designed to wrap an existing adapter, allowing you to maintain a separation of concerns. For example,
@@ -61,47 +102,6 @@ a strong reference cycle is established - the outer adapter holds a strong refer
 adapter holds a strong reference to the outer adapter via its registered observer.
 
 TODO: Expand on this.
-
-## Conversion
-
-Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
-
-|Collection view    |Converter                                  |
-|:------------------|------------------------------------------:|
-|`ListView`         |            `PowerAdapters.toListAdapter()`|
-|`RecyclerView`     |`RecyclerPowerAdapters.toRecyclerAdapter()`|
-
-## Binding
-
-Included in Power Adapters is the ability to bind elements in your data set to views in a reusable and readable manner.
-You can get started by using a `BindingAdapter`.
-
-### Binder
-
-The primary type needed to achieve this is a `Binder`. These have a couple of responsibilities:
-
-* Construct a `View` to be bound, and re-used by the adapter/recycler view
-* Bind an object and/or data set index to the `View`
-
-Multiple types of commonly required binders are supplied: `TypedBinder` and `ViewHolderBinder`.
-
-### Mapper
-
-The second class involved is the `Mapper`. It is consulted to determine which `Binder` to use for presenting a
-particular element in your data set. The most common type of `Mapper` you're likely to use is `PolymorphicMapperBuilder`.
-This class allows you to specify a binder based on the `Class` of the object. If no binder is found, it will walk upwards
-through the class hierarchy attempting to find a suitable binder.
-
-Example:
-
-```java
-Mapper mapper = new PolymorphicMapperBuilder()
-    .bind(Tweet.class, new TweetBinder())
-    .build();
-PowerAdapter adapter = new BindingAdapter(mapper) {
-    // your implementation
-}
-```
 
 ### Samples
 
