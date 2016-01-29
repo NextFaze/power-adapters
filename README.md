@@ -11,14 +11,14 @@ This library provides universally compatible adapter classes that provide common
 
 * Present **multiple data types** within an adapter
 * Show **headers** and **footers**
-* Show a **loading** to indicate a loading state
-* Show an **empty** item to indicate an empty underlying data set
+* Show a loading view to indicate the data is **loading**
+* Show a specific view when the underlying data set is **empty**
 * **Concatenate** multiple adapters together
-* Add **dividers** in between items of an existing adapter
+* Add **dividers** between items of an existing adapter
 * Present **hierarchical** data structures
 
-Power adapters are compatible with `ListView`, `GridView` (technically anything that accepts a normal `Adapter`), and
-`RecyclerView`.
+Power adapters are compatible with `ListView`, `GridView`, and
+`RecyclerView` (and anything else that accepts a normal `Adapter` or `RecyclerView.Adapter`).
 
 Its design promotes reuse via composition.
 
