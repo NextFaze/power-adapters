@@ -5,7 +5,7 @@
 3. Update the `CHANGELOG.md` for the impending release.
 4. Update the `README.md` with the new version.
 5. `git commit -am "Version X.Y.Z"` (where X.Y.Z is the new version)
-6. `./gradlew clean uploadArchives`
+6. `./gradlew clean build uploadArchives`
 7. `git flow release finish X.Y.Z`
 8. Update the `gradle.properties` to the next SNAPSHOT version.
 9. `git commit -am "Version X.Y.Z-SNAPSHOT"`
