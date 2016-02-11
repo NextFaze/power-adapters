@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters.asyncdata;
+package com.nextfaze.poweradapters.powerdata;
 
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
