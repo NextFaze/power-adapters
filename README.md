@@ -69,6 +69,8 @@ public void onDestroyView() {
 }
 ```
 
+Note that `RecyclerDataAdapter` can be found in the `com.nextfaze.powerdata:power-data-recyclerview-v7` module.
+
 ## Invalidating and reloading
 
 At some stage you'll want to request a reload of the elements from the remote source. You can do this using `reload()`,
