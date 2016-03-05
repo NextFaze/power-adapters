@@ -157,6 +157,7 @@ final class ConcatAdapter extends AbstractPowerAdapter {
         for (int i = 0; i < mEntries.size(); i++) {
             mEntries.valueAt(i).registerObserversIfNecessary();
         }
+        invalidateGroups();
     }
 
     @CallSuper
