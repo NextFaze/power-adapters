@@ -276,7 +276,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     public final void refresh() {
         stopThread();
         mDirty = true;
-        setAvailable(Integer.MAX_VALUE);
         startThreadIfNeeded();
     }
 
