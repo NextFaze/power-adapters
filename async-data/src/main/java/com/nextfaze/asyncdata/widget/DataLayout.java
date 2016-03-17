@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -18,6 +19,7 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -39,6 +41,8 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
 import static com.nextfaze.asyncdata.widget.SetUtils.newHashSet;
 import static com.nextfaze.asyncdata.widget.SetUtils.symmetricDifference;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
@@ -85,6 +89,17 @@ public class DataLayout extends RelativeLayout {
 
     @AnimatorRes
     private static final int DEFAULT_ANIMATION_OUT = R.animator.data_layout_default_out;
+
+    @NonNull
+    private final Rect mRect = new Rect();
+
+    @NonNull
+    private final ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener = new ViewTreeObserver.OnScrollChangedListener() {
+        @Override
+        public void onScrollChanged() {
+            updateActive();
+        }
+    };
 
     @NonNull
     private final DataWatcher mDataWatcher = new DataWatcher() {
@@ -298,6 +313,7 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        getViewTreeObserver().addOnScrollChangedListener(mOnScrollChangedListener);
         mAttachedToWindow = true;
         updateActive();
     }
@@ -305,6 +321,7 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        getViewTreeObserver().removeOnScrollChangedListener(mOnScrollChangedListener);
         mAttachedToWindow = false;
         updateActive();
     }
@@ -661,7 +678,21 @@ public class DataLayout extends RelativeLayout {
     /** Returns if this view is currently considered "shown" based on various attributes. */
     private boolean isThisViewActive() {
         return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
-                isEnabled();
+                isEnabled() && visibility() > 0f;
+    }
+
+    private float visibility() {
+        int width = getWidth();
+        int height = getHeight();
+        if (width <= 0 || height <= 0) {
+            return 0f;
+        }
+        if (getGlobalVisibleRect(mRect)) {
+            float visibleArea = mRect.width() * mRect.height();
+            float viewArea = width * height;
+            return max(min(1f, visibleArea / viewArea), 0f);
+        }
+        return 0f;
     }
 
     /** Returns whether now is an appropriate time to perform animations. */
