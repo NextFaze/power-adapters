@@ -328,6 +328,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         super.onFirstObserverRegistered();
         mRootAdapter.registerDataObserver(mRootDataObserver);
         updateEntryObservers();
+        invalidateGroups();
     }
 
     @CallSuper
