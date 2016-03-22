@@ -29,7 +29,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            invalidateGroups();
+            invalidateGroups(); // TODO: Not needed?
             notifyItemRangeChanged(rootToOuter(positionStart), itemCount);
         }
 
@@ -47,6 +47,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            // TODO: Item count should include children of all expanded root items.
             invalidateGroups();
             notifyItemRangeMoved(rootToOuter(fromPosition), rootToOuter(toPosition), itemCount);
         }
@@ -472,11 +473,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         boolean isEnabled(int position) {
             return mAdapter.isEnabled(position - mOffset);
-        }
-
-        @NonNull
-        View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-            return mAdapter.newView(parent, viewType);
         }
 
         void bindView(@NonNull View view, @NonNull Holder holder) {

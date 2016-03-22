@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -23,12 +24,11 @@ public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        throw new UnsupportedOperationException();
+        return new FrameLayout(parent.getContext());
     }
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
