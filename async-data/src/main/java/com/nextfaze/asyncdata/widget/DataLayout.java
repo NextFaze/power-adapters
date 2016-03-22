@@ -271,6 +271,12 @@ public class DataLayout extends RelativeLayout {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        updateActive();
+    }
+
+    @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(super.generateDefaultLayoutParams());
     }
