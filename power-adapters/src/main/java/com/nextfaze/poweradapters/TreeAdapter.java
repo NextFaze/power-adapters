@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.lang.String.format;
+import static java.util.Locale.US;
 
 public abstract class TreeAdapter extends AbstractPowerAdapter {
 
@@ -29,8 +30,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            invalidateGroups(); // TODO: Not needed?
-            notifyItemRangeChanged(rootToOuter(positionStart), itemCount);
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
+                onRootItemChanged(i);
+            }
         }
 
         @Override
@@ -41,8 +43,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            invalidateGroups();
-            notifyItemRangeRemoved(rootToOuter(positionStart), itemCount);
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
+                onRootItemRemoved(i);
+            }
         }
 
         @Override
@@ -207,8 +210,8 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     private void invalidateGroups() {
         mDirty = true;
-        rebuildGroupsIfNecessary();
-        applyExpandedState();
+//        rebuildGroupsIfNecessary();
+//        applyExpandedState();
     }
 
     private void rebuildGroupsIfNecessary() {
@@ -244,7 +247,7 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         rebuildGroupsIfNecessary();
         int totalItemCount = getItemCount();
         if (outerPosition >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
+            throw new ArrayIndexOutOfBoundsException(format(US, "Index: %d, total size: %d", outerPosition, totalItemCount));
         }
         int groupPosition = mGroups.indexOfKey(outerPosition);
         Group group;
@@ -329,7 +332,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         super.onFirstObserverRegistered();
         mRootAdapter.registerDataObserver(mRootDataObserver);
         updateEntryObservers();
+        // Rebuild index immediately, because later we might rely on it being up-to-date
+        // (such as a removal notification from a child).
         invalidateGroups();
+        rebuildGroupsIfNecessary();
     }
 
     @CallSuper
@@ -346,6 +352,37 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         }
     }
 
+    private void onRootItemChanged(int rootPosition) {
+        Entry entry = mEntries.get(rootPosition);
+        if (entry != null) {
+            PowerAdapter adapter = getChildAdapter(entry.getPosition());
+            if (adapter != entry.mAdapter) {
+                int oldItemCount = entry.mAdapter.getItemCount();
+                int newItemCount = adapter.getItemCount();
+                entry.mAdapter = adapter;
+                entry.updateObserver();
+                rebuildGroupsIfNecessary();
+                notifyItemRangeRemoved(entry.mGroup.getEntryStart(), oldItemCount);
+                notifyItemRangeInserted(entry.mGroup.getEntryStart(), newItemCount);
+                invalidateGroups();
+            }
+        }
+        notifyItemRangeChanged(rootToOuter(rootPosition), 1);
+    }
+
+    private void onRootItemRemoved(int rootPosition) {
+        int itemRemovalCount = 1;
+        Entry entry = mEntries.get(rootPosition);
+        if (entry != null) {
+            itemRemovalCount += entry.getItemCount();
+            entry.dispose();
+        }
+        mEntries.remove(rootPosition);
+        int outerPositionStart = rootToOuter(rootPosition);
+        invalidateGroups();
+        notifyItemRangeRemoved(outerPositionStart, itemRemovalCount);
+    }
+
     private final class Entry {
 
         @NonNull
@@ -358,7 +395,6 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                invalidateGroups();
                 notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
             }
 
@@ -370,8 +406,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
+                int outerPositionStart = entryToOuter(positionStart);
                 invalidateGroups();
-                notifyItemRangeRemoved(entryToOuter(positionStart), itemCount);
+                notifyItemRangeRemoved(outerPositionStart, itemCount);
             }
 
             @Override
@@ -389,24 +426,21 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             }
         };
 
-        @Nullable
-        private DataObserver mRegisteredDataObserver;
-
         @NonNull
-        private final PowerAdapter mAdapter;
+        private PowerAdapter mAdapter;
+
+        @Nullable
+        private PowerAdapter mObservedAdapter;
 
         @NonNull
         private Group mGroup;
 
         Entry(@NonNull PowerAdapter adapter) {
             mAdapter = adapter;
-            // Only register child observer if parent has at least 1 observer.
-//            if (getObserverCount() > 0) {
-//                registerObserversIfNecessary();
-//            }
         }
 
         int entryToOuter(int entryPosition) {
+            rebuildGroupsIfNecessary();
             return mGroup.entryToOuter(entryPosition);
         }
 
@@ -414,30 +448,8 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             return groupForPosition(outerPosition).outerToEntry(outerPosition);
         }
 
-        void updateObserver() {
-            if (getObserverCount() > 0) {
-                registerObserversIfNecessary();
-            } else {
-                unregisterObserversIfNecessary();
-            }
-        }
-
-        void registerObserversIfNecessary() {
-            if (mRegisteredDataObserver == null) {
-                mRegisteredDataObserver = mDataObserver;
-                mAdapter.registerDataObserver(mDataObserver);
-            }
-        }
-
-        void unregisterObserversIfNecessary() {
-            DataObserver observer = mRegisteredDataObserver;
-            if (observer != null) {
-                mRegisteredDataObserver = null;
-                mAdapter.unregisterDataObserver(observer);
-            }
-        }
-
         int getPosition() {
+            rebuildGroupsIfNecessary();
             return mGroup.getPosition();
         }
 
@@ -445,8 +457,24 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
             return mAdapter.getItemCount();
         }
 
+        void updateObserver() {
+            PowerAdapter adapter = getObserverCount() > 0 ? mAdapter : null;
+            if (adapter != mObservedAdapter) {
+                if (mObservedAdapter != null) {
+                    mObservedAdapter.unregisterDataObserver(mDataObserver);
+                }
+                mObservedAdapter = adapter;
+                if (mObservedAdapter != null) {
+                    mObservedAdapter.registerDataObserver(mDataObserver);
+                }
+            }
+        }
+
         void dispose() {
-            unregisterObserversIfNecessary();
+            if (mObservedAdapter != null) {
+                mObservedAdapter.unregisterDataObserver(mDataObserver);
+                mObservedAdapter = null;
+            }
         }
     }
 
