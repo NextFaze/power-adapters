@@ -209,6 +209,9 @@ public class DataLayout extends RelativeLayout {
     /** Indicates animations will run as inner views show and hide. */
     private boolean mAnimationEnabled = true;
 
+    @NonNull
+    private VisibilityPredicate mVisibilityPredicate = VisibilityPredicate.DEFAULT;
+
     public DataLayout(Context context) {
         this(context, null);
     }
@@ -442,6 +445,18 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    @NonNull
+    public final VisibilityPredicate getVisibilityPredicate() {
+        return mVisibilityPredicate;
+    }
+
+    public final void setVisibilityPredicate(@NonNull VisibilityPredicate visibilityPredicate) {
+        if (visibilityPredicate != mVisibilityPredicate) {
+            mVisibilityPredicate = visibilityPredicate;
+            updateActive();
+        }
+    }
+
     @Nullable
     public final OnActiveChangeListener getOnActiveChangeListener() {
         return mOnActiveChangeListener;
@@ -661,7 +676,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateActive() {
-        boolean active = isThisViewActive();
+        boolean active = mVisibilityPredicate.isVisible(this);
         mDataWatcher.setEnabled(active);
         if (active != mActive) {
             mActive = active;
@@ -681,13 +696,11 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    /** Returns if this view is currently considered "shown" based on various attributes. */
-    private boolean isThisViewActive() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
-                isEnabled() && visibility() > 0f;
+    public final boolean isAttached() {
+        return mAttachedToWindow;
     }
 
-    private float visibility() {
+    public final float getVisibleAreaFactor() {
         int width = getWidth();
         int height = getHeight();
         if (width <= 0 || height <= 0) {
@@ -917,6 +930,23 @@ public class DataLayout extends RelativeLayout {
          * #setComponentVisibilityWhenHidden(int)}.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
+    }
+
+    /** Returns if this view is currently considered "shown" based on various attributes. */
+    public interface VisibilityPredicate {
+        VisibilityPredicate DEFAULT = new VisibilityPredicate() {
+            @Override
+            public boolean isVisible(@NonNull DataLayout dataLayout) {
+                return dataLayout.isAttached() &&
+                        dataLayout.getWindowVisibility() == VISIBLE &&
+                        dataLayout.getVisibility() == VISIBLE &&
+                        dataLayout.isShown() &&
+                        dataLayout.isEnabled() &&
+                        dataLayout.getVisibleAreaFactor() > 0f;
+            }
+        };
+
+        boolean isVisible(@NonNull DataLayout dataLayout);
     }
 
     /** Callback interface for when the active state of this view changes. */
