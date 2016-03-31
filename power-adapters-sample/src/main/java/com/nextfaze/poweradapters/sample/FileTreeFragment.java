@@ -15,7 +15,6 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
@@ -41,7 +40,6 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
-import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
@@ -52,14 +50,14 @@ public class FileTreeFragment extends BaseFragment {
     @NonNull
     private final File mRootFile = new File("/");
 
+    @Nullable
+    private final Data<File> mRootData = new DirectoryData(mRootFile, MAX_DISPLAYED_FILES_PER_DIR);
+
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
     @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
-
-    @Nullable
-    private Data<File> mRootData;
 
     @Nullable
     private TreeAdapter mRootTreeAdapter;
@@ -75,11 +73,12 @@ public class FileTreeFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Async adapter.
-        PowerAdapter adapter = createFilesAdapter(mRootFile, 0);
+        PowerAdapter adapter = createFilesAdapter(mRootData, mRootFile, 0);
         mDataLayout.setData(mRootData);
 
         // Simple, non-async adapter.
 //        PowerAdapter adapter = createFilesAdapterSimple(mRootFile, 0, true);
+//        mDataLayout.setData(ImmutableData.of(1));
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
@@ -147,24 +146,19 @@ public class FileTreeFragment extends BaseFragment {
                 .addView(directoryHeader(file, depth))
                 .build(adapter);
 
-        if (depth == 1) {
-            adapter = new DividerAdapterBuilder()
-                    .innerResource(R.layout.list_divider_item)
-                    .emptyPolicy(SHOW_LEADING)
-                    .build(adapter);
-        }
+//        if (depth == 1) {
+//            adapter = new DividerAdapterBuilder()
+//                    .innerResource(R.layout.list_divider_item)
+//                    .emptyPolicy(SHOW_LEADING)
+//                    .build(adapter);
+//        }
 
         return adapter;
     }
 
     @NonNull
-    private PowerAdapter createFilesAdapter(@NonNull final File file, final int depth) {
-        final Data<File> data = new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
-        if (mRootData == null) {
-            mRootData = data;
-            mDataLayout.setData(data);
-        }
-
+    private PowerAdapter createFilesAdapter(@Nullable Data<File> overrideData, @NonNull final File file, final int depth) {
+        final Data<File> data = overrideData != null ? overrideData : new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
 
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
@@ -207,16 +201,16 @@ public class FileTreeFragment extends BaseFragment {
             mRootTreeAdapter = treeAdapterRef.get();
         }
 
-        adapter = new HeaderAdapterBuilder()
-                .addView(directoryHeader(file, depth))
-                .build(adapter);
-
+//        adapter = new HeaderAdapterBuilder()
+//                .addView(directoryHeader(file, depth))
+//                .build(adapter);
+//
         adapter = new LoadingAdapterBuilder()
                 .resource(R.layout.list_loading_item)
                 .emptyPolicy(depth == 0 ? LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY :
                         LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS)
                 .build(adapter, new DataLoadingDelegate(data));
-
+//
         adapter = new EmptyAdapterBuilder()
                 .resource(R.layout.file_list_empty_item)
                 .delegate(new DataEmptyDelegate(data))
