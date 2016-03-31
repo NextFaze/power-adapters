@@ -127,17 +127,17 @@ public class FileTreeFragment extends BaseFragment {
                 .limit(MAX_DISPLAYED_FILES_PER_DIR)
                 .toList();
         PowerAdapter adapter = new FileAdapter(files, singletonMapper(binder));
-        treeAdapterRef.set(new TreeAdapter(adapter) {
+        treeAdapterRef.set(new TreeAdapter(adapter, new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
             @Override
-            protected PowerAdapter getChildAdapter(int position) {
+            public PowerAdapter get(int position) {
                 File file = files.get(position);
                 if (file.isDirectory()) {
                     return createFilesAdapterSimple(file, depth + 1, true);
                 }
                 return PowerAdapter.EMPTY;
             }
-        });
+        }));
         if (tree) {
             adapter = treeAdapterRef.get();
         }
@@ -184,17 +184,17 @@ public class FileTreeFragment extends BaseFragment {
         };
 
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(binder));
-        treeAdapterRef.set(new TreeAdapter(adapter) {
+        treeAdapterRef.set(new TreeAdapter(adapter, new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
             @Override
-            protected PowerAdapter getChildAdapter(int position) {
+            public PowerAdapter get(int position) {
                 File file = data.get(position);
                 if (file.isDirectory()) {
-                    return createFilesAdapter(file, depth + 1);
+                    return createFilesAdapter(null, file, depth + 1);
                 }
                 return PowerAdapter.EMPTY;
             }
-        });
+        }));
         adapter = treeAdapterRef.get();
 
         if (mRootTreeAdapter == null) {

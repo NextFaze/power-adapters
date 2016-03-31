@@ -18,7 +18,7 @@ import java.util.WeakHashMap;
 import static java.lang.String.format;
 import static java.util.Locale.US;
 
-public abstract class TreeAdapter extends AbstractPowerAdapter {
+public final class TreeAdapter extends AbstractPowerAdapter {
 
     @NonNull
     private final DataObserver mRootDataObserver = new SimpleDataObserver() {
@@ -57,6 +57,9 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     };
 
     @NonNull
+    private final ChildAdapterSupplier mChildAdapterSupplier;
+
+    @NonNull
     private TreeState mState = new TreeState();
 
     @NonNull
@@ -90,12 +93,15 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
 
     private boolean mDirty = true;
 
-    public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
+    public TreeAdapter(@NonNull PowerAdapter rootAdapter, @NonNull ChildAdapterSupplier childAdapterSupplier) {
         mRootAdapter = rootAdapter;
+        mChildAdapterSupplier = childAdapterSupplier;
     }
 
     @NonNull
-    protected abstract PowerAdapter getChildAdapter(int position);
+    private PowerAdapter getChildAdapter(int position) {
+        return mChildAdapterSupplier.get(position);
+    }
 
     /** Returns the parcelable state of the adapter. */
     @NonNull
@@ -686,5 +692,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         public void writeToParcel(@NonNull Parcel parcel, int flags) {
             parcel.writeSerializable(mExpanded);
         }
+    }
+
+    public interface ChildAdapterSupplier {
+        @NonNull
+        PowerAdapter get(int position);
     }
 }
