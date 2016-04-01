@@ -18,6 +18,7 @@ import java.util.WeakHashMap;
 import static java.lang.String.format;
 import static java.util.Locale.US;
 
+/** Allows hierarchical adapter usage. Note that behaviour of this class is undefined if no observers are registered. */
 public final class TreeAdapter extends AbstractPowerAdapter {
 
     @NonNull
