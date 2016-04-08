@@ -1,4 +1,4 @@
 <manifest
-        package="com.nextfaze.poweradapters.asyncdata">
+        package="com.nextfaze.poweradapters.data">
     <application/>
 </manifest>

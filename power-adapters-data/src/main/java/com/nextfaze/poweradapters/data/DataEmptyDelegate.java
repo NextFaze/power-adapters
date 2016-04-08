@@ -1,7 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
-import com.nextfaze.powerdata.Data;
 import lombok.NonNull;
 
 public final class DataEmptyDelegate extends EmptyAdapterBuilder.Delegate {
@@ -13,7 +12,7 @@ public final class DataEmptyDelegate extends EmptyAdapterBuilder.Delegate {
     private final LoadingPolicy mLoadingPolicy;
 
     @NonNull
-    private final com.nextfaze.powerdata.DataObserver mDataObserver = new com.nextfaze.powerdata.SimpleDataObserver() {
+    private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
         @Override
         public void onChange() {
             notifyEmptyChanged();
@@ -21,7 +20,7 @@ public final class DataEmptyDelegate extends EmptyAdapterBuilder.Delegate {
     };
 
     @NonNull
-    private final com.nextfaze.powerdata.LoadingObserver mLoadingObserver = new com.nextfaze.powerdata.LoadingObserver() {
+    private final com.nextfaze.poweradapters.data.LoadingObserver mLoadingObserver = new com.nextfaze.poweradapters.data.LoadingObserver() {
         @Override
         public void onLoadingChange() {
             notifyEmptyChanged();

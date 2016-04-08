@@ -22,8 +22,8 @@ import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.nextfaze.poweradapters.data.Data;
+import com.nextfaze.poweradapters.data.R;
 import com.nextfaze.poweradapters.data.internal.DataWatcher;
-import com.nextfaze.powerdata.R;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 

@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters.data;
 
-import com.nextfaze.powerdata.BuildConfig;
 import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.support.annotation.Nullable;
-import com.nextfaze.powerdata.IncrementalArrayData;
+import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import lombok.NonNull;
 
 final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {

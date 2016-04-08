@@ -7,7 +7,7 @@ import android.widget.ListView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.powerdata.widget.DataLayout;
+import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;

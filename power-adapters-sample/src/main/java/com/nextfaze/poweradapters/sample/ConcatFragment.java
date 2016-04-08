@@ -22,12 +22,12 @@ import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
+import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.DataEmptyDelegate;
 import com.nextfaze.poweradapters.data.DataLoadingDelegate;
-import com.nextfaze.powerdata.Data;
-import com.nextfaze.powerdata.IncrementalArrayData;
-import com.nextfaze.powerdata.widget.DataLayout;
+import com.nextfaze.poweradapters.data.IncrementalArrayData;
+import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import java.util.ArrayList;

@@ -8,7 +8,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.powerdata.widget.DataLayout;
+import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
