@@ -409,6 +409,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             log.trace("Stopping thread");
             mThread.interrupt();
             mThread = null;
+            setLoading(false);
         }
     }
 
@@ -459,15 +460,19 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                         } else {
                             appendResult(elements);
                         }
+                        setLoading(false);
                     }
                 });
-            } catch (InterruptedException | InterruptedIOException e) {
-                throw new InterruptedException();
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (InterruptedIOException e) {
+                InterruptedException interruptedException = new InterruptedException();
+                interruptedException.initCause(e);
+                throw interruptedException;
             } catch (Throwable e) {
                 log.error("Error loading", e);
                 notifyError(e);
                 mError = true;
-            } finally {
                 setLoading(false);
             }
 
