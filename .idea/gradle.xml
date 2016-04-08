@@ -10,28 +10,24 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-adapters" />
-            <option value="$PROJECT_DIR$/power-adapters-power-data" />
+            <option value="$PROJECT_DIR$/power-adapters-data" />
             <option value="$PROJECT_DIR$/power-adapters-recyclerview-v7" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
             <option value="$PROJECT_DIR$/power-adapters-support-v4" />
-              <option value="$PROJECT_DIR$/power-data" />
-              <option value="$PROJECT_DIR$/power-data-recyclerview-v7" />
-              <option value="$PROJECT_DIR$/power-data-rx" />
-              <option value="$PROJECT_DIR$/power-data-sample" />
+            <option value="$PROJECT_DIR$/power-data" />
+            <option value="$PROJECT_DIR$/power-data-rx" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-adapters" />
-            <option value="$PROJECT_DIR$/power-adapters-power-data" />
+            <option value="$PROJECT_DIR$/power-adapters-data" />
             <option value="$PROJECT_DIR$/power-adapters-recyclerview-v7" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
             <option value="$PROJECT_DIR$/power-adapters-support-v4" />
-              <option value="$PROJECT_DIR$/power-data" />
-              <option value="$PROJECT_DIR$/power-data-recyclerview-v7" />
-              <option value="$PROJECT_DIR$/power-data-rx" />
-              <option value="$PROJECT_DIR$/power-data-sample" />
+            <option value="$PROJECT_DIR$/power-data" />
+            <option value="$PROJECT_DIR$/power-data-rx" />
           </set>
         </option>
       </GradleProjectSettings>

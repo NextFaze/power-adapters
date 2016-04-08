@@ -32,7 +32,7 @@ android {
 
 dependencies {
     compile project(':power-adapters-recyclerview-v7')
-    compile project(':power-adapters-power-data')
+    compile project(':power-adapters-data')
     compile rootProject.ext.supportAppCompat
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'com.jakewharton:butterknife:7.0.1'
