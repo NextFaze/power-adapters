@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:ignore="HardcodedText">
+
+    <!-- Buttons -->
+
+    <RadioGroup android:id="@+id/news_fragment_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checkedButton="@+id/news_fragment_button_simple">
+
+        <!-- Simple -->
+
+        <RadioButton
+                android:id="@id/news_fragment_button_simple"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Simple"/>
+
+        <!-- Auto Incremental -->
+
+        <RadioButton
+                android:id="@+id/news_fragment_button_auto_incremental"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto Incremental"/>
+
+        <!-- Manual Incremental -->
+
+        <RadioButton
+                android:id="@+id/news_fragment_button_manual_incremental"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Manual Incremental"/>
+
+    </RadioGroup>
+
+    <!-- Data layout -->
+
+    <com.nextfaze.powerdata.widget.DataLayout
+            android:id="@+id/news_fragment_data_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+        <!-- List -->
+
+        <ListView
+                android:id="@+id/news_fragment_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_component="content"/>
+
+        <!-- Loading -->
+
+        <ProgressBar
+                style="@android:style/Widget.Holo.ProgressBar"
+                android:id="@+id/news_fragment_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                app:layout_component="loading"/>
+
+        <!-- Empty -->
+
+        <TextView
+                android:id="@+id/news_fragment_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                app:layout_component="empty"
+                android:text="No news today!"
+                tools:ignore="HardcodedText"/>
+
+        <!-- Error -->
+
+        <TextView
+                android:id="@+id/news_fragment_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                app:layout_component="error"
+                android:textColor="#ffff0000"
+                android:textStyle="italic"/>
+
+    </com.nextfaze.powerdata.widget.DataLayout>
+
+    <!-- Load next button -->
+
+    <Button android:id="@+id/news_fragment_load_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Load Next"/>
+
+</LinearLayout>

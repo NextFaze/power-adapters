@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="DataLayout">
+        <!-- Deprecated in favour of "layout_component" layout attribute -->
+        <attr name="contentView" format="reference"/>
+        <attr name="emptyView" format="reference"/>
+        <attr name="loadingView" format="reference"/>
+        <attr name="errorView" format="reference"/>
+
+        <!-- Deprecated in favour of prefixed attributes -->
+        <attr name="animatorIn" format="reference"/>
+        <attr name="animatorOut" format="reference"/>
+        <attr name="animationsEnabled" format="boolean"/>
+
+        <attr name="data_layout_animatorIn" format="reference"/>
+        <attr name="data_layout_animatorOut" format="reference"/>
+        <attr name="data_layout_animationsEnabled" format="boolean"/>
+
+        <attr name="data_layout_componentVisibilityWhenHidden" format="enum">
+            <enum name="invisible" value="4"/>
+            <enum name="gone" value="8"/>
+        </attr>
+
+    </declare-styleable>
+
+    <declare-styleable name="DataLayout_Layout">
+        <attr name="layout_component" format="enum">
+            <enum name="none" value="0"/>
+            <enum name="content" value="1"/>
+            <enum name="empty" value="2"/>
+            <enum name="loading" value="3"/>
+            <enum name="error" value="4"/>
+        </attr>
+    </declare-styleable>
+
+    <item name="data_layout_animator" type="id"/>
+
+</resources>
