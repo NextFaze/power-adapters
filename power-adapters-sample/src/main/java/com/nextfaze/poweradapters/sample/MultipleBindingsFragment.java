@@ -15,7 +15,7 @@ import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.binding.ViewHolderBinder;
-import com.nextfaze.poweradapters.powerdata.DataBindingAdapter;
+import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.powerdata.Data;
 import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
