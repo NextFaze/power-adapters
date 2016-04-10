@@ -12,6 +12,7 @@ import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
+@Deprecated
 public final class FooterAdapterBuilder implements Decorator {
 
     @NonNull
