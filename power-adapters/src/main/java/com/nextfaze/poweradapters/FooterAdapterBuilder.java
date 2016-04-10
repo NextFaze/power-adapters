@@ -2,12 +2,15 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.view.View;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.Conditions.adapter;
+import static com.nextfaze.poweradapters.Conditions.and;
+import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
@@ -20,6 +23,9 @@ public final class FooterAdapterBuilder implements Decorator {
 
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
+
+    @Nullable
+    private Condition mCondition;
 
     /**
      * Not safe for use in a {@code RecyclerView}.
@@ -68,18 +74,23 @@ public final class FooterAdapterBuilder implements Decorator {
         return this;
     }
 
+    @NonNull
+    public FooterAdapterBuilder condition(@Nullable Condition condition) {
+        mCondition = condition;
+        return this;
+    }
+
     @CheckResult
     @NonNull
-    public PowerAdapter build(@NonNull final PowerAdapter adapter) {
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
         if (mItems.isEmpty()) {
             return adapter;
         }
-        return concat(adapter, new HeaderFooterHelperAdapter(mItems, new HeaderFooterHelperAdapter.VisibilityPolicy() {
-            @Override
-            public boolean shouldShow() {
-                return mEmptyPolicy.shouldShow(adapter);
-            }
-        }, adapter));
+        Condition condition = mEmptyPolicy.asCondition(adapter);
+        if (mCondition != null) {
+            condition = and(condition, mCondition);
+        }
+        return adapter.append(asAdapter(mItems).showOnlyWhile(condition));
     }
 
     @NonNull
@@ -89,6 +100,7 @@ public final class FooterAdapterBuilder implements Decorator {
     }
 
     /** Evaluated to determine whether to show the footers. */
+    @Deprecated
     public enum EmptyPolicy {
         /** Show the footers when the wrapped adapter is empty. */
         SHOW {
@@ -107,5 +119,15 @@ public final class FooterAdapterBuilder implements Decorator {
 
         /** Evaluate whether the items should show based on the wrapped adapter. */
         abstract boolean shouldShow(@NonNull PowerAdapter adapter);
+
+        @NonNull
+        Condition asCondition(@NonNull PowerAdapter adapter) {
+            return adapter(adapter, new Predicate<PowerAdapter>() {
+                @Override
+                public boolean apply(PowerAdapter adapter) {
+                    return shouldShow(adapter);
+                }
+            });
+        }
     }
 }
