@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -18,6 +19,7 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,6 +37,8 @@ import java.util.List;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
@@ -76,6 +80,17 @@ public class DataLayout extends RelativeLayout {
 
     @AnimatorRes
     private static final int DEFAULT_ANIMATION_OUT = R.animator.data_layout_default_out;
+
+    @NonNull
+    private final Rect mRect = new Rect();
+
+    @NonNull
+    private final ViewTreeObserver.OnScrollChangedListener mOnScrollChangedListener = new ViewTreeObserver.OnScrollChangedListener() {
+        @Override
+        public void onScrollChanged() {
+            updateVisible();
+        }
+    };
 
     @NonNull
     private final DataWatcher mDataWatcher = new DataWatcher() {
@@ -183,6 +198,9 @@ public class DataLayout extends RelativeLayout {
     /** Indicates animations will run as inner views show and hide. */
     private boolean mAnimationEnabled = true;
 
+    @NonNull
+    private VisibilityPredicate mVisibilityPredicate = VisibilityPredicate.DEFAULT;
+
     public DataLayout(Context context) {
         this(context, null);
     }
@@ -245,6 +263,12 @@ public class DataLayout extends RelativeLayout {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        updateVisible();
+    }
+
+    @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
         return new LayoutParams(super.generateDefaultLayoutParams());
     }
@@ -287,6 +311,7 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        getViewTreeObserver().addOnScrollChangedListener(mOnScrollChangedListener);
         mAttachedToWindow = true;
         updateVisible();
     }
@@ -294,6 +319,7 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        getViewTreeObserver().removeOnScrollChangedListener(mOnScrollChangedListener);
         mAttachedToWindow = false;
         updateVisible();
     }
@@ -389,6 +415,18 @@ public class DataLayout extends RelativeLayout {
         if (visibilityPolicy != mVisibilityPolicy) {
             mVisibilityPolicy = visibilityPolicy;
             updateViews();
+        }
+    }
+
+    @NonNull
+    public final VisibilityPredicate getVisibilityPredicate() {
+        return mVisibilityPredicate;
+    }
+
+    public final void setVisibilityPredicate(@NonNull VisibilityPredicate visibilityPredicate) {
+        if (visibilityPredicate != mVisibilityPredicate) {
+            mVisibilityPredicate = visibilityPredicate;
+            updateVisible();
         }
     }
 
@@ -609,7 +647,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     private void updateVisible() {
-        boolean visible = isThisViewVisible();
+        boolean visible = mVisibilityPredicate.isVisible(this);
         mDataWatcher.setEnabled(visible);
         if (visible != mVisible) {
             mVisible = visible;
@@ -620,10 +658,22 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    /** Returns if this view is currently visible, based on various attributes. */
-    private boolean isThisViewVisible() {
-        return mAttachedToWindow && getWindowVisibility() == VISIBLE && getVisibility() == VISIBLE && isShown() &&
-                isEnabled();
+    public final boolean isAttached() {
+        return mAttachedToWindow;
+    }
+
+    public final float getVisibleAreaFactor() {
+        int width = getWidth();
+        int height = getHeight();
+        if (width <= 0 || height <= 0) {
+            return 0f;
+        }
+        if (getGlobalVisibleRect(mRect)) {
+            float visibleArea = mRect.width() * mRect.height();
+            float viewArea = width * height;
+            return max(min(1f, visibleArea / viewArea), 0f);
+        }
+        return 0f;
     }
 
     /** Returns whether now is an appropriate time to perform animations. */
@@ -842,6 +892,23 @@ public class DataLayout extends RelativeLayout {
          * #setComponentVisibilityWhenHidden(int)}.
          */
         boolean shouldShow(@NonNull DataLayout dataLayout, @NonNull View v);
+    }
+
+    /** Returns if this view is currently considered "shown" based on various attributes. */
+    public interface VisibilityPredicate {
+        VisibilityPredicate DEFAULT = new VisibilityPredicate() {
+            @Override
+            public boolean isVisible(@NonNull DataLayout dataLayout) {
+                return dataLayout.isAttached() &&
+                        dataLayout.getWindowVisibility() == VISIBLE &&
+                        dataLayout.getVisibility() == VISIBLE &&
+                        dataLayout.isShown() &&
+                        dataLayout.isEnabled() &&
+                        dataLayout.getVisibleAreaFactor() > 0f;
+            }
+        };
+
+        boolean isVisible(@NonNull DataLayout dataLayout);
     }
 
     /** Callback interface for when the visible state of this view changes. */

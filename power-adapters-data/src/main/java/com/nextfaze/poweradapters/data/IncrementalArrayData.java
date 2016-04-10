@@ -266,7 +266,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     public final void refresh() {
         stopThread();
         mDirty = true;
-        setAvailable(Integer.MAX_VALUE);
         startThreadIfNeeded();
     }
 
@@ -368,6 +367,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         if (mThread != null) {
             mThread.interrupt();
             mThread = null;
+            setLoading(false);
         }
     }
 
@@ -401,27 +401,31 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                 moreAvailable = result != null && result.getRemaining() > 0;
                 setAvailable(result != null ? result.getRemaining() : 0);
 
-                if (result != null && !result.getElements().isEmpty()) {
-                    // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading.
-                    final boolean needToClear = firstItem;
-                    firstItem = false;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (needToClear) {
-                                overwriteResult(result);
-                            } else {
-                                appendResult(result);
-                            }
+                // If invalidated while shown, we lazily clear the data so the user doesn't see blank data while loading.
+                final boolean needToClear = firstItem;
+                firstItem = false;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<? extends T> elements =
+                                result != null ? result.getElements() : Collections.<T>emptyList();
+                        if (needToClear) {
+                            overwriteResult(elements);
+                        } else {
+                            appendResult(elements);
                         }
-                    });
-                }
-            } catch (InterruptedException | InterruptedIOException e) {
-                throw new InterruptedException();
+                        setLoading(false);
+                    }
+                });
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (InterruptedIOException e) {
+                InterruptedException interruptedException = new InterruptedException();
+                interruptedException.initCause(e);
+                throw interruptedException;
             } catch (Throwable e) {
                 notifyError(e);
                 mError = true;
-            } finally {
                 setLoading(false);
             }
 
@@ -431,7 +435,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    private void overwriteResult(@NonNull Result<? extends T> result) {
+    private void overwriteResult(@NonNull List<? extends T> result) {
         int oldSize = mData.size();
         clearElementsWithCallback(false);
         appendNonNullElements(result);
@@ -448,7 +452,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    private void appendResult(@NonNull Result<? extends T> result) {
+    private void appendResult(@NonNull List<? extends T> result) {
         int oldSize = mData.size();
         appendNonNullElements(result);
         int deltaSize = mData.size() - oldSize;
@@ -457,9 +461,8 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    private void appendNonNullElements(@NonNull Result<? extends T> result) {
-        List<? extends T> elements = result.getElements();
-        for (T t : elements) {
+    private void appendNonNullElements(@NonNull List<? extends T> result) {
+        for (T t : result) {
             if (t != null) {
                 mData.add(t);
             }
