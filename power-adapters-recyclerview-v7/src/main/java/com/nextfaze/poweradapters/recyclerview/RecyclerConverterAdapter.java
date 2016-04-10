@@ -121,7 +121,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
             @Override
             public int getPosition() {
-                return getAdapterPosition();
+                return getLayoutPosition();
             }
         };
 
