@@ -8,7 +8,8 @@ import android.view.View;
 import android.widget.Adapter;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.*;
+import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
@@ -80,7 +81,7 @@ public final class LoadingAdapterBuilder implements Decorator {
             throw new IllegalStateException("Delegate is required");
         }
         mDelegate.mEmptyPolicy = mEmptyPolicy;
-        return concat(adapter, showOnlyWhile(asAdapter(mItem.withEnabled(mEnabled)), mDelegate.mCondition));
+        return concat(adapter, asAdapter(mItem.withEnabled(mEnabled)).showOnlyWhile(mDelegate.mCondition));
     }
 
     @CheckResult

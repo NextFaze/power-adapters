@@ -7,7 +7,8 @@ import android.support.annotation.UiThread;
 import android.view.View;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.*;
+import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
@@ -72,7 +73,7 @@ public final class EmptyAdapterBuilder implements Decorator {
             return adapter;
         }
         final Delegate delegate = mDelegate != null ? mDelegate : new DefaultDelegate(adapter);
-        return concat(adapter, showOnlyWhile(asAdapter(mItem.withEnabled(mEnabled)), delegate.mCondition));
+        return concat(adapter, asAdapter(mItem.withEnabled(mEnabled)).showOnlyWhile(delegate.mCondition));
     }
 
     @NonNull

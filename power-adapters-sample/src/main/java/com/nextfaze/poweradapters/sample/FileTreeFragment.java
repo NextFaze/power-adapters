@@ -15,9 +15,7 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
@@ -25,7 +23,6 @@ import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
@@ -38,8 +35,7 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
-import static com.nextfaze.poweradapters.Conditions.and;
-import static com.nextfaze.poweradapters.Conditions.not;
+import static com.nextfaze.poweradapters.Conditions.*;
 import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
@@ -146,17 +142,6 @@ public class FileTreeFragment extends BaseFragment {
             adapter = treeAdapterRef.get();
         }
 
-        adapter = new HeaderAdapterBuilder()
-                .addView(directoryHeader(file, depth))
-                .build(adapter);
-
-//        if (depth == 1) {
-//            adapter = new DividerAdapterBuilder()
-//                    .innerResource(R.layout.list_divider_item)
-//                    .emptyPolicy(SHOW_LEADING)
-//                    .build(adapter);
-//        }
-
         return adapter;
     }
 
@@ -208,27 +193,13 @@ public class FileTreeFragment extends BaseFragment {
             mRootTreeAdapter = treeAdapterRef.get();
         }
 
-//        adapter = new HeaderAdapterBuilder()
-//                .addView(directoryHeader(file, depth))
-//                .build(adapter);
-//
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .emptyPolicy(depth == 0 ? LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY :
-                        LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS)
-                .build(adapter, new DataLoadingDelegate(data));
+        // Loading indicator
+        adapter = adapter
+                .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(and(isTrue(depth != 0), isLoading(data))));
 
+        // Empty message
         adapter = adapter
                 .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(and(isEmpty(data), not(isLoading(data)))));
-
-//        if (depth == 1) {
-//            adapter = new DividerAdapterBuilder()
-//                    .innerResource(R.layout.list_divider_item)
-//                    .leadingResource(R.layout.list_divider_item)
-//                    .trailingResource(R.layout.list_divider_item)
-//                    .emptyPolicy(SHOW_LEADING)
-//                    .build(adapter);
-//        }
 
         return adapter;
     }

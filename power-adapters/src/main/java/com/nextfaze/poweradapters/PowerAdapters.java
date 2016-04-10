@@ -74,10 +74,4 @@ public final class PowerAdapters {
     public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
         return new ItemAdapter(toItems(resources));
     }
-
-    @NonNull
-    public static PowerAdapter showOnlyWhile(@NonNull PowerAdapter adapter,
-                                             @NonNull Condition condition) {
-        return new ConditionalAdapter(adapter, condition);
-    }
 }
