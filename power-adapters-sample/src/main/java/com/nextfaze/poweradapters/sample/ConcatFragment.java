@@ -14,18 +14,13 @@ import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
-import com.nextfaze.poweradapters.EmptyAdapterBuilder;
-import com.nextfaze.poweradapters.FooterAdapterBuilder;
-import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataEmptyDelegate;
-import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
@@ -35,9 +30,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static com.nextfaze.poweradapters.Conditions.not;
+import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapters.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+import static com.nextfaze.poweradapters.data.DataConditions.*;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends BaseFragment {
@@ -93,17 +91,17 @@ public class ConcatFragment extends BaseFragment {
                 .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
                 .build(adapter);
 
-        adapter = new HeaderAdapterBuilder()
-                .addResource(R.layout.news_header_item)
-                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.SHOW)
-                .build(adapter);
+        // Header
+        adapter = adapter
+                .prepend(asAdapter(R.layout.news_header_item));
 
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .build(adapter, new DataLoadingDelegate(data));
+        // Loading indicator
+        adapter = adapter
+                .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(isLoading(data)));
 
         data.setLookAheadRowCount(-1);
 
+        // Load next button
         LoadNextAdapter loadNextAdapter =
                 new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
@@ -114,15 +112,18 @@ public class ConcatFragment extends BaseFragment {
         });
         adapter = loadNextAdapter;
 
-        adapter = new FooterAdapterBuilder()
-                .addResource(R.layout.news_footer_item)
-                .emptyPolicy(FooterAdapterBuilder.EmptyPolicy.HIDE)
-                .build(adapter);
+        // Footer
+        adapter = adapter
+                .append(asAdapter(R.layout.news_footer_item).showOnlyWhile(not(isEmpty(data))));
 
-        adapter = new EmptyAdapterBuilder()
-                .resource(R.layout.list_empty_item)
-                .delegate(new DataEmptyDelegate(data))
-                .build(adapter);
+        // Empty message
+        adapter = adapter
+                .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(data(data, new Predicate<Data<?>>() {
+                    @Override
+                    public boolean apply(Data<?> data) {
+                        return data.isEmpty() && !data.isLoading();
+                    }
+                })));
 
         return new Pair<NewsIncrementalData, PowerAdapter>(data, adapter);
     }

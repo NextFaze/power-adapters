@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
+
 public interface PowerAdapter {
 
     /** An adapter with no elements. */
@@ -54,10 +56,31 @@ public interface PowerAdapter {
         public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
         }
 
+        @CheckResult
         @NonNull
         @Override
         public PowerAdapter decorate(@NonNull Decorator decorator) {
             return decorator.decorate(this);
+        }
+
+        @NonNull
+        @Override
+        public PowerAdapter prepend(@NonNull PowerAdapter adapter) {
+            return concat(adapter, this);
+        }
+
+        @CheckResult
+        @NonNull
+        @Override
+        public PowerAdapter append(@NonNull PowerAdapter adapter) {
+            return concat(this, adapter);
+        }
+
+        @CheckResult
+        @NonNull
+        @Override
+        public PowerAdapter showOnlyWhile(@NonNull Condition condition) {
+            return new ConditionalAdapter(this, condition);
         }
     };
 
@@ -117,4 +140,20 @@ public interface PowerAdapter {
     @CheckResult
     @NonNull
     PowerAdapter decorate(@NonNull Decorator decorator);
+
+    @CheckResult
+    @NonNull
+    PowerAdapter prepend(@NonNull PowerAdapter adapter);
+
+    @CheckResult
+    @NonNull
+    PowerAdapter append(@NonNull PowerAdapter adapter);
+
+    @CheckResult
+    @NonNull
+    PowerAdapter showOnlyWhile(@NonNull Condition condition);
+
+    // TODO: Limit.
+
+    // TODO: Offset.
 }

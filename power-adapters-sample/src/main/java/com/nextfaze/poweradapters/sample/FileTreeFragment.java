@@ -15,7 +15,6 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
-import com.nextfaze.poweradapters.EmptyAdapterBuilder;
 import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
@@ -26,7 +25,6 @@ import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataEmptyDelegate;
 import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
@@ -40,7 +38,12 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
+import static com.nextfaze.poweradapters.Conditions.and;
+import static com.nextfaze.poweradapters.Conditions.not;
+import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
+import static com.nextfaze.poweradapters.data.DataConditions.isLoading;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class FileTreeFragment extends BaseFragment {
@@ -123,7 +126,8 @@ public class FileTreeFragment extends BaseFragment {
             }
         };
         File[] filesArray = file.listFiles();
-        final List<File> files = FluentIterable.from(filesArray != null ? Lists.newArrayList(filesArray) : Collections.<File>emptyList())
+        final List<File> files = FluentIterable.from(
+                filesArray != null ? Lists.newArrayList(filesArray) : Collections.<File>emptyList())
                 .limit(MAX_DISPLAYED_FILES_PER_DIR)
                 .toList();
         PowerAdapter adapter = new FileAdapter(files, singletonMapper(binder));
@@ -157,8 +161,11 @@ public class FileTreeFragment extends BaseFragment {
     }
 
     @NonNull
-    private PowerAdapter createFilesAdapter(@Nullable Data<File> overrideData, @NonNull final File file, final int depth) {
-        final Data<File> data = overrideData != null ? overrideData : new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
+    private PowerAdapter createFilesAdapter(@Nullable Data<File> overrideData,
+                                            @NonNull final File file,
+                                            final int depth) {
+        final Data<File> data =
+                overrideData != null ? overrideData : new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
 
         Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
@@ -210,11 +217,9 @@ public class FileTreeFragment extends BaseFragment {
                 .emptyPolicy(depth == 0 ? LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY :
                         LoadingAdapterBuilder.EmptyPolicy.SHOW_ALWAYS)
                 .build(adapter, new DataLoadingDelegate(data));
-//
-        adapter = new EmptyAdapterBuilder()
-                .resource(R.layout.file_list_empty_item)
-                .delegate(new DataEmptyDelegate(data))
-                .build(adapter);
+
+        adapter = adapter
+                .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(and(isEmpty(data), not(isLoading(data)))));
 
 //        if (depth == 1) {
 //            adapter = new DividerAdapterBuilder()

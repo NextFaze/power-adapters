@@ -4,6 +4,8 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.PowerAdapters.concat;
+
 public abstract class AbstractPowerAdapter implements PowerAdapter {
 
     @NonNull
@@ -216,6 +218,26 @@ public abstract class AbstractPowerAdapter implements PowerAdapter {
     @Override
     public final PowerAdapter decorate(@NonNull Decorator decorator) {
         return decorator.decorate(this);
+    }
+
+    @NonNull
+    @Override
+    public final PowerAdapter prepend(@NonNull PowerAdapter adapter) {
+        return concat(adapter, this);
+    }
+
+    @CheckResult
+    @NonNull
+    @Override
+    public final PowerAdapter append(@NonNull PowerAdapter adapter) {
+        return concat(this, adapter);
+    }
+
+    @CheckResult
+    @NonNull
+    @Override
+    public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
+        return new ConditionalAdapter(this, condition);
     }
 
     /** Returns the number of registered observers. */
