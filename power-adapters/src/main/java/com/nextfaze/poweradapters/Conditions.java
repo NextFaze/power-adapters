@@ -4,18 +4,28 @@ import lombok.NonNull;
 
 public final class Conditions {
 
-    private static final Condition ALWAYS = constant(true);
-    private static final Condition NEVER = constant(false);
+    private static final Condition ALWAYS = isTrue(true);
+    private static final Condition NEVER = isTrue(false);
 
     private Conditions() {
     }
 
     @NonNull
-    public static Condition constant(final boolean value) {
+    public static Condition isTrue(final boolean value) {
         return new AbstractCondition() {
             @Override
             public boolean eval() {
                 return value;
+            }
+        };
+    }
+
+    @NonNull
+    public static Condition isFalse(final boolean value) {
+        return new AbstractCondition() {
+            @Override
+            public boolean eval() {
+                return !value;
             }
         };
     }
@@ -46,6 +56,16 @@ public final class Conditions {
             @Override
             public boolean eval() {
                 return a.eval() || b.eval();
+            }
+        };
+    }
+
+    @NonNull
+    public static Condition xor(@NonNull final Condition a, @NonNull final Condition b) {
+        return new CompoundCondition(a, b) {
+            @Override
+            public boolean eval() {
+                return (a.eval() || b.eval()) && !(a.eval() && b.eval());
             }
         };
     }
