@@ -17,7 +17,7 @@ final class Item implements ViewFactory {
     private final boolean mEnabled;
 
     @NonNull
-    static List<Item> toItems(@NonNull Iterable<ViewFactory> views) {
+    static List<Item> toItems(@NonNull Iterable<? extends ViewFactory> views) {
         ArrayList<Item> items = new ArrayList<>();
         for (ViewFactory v : views) {
             items.add(new Item(v, true));

@@ -6,7 +6,10 @@ import android.widget.ListAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
+import java.util.Collection;
+
 import static com.nextfaze.poweradapters.Item.toItems;
+import static com.nextfaze.poweradapters.PowerAdapter.EMPTY;
 import static java.util.Arrays.asList;
 
 public final class PowerAdapters {
@@ -44,19 +47,37 @@ public final class PowerAdapters {
 
     @CheckResult
     @NonNull
-    public static PowerAdapter create(@NonNull ViewFactory... views) {
+    public static PowerAdapter asAdapter(@NonNull ViewFactory... views) {
+        if (views.length == 0) {
+            return EMPTY;
+        }
         return new ItemAdapter(toItems(asList(views)));
     }
 
     @CheckResult
     @NonNull
-    public static PowerAdapter create(@NonNull Iterable<ViewFactory> views) {
+    public static PowerAdapter asAdapter(@NonNull Iterable<? extends ViewFactory> views) {
         return new ItemAdapter(toItems(views));
     }
 
     @CheckResult
     @NonNull
-    public static PowerAdapter create(@NonNull @LayoutRes int... resources) {
+    public static PowerAdapter asAdapter(@NonNull Collection<? extends ViewFactory> views) {
+        if (views.isEmpty()) {
+            return EMPTY;
+        }
+        return new ItemAdapter(toItems(views));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
         return new ItemAdapter(toItems(resources));
+    }
+
+    @NonNull
+    public static PowerAdapter showOnlyWhile(@NonNull PowerAdapter adapter,
+                                             @NonNull Condition condition) {
+        return new ConditionalAdapter(adapter, condition);
     }
 }
