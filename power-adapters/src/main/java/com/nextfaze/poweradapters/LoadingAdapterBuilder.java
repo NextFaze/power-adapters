@@ -8,11 +8,15 @@ import android.view.View;
 import android.widget.Adapter;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.PowerAdapters.*;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
-/** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
+/**
+ * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Use {@link Condition}s
+ * instead.
+ */
+@Deprecated
 public final class LoadingAdapterBuilder implements Decorator {
 
     @Nullable
@@ -75,7 +79,8 @@ public final class LoadingAdapterBuilder implements Decorator {
         if (mDelegate == null) {
             throw new IllegalStateException("Delegate is required");
         }
-        return concat(adapter, new LoadingAdapter(mDelegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
+        mDelegate.mEmptyPolicy = mEmptyPolicy;
+        return concat(adapter, showOnlyWhile(asAdapter(mItem.withEnabled(mEnabled)), mDelegate.mCondition));
     }
 
     @CheckResult
@@ -118,11 +123,29 @@ public final class LoadingAdapterBuilder implements Decorator {
         abstract boolean shouldShow(@NonNull Delegate delegate);
     }
 
-    /** Invoked by {@link LoadingAdapter} to determine when the loading item is shown. */
+    /** Invoked to determine when the loading item is shown. */
+    @Deprecated
     public static abstract class Delegate {
 
-        @Nullable
-        private LoadingAdapter mAdapter;
+        @NonNull
+        private final AbstractCondition mCondition = new AbstractCondition() {
+            @Override
+            public boolean eval() {
+                return isLoading() && mEmptyPolicy.shouldShow(Delegate.this);
+            }
+
+            @Override
+            protected void onFirstObserverRegistered() {
+                Delegate.this.onFirstObserverRegistered();
+            }
+
+            @Override
+            protected void onLastObserverUnregistered() {
+                Delegate.this.onLastObserverUnregistered();
+            }
+        };
+
+        EmptyPolicy mEmptyPolicy;
 
         /**
          * Returns whether the loading item should be shown or not.
@@ -158,20 +181,12 @@ public final class LoadingAdapterBuilder implements Decorator {
         /** Must be called when the value of {@link #isLoading()} changes. */
         @UiThread
         public final void notifyLoadingChanged() {
-            if (mAdapter != null) {
-                mAdapter.notifyLoadingChanged();
-            }
+            mCondition.notifyChanged();
         }
 
         /** Must be called when the value of {@link #isEmpty()} changes. */
         public final void notifyEmptyChanged() {
-            if (mAdapter != null) {
-                mAdapter.notifyEmptyChanged();
-            }
-        }
-
-        void setAdapter(@Nullable LoadingAdapter adapter) {
-            mAdapter = adapter;
+            mCondition.notifyChanged();
         }
     }
 }

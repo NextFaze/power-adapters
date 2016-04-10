@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import lombok.NonNull;
 
+@Deprecated
 public final class DataLoadingDelegate extends LoadingAdapterBuilder.Delegate {
 
     @NonNull

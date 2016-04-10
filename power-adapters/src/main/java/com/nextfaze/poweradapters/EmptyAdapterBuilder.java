@@ -7,10 +7,12 @@ import android.support.annotation.UiThread;
 import android.view.View;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.PowerAdapters.*;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
+/** Use {@link Condition}s instead. */
+@Deprecated
 public final class EmptyAdapterBuilder implements Decorator {
 
     @Nullable
@@ -69,11 +71,8 @@ public final class EmptyAdapterBuilder implements Decorator {
         if (mItem == null) {
             return adapter;
         }
-        Delegate delegate = mDelegate;
-        if (delegate == null) {
-            delegate = new DefaultDelegate(adapter);
-        }
-        return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
+        final Delegate delegate = mDelegate != null ? mDelegate : new DefaultDelegate(adapter);
+        return concat(adapter, showOnlyWhile(asAdapter(mItem.withEnabled(mEnabled)), delegate.mCondition));
     }
 
     @NonNull
@@ -82,11 +81,27 @@ public final class EmptyAdapterBuilder implements Decorator {
         return build(adapter);
     }
 
-    /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
+    /** Invoked to determine when the empty item is shown. */
+    @Deprecated
     public static abstract class Delegate {
 
-        @Nullable
-        private EmptyAdapter mAdapter;
+        @NonNull
+        private final AbstractCondition mCondition = new AbstractCondition() {
+            @Override
+            public boolean eval() {
+                return isEmpty();
+            }
+
+            @Override
+            protected void onFirstObserverRegistered() {
+                Delegate.this.onFirstObserverRegistered();
+            }
+
+            @Override
+            protected void onLastObserverUnregistered() {
+                Delegate.this.onLastObserverUnregistered();
+            }
+        };
 
         /**
          * Determines if the empty item should currently be shown.
@@ -113,13 +128,7 @@ public final class EmptyAdapterBuilder implements Decorator {
         /** Must be called when the value of {@link #isEmpty()} changes. */
         @UiThread
         public final void notifyEmptyChanged() {
-            if (mAdapter != null) {
-                mAdapter.updateVisible();
-            }
-        }
-
-        void setAdapter(@Nullable EmptyAdapter adapter) {
-            mAdapter = adapter;
+            mCondition.notifyChanged();
         }
     }
 
