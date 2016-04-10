@@ -1,0 +1,74 @@
+package com.nextfaze.poweradapters.data;
+
+import com.nextfaze.poweradapters.AbstractCondition;
+import com.nextfaze.poweradapters.Predicate;
+import lombok.NonNull;
+
+final class DataCondition<T> extends AbstractCondition {
+
+    @NonNull
+    private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
+        @Override
+        public void onChange() {
+            notifyChanged();
+        }
+    };
+
+    @NonNull
+    private final LoadingObserver mLoadingObserver = new LoadingObserver() {
+        @Override
+        public void onLoadingChange() {
+            DataCondition.this.notifyChanged();
+        }
+    };
+
+    @NonNull
+    private final AvailableObserver mAvailableObserver = new AvailableObserver() {
+        @Override
+        public void onAvailableChange() {
+            notifyChanged();
+        }
+    };
+
+    @NonNull
+    private final ErrorObserver mErrorObserver = new ErrorObserver() {
+        @Override
+        public void onError(@NonNull Throwable e) {
+            notifyChanged();
+        }
+    };
+
+    @NonNull
+    private final Data<? extends T> mData;
+
+    @NonNull
+    private final Predicate<? super Data<? extends T>> mPredicate;
+
+    DataCondition(@NonNull Data<? extends T> data, @NonNull Predicate<? super Data<? extends T>> predicate) {
+        mPredicate = predicate;
+        mData = data;
+    }
+
+    @Override
+    public boolean eval() {
+        return mPredicate.apply(mData);
+    }
+
+    @Override
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mData.registerDataObserver(mDataObserver);
+        mData.registerLoadingObserver(mLoadingObserver);
+        mData.registerAvailableObserver(mAvailableObserver);
+        mData.registerErrorObserver(mErrorObserver);
+    }
+
+    @Override
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mData.unregisterDataObserver(mDataObserver);
+        mData.unregisterLoadingObserver(mLoadingObserver);
+        mData.unregisterAvailableObserver(mAvailableObserver);
+        mData.unregisterErrorObserver(mErrorObserver);
+    }
+}
