@@ -32,6 +32,21 @@ public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
     }
 
     @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mData.get(position).hashCode();
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        return super.isEnabled(position);
+    }
+
+    @Override
     public final int getItemCount() {
         return mData.size();
     }

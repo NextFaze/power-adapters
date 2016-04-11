@@ -38,6 +38,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
+            // TODO: Offset all entries within table by itemCount.
             invalidateGroups();
             notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
         }
