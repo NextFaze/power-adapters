@@ -145,12 +145,12 @@ public final class TreeAdapter extends AbstractPowerAdapter {
                 mEntries.put(position, entry);
                 mState.setExpanded(itemId, true);
                 invalidateGroups();
-                notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
+                notifyItemRangeInserted(rootToOuter(position) + 1, entry.getChildItemCount());
                 entry.updateObserver();
             }
         } else {
             if (entry != null) {
-                int preDisposeItemCount = entry.getItemCount();
+                int preDisposeItemCount = entry.getChildItemCount();
                 entry.dispose();
                 mEntries.remove(position);
                 mState.setExpanded(itemId, false);
@@ -172,7 +172,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             for (int i = 0; i < mEntries.size(); i++) {
                 Entry entry = mEntries.valueAt(i);
                 final int position = entry.getPosition();
-                final int preDisposeItemCount = entry.getItemCount();
+                final int preDisposeItemCount = entry.getChildItemCount();
                 entry.dispose();
                 notifications.add(new Runnable() {
                     @Override
@@ -192,7 +192,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
                     entry = new Entry(getChildAdapter(position));
                     mEntries.put(position, entry);
                     mState.setExpanded(itemId, true);
-                    final int itemCount = entry.getItemCount();
+                    final int itemCount = entry.getChildItemCount();
                     final int finalPosition = position;
                     notifications.add(new Runnable() {
                         @Override
@@ -237,7 +237,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
                 mGroups.put(outerStart, group);
                 Entry entry = mEntries.get(i);
                 if (entry != null) {
-                    int entryItemCount = entry.getItemCount();
+                    int entryItemCount = entry.getChildItemCount();
                     entry.mGroup = group;
                     outerStart += entryItemCount;
                     rootStart += entryItemCount;
@@ -369,8 +369,8 @@ public final class TreeAdapter extends AbstractPowerAdapter {
                 entry.mAdapter = adapter;
                 entry.updateObserver();
                 rebuildGroupsIfNecessary();
-                notifyItemRangeRemoved(entry.mGroup.getEntryStart(), oldItemCount);
-                notifyItemRangeInserted(entry.mGroup.getEntryStart(), newItemCount);
+                notifyItemRangeRemoved(entry.mGroup.getChildOuterStart(), oldItemCount);
+                notifyItemRangeInserted(entry.mGroup.getChildOuterStart(), newItemCount);
                 invalidateGroups();
             }
         }
@@ -381,7 +381,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         int itemRemovalCount = 1;
         Entry entry = mEntries.get(rootPosition);
         if (entry != null) {
-            itemRemovalCount += entry.getItemCount();
+            itemRemovalCount += entry.getChildItemCount();
             entry.dispose();
         }
         mEntries.remove(rootPosition);
@@ -402,18 +402,18 @@ public final class TreeAdapter extends AbstractPowerAdapter {
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
+                notifyItemRangeChanged(childToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 invalidateGroups();
-                notifyItemRangeInserted(entryToOuter(positionStart), itemCount);
+                notifyItemRangeInserted(childToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
-                int outerPositionStart = entryToOuter(positionStart);
+                int outerPositionStart = childToOuter(positionStart);
                 invalidateGroups();
                 notifyItemRangeRemoved(outerPositionStart, itemCount);
             }
@@ -421,7 +421,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
                 invalidateGroups();
-                notifyItemRangeMoved(entryToOuter(fromPosition), entryToOuter(toPosition), itemCount);
+                notifyItemRangeMoved(childToOuter(fromPosition), childToOuter(toPosition), itemCount);
             }
         };
 
@@ -429,7 +429,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         private final Transform mTransform = new Transform() {
             @Override
             public int transform(int position) {
-                return outerToEntry(position);
+                return outerToChild(position);
             }
         };
 
@@ -446,13 +446,13 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             mAdapter = adapter;
         }
 
-        int entryToOuter(int entryPosition) {
+        int childToOuter(int childPosition) {
             rebuildGroupsIfNecessary();
-            return mGroup.entryToOuter(entryPosition);
+            return mGroup.childToOuter(childPosition);
         }
 
-        int outerToEntry(int outerPosition) {
-            return groupForPosition(outerPosition).outerToEntry(outerPosition);
+        int outerToChild(int outerPosition) {
+            return groupForPosition(outerPosition).outerToChild(outerPosition);
         }
 
         int getPosition() {
@@ -460,7 +460,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             return mGroup.getPosition();
         }
 
-        int getItemCount() {
+        int getChildItemCount() {
             return mAdapter.getItemCount();
         }
 
@@ -492,22 +492,24 @@ public final class TreeAdapter extends AbstractPowerAdapter {
 
         private PowerAdapter mAdapter;
         private Transform mTransform;
-        private int mOffset;
+
+        /** The starting position at which this adapter appears in outer coordinate space. */
+        private int mOuterOffset;
 
         @NonNull
-        OffsetAdapter set(@NonNull PowerAdapter adapter, @NonNull Transform transform, int offset) {
+        OffsetAdapter set(@NonNull PowerAdapter adapter, @NonNull Transform transform, int outerOffset) {
             mAdapter = adapter;
             mTransform = transform;
-            mOffset = offset;
+            mOuterOffset = outerOffset;
             return this;
         }
 
         long getItemId(int position) {
-            return mAdapter.getItemId(position - mOffset);
+            return mAdapter.getItemId(position - mOuterOffset);
         }
 
         boolean isEnabled(int position) {
-            return mAdapter.isEnabled(position - mOffset);
+            return mAdapter.isEnabled(position - mOuterOffset);
         }
 
         void bindView(@NonNull View view, @NonNull Holder holder) {
@@ -517,19 +519,19 @@ public final class TreeAdapter extends AbstractPowerAdapter {
                 mHolders.put(holder, offsetHolder);
             }
             offsetHolder.transform = mTransform;
-            offsetHolder.offset = mOffset;
+            offsetHolder.outerOffset = mOuterOffset;
             mAdapter.bindView(view, offsetHolder);
         }
 
         @NonNull
         ViewType getViewType(int position) {
-            return mAdapter.getItemViewType(position - mOffset);
+            return mAdapter.getItemViewType(position - mOuterOffset);
         }
 
         private static final class OffsetHolder extends HolderWrapper {
 
             Transform transform;
-            int offset;
+            int outerOffset;
 
             OffsetHolder(@NonNull Holder holder) {
                 super(holder);
@@ -578,12 +580,12 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             return this;
         }
 
-        int entryToOuter(int entryPosition) {
-            return getEntryStart() + entryPosition;
+        int childToOuter(int childPosition) {
+            return getChildOuterStart() + childPosition;
         }
 
-        int outerToEntry(int outerPosition) {
-            return outerPosition - getEntryStart();
+        int outerToChild(int outerPosition) {
+            return outerPosition - getChildOuterStart();
         }
 
         /** Index of this group within the collection. */
@@ -601,7 +603,9 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             return mRootStart;
         }
 
-        int getEntryStart() {
+        /** Offset of the entry adapter items in outer adapter coordinate space. */
+        int getChildOuterStart() {
+            // First item is the root item, subsequent are child items.
             return mOuterStart + 1;
         }
 
@@ -609,7 +613,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             int size = 1;
             Entry entry = mEntries.get(getPosition());
             if (entry != null) {
-                size += entry.getItemCount();
+                size += entry.getChildItemCount();
             }
             return size;
         }
@@ -622,7 +626,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
             }
             // Outer position maps to the child adapter.
             Entry entry = mEntries.get(getPosition());
-            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getEntryStart());
+            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getChildOuterStart());
         }
 
         @Override
