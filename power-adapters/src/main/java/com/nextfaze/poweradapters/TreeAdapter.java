@@ -210,11 +210,6 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         }
     }
 
-    @NonNull
-    private OffsetAdapter adapterForPosition(int outerPosition) {
-        return groupForPosition(outerPosition).adapter(outerPosition);
-    }
-
     private void invalidateGroups() {
         mDirty = true;
 //        rebuildGroupsIfNecessary();
@@ -272,6 +267,11 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         return adapter != null ? adapter : mRootAdapter;
     }
 
+    @NonNull
+    private OffsetAdapter outerToAdapter(int outerPosition) {
+        return groupForPosition(outerPosition).adapter(outerPosition);
+    }
+
     private int rootToOuter(int rootPosition) {
         rebuildGroupsIfNecessary();
         if (mGroups.size() == 0) {
@@ -284,14 +284,15 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         return outerPosition - groupForPosition(outerPosition).getRootStart();
     }
 
-    /**
-     * By default returns {@code false}, because we don't know all our adapters ahead of time, so can't assume they're
-     * stable.
-     */
-    @Override
-    public boolean hasStableIds() {
-        return false;
+    private int outerToChild(int outerPosition) {
+        return groupForPosition(outerPosition).outerToChild(outerPosition);
     }
+
+    private int rootToChildOuterStart(int rootPosition) {
+        throw new UnsupportedOperationException();
+    }
+
+    // TODO: Avoid visiting entire root adapter in order to build index. Possibly avoid need for index.
 
     @Override
     public final int getItemCount() {
@@ -303,20 +304,29 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         return group.getOuterStart() + group.size();
     }
 
+    /**
+     * By default returns {@code false}, because we don't know all our adapters ahead of time, so can't assume they're
+     * stable.
+     */
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
     @Override
     public final long getItemId(int position) {
-        return adapterForPosition(position).getItemId(position);
+        return outerToAdapter(position).getItemId(position);
     }
 
     @Override
     public final boolean isEnabled(int position) {
-        return adapterForPosition(position).isEnabled(position);
+        return outerToAdapter(position).isEnabled(position);
     }
 
     @NonNull
     @Override
     public final ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = adapterForPosition(position);
+        OffsetAdapter offsetAdapter = outerToAdapter(position);
         ViewType viewType = offsetAdapter.getViewType(position);
         mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
         return viewType;
@@ -330,7 +340,7 @@ public final class TreeAdapter extends AbstractPowerAdapter {
 
     @Override
     public final void bindView(@NonNull View view, @NonNull Holder holder) {
-        adapterForPosition(holder.getPosition()).bindView(view, holder);
+        outerToAdapter(holder.getPosition()).bindView(view, holder);
     }
 
     @CallSuper
@@ -449,10 +459,6 @@ public final class TreeAdapter extends AbstractPowerAdapter {
         int childToOuter(int childPosition) {
             rebuildGroupsIfNecessary();
             return mGroup.childToOuter(childPosition);
-        }
-
-        int outerToChild(int outerPosition) {
-            return groupForPosition(outerPosition).outerToChild(outerPosition);
         }
 
         int getPosition() {

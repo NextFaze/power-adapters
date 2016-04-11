@@ -89,6 +89,7 @@ public final class TreeAdapterTest {
     @Test
     public void expansionStateIsCorrect0() {
         mTreeAdapter.setExpanded(0, true);
+        reset(mRootAdapter, mChildAdapters.get(0), mChildAdapters.get(1), mChildAdapters.get(2));
         verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
@@ -631,16 +632,16 @@ public final class TreeAdapterTest {
         }
 
         /** Must be called at the end to perform the verification. */
-        void verify(@NonNull TreeAdapter treeAdapter) {
+        void verify(@NonNull PowerAdapter parentAdapter) {
             checkState(!mGetCalls.isEmpty(), "Must specify at least one " + GetCall.class.getSimpleName());
             checkState(!mMockSubAdapters.isEmpty(), "Must specify at least one mock sub adapter");
-            // TreeAdapter item count must match number of checks,
+            // Parent adapter item count must match number of checks,
             // since we're verifying each position maps to the right sub adapter.
-            assertThat(treeAdapter.getItemCount()).isEqualTo(mChecks.size());
+            assertThat(parentAdapter.getItemCount()).isEqualTo(mChecks.size());
             InOrder inOrder = inOrder(mMockSubAdapters.toArray());
             for (int i = 0; i < mChecks.size(); i++) {
                 for (GetCall call : mGetCalls) {
-                    call.get(treeAdapter, i);
+                    call.get(parentAdapter, i);
                 }
             }
             for (Check check : mChecks) {
