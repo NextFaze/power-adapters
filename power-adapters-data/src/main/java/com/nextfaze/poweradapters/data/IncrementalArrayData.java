@@ -257,7 +257,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
 
     @Override
     public final void invalidate() {
-        stopThread();
         mDirty = true;
         mClear = true;
     }
