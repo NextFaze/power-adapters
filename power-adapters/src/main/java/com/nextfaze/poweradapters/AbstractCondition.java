@@ -29,7 +29,7 @@ public abstract class AbstractCondition implements Condition {
     }
 
     @Override
-    public void registerObserver(@NonNull Observer observer) {
+    public final void registerObserver(@NonNull Observer observer) {
         boolean firstAdded;
         synchronized (mObservable) {
             mObservable.registerObserver(observer);
@@ -41,7 +41,7 @@ public abstract class AbstractCondition implements Condition {
     }
 
     @Override
-    public void unregisterObserver(@NonNull Observer observer) {
+    public final void unregisterObserver(@NonNull Observer observer) {
         boolean lastRemoved;
         synchronized (mObservable) {
             mObservable.unregisterObserver(observer);
