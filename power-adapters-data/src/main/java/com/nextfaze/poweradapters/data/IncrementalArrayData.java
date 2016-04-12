@@ -265,7 +265,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     public final void refresh() {
         stopThread();
         mDirty = true;
-        startThreadIfNeeded();
+        if (!startThreadIfNeeded()) {
+            setLoading(false);
+        }
     }
 
     @Override
@@ -347,7 +349,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    private void startThreadIfNeeded() {
+    private boolean startThreadIfNeeded() {
         if (mDirty && mThread == null && getDataObserverCount() > 0) {
             mDirty = false;
             onLoadBegin();
@@ -359,14 +361,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
                 }
             });
             mThread.start();
+            return true;
         }
+        return false;
     }
 
     private void stopThread() {
         if (mThread != null) {
             mThread.interrupt();
             mThread = null;
-            setLoading(false);
         }
     }
 
