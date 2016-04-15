@@ -15,7 +15,7 @@ final class LimitData<T> extends DataWrapper<T> {
     LimitData(@NonNull Data<? extends T> data, int limit) {
         super(data);
         mData = data;
-        mLimit = limit;
+        mLimit = max(0, limit);
     }
 
     @NonNull
