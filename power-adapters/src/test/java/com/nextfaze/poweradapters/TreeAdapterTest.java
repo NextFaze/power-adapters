@@ -11,7 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -19,18 +18,13 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.PowerAdapter.EMPTY;
-import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -52,11 +46,11 @@ public final class TreeAdapterTest {
 
     @Before
     public void setUp() throws Exception {
-        mRootAdapter = spy(fakeAdapter(3));
+        mRootAdapter = spy(AdapterTestUtils.fakeIntAdapter(3));
         mChildAdapters = newArrayList(
-                spy(fakeAdapter(3)),
-                spy(fakeAdapter(3)),
-                spy(fakeAdapter(3))
+                spy(AdapterTestUtils.fakeIntAdapter(3)),
+                spy(AdapterTestUtils.fakeIntAdapter(3)),
+                spy(AdapterTestUtils.fakeIntAdapter(3))
         );
         mChildAdapterSupplier = spy(new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
@@ -91,7 +85,7 @@ public final class TreeAdapterTest {
     public void expansionStateIsCorrect0() {
         mTreeAdapter.setExpanded(0, true);
         reset(mRootAdapter, mChildAdapters.get(0), mChildAdapters.get(1), mChildAdapters.get(2));
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -104,7 +98,7 @@ public final class TreeAdapterTest {
     @Test
     public void expansionStateIsCorrect1() {
         mTreeAdapter.setExpanded(1, true);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mRootAdapter, 1)
                 .check(mChildAdapters.get(1), 0)
@@ -117,7 +111,7 @@ public final class TreeAdapterTest {
     @Test
     public void expansionStateIsCorrect2() {
         mTreeAdapter.setExpanded(2, true);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mRootAdapter, 1)
                 .check(mRootAdapter, 2)
@@ -163,7 +157,7 @@ public final class TreeAdapterTest {
     public void collapseStateIsCorrect0() {
         mTreeAdapter.setAllExpanded(true);
         mTreeAdapter.setExpanded(0, false);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mRootAdapter, 1)
                 .check(mChildAdapters.get(1), 0)
@@ -180,7 +174,7 @@ public final class TreeAdapterTest {
     public void collapseStateIsCorrect1() {
         mTreeAdapter.setAllExpanded(true);
         mTreeAdapter.setExpanded(1, false);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -197,7 +191,7 @@ public final class TreeAdapterTest {
     public void collapseStateIsCorrect2() {
         mTreeAdapter.setAllExpanded(true);
         mTreeAdapter.setExpanded(2, false);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -224,7 +218,7 @@ public final class TreeAdapterTest {
     @Test
     public void treeRegistersObserversOnChildAdaptersWhenFirstExternalObserverRegisters() {
         final PowerAdapter childAdapter = mock(PowerAdapter.class);
-        TreeAdapter treeAdapter = new TreeAdapter(fakeAdapter(3), new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(AdapterTestUtils.fakeIntAdapter(3), new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -318,7 +312,7 @@ public final class TreeAdapterTest {
 
     @Test
     public void rootChangeUnregistersFromPreviousChildAdapterIfExpanded() {
-        FakeAdapter<Integer> rootAdapter = fakeAdapter(1);
+        FakeAdapter<Integer> rootAdapter = AdapterTestUtils.fakeIntAdapter(1);
         PowerAdapter oldChildAdapter = mock(PowerAdapter.class);
         final AtomicReference<PowerAdapter> childAdapterRef = new AtomicReference<>(oldChildAdapter);
         TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
@@ -346,7 +340,7 @@ public final class TreeAdapterTest {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
-                return fakeAdapter(3);
+                return AdapterTestUtils.fakeIntAdapter(3);
             }
         });
         treeAdapter.setAllExpanded(true);
@@ -381,13 +375,13 @@ public final class TreeAdapterTest {
         mTreeAdapter.setAllExpanded(true);
         mTreeAdapter.registerDataObserver(mObserver);
         reset(mRootAdapter, mChildAdapters.get(0), mChildAdapters.get(1), mChildAdapters.get(2));
-        mChildAdapters.add(1, spy(fakeAdapter(3)));
+        mChildAdapters.add(1, spy(AdapterTestUtils.fakeIntAdapter(3)));
         mRootAdapter.add(1, 5);
-        mChildAdapters.add(1, spy(fakeAdapter(3)));
+        mChildAdapters.add(1, spy(AdapterTestUtils.fakeIntAdapter(3)));
         mRootAdapter.add(1, 5);
-        mChildAdapters.add(1, spy(fakeAdapter(3)));
+        mChildAdapters.add(1, spy(AdapterTestUtils.fakeIntAdapter(3)));
         mRootAdapter.add(1, 5);
-        verifySubAdapterCalls(GetCall.ENABLED)
+        AdapterVerifier.verifySubAdapterCalls(GetCall.ENABLED)
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -462,8 +456,8 @@ public final class TreeAdapterTest {
 
     @Test
     public void childInsertionGeneratesTreeInsertion() {
-        final FakeAdapter<Integer> childAdapter = fakeAdapter(3);
-        TreeAdapter treeAdapter = new TreeAdapter(fakeAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
+        final FakeAdapter<Integer> childAdapter = AdapterTestUtils.fakeIntAdapter(3);
+        TreeAdapter treeAdapter = new TreeAdapter(AdapterTestUtils.fakeIntAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -479,8 +473,8 @@ public final class TreeAdapterTest {
 
     @Test
     public void childRemovalGeneratesTreeRemoval() {
-        final FakeAdapter<Integer> childAdapter = fakeAdapter(3);
-        TreeAdapter treeAdapter = new TreeAdapter(fakeAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
+        final FakeAdapter<Integer> childAdapter = AdapterTestUtils.fakeIntAdapter(3);
+        TreeAdapter treeAdapter = new TreeAdapter(AdapterTestUtils.fakeIntAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -538,7 +532,7 @@ public final class TreeAdapterTest {
         mTreeAdapter.registerDataObserver(new SimpleDataObserver() {
             @Override
             public void onChanged() {
-                verifySubAdapterAllGetCalls()
+                AdapterVerifier.verifySubAdapterAllGetCalls()
                         .check(mRootAdapter, 0)
                         .check(mChildAdapters.get(0), 0)
                         .check(mChildAdapters.get(0), 1)
@@ -565,7 +559,7 @@ public final class TreeAdapterTest {
         TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, mChildAdapterSupplier);
         treeAdapter.registerDataObserver(mObserver);
         treeAdapter.restoreInstanceState(state);
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -578,27 +572,8 @@ public final class TreeAdapterTest {
                 .verify(treeAdapter);
     }
 
-    @NonNull
-    private static FakeAdapter<Integer> fakeAdapter(int itemCount) {
-        FakeAdapter<Integer> adapter = new FakeAdapter<>();
-        for (int i = 0; i < itemCount; i++) {
-            adapter.add(i);
-        }
-        return adapter;
-    }
-
-    @NonNull
-    private static SubAdapterVerifier verifySubAdapterAllGetCalls() {
-        return verifySubAdapterCalls(GetCall.values());
-    }
-
-    @NonNull
-    private static SubAdapterVerifier verifySubAdapterCalls(@NonNull GetCall... getCalls) {
-        return new SubAdapterVerifier(getCalls);
-    }
-
     private void verifyStateNoneExpanded() {
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mRootAdapter, 1)
                 .check(mRootAdapter, 2)
@@ -606,7 +581,7 @@ public final class TreeAdapterTest {
     }
 
     private void verifyStateAllExpanded() {
-        verifySubAdapterAllGetCalls()
+        AdapterVerifier.verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
                 .check(mChildAdapters.get(0), 1)
@@ -620,62 +595,5 @@ public final class TreeAdapterTest {
                 .check(mChildAdapters.get(2), 1)
                 .check(mChildAdapters.get(2), 2)
                 .verify(mTreeAdapter);
-    }
-
-    private static final class SubAdapterVerifier {
-
-        /** Set of mocked root and child adapters. */
-        @NonNull
-        private final Set<PowerAdapter> mMockSubAdapters = new HashSet<>();
-
-        /** Set of get calls to be verified as passing the correct position arg. */
-        @NonNull
-        private final Set<GetCall> mGetCalls = new HashSet<>();
-
-        /** List of verifications to be performed in order. */
-        @NonNull
-        private final List<Check> mChecks = new ArrayList<>();
-
-        SubAdapterVerifier(@NonNull GetCall... getCalls) {
-            addAll(mGetCalls, getCalls);
-        }
-
-        /** Verify that the specified mocked sub adapter was invoked with the specified position arg. */
-        @NonNull
-        SubAdapterVerifier check(@NonNull final PowerAdapter mockAdapter, final int position) {
-            mMockSubAdapters.add(mockAdapter);
-            mChecks.add(new Check() {
-                @Override
-                public void run(@NonNull InOrder inOrder) {
-                    for (GetCall call : mGetCalls) {
-                        call.get(inOrder.verify(mockAdapter), position);
-                    }
-                }
-            });
-            return this;
-        }
-
-        /** Must be called at the end to perform the verification. */
-        void verify(@NonNull PowerAdapter parentAdapter) {
-            checkState(!mGetCalls.isEmpty(), "Must specify at least one " + GetCall.class.getSimpleName());
-            checkState(!mMockSubAdapters.isEmpty(), "Must specify at least one mock sub adapter");
-            // Parent adapter item count must match number of checks,
-            // since we're verifying each position maps to the right sub adapter.
-            assertThat(parentAdapter.getItemCount()).isEqualTo(mChecks.size());
-            InOrder inOrder = inOrder(mMockSubAdapters.toArray());
-            for (int i = 0; i < mChecks.size(); i++) {
-                for (GetCall call : mGetCalls) {
-                    call.get(parentAdapter, i);
-                }
-            }
-            for (Check check : mChecks) {
-                check.run(inOrder);
-            }
-            inOrder.verifyNoMoreInteractions();
-        }
-
-        interface Check {
-            void run(@NonNull InOrder inOrder);
-        }
     }
 }
