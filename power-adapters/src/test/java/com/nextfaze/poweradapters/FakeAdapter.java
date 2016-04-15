@@ -237,6 +237,20 @@ public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
         }
     }
 
+    public final void set(int position, @NonNull T... elements) {
+        for (int i = 0; i < elements.length; i++) {
+            mData.set(position + i, elements[i]);
+        }
+        notifyItemRangeChanged(position, elements.length);
+    }
+
+    public final void add(int position, @NonNull T... elements) {
+        for (int i = 0; i < elements.length; i++) {
+            mData.add(position + i, elements[i]);
+        }
+        notifyItemRangeInserted(position, elements.length);
+    }
+
     public final void move(int fromPosition, int toPosition, int itemCount) {
         ArrayList<T> copy = new ArrayList<>();
         for (int i = 0; i < itemCount; i++) {
@@ -250,11 +264,11 @@ public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
         }
     }
 
-    public boolean isNotificationsEnabled() {
+    public final boolean isNotificationsEnabled() {
         return mNotificationsEnabled;
     }
 
-    public void setNotificationsEnabled(boolean notificationsEnabled) {
+    public final void setNotificationsEnabled(boolean notificationsEnabled) {
         mNotificationsEnabled = notificationsEnabled;
     }
 }
