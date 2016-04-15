@@ -38,6 +38,11 @@ public final class LimitDataTest {
     }
 
     @Test
+    public void negativeLimitClamped() {
+        assertThat(new LimitData<>(mData, -50)).containsExactly().inOrder();
+    }
+
+    @Test
     public void limitedSize() {
         assertThat(mLimitedData).hasSize(5);
     }
@@ -54,7 +59,7 @@ public final class LimitDataTest {
 
     @Test
     public void outOfBoundsChangeDropped() {
-        mData.remove(5);
+        mData.set(5, "foo");
         assertLimitedDataClippedContents();
         verifyZeroInteractions(mDataObserver);
     }
@@ -71,6 +76,12 @@ public final class LimitDataTest {
         mData.remove("pqrstu");
         assertLimitedDataClippedContents();
         verifyZeroInteractions(mDataObserver);
+    }
+
+    @Test
+    public void outOfBoundsMoveDropped() {
+        // TODO: Check that a move that's entirely out of bounds results in no notification.
+        throw new UnsupportedOperationException();
     }
 
     @Test
