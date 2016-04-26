@@ -212,6 +212,15 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         }
     }
 
+    public final void remove(int index, int count) {
+        for (int i = 0; i < count; i++) {
+            mData.remove(index);
+        }
+        if (mNotificationsEnabled) {
+            notifyItemRangeRemoved(index, count);
+        }
+    }
+
     @Override
     public void invalidate() {
     }
