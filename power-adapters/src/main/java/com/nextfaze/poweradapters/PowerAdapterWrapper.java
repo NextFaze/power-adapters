@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 import java.util.WeakHashMap;
 
-public class PowerAdapterWrapper extends AbstractPowerAdapter {
+public class PowerAdapterWrapper extends PowerAdapter {
 
     @NonNull
     private final WeakHashMap<Holder, HolderWrapper> mHolders = new WeakHashMap<>();

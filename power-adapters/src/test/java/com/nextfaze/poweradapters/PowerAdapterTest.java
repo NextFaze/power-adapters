@@ -14,16 +14,16 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public final class AbstractPowerAdapterTest {
+public final class PowerAdapterTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
 
-    private AbstractPowerAdapter mAdapter;
+    private PowerAdapter mAdapter;
 
     @Before
     public void setUp() throws Exception {
-        mAdapter = spy(AbstractPowerAdapter.class);
+        mAdapter = spy(PowerAdapter.class);
     }
 
     @Test

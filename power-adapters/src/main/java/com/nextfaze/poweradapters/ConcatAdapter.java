@@ -14,7 +14,7 @@ import java.util.WeakHashMap;
 
 import static java.lang.String.format;
 
-final class ConcatAdapter extends AbstractPowerAdapter {
+final class ConcatAdapter extends PowerAdapter {
 
     /** Reused to wrap an adapter and automatically offset all position calls. */
     @NonNull

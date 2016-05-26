@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-class ItemAdapter extends AbstractPowerAdapter {
+class ItemAdapter extends PowerAdapter {
 
     @NonNull
     private final List<Item> mItems;

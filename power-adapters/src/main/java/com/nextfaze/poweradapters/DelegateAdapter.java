@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 
 /** Wraps another {@link PowerAdapter} optionally, delegating work to it. The wrapped adapter can be reassigned freely. */
 @Accessors(prefix = "m")
-public final class DelegateAdapter extends AbstractPowerAdapter {
+public final class DelegateAdapter extends PowerAdapter {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {

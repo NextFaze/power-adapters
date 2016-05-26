@@ -3,8 +3,8 @@ package com.nextfaze.poweradapters.binding;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import com.nextfaze.poweradapters.AbstractPowerAdapter;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 import java.util.WeakHashMap;
 
 @Accessors(prefix = "m")
-public abstract class BindingAdapter extends AbstractPowerAdapter {
+public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull
     private final WeakHashMap<ViewType, Binder> mBinders = new WeakHashMap<>();

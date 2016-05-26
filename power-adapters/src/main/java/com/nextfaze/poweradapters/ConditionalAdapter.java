@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-final class ConditionalAdapter extends AbstractPowerAdapter {
+final class ConditionalAdapter extends PowerAdapter {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
