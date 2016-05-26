@@ -11,7 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
+public class FakeAdapter<T> extends PowerAdapter implements List<T> {
+
+    @NonNull
+    private final ViewType mViewType = ViewTypes.create();
 
     @NonNull
     private final List<T> mData = new ArrayList<>();
@@ -19,6 +22,12 @@ public class FakeAdapter<T> extends AbstractPowerAdapter implements List<T> {
     private boolean mNotificationsEnabled = true;
 
     public FakeAdapter() {
+    }
+
+    @NonNull
+    @Override
+    public ViewType getItemViewType(int position) {
+        return mViewType;
     }
 
     @NonNull

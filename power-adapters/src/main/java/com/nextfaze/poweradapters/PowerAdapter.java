@@ -1,16 +1,22 @@
 package com.nextfaze.poweradapters;
 
+import android.annotation.SuppressLint;
+import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
+import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import java.util.Collection;
 
-public interface PowerAdapter {
+import static com.nextfaze.poweradapters.Item.toItems;
+import static java.util.Arrays.asList;
+
+public abstract class PowerAdapter {
 
     /** An adapter with no elements. */
-    PowerAdapter EMPTY = new PowerAdapter() {
+    public static final PowerAdapter EMPTY = new PowerAdapter() {
         @Override
         public int getItemCount() {
             return 0;
@@ -48,49 +54,29 @@ public interface PowerAdapter {
             throw new UnsupportedOperationException();
         }
 
+        @SuppressLint("MissingSuperCall")
         @Override
         public void registerDataObserver(@NonNull DataObserver dataObserver) {
+            // No-op; this adapter does not emit any changes.
         }
 
+        @SuppressLint("MissingSuperCall")
         @Override
         public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        }
-
-        @CheckResult
-        @NonNull
-        @Override
-        public PowerAdapter decorate(@NonNull Decorator decorator) {
-            return decorator.decorate(this);
-        }
-
-        @NonNull
-        @Override
-        public PowerAdapter prepend(@NonNull PowerAdapter adapter) {
-            return concat(adapter, this);
-        }
-
-        @CheckResult
-        @NonNull
-        @Override
-        public PowerAdapter append(@NonNull PowerAdapter adapter) {
-            return concat(this, adapter);
-        }
-
-        @CheckResult
-        @NonNull
-        @Override
-        public PowerAdapter showOnlyWhile(@NonNull Condition condition) {
-            return new ConditionalAdapter(this, condition);
+            // No-op; this adapter does not emit any changes.
         }
     };
 
-    int NO_ID = -1;
+    public static final int NO_ID = -1;
+
+    @NonNull
+    private final DataObservable mDataObservable = new DataObservable();
 
     /**
      * Returns the total number of items in the data set hold by the adapter.
      * @return The total number of items in this adapter.
      */
-    int getItemCount();
+    public abstract int getItemCount();
 
     /**
      * Returns true if this adapter publishes a unique {@code long} value that can
@@ -98,7 +84,9 @@ public interface PowerAdapter {
      * in the data set, the ID returned for that item should be the same.
      * @return true if this adapter's items have stable IDs
      */
-    boolean hasStableIds();
+    public boolean hasStableIds() {
+        return false;
+    }
 
     /**
      * Return the stable ID for the item at {@code position}. If {@link #hasStableIds()}
@@ -106,7 +94,9 @@ public interface PowerAdapter {
      * @param position Adapter position to query
      * @return the stable ID of the item at position
      */
-    long getItemId(int position);
+    public long getItemId(int position) {
+        return NO_ID;
+    }
 
     /**
      * Get the type of view for item at {@code position}, for the purpose of view recycling.
@@ -115,7 +105,7 @@ public interface PowerAdapter {
      * @return A {@link ViewType} object that is unique for this type of view throughout the process.
      */
     @NonNull
-    ViewType getItemViewType(int position);
+    public abstract ViewType getItemViewType(int position);
 
     /**
      * Returns true if the item at the specified position is not a separator.
@@ -125,35 +115,267 @@ public interface PowerAdapter {
      * @param position Index of the item
      * @return True if the item is not a separator
      */
-    boolean isEnabled(int position);
+    public boolean isEnabled(int position) {
+        return true;
+    }
 
     @NonNull
-    View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType);
+    public abstract View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType);
 
-    void bindView(@NonNull View view, @NonNull Holder holder);
+    public abstract void bindView(@NonNull View view, @NonNull Holder holder);
 
-    void registerDataObserver(@NonNull DataObserver dataObserver);
+    @CallSuper
+    public void registerDataObserver(@NonNull DataObserver dataObserver) {
+        mDataObservable.registerObserver(dataObserver);
+        if (mDataObservable.size() == 1) {
+            onFirstObserverRegistered();
+        }
+    }
 
-    void unregisterDataObserver(@NonNull DataObserver dataObserver);
+    @CallSuper
+    public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
+        mDataObservable.unregisterObserver(dataObserver);
+        if (mDataObservable.size() == 0) {
+            onLastObserverUnregistered();
+        }
+    }
+
+    /** Returns the number of registered observers. */
+    protected final int getObserverCount() {
+        return mDataObservable.size();
+    }
+
+    /** Called when the first observer has registered with this adapter. */
+    @CallSuper
+    protected void onFirstObserverRegistered() {
+    }
+
+    /** Called when the last observer has unregistered from this adapter. */
+    @CallSuper
+    protected void onLastObserverUnregistered() {
+    }
+
+    /**
+     * Notify any registered observers that the data set has changed.
+     *
+     * <p>There are two different classes of data change events, item changes and structural
+     * changes. Item changes are when a single item has its data updated but no positional
+     * changes have occurred. Structural changes are when items are inserted, removed or moved
+     * within the data set.</p>
+     *
+     * <p>This event does not specify what about the data set has changed, forcing
+     * any observers to assume that all existing items and structure may no longer be valid.
+     * LayoutManagers will be forced to fully rebind and relayout all visible views.</p>
+     *
+     * <p><code>RecyclerView</code> will attempt to synthesize visible structural change events
+     * for adapters that report that they have {@link #hasStableIds() stable IDs} when
+     * this method is used. This can help for the purposes of animation and visual
+     * object persistence but individual item views will still need to be rebound
+     * and relaid out.</p>
+     *
+     * <p>If you are writing an adapter it will always be more efficient to use the more
+     * specific change events if you can. Rely on <code>notifyDataSetChanged()</code>
+     * as a last resort.</p>
+     *
+     * @see #notifyItemChanged(int)
+     * @see #notifyItemInserted(int)
+     * @see #notifyItemRemoved(int)
+     * @see #notifyItemRangeChanged(int, int)
+     * @see #notifyItemRangeInserted(int, int)
+     * @see #notifyItemRangeRemoved(int, int)
+     */
+    protected final void notifyDataSetChanged() {
+        mDataObservable.notifyDataSetChanged();
+    }
+
+    /**
+     * Notify any registered observers that the item at <code>position</code> has changed.
+     *
+     * <p>This is an item change event, not a structural change event. It indicates that any
+     * reflection of the data at <code>position</code> is out of date and should be updated.
+     * The item at <code>position</code> retains the same identity.</p>
+     *
+     * @param position Position of the item that has changed
+     *
+     * @see #notifyItemRangeChanged(int, int)
+     */
+    protected final void notifyItemChanged(int position) {
+        mDataObservable.notifyItemChanged(position);
+    }
+
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items starting at
+     * position <code>positionStart</code> have changed.
+     *
+     * <p>This is an item change event, not a structural change event. It indicates that
+     * any reflection of the data in the given position range is out of date and should
+     * be updated. The items in the given range retain the same identity.</p>
+     *
+     * @param positionStart Position of the first item that has changed
+     * @param itemCount Number of items that have changed
+     *
+     * @see #notifyItemChanged(int)
+     */
+    protected final void notifyItemRangeChanged(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeChanged(positionStart, itemCount);
+    }
+
+    /**
+     * Notify any registered observers that the item reflected at <code>position</code>
+     * has been newly inserted. The item previously at <code>position</code> is now at
+     * position <code>position + 1</code>.
+     *
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     *
+     * @param position Position of the newly inserted item in the data set
+     *
+     * @see #notifyItemRangeInserted(int, int)
+     */
+    protected final void notifyItemInserted(int position) {
+        mDataObservable.notifyItemInserted(position);
+    }
+
+    /**
+     * Notify any registered observers that the currently reflected <code>itemCount</code>
+     * items starting at <code>positionStart</code> have been newly inserted. The items
+     * previously located at <code>positionStart</code> and beyond can now be found starting
+     * at position <code>positionStart + itemCount</code>.
+     *
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     *
+     * @param positionStart Position of the first item that was inserted
+     * @param itemCount Number of items inserted
+     *
+     * @see #notifyItemInserted(int)
+     */
+    protected final void notifyItemRangeInserted(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeInserted(positionStart, itemCount);
+    }
+
+    /**
+     * Notify any registered observers that the item reflected at <code>fromPosition</code>
+     * has been moved to <code>toPosition</code>.
+     *
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     *
+     * @param fromPosition Previous position of the item.
+     * @param toPosition New position of the item.
+     */
+    protected final void notifyItemMoved(int fromPosition, int toPosition) {
+        mDataObservable.notifyItemMoved(fromPosition, toPosition);
+    }
+
+    protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+        mDataObservable.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+    }
+
+    /**
+     * Notify any registered observers that the item previously located at <code>position</code>
+     * has been removed from the data set. The items previously located at and after
+     * <code>position</code> may now be found at <code>oldPosition - 1</code>.
+     *
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     *
+     * @param position Position of the item that has now been removed
+     *
+     * @see #notifyItemRangeRemoved(int, int)
+     */
+    protected final void notifyItemRemoved(int position) {
+        mDataObservable.notifyItemRemoved(position);
+    }
+
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items previously
+     * located at <code>positionStart</code> have been removed from the data set. The items
+     * previously located at and after <code>positionStart + itemCount</code> may now be found
+     * at <code>oldPosition - itemCount</code>.
+     *
+     * <p>This is a structural change event. Representations of other existing items in the data
+     * set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     *
+     * @param positionStart Previous position of the first item that was removed
+     * @param itemCount Number of items removed from the data set
+     */
+    protected final void notifyItemRangeRemoved(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
+    }
 
     /** Wraps this adapter using the specified decorator, and returns the result. */
     @CheckResult
     @NonNull
-    PowerAdapter decorate(@NonNull Decorator decorator);
+    public final PowerAdapter decorate(@NonNull Decorator decorator) {
+        return decorator.decorate(this);
+    }
 
     @CheckResult
     @NonNull
-    PowerAdapter prepend(@NonNull PowerAdapter adapter);
+    public final PowerAdapter prepend(@NonNull PowerAdapter adapter) {
+        return new ConcatAdapter(asList(adapter, this));
+    }
 
     @CheckResult
     @NonNull
-    PowerAdapter append(@NonNull PowerAdapter adapter);
+    public final PowerAdapter append(@NonNull PowerAdapter adapter) {
+        return new ConcatAdapter(asList(this, adapter));
+    }
 
     @CheckResult
     @NonNull
-    PowerAdapter showOnlyWhile(@NonNull Condition condition);
+    public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
+        return new ConditionalAdapter(this, condition);
+    }
 
-    // TODO: Limit.
+    @CheckResult
+    @NonNull
+    public static PowerAdapter concat(@NonNull PowerAdapter... powerAdapters) {
+        if (powerAdapters.length == 1) {
+            return powerAdapters[0];
+        }
+        return new ConcatAdapter(asList(powerAdapters));
+    }
 
-    // TODO: Offset.
+    @CheckResult
+    @NonNull
+    public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> powerAdapters) {
+        return new ConcatAdapter(powerAdapters);
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter asAdapter(@NonNull ViewFactory... views) {
+        if (views.length == 0) {
+            return EMPTY;
+        }
+        return new ItemAdapter(toItems(asList(views)));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter asAdapter(@NonNull Iterable<? extends ViewFactory> views) {
+        return new ItemAdapter(toItems(views));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter asAdapter(@NonNull Collection<? extends ViewFactory> views) {
+        if (views.isEmpty()) {
+            return EMPTY;
+        }
+        return new ItemAdapter(toItems(views));
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
+        return new ItemAdapter(toItems(resources));
+    }
 }

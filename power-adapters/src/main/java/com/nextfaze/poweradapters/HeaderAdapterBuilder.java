@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import static com.nextfaze.poweradapters.Conditions.adapter;
 import static com.nextfaze.poweradapters.Conditions.and;
-import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 

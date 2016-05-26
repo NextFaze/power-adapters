@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Random;
 
 import static com.nextfaze.poweradapters.Conditions.not;
-import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.*;

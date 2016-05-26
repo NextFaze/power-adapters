@@ -7,8 +7,8 @@ import android.support.annotation.UiThread;
 import android.view.View;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 

@@ -36,7 +36,7 @@ import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
 import static com.nextfaze.poweradapters.Conditions.*;
-import static com.nextfaze.poweradapters.PowerAdapters.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
 import static com.nextfaze.poweradapters.data.DataConditions.isLoading;
