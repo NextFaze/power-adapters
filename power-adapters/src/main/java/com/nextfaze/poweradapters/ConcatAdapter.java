@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static java.lang.String.format;
+import static java.util.Locale.US;
 
 final class ConcatAdapter extends PowerAdapter {
 
@@ -43,14 +44,8 @@ final class ConcatAdapter extends PowerAdapter {
         }
     }
 
-    @NonNull
-    private OffsetAdapter adapterForPosition(int outerPosition) {
-        return groupForPosition(outerPosition).adapter();
-    }
-
     private void invalidateGroups() {
         mDirty = true;
-        rebuildGroupsIfNecessary();
     }
 
     private void rebuildGroupsIfNecessary() {
@@ -67,7 +62,7 @@ final class ConcatAdapter extends PowerAdapter {
                 Entry entry = mEntries.get(i);
                 group.set(i, outerStart, entry);
                 mGroups.put(outerStart, group);
-                int entryItemCount = entry.getItemCount();
+                int entryItemCount = entry.getChildItemCount();
                 entry.mGroup = group;
                 outerStart += entryItemCount;
                 i++;
@@ -81,7 +76,7 @@ final class ConcatAdapter extends PowerAdapter {
         rebuildGroupsIfNecessary();
         int totalItemCount = getItemCount();
         if (outerPosition >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
+            throw new ArrayIndexOutOfBoundsException(format(US, "Index: %d, total size: %d", outerPosition, totalItemCount));
         }
         int groupPosition = mGroups.indexOfKey(outerPosition);
         Group group;
@@ -98,16 +93,13 @@ final class ConcatAdapter extends PowerAdapter {
         return mAdaptersByViewType.get(viewType);
     }
 
-    @Override
-    public boolean hasStableIds() {
-        //noinspection SimplifiableIfStatement
-        if (mEntries.size() == 1) {
-            // Only a single entry, so it's safe to forward it's value directly.
-            return mEntries.valueAt(0).mAdapter.hasStableIds();
-        }
-        // Otherwise, must return false because IDs returned by multiple
-        // child adapters may collide, falsely indicating equality.
-        return false;
+    @NonNull
+    private OffsetAdapter outerToAdapter(int outerPosition) {
+        return groupForPosition(outerPosition).adapter();
+    }
+
+    private int outerToChild(int outerPosition) {
+        return groupForPosition(outerPosition).outerToChild(outerPosition);
     }
 
     @Override
@@ -121,19 +113,31 @@ final class ConcatAdapter extends PowerAdapter {
     }
 
     @Override
+    public boolean hasStableIds() {
+        //noinspection SimplifiableIfStatement
+        if (mEntries.size() == 1) {
+            // Only a single entry, so it's safe to forward it's value directly.
+            return mEntries.valueAt(0).mAdapter.hasStableIds();
+        }
+        // Otherwise, must return false because IDs returned by multiple
+        // child adapters may collide, falsely indicating equality.
+        return false;
+    }
+
+    @Override
     public long getItemId(int position) {
-        return adapterForPosition(position).getItemId(position);
+        return outerToAdapter(position).getItemId(position);
     }
 
     @Override
     public boolean isEnabled(int position) {
-        return adapterForPosition(position).isEnabled(position);
+        return outerToAdapter(position).isEnabled(position);
     }
 
     @NonNull
     @Override
     public ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = adapterForPosition(position);
+        OffsetAdapter offsetAdapter = outerToAdapter(position);
         ViewType viewType = offsetAdapter.getViewType(position);
         mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
         return viewType;
@@ -147,32 +151,37 @@ final class ConcatAdapter extends PowerAdapter {
 
     @Override
     public void bindView(@NonNull View view, @NonNull Holder holder) {
-        adapterForPosition(holder.getPosition()).bindView(view, holder);
+        outerToAdapter(holder.getPosition()).bindView(view, holder);
     }
 
     @CallSuper
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).registerObserversIfNecessary();
-        }
+        updateEntryObservers();
+        // Rebuild index immediately, because later we might rely on it being up-to-date
+        // (such as a removal notification from a child).
         invalidateGroups();
+        rebuildGroupsIfNecessary();
     }
 
     @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
+        updateEntryObservers();
+    }
+
+    private void updateEntryObservers() {
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).unregisterObserversIfNecessary();
+            mEntries.valueAt(i).updateObserver();
         }
     }
 
     private final class Entry {
 
         @NonNull
-        private final DataObserver mDataObserver = new SimpleDataObserver() {
+        private final DataObserver mDataObserver = new DataObserver() {
             @Override
             public void onChanged() {
                 invalidateGroups();
@@ -181,26 +190,28 @@ final class ConcatAdapter extends PowerAdapter {
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                invalidateGroups();
-                notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
+                notifyItemRangeChanged(childToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 invalidateGroups();
-                notifyItemRangeInserted(entryToOuter(positionStart), itemCount);
+                notifyItemRangeInserted(childToOuter(positionStart), itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
+                // Must obtain translated position BEFORE invalidating, because a removal notification indicates
+                // items that WERE present have been removed.
+                int outerPositionStart = childToOuter(positionStart);
                 invalidateGroups();
-                notifyItemRangeRemoved(entryToOuter(positionStart), itemCount);
+                notifyItemRangeRemoved(outerPositionStart, itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
                 invalidateGroups();
-                notifyItemRangeMoved(entryToOuter(fromPosition), entryToOuter(toPosition), itemCount);
+                notifyItemRangeMoved(childToOuter(fromPosition), childToOuter(toPosition), itemCount);
             }
         };
 
@@ -208,15 +219,15 @@ final class ConcatAdapter extends PowerAdapter {
         private final Transform mTransform = new Transform() {
             @Override
             public int transform(int position) {
-                return outerToEntry(position);
+                return outerToChild(position);
             }
         };
 
-        @Nullable
-        private DataObserver mRegisteredDataObserver;
-
         @NonNull
         private final PowerAdapter mAdapter;
+
+        @Nullable
+        private PowerAdapter mObservedAdapter;
 
         @NonNull
         private Group mGroup;
@@ -225,30 +236,26 @@ final class ConcatAdapter extends PowerAdapter {
             mAdapter = adapter;
         }
 
-        int entryToOuter(int entryPosition) {
-            return mGroup.entryToOuter(entryPosition);
+        int childToOuter(int childPosition) {
+            rebuildGroupsIfNecessary();
+            return mGroup.childToOuter(childPosition);
         }
 
-        int outerToEntry(int outerPosition) {
-            return groupForPosition(outerPosition).outerToEntry(outerPosition);
-        }
-
-        void registerObserversIfNecessary() {
-            if (mRegisteredDataObserver == null) {
-                mAdapter.registerDataObserver(mDataObserver);
-                mRegisteredDataObserver = mDataObserver;
-            }
-        }
-
-        void unregisterObserversIfNecessary() {
-            if (mRegisteredDataObserver != null) {
-                mAdapter.unregisterDataObserver(mRegisteredDataObserver);
-                mRegisteredDataObserver = null;
-            }
-        }
-
-        int getItemCount() {
+        int getChildItemCount() {
             return mAdapter.getItemCount();
+        }
+
+        void updateObserver() {
+            PowerAdapter adapter = getObserverCount() > 0 ? mAdapter : null;
+            if (adapter != mObservedAdapter) {
+                if (mObservedAdapter != null) {
+                    mObservedAdapter.unregisterDataObserver(mDataObserver);
+                }
+                mObservedAdapter = adapter;
+                if (mObservedAdapter != null) {
+                    mObservedAdapter.registerDataObserver(mDataObserver);
+                }
+            }
         }
     }
 
@@ -259,6 +266,8 @@ final class ConcatAdapter extends PowerAdapter {
 
         private PowerAdapter mAdapter;
         private Transform mTransform;
+
+        /** The starting position at which this adapter appears in outer coordinate space. */
         private int mOffset;
 
         @NonNull
@@ -352,12 +361,12 @@ final class ConcatAdapter extends PowerAdapter {
             return this;
         }
 
-        int entryToOuter(int entryPosition) {
-            return getEntryStart() + entryPosition;
+        int childToOuter(int entryPosition) {
+            return getChildOuterStart() + entryPosition;
         }
 
-        int outerToEntry(int outerPosition) {
-            return outerPosition - getEntryStart();
+        int outerToChild(int outerPosition) {
+            return outerPosition - getChildOuterStart();
         }
 
         /** Index of this group within the collection. */
@@ -370,18 +379,18 @@ final class ConcatAdapter extends PowerAdapter {
             return mOuterStart;
         }
 
-        int getEntryStart() {
+        int getChildOuterStart() {
             return mOuterStart;
         }
 
         int size() {
-            return mEntry.getItemCount();
+            return mEntry.getChildItemCount();
         }
 
         @NonNull
         OffsetAdapter adapter() {
             // Outer position maps to the child adapter.
-            return mOffsetAdapter.set(mEntry.mAdapter, mEntry.mTransform, getEntryStart());
+            return mOffsetAdapter.set(mEntry.mAdapter, mEntry.mTransform, getChildOuterStart());
         }
 
         @Override

@@ -213,8 +213,6 @@ public final class TreeAdapter extends PowerAdapter {
 
     private void invalidateGroups() {
         mDirty = true;
-//        rebuildGroupsIfNecessary();
-//        applyExpandedState();
     }
 
     private void rebuildGroupsIfNecessary() {
@@ -404,7 +402,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final class Entry {
 
         @NonNull
-        private final DataObserver mDataObserver = new SimpleDataObserver() {
+        private final DataObserver mDataObserver = new DataObserver() {
             @Override
             public void onChanged() {
                 invalidateGroups();
@@ -424,6 +422,8 @@ public final class TreeAdapter extends PowerAdapter {
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
+                // Must obtain translated position BEFORE invalidating, because a removal notification indicates
+                // items that WERE present have been removed.
                 int outerPositionStart = childToOuter(positionStart);
                 invalidateGroups();
                 notifyItemRangeRemoved(outerPositionStart, itemCount);
