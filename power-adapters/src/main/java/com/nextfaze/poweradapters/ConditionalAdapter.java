@@ -68,7 +68,6 @@ final class ConditionalAdapter extends PowerAdapter {
     ConditionalAdapter(@NonNull PowerAdapter adapter, @NonNull Condition condition) {
         mAdapter = adapter;
         mCondition = condition;
-        updateVisible();
     }
 
     @Override
