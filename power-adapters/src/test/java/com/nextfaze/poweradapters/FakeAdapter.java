@@ -61,6 +61,10 @@ public class FakeAdapter extends PowerAdapter {
         notifyItemRangeInserted(positionStart, itemCount);
     }
 
+    public void append(int itemCount) {
+        insert(mItemCount, itemCount);
+    }
+
     public void remove(int positionStart, int itemCount) {
         if (positionStart + itemCount > mItemCount) {
             throw new IndexOutOfBoundsException();
@@ -83,7 +87,7 @@ public class FakeAdapter extends PowerAdapter {
 
     @Deprecated
     public void add(Object o) {
-        insert(mItemCount, 1);
+        append(1);
     }
 
     @Deprecated
