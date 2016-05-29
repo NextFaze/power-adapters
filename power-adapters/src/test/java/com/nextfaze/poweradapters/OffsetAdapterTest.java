@@ -11,7 +11,6 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.nextfaze.poweradapters.AdapterTestUtils.fakeIntAdapter;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -22,16 +21,16 @@ public class OffsetAdapterTest {
     public MockitoRule mMockito = MockitoJUnit.rule();
 
     @Mock
-    private DataObserver mDataObserver;
+    private DataObserver mObserver;
 
-    private FakeAdapter<Integer> mFakeAdapter;
+    private FakeAdapter mFakeAdapter;
     private OffsetAdapter mOffsetAdapter;
 
     @Before
     public void setUp() throws Exception {
-        mFakeAdapter = spy(fakeIntAdapter(10));
+        mFakeAdapter = spy(new FakeAdapter(10));
         mOffsetAdapter = new OffsetAdapter(mFakeAdapter, 5);
-        mOffsetAdapter.registerDataObserver(mDataObserver);
+        mOffsetAdapter.registerDataObserver(mObserver);
     }
 
     @Test
@@ -46,7 +45,7 @@ public class OffsetAdapterTest {
 
     @Test
     public void clippedContents() {
-        verifyExpectedOffsetState();
+        verifyUnchangedState();
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
@@ -65,76 +64,81 @@ public class OffsetAdapterTest {
     }
 
     @Test
-    public void outOfBoundsChangeDropped() {
-        mFakeAdapter.set(2, 1);
-        verifyZeroInteractions(mDataObserver);
+    public void changeOutOfBoundsDropped() {
+        mFakeAdapter.change(2, 1);
+        verifyZeroInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsChangeStateUnchanged() {
-        mFakeAdapter.set(4, 1);
-        verifyExpectedOffsetState();
+    public void changeOutOfBoundsStateUnchanged() {
+        mFakeAdapter.change(4, 1);
+        verifyUnchangedState();
     }
 
     @Test
-    public void outOfBoundsInsertDropped() {
-        mFakeAdapter.add(1, 9);
-        verifyZeroInteractions(mDataObserver);
+    public void changeBoundaryStraddlingIsClipped() {
+        mFakeAdapter.change(3, 3);
+        verify(mObserver).onItemRangeChanged(0, 1);
+        verifyRangeState(5, 5);
+        verifyNoMoreInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsInsertStateUnchanged() {
-        mFakeAdapter.add(1, 9);
-        verifyExpectedOffsetState();
+    public void insertOutOfBoundsDropped() {
+        mFakeAdapter.insert(1, 1);
+        verifyZeroInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsRemoveDropped() {
-        mFakeAdapter.remove(2);
-        verifyZeroInteractions(mDataObserver);
+    public void insertOutOfBoundsStateIsCorrect() {
+        mFakeAdapter.insert(1, 1);
+        verifyRangeState(5, 6);
     }
 
     @Test
-    public void outOfBoundsRemoveStateUnchanged() {
-        mFakeAdapter.remove(2);
-        verifyExpectedOffsetState();
-    }
-
-    @Test
-    public void outOfBoundsMoveDropped() {
-        // TODO: Check that a move that's entirely out of bounds results in no notification.
-        throw new UnsupportedOperationException();
-    }
-
-    @Test
-    public void boundaryStraddlingChangeClipped() {
-        mFakeAdapter.set(3, 0, 0, 0);
-        verify(mDataObserver).onItemRangeChanged(0, 1);
-        AdapterVerifier.verifySubAdapterAllGetCalls()
-                .checkRange(mFakeAdapter, 5, 5)
-                .verify(mOffsetAdapter);
-        verifyNoMoreInteractions(mDataObserver);
-    }
-
-    @Test
-    public void boundaryStraddlingInsertClipped() {
-        mFakeAdapter.add(3, 0, 0, 0);
+    public void insertBoundaryStraddlingIsClipped() {
+        mFakeAdapter.insert(3, 3);
         AdapterVerifier.verifySubAdapterAllGetCalls()
                 .checkRange(mFakeAdapter, 5, 8)
                 .verify(mOffsetAdapter);
-        verify(mDataObserver).onItemRangeInserted(0, 1);
-        verifyNoMoreInteractions(mDataObserver);
+        verify(mObserver).onItemRangeInserted(0, 1);
+        verifyNoMoreInteractions(mObserver);
     }
 
     @Test
-    public void boundaryStraddlingRemoveClipped() {
-        mFakeAdapter.clear();
-        assertThat(mOffsetAdapter.getItemCount()).isEqualTo(0);
-        verify(mDataObserver).onItemRangeRemoved(0, 5);
-        verifyNoMoreInteractions(mDataObserver);
+    public void removeOutOfBoundsDropped() {
+        mFakeAdapter.remove(2, 1);
+        verifyZeroInteractions(mObserver);
     }
 
-    private void verifyExpectedOffsetState() {
+    @Test
+    public void removeOutOfBoundsStateIsCorrect() {
+        mFakeAdapter.remove(2, 1);
+        verifyRangeState(5, 4);
+    }
+
+    @Test
+    public void removeAllStateIsEmpty() {
+        mFakeAdapter.clear();
+        assertThat(mOffsetAdapter.getItemCount()).isEqualTo(0);
+        verify(mObserver).onItemRangeRemoved(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void moveNotifies() {
+        mFakeAdapter.move(1, 3, 2);
+        verify(mObserver).onChanged();
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    private void verifyRangeState(int start, int count) {
+        AdapterVerifier.verifySubAdapterAllGetCalls()
+                .checkRange(mFakeAdapter, start, count)
+                .verify(mOffsetAdapter);
+    }
+
+    private void verifyUnchangedState() {
         AdapterVerifier.verifySubAdapterAllGetCalls()
                 .checkRange(mFakeAdapter, 5, 5)
                 .verify(mOffsetAdapter);

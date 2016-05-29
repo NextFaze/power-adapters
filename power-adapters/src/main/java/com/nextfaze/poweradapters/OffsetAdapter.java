@@ -38,7 +38,7 @@ final class OffsetAdapter extends PowerAdapterWrapper {
 
     @Override
     public int getItemCount() {
-        return super.getItemCount() - mOffset;
+        return max(0, super.getItemCount() - mOffset);
     }
 
     @Override
@@ -78,6 +78,7 @@ final class OffsetAdapter extends PowerAdapterWrapper {
     @Override
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
         // TODO: Fine-grained notifications.
+        // TODO: Drop notification entirely if out of range.
         notifyDataSetChanged();
     }
 }
