@@ -5,7 +5,7 @@ import lombok.NonNull;
 public interface Decorator {
 
     /** A decorator that simply returns the input {@link PowerAdapter}. */
-    Decorator NULL = new Decorator() {
+    Decorator IDENTITY = new Decorator() {
         @NonNull
         @Override
         public PowerAdapter decorate(@NonNull PowerAdapter adapter) {

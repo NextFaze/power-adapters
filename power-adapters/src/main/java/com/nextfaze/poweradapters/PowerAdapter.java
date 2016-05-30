@@ -337,14 +337,20 @@ public abstract class PowerAdapter {
 
     @CheckResult
     @NonNull
-    public final PowerAdapter prepend(@NonNull PowerAdapter adapter) {
-        return new ConcatAdapter(asList(adapter, this));
+    public final PowerAdapter prepend(@NonNull PowerAdapter... adapters) {
+        if (adapters.length == 0) {
+            return this;
+        }
+        return new ConcatAdapter.Builder().addAll(adapters).add(this).build();
     }
 
     @CheckResult
     @NonNull
-    public final PowerAdapter append(@NonNull PowerAdapter adapter) {
-        return new ConcatAdapter(asList(this, adapter));
+    public final PowerAdapter append(@NonNull PowerAdapter... adapters) {
+        if (adapters.length == 0) {
+            return this;
+        }
+        return new ConcatAdapter.Builder().add(this).addAll(adapters).build();
     }
 
     @CheckResult
@@ -378,17 +384,29 @@ public abstract class PowerAdapter {
 
     @CheckResult
     @NonNull
-    public static PowerAdapter concat(@NonNull PowerAdapter... powerAdapters) {
-        if (powerAdapters.length == 1) {
-            return powerAdapters[0];
+    public static PowerAdapter concat(@NonNull PowerAdapter... adapters) {
+        if (adapters.length == 0) {
+            return EMPTY;
         }
-        return new ConcatAdapter(asList(powerAdapters));
+        if (adapters.length == 1) {
+            return adapters[0];
+        }
+        return new ConcatAdapter.Builder().addAll(adapters).build();
     }
 
     @CheckResult
     @NonNull
-    public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> powerAdapters) {
-        return new ConcatAdapter(powerAdapters);
+    public static PowerAdapter concat(@NonNull Collection<? extends PowerAdapter> adapters) {
+        if (adapters.isEmpty()) {
+            return EMPTY;
+        }
+        return new ConcatAdapter.Builder().addAll(adapters).build();
+    }
+
+    @CheckResult
+    @NonNull
+    public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> adapters) {
+        return new ConcatAdapter.Builder().addAll(adapters).build();
     }
 
     @CheckResult
