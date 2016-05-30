@@ -11,23 +11,13 @@ public final class Conditions {
     }
 
     @NonNull
-    public static Condition isTrue(final boolean value) {
-        return new AbstractCondition() {
-            @Override
-            public boolean eval() {
-                return value;
-            }
-        };
+    public static Condition isTrue(boolean value) {
+        return new ConstantCondition(value);
     }
 
     @NonNull
-    public static Condition isFalse(final boolean value) {
-        return new AbstractCondition() {
-            @Override
-            public boolean eval() {
-                return !value;
-            }
-        };
+    public static Condition isFalse(boolean value) {
+        return new ConstantCondition(value);
     }
 
     @NonNull
