@@ -51,7 +51,7 @@ public final class LimitAdapterTest {
 
     @Test
     public void limitedContents() {
-        verifyLimitAdapterStateIsClipped();
+        verifyState(5);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
@@ -72,13 +72,14 @@ public final class LimitAdapterTest {
     @Test
     public void changeOutOfBounds() {
         mFakeAdapter.change(5, 1);
-        verifyLimitAdapterStateIsClipped();
+        verifyState(5);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void changeNormal() {
         mFakeAdapter.change(0, 3);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(0, 3);
         verifyNoMoreInteractions(mObserver);
     }
@@ -86,6 +87,7 @@ public final class LimitAdapterTest {
     @Test
     public void changeBoundaryStraddlingClipped() {
         mFakeAdapter.change(3, 3);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(3, 2);
         verifyNoMoreInteractions(mObserver);
     }
@@ -93,7 +95,7 @@ public final class LimitAdapterTest {
     @Test
     public void insertOutOfBounds() {
         mFakeAdapter.append(1);
-        verifyLimitAdapterStateIsClipped();
+        verifyState(5);
         verifyZeroInteractions(mObserver);
     }
 
@@ -263,9 +265,5 @@ public final class LimitAdapterTest {
         AdapterVerifier.verifySubAdapterAllGetCalls()
                 .checkRange(mFakeAdapter, 0, count)
                 .verify(mLimitAdapter);
-    }
-
-    private void verifyLimitAdapterStateIsClipped() {
-        verifyState(5);
     }
 }

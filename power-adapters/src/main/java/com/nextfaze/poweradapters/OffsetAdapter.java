@@ -61,17 +61,14 @@ final class OffsetAdapter extends PowerAdapterWrapper {
 
     @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
-        if (innerPositionStart + innerItemCount > mOffset) {
-            notifyItemRangeInserted(max(0, innerPositionStart - mOffset),
-                    min(innerItemCount, innerItemCount - mOffset + innerPositionStart));
-        }
+        notifyItemRangeInserted(max(0, innerPositionStart - mOffset), innerItemCount);
     }
 
     @Override
     protected void forwardItemRangeRemoved(int innerPositionStart, int innerItemCount) {
-        if (innerPositionStart + innerItemCount > mOffset) {
-            notifyItemRangeRemoved(max(0, innerPositionStart - mOffset),
-                    min(innerItemCount, innerItemCount - mOffset + innerPositionStart));
+        int removeCount = min(innerItemCount, super.getItemCount() + innerItemCount - mOffset);
+        if (removeCount > 0) {
+            notifyItemRangeRemoved(max(0, innerPositionStart - mOffset), removeCount);
         }
     }
 
