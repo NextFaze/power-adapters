@@ -31,9 +31,9 @@ public class OffsetAdapterTest {
         configure(5, 10);
     }
 
-    private void configure(int limit, int count) {
+    private void configure(int offset, int count) {
         mFakeAdapter = spy(new FakeAdapter(count));
-        mOffsetAdapter = new OffsetAdapter(mFakeAdapter, limit);
+        mOffsetAdapter = new OffsetAdapter(mFakeAdapter, offset);
         mOffsetAdapter.registerDataObserver(mObserver);
         verify(mFakeAdapter).onFirstObserverRegistered();
     }
@@ -200,9 +200,9 @@ public class OffsetAdapterTest {
     @Test
     public void removeBoundaryStraddling() {
         configure(5, 10);
-        mFakeAdapter.remove(3, 5);
-        assertEmpty();
-        verify(mObserver).onItemRangeRemoved(0, 5);
+        mFakeAdapter.remove(3, 4);
+        verifyState(5, 1);
+        verify(mObserver).onItemRangeRemoved(0, 4);
         verifyNoMoreInteractions(mObserver);
     }
 
