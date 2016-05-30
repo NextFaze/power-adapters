@@ -4,14 +4,12 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.view.View;
 import android.widget.Adapter;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /**
  * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Use {@link Condition}s
@@ -30,16 +28,6 @@ public final class LoadingAdapterBuilder implements Decorator {
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_ALWAYS;
 
     private boolean mEnabled;
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public LoadingAdapterBuilder view(@NonNull View view) {
-        return view(viewFactoryForView(view));
-    }
 
     @NonNull
     public LoadingAdapterBuilder resource(@LayoutRes int resource) {

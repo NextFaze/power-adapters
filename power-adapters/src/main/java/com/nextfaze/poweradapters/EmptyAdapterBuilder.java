@@ -4,13 +4,11 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.view.View;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Use {@link Condition}s instead. */
 @Deprecated
@@ -27,16 +25,6 @@ public final class EmptyAdapterBuilder implements Decorator {
     @NonNull
     public EmptyAdapterBuilder resource(@LayoutRes int resource) {
         return view(viewFactoryForResource(resource));
-    }
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public EmptyAdapterBuilder view(@NonNull View view) {
-        return view(viewFactoryForView(view));
     }
 
     @NonNull

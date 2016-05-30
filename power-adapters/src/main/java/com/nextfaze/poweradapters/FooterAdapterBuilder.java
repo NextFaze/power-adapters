@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.view.View;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import static com.nextfaze.poweradapters.Conditions.adapter;
 import static com.nextfaze.poweradapters.Conditions.and;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 @Deprecated
@@ -26,26 +24,6 @@ public final class FooterAdapterBuilder implements Decorator {
 
     @Nullable
     private Condition mCondition;
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public FooterAdapterBuilder addView(@NonNull View view) {
-        return addView(view, false);
-    }
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public FooterAdapterBuilder addView(@NonNull View view, boolean enabled) {
-        return addView(viewFactoryForView(view), enabled);
-    }
 
     @NonNull
     public FooterAdapterBuilder addResource(@LayoutRes int resource) {
