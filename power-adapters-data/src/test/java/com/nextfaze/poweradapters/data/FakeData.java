@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
+import static java.util.Arrays.asList;
+
 public class FakeData<T> extends AbstractData<T> implements List<T> {
 
     @NonNull
@@ -199,6 +201,39 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         }
     }
 
+    @SafeVarargs
+    public final void insert(int index, @NonNull T... items) {
+        if (items.length > 0) {
+            mData.addAll(index, asList(items));
+            if (mNotificationsEnabled) {
+                notifyItemRangeInserted(index, items.length);
+            }
+        }
+    }
+
+    @SafeVarargs
+    public final void change(int index, @NonNull T... items) {
+        if (items.length > 0) {
+            for (int i = 0; i < items.length; i++) {
+                mData.set(index + i, items[i]);
+            }
+            if (mNotificationsEnabled) {
+                notifyItemRangeChanged(index, items.length);
+            }
+        }
+    }
+
+    public final void remove(int index, int count) {
+        if (count > 0) {
+            for (int i = 0; i < count; i++) {
+                mData.remove(index);
+            }
+            if (mNotificationsEnabled) {
+                notifyItemRangeRemoved(index, count);
+            }
+        }
+    }
+
     public final void move(int fromPosition, int toPosition, int itemCount) {
         ArrayList<T> copy = new ArrayList<>();
         for (int i = 0; i < itemCount; i++) {
@@ -209,15 +244,6 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         }
         if (mNotificationsEnabled) {
             notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-        }
-    }
-
-    public final void remove(int index, int count) {
-        for (int i = 0; i < count; i++) {
-            mData.remove(index);
-        }
-        if (mNotificationsEnabled) {
-            notifyItemRangeRemoved(index, count);
         }
     }
 
