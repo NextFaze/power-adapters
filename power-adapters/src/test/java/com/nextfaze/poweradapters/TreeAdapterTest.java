@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.nextfaze.poweradapters.AdapterTestUtils.*;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.PowerAdapter.EMPTY;
 import static org.mockito.Mockito.*;
@@ -271,12 +272,7 @@ public final class TreeAdapterTest {
     public void rootBindViewDelegation() {
         mTreeAdapter.setAllExpanded(true);
         reset(mRootAdapter);
-        mTreeAdapter.bindView(mItemView, new Holder() {
-            @Override
-            public int getPosition() {
-                return 8;
-            }
-        });
+        mTreeAdapter.bindView(mItemView, holder(8));
         verify(mRootAdapter).bindView(eq(mItemView), argThat(holderWithPosition(2)));
         verifyNoMoreInteractions(mRootAdapter);
     }
@@ -440,25 +436,22 @@ public final class TreeAdapterTest {
     // TODO: After every type of root change, check that get*() calls map correctly.
 
     @Test
-    public void childNewViewDelegation() {
+    public void childNewViewDelegated() {
         mTreeAdapter.setAllExpanded(true);
         ViewType viewType = mTreeAdapter.getItemViewType(3);
-        PowerAdapter childAdapter = mChildAdapters.get(0);
         mTreeAdapter.newView(mParent, viewType);
-        verify(childAdapter).newView(mParent, viewType);
+        verify(mChildAdapters.get(0)).newView(mParent, viewType);
+        verifyNewViewNeverCalled(mChildAdapters.get(1));
+        verifyNewViewNeverCalled(mChildAdapters.get(2));
     }
 
     @Test
-    public void childBindViewDelegation() {
+    public void childBindViewDelegated() {
         mTreeAdapter.setAllExpanded(true);
-        mTreeAdapter.bindView(mItemView, new Holder() {
-            @Override
-            public int getPosition() {
-                return 10;
-            }
-        });
-        PowerAdapter childAdapter = mChildAdapters.get(2);
-        verify(childAdapter).bindView(eq(mItemView), argThat(holderWithPosition(1)));
+        mTreeAdapter.bindView(mItemView, holder(10));
+        verifyBindViewNeverCalled(mChildAdapters.get(0));
+        verifyBindViewNeverCalled(mChildAdapters.get(1));
+        verify(mChildAdapters.get(2)).bindView(eq(mItemView), argThat(holderWithPosition(1)));
     }
 
     @Test
