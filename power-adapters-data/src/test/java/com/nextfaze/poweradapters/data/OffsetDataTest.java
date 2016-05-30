@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
+import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,9 +11,7 @@ import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -22,96 +21,171 @@ public final class OffsetDataTest {
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
 
-    private FakeData<String> mData;
-    private Data<String> mOffsetData;
-
     @Mock
-    private DataObserver mDataObserver;
+    private DataObserver mObserver;
+
+    private FakeData<String> mFakeData;
+    private Data<String> mOffsetData;
 
     @Before
     public void setUp() throws Exception {
-        mData = new FakeData<>();
-        addAll(mData, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
-        mOffsetData = new OffsetData<>(mData, 5);
-        mOffsetData.registerDataObserver(mDataObserver);
+        configure(5, 10);
+    }
+
+    private void configure(int offset, int count) {
+        mFakeData = spy(new FakeData<String>());
+        for (int i = 0; i < count; i++) {
+            mFakeData.add(String.valueOf(i));
+        }
+        mOffsetData = new OffsetData<>(mFakeData, offset);
+        mOffsetData.registerDataObserver(mObserver);
+        verify(mFakeData).onFirstDataObserverRegistered();
     }
 
     @Test
     public void negativeOffsetClamped() {
-        assertThat(new OffsetData<>(mData, -10))
-                .containsExactly("a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12").inOrder();
+        configure(3, 5);
+        OffsetData<String> offsetData = new OffsetData<>(mFakeData, -10);
+        assertThat(offsetData.getOffset()).isEqualTo(0);
+        assertThat(offsetData).containsExactly("0", "1", "2", "3", "4").inOrder();
     }
 
     @Test
     public void reducedSize() {
-        assertThat(mOffsetData).hasSize(2);
+        assertThat(mOffsetData).hasSize(5);
     }
 
     @Test
     public void clippedContents() {
-        assertOffsetDataClippedContents();
+        assertContains("5", "6", "7", "8", "9");
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void getOutOfBoundsThrows() {
-        mOffsetData.get(3);
+        mOffsetData.get(6);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void getNegativeThrows() {
+        mOffsetData.get(-3);
     }
 
     @Test
-    public void outOfBoundsChangeDropped() {
-        mData.set(4, "foo");
-        assertOffsetDataClippedContents();
-        verifyZeroInteractions(mDataObserver);
+    public void changeOutOfBounds() {
+        mFakeData.set(4, "a");
+        assertContains("5", "6", "7", "8", "9");
+        verifyZeroInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsInsertDropped() {
-        mData.add(1, "foo");
-        assertThat(mOffsetData).containsExactly("klmno", "pqrstu", "vwxyz12").inOrder();
-        verifyZeroInteractions(mDataObserver);
+    public void changeWithinBounds() {
+        mFakeData.change(6, "a", "b", "c");
+        assertContains("5", "a", "b", "c", "9");
+        verify(mObserver).onItemRangeChanged(1, 3);
+        verifyNoMoreInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsRemoveDropped() {
-        mData.remove("def");
-        assertThat(mOffsetData).containsExactly("vwxyz12").inOrder();
-        verifyZeroInteractions(mDataObserver);
+    public void changeBoundaryStraddling() {
+        mFakeData.change(3, "a", "b", "c");
+        assertContains("c", "6", "7", "8", "9");
+        verify(mObserver).onItemRangeChanged(0, 1);
+        verifyNoMoreInteractions(mObserver);
     }
 
     @Test
-    public void outOfBoundsMoveDropped() {
-        // TODO: Check that a move that's entirely out of bounds results in no notification.
-        throw new UnsupportedOperationException();
+    public void insertOutOfBounds() {
+        mFakeData.insert(1, "a");
+        assertContains("4", "5", "6", "7", "8", "9");
+        verify(mObserver).onItemRangeInserted(0, 1);
+        verifyNoMoreInteractions(mObserver);
     }
 
     @Test
-    public void boundaryStraddlingChangeClipped() {
-        mData.setNotificationsEnabled(false);
-        for (int i = 0; i < 3; i++) {
-            mData.set(3, "x");
+    public void insertOutOfBounds2() {
+        mFakeData.insert(0, "a", "b", "c", "d", "e");
+        assertContains("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        verify(mObserver).onItemRangeInserted(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void insertBoundaryStraddling() {
+        mFakeData.insert(3, "a", "b", "c");
+        assertContains("c", "3", "4", "5", "6", "7", "8", "9");
+        verify(mObserver).onItemRangeInserted(0, 3);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void insertWithinBounds() {
+        mFakeData.insert(6, "a", "b", "c");
+        assertContains("5", "a", "b", "c", "6", "7", "8", "9");
+        verify(mObserver).onItemRangeInserted(1, 3);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void removeOutOfBounds() {
+        mFakeData.remove(2, 1);
+        assertContains("6", "7", "8", "9");
+        verify(mObserver).onItemRangeRemoved(0, 1);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void removeWithinBounds() {
+        mFakeData.remove(7, 2);
+        assertContains("5", "6", "9");
+        verify(mObserver).onItemRangeRemoved(2, 2);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void removeBoundaryStraddling() {
+        mFakeData.remove(3, 5);
+        assertEmpty();
+        verify(mObserver).onItemRangeRemoved(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void removeBoundaryStraddling2() {
+        mFakeData.remove(4, 3);
+        assertContains("8", "9");
+        verify(mObserver).onItemRangeRemoved(0, 3);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void removeAll() {
+        mFakeData.clear();
+        assertEmpty();
+        verify(mObserver).onItemRangeRemoved(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void moveNotifiesOfChange() {
+        mFakeData.move(1, 2, 1);
+        verify(mObserver).onChange();
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    private void assertContains(@NonNull String... contents) {
+        assertThat(mOffsetData).containsExactly((Object[]) contents).inOrder();
+    }
+
+    private void assertEmpty() {
+        assertContains();
+    }
+
+    @NonNull
+    private static String[] range(int count) {
+        String[] a = new String[count];
+        for (int i = 0; i < count; i++) {
+            a[i] = String.valueOf(i);
         }
-        mData.notifyItemRangeChanged(3, 3);
-        verify(mDataObserver).onItemRangeChanged(0, 1);
-        verifyNoMoreInteractions(mDataObserver);
-    }
-
-    @Test
-    public void boundaryStraddlingInsertClipped() {
-        mData.addAll(2, newArrayList("x", "y", "z", "w"));
-        assertThat(mOffsetData).containsExactly("w", "def", "ghij", "klmno", "pqrstu", "vwxyz12").inOrder();
-        verify(mDataObserver).onItemRangeInserted(0, 1);
-        verifyNoMoreInteractions(mDataObserver);
-    }
-
-    @Test
-    public void boundaryStraddlingRemoveClipped() {
-        mData.clear();
-        assertThat(mOffsetData).isEmpty();
-        verify(mDataObserver).onItemRangeRemoved(0, 2);
-        verifyNoMoreInteractions(mDataObserver);
-    }
-
-    private void assertOffsetDataClippedContents() {
-        assertThat(mOffsetData).containsExactly("pqrstu", "vwxyz12").inOrder();
+        return a;
     }
 }
