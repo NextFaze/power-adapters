@@ -1,6 +1,5 @@
-package com.nextfaze.poweradapters.data;
+package com.nextfaze.poweradapters;
 
-import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -12,102 +11,97 @@ import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.Arrays.asList;
-import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public final class LimitDataTest {
+public final class LimitAdapterTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
 
-    private FakeData<String> mData;
-    private Data<String> mLimitedData;
-
     @Mock
     private DataObserver mObserver;
 
+    private FakeAdapter mFakeAdapter;
+    private LimitAdapter mLimitAdapter;
+
     @Before
     public void setUp() throws Exception {
-        mData = new FakeData<>();
-        //noinspection SpellCheckingInspection
-        addAll(mData, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
-        mLimitedData = new LimitData<>(mData, 5);
-        mLimitedData.registerDataObserver(mObserver);
+        configure(5, 10);
     }
 
-    private void configure(int limit, @NonNull String... elements) {
-        mData = new FakeData<>();
-        addAll(mData, elements);
-        mLimitedData = new LimitData<>(mData, limit);
-        mLimitedData.registerDataObserver(mObserver);
+    private void configure(int limit, int count) {
+        mFakeAdapter = spy(new FakeAdapter(count));
+        mLimitAdapter = new LimitAdapter(mFakeAdapter, limit);
+        mLimitAdapter.registerDataObserver(mObserver);
+        verify(mFakeAdapter).onFirstObserverRegistered();
     }
 
     @Test
     public void negativeLimitClamped() {
-        assertThat(new LimitData<>(mData, -50)).containsExactly().inOrder();
+        assertThat(new LimitAdapter(mFakeAdapter, -50).getLimit()).isEqualTo(0);
     }
 
     @Test
     public void limitedSize() {
-        assertThat(mLimitedData).hasSize(5);
+        assertThat(mLimitAdapter.getItemCount()).isEqualTo(5);
     }
 
     @Test
     public void limitedContents() {
-        verifyLimitDataContentsIsClipped();
+        verifyLimitAdapterStateIsClipped();
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void getOutOfBoundsThrows() {
-        mLimitedData.get(7);
+    public void getItemViewTypeOutOfBoundsThrows() {
+        mLimitAdapter.getItemViewType(7);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void getItemIdOutOfBoundsThrows() {
+        mLimitAdapter.getItemId(5);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void isEnabledOutOfBoundsThrows() {
+        mLimitAdapter.isEnabled(6);
     }
 
     @Test
     public void changeOutOfBounds() {
-        mData.set(5, "foo");
-        verifyLimitDataContentsIsClipped();
+        mFakeAdapter.change(5, 1);
+        verifyLimitAdapterStateIsClipped();
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void changeNormal() {
-        mData.setNotificationsEnabled(false);
-        for (int i = 0; i < 3; i++) {
-            mData.set(0, "y");
-        }
-        mData.notifyItemRangeChanged(0, 3);
+        mFakeAdapter.change(0, 3);
         verify(mObserver).onItemRangeChanged(0, 3);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void changeBoundaryStraddlingClipped() {
-        mData.setNotificationsEnabled(false);
-        for (int i = 0; i < 3; i++) {
-            mData.set(3, "x");
-        }
-        mData.notifyItemRangeChanged(3, 3);
+        mFakeAdapter.change(3, 3);
         verify(mObserver).onItemRangeChanged(3, 2);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void insertOutOfBounds() {
-        mData.add("foo");
-        verifyLimitDataContentsIsClipped();
+        mFakeAdapter.append(1);
+        verifyLimitAdapterStateIsClipped();
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void insertBoundaryStraddling() {
-        configure(5, "0", "1", "2");
-        mData.addAll(1, newArrayList("x", "y", "z"));
-        assertThat(mLimitedData).containsExactly("0", "x", "y", "z", "1").inOrder();
+        configure(5, 3);
+        mFakeAdapter.insert(1, 3);
+        verifyState(5);
         verify(mObserver).onItemRangeRemoved(2, 1);
         verify(mObserver).onItemRangeInserted(1, 3);
         verifyNoMoreInteractions(mObserver);
@@ -115,27 +109,27 @@ public final class LimitDataTest {
 
     @Test
     public void insertBoundaryStraddling2() {
-        configure(5, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-        mData.addAll(0, newArrayList("x", "y", "z", "w"));
-        assertThat(mLimitedData).containsExactly("x", "y", "z", "w", "0").inOrder();
+        configure(5, 10);
+        mFakeAdapter.insert(0, 4);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(0, 5);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void insertBoundaryStraddling3() {
-        configure(5, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-        mData.addAll(4, newArrayList("x", "y"));
-        assertThat(mLimitedData).containsExactly("0", "1", "2", "3", "x").inOrder();
+        configure(5, 10);
+        mFakeAdapter.insert(4, 2);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(4, 1);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void insertBoundaryStraddlingNonEmptyInitially() {
-        configure(3, "a");
-        mData.addAll(0, asList("1", "2", "3", "4", "5", "6"));
-        assertThat(mLimitedData).containsExactly("1", "2", "3").inOrder();
+        configure(3, 1);
+        mFakeAdapter.insert(0, 6);
+        verifyState(3);
         verify(mObserver).onItemRangeRemoved(0, 1);
         verify(mObserver).onItemRangeInserted(0, 3);
         verifyNoMoreInteractions(mObserver);
@@ -143,9 +137,9 @@ public final class LimitDataTest {
 
     @Test
     public void insertBoundaryStraddlingNonEmptyInitially2() {
-        configure(4, "a", "b");
-        mData.addAll(1, asList("1", "2", "3", "4", "5", "6"));
-        assertThat(mLimitedData).containsExactly("a", "1", "2", "3").inOrder();
+        configure(4, 2);
+        mFakeAdapter.insert(1, 6);
+        verifyState(4);
         verify(mObserver).onItemRangeRemoved(1, 1);
         verify(mObserver).onItemRangeInserted(1, 3);
         verifyNoMoreInteractions(mObserver);
@@ -153,9 +147,9 @@ public final class LimitDataTest {
 
     @Test
     public void insertBoundaryStraddlingNonEmptyInitially3() {
-        configure(7, "a", "b", "c", "d", "e", "f");
-        mData.addAll(3, asList("1", "2", "3", "4", "5", "6"));
-        assertThat(mLimitedData).containsExactly("a", "b", "c", "1", "2", "3", "4").inOrder();
+        configure(7, 6);
+        mFakeAdapter.insert(3, 6);
+        verifyState(7);
         verify(mObserver).onItemRangeRemoved(3, 3);
         verify(mObserver).onItemRangeInserted(3, 4);
         verifyNoMoreInteractions(mObserver);
@@ -163,52 +157,52 @@ public final class LimitDataTest {
 
     @Test
     public void insertFullRangeFromStart() {
-        configure(5, "0", "1", "2", "3", "4");
-        mData.addAll(0, newArrayList("a", "b", "c", "d", "e"));
-        assertThat(mLimitedData).containsExactly("a", "b", "c", "d", "e").inOrder();
+        configure(5, 5);
+        mFakeAdapter.insert(0, 5);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(0, 5);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void insertAppend() {
-        configure(5, "a", "b");
-        mData.addAll(newArrayList("c", "d"));
-        assertThat(mLimitedData).containsExactly("a", "b", "c", "d").inOrder();
+        configure(5, 2);
+        mFakeAdapter.append(2);
+        verifyState(4);
         verify(mObserver).onItemRangeInserted(2, 2);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void insertFromEmpty() {
-        configure(5);
-        mData.addAll(newArrayList("x", "y"));
-        assertThat(mLimitedData).containsExactly("x", "y").inOrder();
+        configure(5, 0);
+        mFakeAdapter.append(2);
+        verifyState(2);
         verify(mObserver).onItemRangeInserted(0, 2);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void removeOutOfBoundsDropped() {
-        mData.remove("pqrstu");
-        verifyLimitDataContentsIsClipped();
+        mFakeAdapter.remove(5, 1);
+        verifyState(5);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
-    public void removeAllClipped() {
-        configure(5, "0", "1", "2", "3", "4", "5", "6", "7");
-        mData.clear();
-        assertThat(mLimitedData).isEmpty();
+    public void removeAll() {
+        configure(5, 8);
+        mFakeAdapter.clear();
+        assertThat(mLimitAdapter.getItemCount()).isEqualTo(0);
         verify(mObserver).onItemRangeRemoved(0, 5);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void removeBoundaryStraddlingBrokenIntoRemoveAndInsert() {
-        configure(5, "0", "1", "2", "3", "4", "6", "7", "8", "9");
-        mData.remove(2, 5);
-        assertThat(mLimitedData).containsExactly("0", "1", "8", "9").inOrder();
+        configure(5, 9);
+        mFakeAdapter.remove(2, 5);
+        verifyState(4);
         verify(mObserver).onItemRangeRemoved(2, 3);
         verify(mObserver).onItemRangeInserted(2, 2);
         verifyNoMoreInteractions(mObserver);
@@ -216,9 +210,9 @@ public final class LimitDataTest {
 
     @Test
     public void removeBoundaryStraddlingBrokenIntoRemoveAndInsert2() {
-        configure(5, "0", "1", "2", "3", "4", "6", "7", "8", "9");
-        mData.remove(1, 5);
-        assertThat(mLimitedData).containsExactly("0", "7", "8", "9").inOrder();
+        configure(5, 9);
+        mFakeAdapter.remove(1, 5);
+        verifyState(4);
         verify(mObserver).onItemRangeRemoved(1, 4);
         verify(mObserver).onItemRangeInserted(1, 3);
         verifyNoMoreInteractions(mObserver);
@@ -226,27 +220,27 @@ public final class LimitDataTest {
 
     @Test
     public void removeFirstTwoFromLargeInnerRangeOnlyIssuesChange() {
-        configure(5, "0", "1", "2", "3", "4", "6", "7", "8", "9");
-        mData.remove(0, 2);
-        assertThat(mLimitedData).containsExactly("2", "3", "4", "6", "7").inOrder();
+        configure(5, 10);
+        mFakeAdapter.remove(0, 2);
+        verifyState(5);
         verify(mObserver).onItemRangeChanged(0, 5);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void removeSingleFromEnd() {
-        configure(5, "0", "1", "2", "3", "4");
-        mData.remove(4, 1);
-        assertThat(mLimitedData).containsExactly("0", "1", "2", "3").inOrder();
+        configure(5, 5);
+        mFakeAdapter.remove(4, 1);
+        verifyState(4);
         verify(mObserver).onItemRangeRemoved(4, 1);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void removeSingleFromMiddle() {
-        configure(5, "0", "1", "2", "3", "4");
-        mData.remove(2, 1);
-        assertThat(mLimitedData).containsExactly("0", "1", "3", "4").inOrder();
+        configure(5, 5);
+        mFakeAdapter.remove(2, 1);
+        verifyState(4);
         verify(mObserver).onItemRangeRemoved(2, 1);
         verifyNoMoreInteractions(mObserver);
     }
@@ -258,7 +252,20 @@ public final class LimitDataTest {
         throw new UnsupportedOperationException();
     }
 
-    private void verifyLimitDataContentsIsClipped() {
-        assertThat(mLimitedData).containsExactly("a", "bc", "def", "ghij", "klmno").inOrder();
+    @Test
+    public void moveNotifiesOfChange() {
+        mFakeAdapter.move(0, 1, 1);
+        verify(mObserver).onChanged();
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    private void verifyState(int count) {
+        AdapterVerifier.verifySubAdapterAllGetCalls()
+                .checkRange(mFakeAdapter, 0, count)
+                .verify(mLimitAdapter);
+    }
+
+    private void verifyLimitAdapterStateIsClipped() {
+        verifyState(5);
     }
 }

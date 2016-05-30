@@ -85,26 +85,6 @@ public class FakeAdapter extends PowerAdapter {
         remove(0, mItemCount);
     }
 
-    @Deprecated
-    public void add(Object o) {
-        append(1);
-    }
-
-    @Deprecated
-    public void add(int index, Object o) {
-        insert(index, 1);
-    }
-
-    @Deprecated
-    public void remove(int index) {
-        remove(index, 1);
-    }
-
-    @Deprecated
-    public void set(int index, Object o) {
-        change(index, 1);
-    }
-
     private void assertWithinRange(int position) {
         if (position >= mItemCount) {
             throw new IndexOutOfBoundsException();
