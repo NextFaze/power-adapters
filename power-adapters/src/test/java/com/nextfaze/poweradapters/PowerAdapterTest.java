@@ -52,6 +52,8 @@ public final class PowerAdapterTest {
         DataObserver observer2 = mock(DataObserver.class);
         mAdapter.registerDataObserver(observer);
         mAdapter.registerDataObserver(observer2);
+        verify(mAdapter).registerDataObserver(observer);
+        verify(mAdapter).registerDataObserver(observer2);
         verify(mAdapter).onFirstObserverRegistered();
         verifyNoMoreInteractions(mAdapter);
     }
