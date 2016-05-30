@@ -3,14 +3,16 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.UiThread;
 import lombok.NonNull;
 
+import java.util.ArrayList;
+
 public abstract class AbstractCondition implements Condition {
 
     @NonNull
-    private final Observable mObservable = new Observable();
+    private final ArrayList<Observer> mObservers = new ArrayList<>();
 
     /** Returns the number of registered observers. */
     protected final int getObserverCount() {
-        return mObservable.size();
+        return mObservers.size();
     }
 
     /** Called when the first observer has registered with this condition. */
@@ -25,29 +27,30 @@ public abstract class AbstractCondition implements Condition {
 
     /** Notify observers that the condition has changed. */
     protected final void notifyChanged() {
-        mObservable.notifyChanged();
+        for (int i = mObservers.size() - 1; i >= 0; i--) {
+            mObservers.get(i).onChanged();
+        }
     }
 
     @Override
     public final void registerObserver(@NonNull Observer observer) {
-        boolean firstAdded;
-        synchronized (mObservable) {
-            mObservable.registerObserver(observer);
-            firstAdded = mObservable.size() == 1;
+        if (mObservers.contains(observer)) {
+            throw new IllegalStateException("Observer is already registered.");
         }
-        if (firstAdded) {
+        mObservers.add(observer);
+        if (mObservers.size() == 1) {
             onFirstObserverRegistered();
         }
     }
 
     @Override
     public final void unregisterObserver(@NonNull Observer observer) {
-        boolean lastRemoved;
-        synchronized (mObservable) {
-            mObservable.unregisterObserver(observer);
-            lastRemoved = mObservable.size() == 0;
+        int index = mObservers.indexOf(observer);
+        if (index == -1) {
+            throw new IllegalStateException("Observer was not registered.");
         }
-        if (lastRemoved) {
+        mObservers.remove(index);
+        if (mObservers.size() == 0) {
             onLastObserverUnregistered();
         }
     }
