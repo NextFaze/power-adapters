@@ -349,7 +349,30 @@ public abstract class PowerAdapter {
 
     @CheckResult
     @NonNull
+    public final PowerAdapter offset(int offset) {
+        if (offset <= 0) {
+            return this;
+        }
+        return new OffsetAdapter(this, offset);
+    }
+
+    @CheckResult
+    @NonNull
+    public final PowerAdapter limit(int limit) {
+        if (limit == Integer.MAX_VALUE) {
+            return this;
+        }
+        return new LimitAdapter(this, limit);
+    }
+
+    @CheckResult
+    @NonNull
     public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
+        if (condition == Conditions.always()) {
+            return this;
+        } else if (condition == Conditions.never()) {
+            return EMPTY;
+        }
         return new ConditionalAdapter(this, condition);
     }
 
