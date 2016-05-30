@@ -52,9 +52,10 @@ public final class TreeAdapter extends PowerAdapter {
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            // TODO: Fine-grained notifications.
             // TODO: Item count should include children of all expanded root items.
             invalidateGroups();
-            notifyItemRangeMoved(rootToOuter(fromPosition), rootToOuter(toPosition), itemCount);
+            notifyDataSetChanged();
         }
     };
 
@@ -431,8 +432,10 @@ public final class TreeAdapter extends PowerAdapter {
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                // TODO: Fine-grained notifications.
+                // TODO: Item count should include children of all expanded root items.
                 invalidateGroups();
-                notifyItemRangeMoved(childToOuter(fromPosition), childToOuter(toPosition), itemCount);
+                notifyDataSetChanged();
             }
         };
 
