@@ -166,26 +166,25 @@ public abstract class PowerAdapter {
 
     /**
      * Notify any registered observers that the data set has changed.
-     *
+     * <p>
      * <p>There are two different classes of data change events, item changes and structural
      * changes. Item changes are when a single item has its data updated but no positional
      * changes have occurred. Structural changes are when items are inserted, removed or moved
      * within the data set.</p>
-     *
+     * <p>
      * <p>This event does not specify what about the data set has changed, forcing
      * any observers to assume that all existing items and structure may no longer be valid.
      * LayoutManagers will be forced to fully rebind and relayout all visible views.</p>
-     *
+     * <p>
      * <p><code>RecyclerView</code> will attempt to synthesize visible structural change events
      * for adapters that report that they have {@link #hasStableIds() stable IDs} when
      * this method is used. This can help for the purposes of animation and visual
      * object persistence but individual item views will still need to be rebound
      * and relaid out.</p>
-     *
+     * <p>
      * <p>If you are writing an adapter it will always be more efficient to use the more
      * specific change events if you can. Rely on <code>notifyDataSetChanged()</code>
      * as a last resort.</p>
-     *
      * @see #notifyItemChanged(int)
      * @see #notifyItemInserted(int)
      * @see #notifyItemRemoved(int)
@@ -201,13 +200,11 @@ public abstract class PowerAdapter {
 
     /**
      * Notify any registered observers that the item at <code>position</code> has changed.
-     *
+     * <p>
      * <p>This is an item change event, not a structural change event. It indicates that any
      * reflection of the data at <code>position</code> is out of date and should be updated.
      * The item at <code>position</code> retains the same identity.</p>
-     *
      * @param position Position of the item that has changed
-     *
      * @see #notifyItemRangeChanged(int, int)
      */
     protected final void notifyItemChanged(int position) {
@@ -217,19 +214,21 @@ public abstract class PowerAdapter {
     /**
      * Notify any registered observers that the <code>itemCount</code> items starting at
      * position <code>positionStart</code> have changed.
-     *
+     * <p>
      * <p>This is an item change event, not a structural change event. It indicates that
      * any reflection of the data in the given position range is out of date and should
      * be updated. The items in the given range retain the same identity.</p>
-     *
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
      * @param positionStart Position of the first item that has changed
      * @param itemCount Number of items that have changed
-     *
      * @see #notifyItemChanged(int)
      */
     protected final void notifyItemRangeChanged(int positionStart, int itemCount) {
-        for (int i = mObservers.size() - 1; i >= 0; i--) {
-            mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
+        if (itemCount > 0) {
+            for (int i = mObservers.size() - 1; i >= 0; i--) {
+                mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
+            }
         }
     }
 
@@ -237,13 +236,11 @@ public abstract class PowerAdapter {
      * Notify any registered observers that the item reflected at <code>position</code>
      * has been newly inserted. The item previously at <code>position</code> is now at
      * position <code>position + 1</code>.
-     *
+     * <p>
      * <p>This is a structural change event. Representations of other existing items in the
      * data set are still considered up to date and will not be rebound, though their
      * positions may be altered.</p>
-     *
      * @param position Position of the newly inserted item in the data set
-     *
      * @see #notifyItemRangeInserted(int, int)
      */
     protected final void notifyItemInserted(int position) {
@@ -255,30 +252,31 @@ public abstract class PowerAdapter {
      * items starting at <code>positionStart</code> have been newly inserted. The items
      * previously located at <code>positionStart</code> and beyond can now be found starting
      * at position <code>positionStart + itemCount</code>.
-     *
+     * <p>
      * <p>This is a structural change event. Representations of other existing items in the
      * data set are still considered up to date and will not be rebound, though their positions
      * may be altered.</p>
-     *
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
      * @param positionStart Position of the first item that was inserted
      * @param itemCount Number of items inserted
-     *
      * @see #notifyItemInserted(int)
      */
     protected final void notifyItemRangeInserted(int positionStart, int itemCount) {
-        for (int i = mObservers.size() - 1; i >= 0; i--) {
-            mObservers.get(i).onItemRangeInserted(positionStart, itemCount);
+        if (itemCount > 0) {
+            for (int i = mObservers.size() - 1; i >= 0; i--) {
+                mObservers.get(i).onItemRangeInserted(positionStart, itemCount);
+            }
         }
     }
 
     /**
      * Notify any registered observers that the item reflected at <code>fromPosition</code>
      * has been moved to <code>toPosition</code>.
-     *
+     * <p>
      * <p>This is a structural change event. Representations of other existing items in the
      * data set are still considered up to date and will not be rebound, though their
      * positions may be altered.</p>
-     *
      * @param fromPosition Previous position of the item.
      * @param toPosition New position of the item.
      */
@@ -287,8 +285,10 @@ public abstract class PowerAdapter {
     }
 
     protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-        for (int i = mObservers.size() - 1; i >= 0; i--) {
-            mObservers.get(i).onItemRangeMoved(fromPosition, toPosition, itemCount);
+        if (itemCount > 0) {
+            for (int i = mObservers.size() - 1; i >= 0; i--) {
+                mObservers.get(i).onItemRangeMoved(fromPosition, toPosition, itemCount);
+            }
         }
     }
 
@@ -296,13 +296,11 @@ public abstract class PowerAdapter {
      * Notify any registered observers that the item previously located at <code>position</code>
      * has been removed from the data set. The items previously located at and after
      * <code>position</code> may now be found at <code>oldPosition - 1</code>.
-     *
+     * <p>
      * <p>This is a structural change event. Representations of other existing items in the
      * data set are still considered up to date and will not be rebound, though their positions
      * may be altered.</p>
-     *
      * @param position Position of the item that has now been removed
-     *
      * @see #notifyItemRangeRemoved(int, int)
      */
     protected final void notifyItemRemoved(int position) {
@@ -314,17 +312,20 @@ public abstract class PowerAdapter {
      * located at <code>positionStart</code> have been removed from the data set. The items
      * previously located at and after <code>positionStart + itemCount</code> may now be found
      * at <code>oldPosition - itemCount</code>.
-     *
+     * <p>
      * <p>This is a structural change event. Representations of other existing items in the data
      * set are still considered up to date and will not be rebound, though their positions
      * may be altered.</p>
-     *
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
      * @param positionStart Previous position of the first item that was removed
      * @param itemCount Number of items removed from the data set
      */
     protected final void notifyItemRangeRemoved(int positionStart, int itemCount) {
-        for (int i = mObservers.size() - 1; i >= 0; i--) {
-            mObservers.get(i).onItemRangeRemoved(positionStart, itemCount);
+        if (itemCount > 0) {
+            for (int i = mObservers.size() - 1; i >= 0; i--) {
+                mObservers.get(i).onItemRangeRemoved(positionStart, itemCount);
+            }
         }
     }
 
