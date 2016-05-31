@@ -35,7 +35,8 @@ import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
-import static com.nextfaze.poweradapters.data.DataConditions.*;
+import static com.nextfaze.poweradapters.data.DataConditions.data;
+import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public class ConcatFragment extends BaseFragment {
@@ -96,8 +97,7 @@ public class ConcatFragment extends BaseFragment {
                 .prepend(asAdapter(R.layout.news_header_item));
 
         // Loading indicator
-        adapter = adapter
-                .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(isLoading(data)));
+        adapter = adapter.compose(appendLoadingIndicator(data));
 
         data.setLookAheadRowCount(-1);
 

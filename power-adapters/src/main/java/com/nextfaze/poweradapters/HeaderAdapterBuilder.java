@@ -14,7 +14,7 @@ import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
 @Deprecated
-public final class HeaderAdapterBuilder implements Decorator {
+public final class HeaderAdapterBuilder implements PowerAdapter.Transformer {
 
     @NonNull
     private final ArrayList<Item> mItems = new ArrayList<>();
@@ -73,7 +73,7 @@ public final class HeaderAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 

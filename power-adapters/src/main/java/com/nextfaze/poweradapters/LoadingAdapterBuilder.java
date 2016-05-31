@@ -16,7 +16,7 @@ import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
  * instead.
  */
 @Deprecated
-public final class LoadingAdapterBuilder implements Decorator {
+public final class LoadingAdapterBuilder implements PowerAdapter.Transformer {
 
     @Nullable
     private Delegate mDelegate;
@@ -81,7 +81,7 @@ public final class LoadingAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 

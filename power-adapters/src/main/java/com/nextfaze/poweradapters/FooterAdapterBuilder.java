@@ -14,7 +14,7 @@ import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
 @Deprecated
-public final class FooterAdapterBuilder implements Decorator {
+public final class FooterAdapterBuilder implements PowerAdapter.Transformer {
 
     @NonNull
     private final ArrayList<Item> mItems = new ArrayList<>();
@@ -73,7 +73,7 @@ public final class FooterAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 

@@ -7,7 +7,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
-import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
@@ -20,7 +19,10 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.Conditions.not;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
+import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
 
 public final class MultipleBindingsFragment extends BaseFragment {
 
@@ -60,17 +62,12 @@ public final class MultipleBindingsFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
-        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        adapter = new HeaderAdapterBuilder()
-                .addResource(R.layout.news_header_item)
-                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.HIDE)
-                .build(adapter);
-        adapter = new DividerAdapterBuilder()
-                .innerResource(R.layout.list_divider_item)
-                .outerResource(R.layout.list_divider_item)
-                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
-                .build(adapter);
-        return adapter;
+        return new DataBindingAdapter(data, mMapper)
+                .prepend(asAdapter(R.layout.news_header_item).showOnlyWhile(not(isEmpty(data))))
+                .compose(new DividerAdapterBuilder()
+                        .innerResource(R.layout.list_divider_item)
+                        .outerResource(R.layout.list_divider_item)
+                        .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING));
     }
 
     @Override

@@ -329,11 +329,11 @@ public abstract class PowerAdapter {
         }
     }
 
-    /** Wraps this adapter using the specified decorator, and returns the result. */
+    /** Applies the specified {@link Transformer} to this adapter, and returns the result. */
     @CheckResult
     @NonNull
-    public final PowerAdapter decorate(@NonNull Decorator decorator) {
-        return decorator.decorate(this);
+    public final PowerAdapter compose(@NonNull Transformer transformer) {
+        return transformer.transform(this);
     }
 
     @CheckResult
@@ -440,5 +440,10 @@ public abstract class PowerAdapter {
     @NonNull
     public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
         return new ItemAdapter(toItems(resources));
+    }
+
+    public interface Transformer {
+        @NonNull
+        PowerAdapter transform(@NonNull PowerAdapter adapter);
     }
 }

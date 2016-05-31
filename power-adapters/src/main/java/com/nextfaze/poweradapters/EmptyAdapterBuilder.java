@@ -12,7 +12,7 @@ import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Use {@link Condition}s instead. */
 @Deprecated
-public final class EmptyAdapterBuilder implements Decorator {
+public final class EmptyAdapterBuilder implements PowerAdapter.Transformer {
 
     @Nullable
     private Item mItem;
@@ -66,7 +66,7 @@ public final class EmptyAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 

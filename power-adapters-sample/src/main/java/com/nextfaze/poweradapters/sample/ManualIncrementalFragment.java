@@ -5,13 +5,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import butterknife.Bind;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
@@ -38,11 +36,8 @@ public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
-        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .build(adapter, new DataLoadingDelegate(data));
+        PowerAdapter adapter = new DataBindingAdapter(data, mMapper).compose(appendLoadingIndicator(data));
+        // TODO: Replace LoadNextAdapter with showOnlyWhile()
         // "Load next" adapter lets user click the button to load next increment of results.
         LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, asViewFactory(R.layout.list_load_next_item));
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {

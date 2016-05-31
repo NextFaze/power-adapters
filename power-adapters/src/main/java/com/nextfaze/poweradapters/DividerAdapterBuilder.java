@@ -9,7 +9,7 @@ import lombok.NonNull;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Inserts {@link View}-based dividers between items. */
-public final class DividerAdapterBuilder implements Decorator {
+public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
 
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_LEADING;
@@ -107,7 +107,7 @@ public final class DividerAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 

@@ -6,13 +6,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ListView;
 import butterknife.Bind;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
@@ -33,13 +31,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createAutoIncrementalAdapter(@NonNull Data<?> data) {
-        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .emptyPolicy(LoadingAdapterBuilder.EmptyPolicy.SHOW_ONLY_IF_NON_EMPTY)
-                .build(adapter, new DataLoadingDelegate(data));
-        return adapter;
+        return new DataBindingAdapter(data, mMapper).compose(appendLoadingIndicator(data));
     }
 
     @Bind(R.id.data_layout)

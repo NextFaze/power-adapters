@@ -17,12 +17,17 @@ import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.Predicate;
+import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.data.DataConditions.data;
 
 abstract class BaseFragment extends Fragment {
 
@@ -145,6 +150,22 @@ abstract class BaseFragment extends Fragment {
     }
 
     void onInvalidateClick() {
+    }
+
+    @NonNull
+    PowerAdapter.Transformer appendLoadingIndicator(@NonNull final Data<?> data) {
+        return new PowerAdapter.Transformer() {
+            @NonNull
+            @Override
+            public PowerAdapter transform(@NonNull PowerAdapter adapter) {
+                return adapter.append(asAdapter(R.layout.list_loading_item).showOnlyWhile(data(data, new Predicate<Data<?>>() {
+                    @Override
+                    public boolean apply(Data<?> data) {
+                        return data.isLoading() && !data.isEmpty();
+                    }
+                })));
+            }
+        };
     }
 
     enum CollectionView {
