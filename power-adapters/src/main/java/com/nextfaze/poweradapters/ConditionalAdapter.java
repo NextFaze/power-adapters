@@ -11,37 +11,27 @@ final class ConditionalAdapter extends PowerAdapter {
     private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChanged() {
-            if (updateVisible()) {
-                notifyDataSetChanged();
-            }
+            notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            if (updateVisible()) {
-                notifyItemRangeChanged(positionStart, itemCount);
-            }
+            notifyItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            if (updateVisible()) {
-                notifyItemRangeInserted(positionStart, itemCount);
-            }
+            notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            if (updateVisible()) {
-                notifyItemRangeRemoved(positionStart, itemCount);
-            }
+            notifyItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            if (updateVisible()) {
-                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-            }
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
 
@@ -132,8 +122,7 @@ final class ConditionalAdapter extends PowerAdapter {
         updateConditionObserver();
     }
 
-    /** Returns if a notification should be forwarded. */
-    private boolean updateVisible() {
+    private void updateVisible() {
         boolean visible = mCondition.eval();
         if (visible != mVisible) {
             int removeCount = mVisible ? mAdapter.getItemCount() : 0;
@@ -146,9 +135,7 @@ final class ConditionalAdapter extends PowerAdapter {
             if (insertCount > 0) {
                 notifyItemRangeInserted(0, insertCount);
             }
-            return false;
         }
-        return mVisible;
     }
 
     private void updateDataObserver() {
@@ -179,5 +166,4 @@ final class ConditionalAdapter extends PowerAdapter {
             }
         }
     }
-
 }
