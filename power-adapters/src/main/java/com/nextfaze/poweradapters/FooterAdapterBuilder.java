@@ -8,7 +8,6 @@ import lombok.NonNull;
 import java.util.ArrayList;
 
 import static com.nextfaze.poweradapters.Condition.adapter;
-import static com.nextfaze.poweradapters.Condition.and;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
@@ -66,7 +65,7 @@ public final class FooterAdapterBuilder implements PowerAdapter.Transformer {
         }
         Condition condition = mEmptyPolicy.asCondition(adapter);
         if (mCondition != null) {
-            condition = and(condition, mCondition);
+            condition = condition.and(mCondition);
         }
         return adapter.append(asAdapter(mItems).showOnlyWhile(condition));
     }

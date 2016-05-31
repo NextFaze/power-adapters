@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -26,8 +27,9 @@ import lombok.NonNull;
 import static android.os.Looper.getMainLooper;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.data.DataConditions.data;
+import static com.nextfaze.poweradapters.data.DataConditions.*;
 
 abstract class BaseFragment extends Fragment {
 
@@ -164,6 +166,17 @@ abstract class BaseFragment extends Fragment {
                         return data.isLoading() && !data.isEmpty();
                     }
                 })));
+            }
+        };
+    }
+
+    @NonNull
+    PowerAdapter.Transformer appendEmptyMessage(@NonNull final Data<?> data, @LayoutRes final int layoutResource) {
+        return new PowerAdapter.Transformer() {
+            @NonNull
+            @Override
+            public PowerAdapter transform(@NonNull PowerAdapter adapter) {
+                return adapter.append(asAdapter(layoutResource).showOnlyWhile(isEmpty(data).and(not(isLoading(data)))));
             }
         };
     }
