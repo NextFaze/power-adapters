@@ -46,6 +46,21 @@ public final class PowerAdapterTest {
         verifyZeroInteractions(observer);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void doubleRegistrationThrows() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.registerDataObserver(observer);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void doubleUnregistrationThrows() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.unregisterDataObserver(observer);
+        mAdapter.unregisterDataObserver(observer);
+    }
+
     @Test
     public void firstObserverRegisteredWasInvokedForFirstObserverOnly() {
         DataObserver observer = mock(DataObserver.class);
@@ -69,5 +84,80 @@ public final class PowerAdapterTest {
         verify(mAdapter).onLastObserverUnregistered();
     }
 
-    // TODO: Each observer notify callback.
+    @Test
+    public void notifyDataSetChangedInvokesObservers() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyDataSetChanged();
+        verify(observer).onChanged();
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void notifyChangeInvokesObservers() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeChanged(3, 5);
+        verify(observer).onItemRangeChanged(3, 5);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void notifyInsertInvokesObservers() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeInserted(15, 1);
+        verify(observer).onItemRangeInserted(15, 1);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void notifyRemoveInvokesObservers() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeRemoved(9, 2);
+        verify(observer).onItemRangeRemoved(9, 2);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void notifyMoveInvokesObservers() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeMoved(3, 10, 2);
+        verify(observer).onItemRangeMoved(3, 10, 2);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void notifyZeroChangeDoesNothing() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeChanged(3, 0);
+        verifyZeroInteractions(observer);
+    }
+
+    @Test
+    public void notifyZeroInsertDoesNothing() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeInserted(9, 0);
+        verifyZeroInteractions(observer);
+    }
+
+    @Test
+    public void notifyZeroRemoveDoesNothing() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeRemoved(12, 0);
+        verifyZeroInteractions(observer);
+    }
+
+    @Test
+    public void notifyZeroMoveDoesNothing() {
+        DataObserver observer = mock(DataObserver.class);
+        mAdapter.registerDataObserver(observer);
+        mAdapter.notifyItemRangeMoved(3, 7, 0);
+        verifyZeroInteractions(observer);
+    }
 }
