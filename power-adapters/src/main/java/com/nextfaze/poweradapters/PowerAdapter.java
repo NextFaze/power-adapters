@@ -374,10 +374,12 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
-        if (condition == Conditions.always()) {
-            return this;
-        } else if (condition == Conditions.never()) {
-            return EMPTY;
+        if (condition instanceof ConstantCondition) {
+            if (condition.eval()) {
+                return this;
+            } else {
+                return EMPTY;
+            }
         }
         return new ConditionalAdapter(this, condition);
     }
