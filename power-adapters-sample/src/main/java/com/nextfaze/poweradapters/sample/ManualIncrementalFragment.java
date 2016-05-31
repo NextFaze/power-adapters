@@ -15,7 +15,7 @@ import com.nextfaze.poweradapters.data.DataLoadingDelegate;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public final class ManualIncrementalFragment extends BaseFragment {
@@ -44,7 +44,7 @@ public final class ManualIncrementalFragment extends BaseFragment {
                 .resource(R.layout.list_loading_item)
                 .build(adapter, new DataLoadingDelegate(data));
         // "Load next" adapter lets user click the button to load next increment of results.
-        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
+        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, asViewFactory(R.layout.list_load_next_item));
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
             @Override
             public void onClick() {

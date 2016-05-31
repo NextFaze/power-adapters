@@ -8,7 +8,7 @@ import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 public abstract class ViewHolderBinder<T, H extends ViewHolder> extends AbstractBinder {
 
@@ -25,7 +25,7 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Abstract
     }
 
     public ViewHolderBinder(@LayoutRes int itemLayoutResource, boolean enabled) {
-        this(viewFactoryForResource(itemLayoutResource), enabled);
+        this(asViewFactory(itemLayoutResource), enabled);
     }
 
     public ViewHolderBinder(@NonNull ViewFactory viewFactory) {

@@ -9,7 +9,7 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /**
  * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Use {@link Condition}s
@@ -31,7 +31,7 @@ public final class LoadingAdapterBuilder implements Decorator {
 
     @NonNull
     public LoadingAdapterBuilder resource(@LayoutRes int resource) {
-        return view(viewFactoryForResource(resource));
+        return view(asViewFactory(resource));
     }
 
     @NonNull

@@ -7,7 +7,7 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** A "type safe" binder implementation that performs the casts for you. */
 public abstract class TypedBinder<T, V extends View> extends AbstractBinder {
@@ -22,7 +22,7 @@ public abstract class TypedBinder<T, V extends View> extends AbstractBinder {
     }
 
     public TypedBinder(@LayoutRes int itemLayoutResource, boolean enabled) {
-        this(viewFactoryForResource(itemLayoutResource), enabled);
+        this(asViewFactory(itemLayoutResource), enabled);
     }
 
     public TypedBinder(@NonNull ViewFactory viewFactory) {

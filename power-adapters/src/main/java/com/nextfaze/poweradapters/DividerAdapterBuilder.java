@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Inserts {@link View}-based dividers between items. */
 public final class DividerAdapterBuilder implements Decorator {
@@ -43,7 +43,7 @@ public final class DividerAdapterBuilder implements Decorator {
     /** Sets the divider that appears before the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder leadingResource(@LayoutRes int resource) {
-        return leadingView(viewFactoryForResource(resource));
+        return leadingView(asViewFactory(resource));
     }
 
     /** Sets the divider that appears after the wrapped adapters items. */
@@ -56,7 +56,7 @@ public final class DividerAdapterBuilder implements Decorator {
     /** Sets the divider that appears after the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder trailingResource(@LayoutRes int resource) {
-        return trailingView(viewFactoryForResource(resource));
+        return trailingView(asViewFactory(resource));
     }
 
     /** Sets the divider that appears between all of the wrapped adapters items. */
@@ -69,7 +69,7 @@ public final class DividerAdapterBuilder implements Decorator {
     /** Sets the divider that appears between all of the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder innerResource(@LayoutRes int resource) {
-        return innerView(viewFactoryForResource(resource));
+        return innerView(asViewFactory(resource));
     }
 
     /** Sets the divider that appears before and after the wrapped adapters items. */
@@ -81,7 +81,7 @@ public final class DividerAdapterBuilder implements Decorator {
     /** Sets the divider that appears before and after the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder outerResource(@LayoutRes int resource) {
-        return outerView(viewFactoryForResource(resource));
+        return outerView(asViewFactory(resource));
     }
 
     /** Sets the divider that appears before, after, and between the wrapped adapters items. */
@@ -93,7 +93,7 @@ public final class DividerAdapterBuilder implements Decorator {
     /** Sets the divider that appears before, after, and between the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder resource(@LayoutRes int resource) {
-        return view(viewFactoryForResource(resource));
+        return view(asViewFactory(resource));
     }
 
     @CheckResult

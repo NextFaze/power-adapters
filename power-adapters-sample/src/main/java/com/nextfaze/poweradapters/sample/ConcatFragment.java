@@ -33,7 +33,7 @@ import java.util.Random;
 import static com.nextfaze.poweradapters.Conditions.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.*;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
@@ -103,7 +103,7 @@ public class ConcatFragment extends BaseFragment {
 
         // Load next button
         LoadNextAdapter loadNextAdapter =
-                new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
+                new LoadNextAdapter(adapter, data, asViewFactory(R.layout.list_load_next_item));
         loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
             @Override
             public void onClick() {

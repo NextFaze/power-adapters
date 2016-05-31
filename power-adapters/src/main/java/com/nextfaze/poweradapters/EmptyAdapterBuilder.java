@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Use {@link Condition}s instead. */
 @Deprecated
@@ -24,7 +24,7 @@ public final class EmptyAdapterBuilder implements Decorator {
 
     @NonNull
     public EmptyAdapterBuilder resource(@LayoutRes int resource) {
-        return view(viewFactoryForResource(resource));
+        return view(asViewFactory(resource));
     }
 
     @NonNull

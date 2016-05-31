@@ -7,7 +7,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 final class Item implements ViewFactory {
 
@@ -29,7 +29,7 @@ final class Item implements ViewFactory {
     static List<Item> toItems(@NonNull int... resources) {
         ArrayList<Item> items = new ArrayList<>();
         for (Integer resource : resources) {
-            items.add(new Item(viewFactoryForResource(resource), true));
+            items.add(new Item(asViewFactory(resource), true));
         }
         return items;
     }

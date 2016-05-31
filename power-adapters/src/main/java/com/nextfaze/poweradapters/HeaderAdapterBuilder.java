@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import static com.nextfaze.poweradapters.Conditions.adapter;
 import static com.nextfaze.poweradapters.Conditions.and;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Wraps an existing {@link PowerAdapter} to provide header views above the wrapped adapter's items. */
 @Deprecated
@@ -32,7 +32,7 @@ public final class HeaderAdapterBuilder implements Decorator {
 
     @NonNull
     public HeaderAdapterBuilder addResource(@LayoutRes int resource, boolean enabled) {
-        return addView(viewFactoryForResource(resource), enabled);
+        return addView(asViewFactory(resource), enabled);
     }
 
     @NonNull
