@@ -11,7 +11,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.nextfaze.poweradapters.Item.toItems;
+import static com.nextfaze.poweradapters.ItemAdapter.toItems;
 import static java.util.Arrays.asList;
 
 @SuppressWarnings("WeakerAccess")
@@ -415,13 +415,13 @@ public abstract class PowerAdapter {
         if (views.length == 0) {
             return EMPTY;
         }
-        return new ItemAdapter(toItems(asList(views)));
+        return new ItemAdapter(ItemAdapter.toItems(asList(views)));
     }
 
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull Iterable<? extends ViewFactory> views) {
-        return new ItemAdapter(toItems(views));
+        return new ItemAdapter(ItemAdapter.toItems(views));
     }
 
     @CheckResult
@@ -430,7 +430,7 @@ public abstract class PowerAdapter {
         if (views.isEmpty()) {
             return EMPTY;
         }
-        return new ItemAdapter(toItems(views));
+        return new ItemAdapter(ItemAdapter.toItems(views));
     }
 
     @CheckResult
