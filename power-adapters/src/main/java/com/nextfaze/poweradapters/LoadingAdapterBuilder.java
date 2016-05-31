@@ -117,7 +117,7 @@ public final class LoadingAdapterBuilder implements PowerAdapter.Transformer {
     public static abstract class Delegate {
 
         @NonNull
-        private final AbstractCondition mCondition = new AbstractCondition() {
+        private final Condition mCondition = new Condition() {
             @Override
             public boolean eval() {
                 return isLoading() && mEmptyPolicy.shouldShow(Delegate.this);

@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.AdapterTestUtils.holder;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
-import static com.nextfaze.poweradapters.Conditions.always;
+import static com.nextfaze.poweradapters.Condition.always;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -55,7 +55,7 @@ public class ConditionalAdapterTest {
 
     @Test
     public void itemCountIsZeroWhenFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         assertThat(mConditionalAdapter.getItemCount()).isEqualTo(0);
     }
 
@@ -140,7 +140,7 @@ public class ConditionalAdapterTest {
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromNewViewWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mConditionalAdapter.newView(mParent, ViewTypes.create());
     }
 
@@ -153,25 +153,25 @@ public class ConditionalAdapterTest {
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromBindViewWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mConditionalAdapter.bindView(mItemView, holder(5));
     }
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromGetItemViewTypeWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mConditionalAdapter.getItemViewType(5);
     }
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromGetItemIdWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mConditionalAdapter.getItemId(2);
     }
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromIsEnabledWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mConditionalAdapter.isEnabled(6);
     }
 
@@ -212,28 +212,28 @@ public class ConditionalAdapterTest {
 
     @Test
     public void childChangeIsSuppressedWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mFakeAdapter.change(3, 5);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void childInsertionIsSuppressedWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mFakeAdapter.insert(2, 9);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void childRemovalIsSuppressedWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mFakeAdapter.remove(9, 1);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void childMoveIsSuppressedWhileConditionIsFalse() {
-        setCondition(Conditions.never());
+        setCondition(Condition.never());
         mFakeAdapter.move(3, 5, 1);
         verifyZeroInteractions(mObserver);
     }

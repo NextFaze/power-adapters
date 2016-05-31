@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.data;
 
-import com.nextfaze.poweradapters.AbstractCondition;
+import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
 
-final class DataCondition<T> extends AbstractCondition {
+final class DataCondition<T> extends Condition {
 
     @NonNull
     private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {

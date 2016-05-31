@@ -15,6 +15,7 @@ import android.widget.TextView;
 import butterknife.Bind;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
@@ -35,7 +36,6 @@ import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
 import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
-import static com.nextfaze.poweradapters.Conditions.*;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
@@ -195,11 +195,11 @@ public class FileTreeFragment extends BaseFragment {
 
         // Loading indicator
         adapter = adapter
-                .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(and(isTrue(depth != 0), isLoading(data))));
+                .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(Condition.and(Condition.isTrue(depth != 0), isLoading(data))));
 
         // Empty message
         adapter = adapter
-                .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(and(isEmpty(data), not(isLoading(data)))));
+                .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(Condition.and(isEmpty(data), Condition.not(isLoading(data)))));
 
         return adapter;
     }

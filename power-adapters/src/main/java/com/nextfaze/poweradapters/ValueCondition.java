@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-public final class ValueCondition extends AbstractCondition {
+public final class ValueCondition extends Condition {
 
     private boolean mValue;
 

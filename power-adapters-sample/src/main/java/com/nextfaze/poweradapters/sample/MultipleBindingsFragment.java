@@ -19,7 +19,7 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.Conditions.not;
+import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;

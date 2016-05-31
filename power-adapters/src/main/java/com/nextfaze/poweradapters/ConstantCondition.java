@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters;
 
 import lombok.NonNull;
 
-final class ConstantCondition implements Condition {
+final class ConstantCondition extends Condition {
 
     private final boolean mValue;
 

@@ -7,8 +7,8 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 
-import static com.nextfaze.poweradapters.Conditions.adapter;
-import static com.nextfaze.poweradapters.Conditions.and;
+import static com.nextfaze.poweradapters.Condition.adapter;
+import static com.nextfaze.poweradapters.Condition.and;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 

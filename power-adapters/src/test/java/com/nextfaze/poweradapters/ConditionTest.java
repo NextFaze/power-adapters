@@ -14,16 +14,16 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public final class AbstractConditionTest {
+public final class ConditionTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
 
-    private AbstractCondition mCondition;
+    private Condition mCondition;
 
     @Before
     public void setUp() throws Exception {
-        mCondition = spy(AbstractCondition.class);
+        mCondition = spy(Condition.class);
     }
 
     @Test
@@ -68,7 +68,6 @@ public final class AbstractConditionTest {
         mCondition.registerObserver(observer);
         mCondition.registerObserver(observer2);
         verify(mCondition).onFirstObserverRegistered();
-        verifyNoMoreInteractions(mCondition);
     }
 
     @Test

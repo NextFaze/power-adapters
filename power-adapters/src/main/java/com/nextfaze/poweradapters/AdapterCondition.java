@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters;
 
 import lombok.NonNull;
 
-final class AdapterCondition extends AbstractCondition {
+final class AdapterCondition extends Condition {
 
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {

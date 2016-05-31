@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static java.util.Collections.addAll;
 
-abstract class CompoundCondition extends AbstractCondition {
+abstract class CompoundCondition extends Condition {
 
     @NonNull
     private final Observer mObserver = new Observer() {
