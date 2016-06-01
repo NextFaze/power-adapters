@@ -8,8 +8,7 @@ import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 /**
- * Binds an object to a {@link View}. The binder is also responsible for creating the view, and determining if it is
- * enabled (which means it can be clicked within a list).
+ * Binds an object to a {@link View} in a {@link PowerAdapter}.
  */
 public interface Binder<T, V extends View> {
     /**
@@ -39,6 +38,7 @@ public interface Binder<T, V extends View> {
     /** @see PowerAdapter#getItemId(int) */
     long getItemId(@NonNull T t, int position);
 
+    /** @see PowerAdapter#getItemViewType(int) */
     @NonNull
     ViewType getViewType(@NonNull T t, int position);
 

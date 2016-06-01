@@ -125,7 +125,7 @@ public class ConcatFragment extends BaseFragment {
                     }
                 })));
 
-        return new Pair<NewsIncrementalData, PowerAdapter>(data, adapter);
+        return new Pair<>(data, adapter);
     }
 
     private void showEditDialog(@NonNull final IncrementalArrayData<NewsItem> data, final int position) {
@@ -218,7 +218,7 @@ public class ConcatFragment extends BaseFragment {
         showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
-    static final class ColoredBinder extends NewsItemBinder {
+    private static final class ColoredBinder extends NewsItemBinder {
 
         private final int mColor;
 
@@ -227,8 +227,8 @@ public class ConcatFragment extends BaseFragment {
         }
 
         @Override
-        protected void bind(@NonNull NewsItem newsItem, @NonNull TextView v, @NonNull Holder holder) {
-            super.bind(newsItem, v, holder);
+        public void bindView(@NonNull NewsItem newsItem, @NonNull TextView v, @NonNull Holder holder) {
+            super.bindView(newsItem, v, holder);
             v.setBackgroundColor(mColor);
         }
     }

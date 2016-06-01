@@ -20,7 +20,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Accessors(prefix = "m")
+@Deprecated
 final class LoadNextAdapter extends PowerAdapterWrapper {
+
+    // TODO: Replace this entire class with conditional adapter.
 
     @NonNull
     private final Data<?> mData;

@@ -2,18 +2,15 @@ package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
 import android.view.View;
-import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
-/** A "type safe" binder implementation that performs the casts for you. */
+/** @deprecated Use an {@link AbstractBinder} instead. */
+@Deprecated
 public abstract class TypedBinder<T, V extends View> extends AbstractBinder<T, V> {
-
-    @NonNull
-    private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
 
@@ -30,14 +27,8 @@ public abstract class TypedBinder<T, V extends View> extends AbstractBinder<T, V
     }
 
     public TypedBinder(@NonNull ViewFactory viewFactory, boolean enabled) {
-        mViewFactory = viewFactory;
+        super(viewFactory);
         mEnabled = enabled;
-    }
-
-    @NonNull
-    @Override
-    public final View newView(@NonNull ViewGroup parent) {
-        return mViewFactory.create(parent);
     }
 
     @Override

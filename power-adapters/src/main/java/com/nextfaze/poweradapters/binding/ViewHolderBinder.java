@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
 import android.view.View;
-import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.internal.WeakMap;
@@ -14,9 +13,6 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Abstract
 
     @NonNull
     private final WeakMap<View, H> mViewHolders = new WeakMap<>();
-
-    @NonNull
-    private final ViewFactory mViewFactory;
 
     private final boolean mEnabled;
 
@@ -33,14 +29,8 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Abstract
     }
 
     public ViewHolderBinder(@NonNull ViewFactory viewFactory, boolean enabled) {
-        mViewFactory = viewFactory;
+        super(viewFactory);
         mEnabled = enabled;
-    }
-
-    @NonNull
-    @Override
-    public final View newView(@NonNull ViewGroup parent) {
-        return mViewFactory.create(parent);
     }
 
     @Override

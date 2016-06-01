@@ -19,8 +19,8 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
+import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
-import com.nextfaze.poweradapters.binding.TypedBinder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
@@ -105,9 +105,9 @@ public class FileTreeFragment extends BaseFragment {
     @NonNull
     private PowerAdapter createFilesAdapterSimple(@NonNull final File file, final int depth, final boolean tree) {
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
-        Binder<File, TextView> binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
+        Binder<File, TextView> binder = new AbstractBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
-            protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
+            public void bindView(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
                 v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
                 v.setOnClickListener(new View.OnClickListener() {
@@ -152,9 +152,9 @@ public class FileTreeFragment extends BaseFragment {
                 overrideData != null ? overrideData : new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
 
-        Binder<File, TextView> binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
+        Binder<File, TextView> binder = new AbstractBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
-            protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
+            public void bindView(@NonNull File file, @NonNull TextView v, @NonNull final Holder holder) {
                 v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
                 if (file.isDirectory()) {

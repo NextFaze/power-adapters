@@ -4,17 +4,17 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.binding.TypedBinder;
+import com.nextfaze.poweradapters.binding.AbstractBinder;
 import lombok.NonNull;
 
-class NewsItemBinder extends TypedBinder<NewsItem, TextView> {
+class NewsItemBinder extends AbstractBinder<NewsItem, TextView> {
 
     NewsItemBinder() {
         super(android.R.layout.simple_list_item_1);
     }
 
     @Override
-    protected void bind(@NonNull final NewsItem newsItem, @NonNull final TextView v, @NonNull Holder holder) {
+    public void bindView(@NonNull final NewsItem newsItem, @NonNull TextView v, @NonNull Holder holder) {
         v.setText(newsItem.getTitle());
         v.setOnClickListener(new View.OnClickListener() {
             @Override
