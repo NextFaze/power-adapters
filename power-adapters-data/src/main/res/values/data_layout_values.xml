@@ -34,6 +34,4 @@
         </attr>
     </declare-styleable>
 
-    <item name="data_layout_animator" type="id"/>
-
 </resources>

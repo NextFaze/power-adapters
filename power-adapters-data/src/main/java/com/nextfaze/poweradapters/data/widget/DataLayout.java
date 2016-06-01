@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters.data.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -34,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
@@ -65,6 +65,8 @@ import static java.util.Collections.singleton;
  */
 @Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
+
+    private static final String TAG = DataLayout.class.getSimpleName();
 
     private static final String KEY_SUPER_STATE = "superState";
     private static final String KEY_ERROR_MESSAGE = "errorMessage";
@@ -116,6 +118,9 @@ public class DataLayout extends RelativeLayout {
             updateViews();
         }
     };
+
+    @NonNull
+    private final WeakHashMap<View, Animator> mAnimators = new WeakHashMap<>();
 
     /** Child view ID for displaying contents of {@link #mDatas}. */
     @IdRes
@@ -247,16 +252,16 @@ public class DataLayout extends RelativeLayout {
 
         // All components are initially invisible.
         if (mContentView != null) {
-            mContentView.setVisibility(mComponentVisibilityWhenHidden);
+            hideComponent(mContentView);
         }
         if (mEmptyView != null) {
-            mEmptyView.setVisibility(mComponentVisibilityWhenHidden);
+            hideComponent(mEmptyView);
         }
         if (mLoadingView != null) {
-            mLoadingView.setVisibility(mComponentVisibilityWhenHidden);
+            hideComponent(mLoadingView);
         }
         if (mErrorView != null) {
-            mErrorView.setVisibility(mComponentVisibilityWhenHidden);
+            hideComponent(mErrorView);
         }
 
         updateViews();
@@ -771,51 +776,32 @@ public class DataLayout extends RelativeLayout {
         return mErrorFormatter.format(getContext(), e);
     }
 
-    //region Animation
-
-    private void animateIn(@NonNull final View v, boolean immediately) {
+    private void animateIn(@NonNull View v, boolean immediately) {
         v.setVisibility(VISIBLE);
-        Animator animator = createAnimatorIn();
+        Animator animator = mAnimatorIn != null ? mAnimatorIn.clone() : null;
         if (animator != null) {
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    onAnimateInEnd(v);
-                }
-            });
             animate(v, animator, immediately);
         }
-    }
-
-    private static void onAnimateInEnd(@NonNull View v) {
-        setAnimator(v, null);
     }
 
     private void animateOut(@NonNull final View v, boolean immediately) {
-        Animator animator = createAnimatorOut();
+        Animator animator = mAnimatorOut != null ? mAnimatorOut.clone() : null;
         if (animator != null) {
-            animator.addListener(new AnimatorListenerAdapter() {
+            animator.addListener(new AnimationEndedListener() {
                 @Override
-                public void onAnimationEnd(Animator animation) {
-                    onAnimateOutEnd(animation, v);
+                void onEnd(Animator animation) {
+                    v.setVisibility(mComponentVisibilityWhenHidden);
                 }
             });
             animate(v, animator, immediately);
         }
     }
 
-    private void onAnimateOutEnd(Animator animation, @NonNull View v) {
-        // Check the animator here to prevent canceled animations from unintentionally hiding the view.
-        // Animations that are canceled will have had their animator reassigned, and this check won't pass.
-        if (getAnimator(v) == animation) {
-            v.setVisibility(mComponentVisibilityWhenHidden);
+    private void animate(@NonNull final View v, @NonNull Animator animator, boolean immediately) {
+        Animator existing = mAnimators.put(v, animator);
+        if (existing != null) {
+            existing.cancel();
         }
-        setAnimator(v, null);
-    }
-
-    private void animate(@NonNull View v, @NonNull Animator animator, boolean immediately) {
-        cancelAnimator(v);
-        setAnimator(v, animator);
         if (immediately) {
             animator.setDuration(0);
         }
@@ -823,32 +809,18 @@ public class DataLayout extends RelativeLayout {
         animator.start();
     }
 
-    @Nullable
-    private Animator createAnimatorIn() {
-        return mAnimatorIn != null ? mAnimatorIn.clone() : null;
-    }
-
-    @Nullable
-    private Animator createAnimatorOut() {
-        return mAnimatorOut != null ? mAnimatorOut.clone() : null;
-    }
-
-    private static void cancelAnimator(@NonNull View v) {
-        Animator animator = getAnimator(v);
-        if (animator != null) {
-            // Must reassign animator before cancel.
-            setAnimator(v, null);
-            animator.cancel();
+    private void hideComponent(@Nullable View v) {
+        if (v != null) {
+            v.setVisibility(mComponentVisibilityWhenHidden);
+            // Run the "out" animation immediately to ensure the component view is in the proper state.
+            // Eg. the force the view to alpha 0.
+            if (mAnimatorOut != null) {
+                Animator animator = mAnimatorOut.clone();
+                animator.setDuration(0);
+                animator.setTarget(v);
+                animator.start();
+            }
         }
-    }
-
-    private static void setAnimator(@NonNull View v, @Nullable Animator animator) {
-        v.setTag(R.id.data_layout_animator, animator);
-    }
-
-    @Nullable
-    private static Animator getAnimator(@NonNull View v) {
-        return (Animator) v.getTag(R.id.data_layout_animator);
     }
 
     @Nullable
@@ -860,8 +832,6 @@ public class DataLayout extends RelativeLayout {
         return AnimatorInflater.loadAnimator(context,
                 typedArray.getResourceId(index, typedArray.getResourceId(fallbackIndex, defaultValue)));
     }
-
-    //endregion
 
     /** Allows control of visibility of each {@link DataLayout} component. */
     public interface VisibilityPolicy {
