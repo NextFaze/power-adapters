@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.data.internal;
 
 import android.util.Log;
+import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.Data;
-import com.nextfaze.poweradapters.data.DataObserver;
 import com.nextfaze.poweradapters.data.ErrorObserver;
 import com.nextfaze.poweradapters.data.LoadingObserver;
-import com.nextfaze.poweradapters.data.SimpleDataObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 

@@ -1,13 +1,15 @@
 package com.nextfaze.poweradapters.data;
 
 import com.nextfaze.poweradapters.Condition;
+import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
+import com.nextfaze.poweradapters.SimpleDataObserver;
 import lombok.NonNull;
 
 final class DataCondition<T> extends Condition {
 
     @NonNull
-    private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
             notifyChanged();

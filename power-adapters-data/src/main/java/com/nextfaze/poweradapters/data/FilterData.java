@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import android.os.Handler;
 import android.util.SparseIntArray;
 import com.android.internal.util.Predicate;
+import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;

@@ -1,5 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
+import com.nextfaze.poweradapters.DataObserver;
+
 final class DataObservers extends Observers<DataObserver> {
     void notifyDataSetChanged() {
         for (DataObserver dataObserver : mObservers) {

@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.UiThread;
+import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
 import java.util.Iterator;

@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
+import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Ignore;

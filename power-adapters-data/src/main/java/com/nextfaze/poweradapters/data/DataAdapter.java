@@ -2,6 +2,8 @@ package com.nextfaze.poweradapters.data;
 
 import android.database.DataSetObserver;
 import android.widget.BaseAdapter;
+import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.SimpleDataObserver;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 

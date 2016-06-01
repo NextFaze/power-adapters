@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
+import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.EmptyAdapterBuilder;
+import com.nextfaze.poweradapters.SimpleDataObserver;
 import lombok.NonNull;
 
 @Deprecated
@@ -13,7 +15,7 @@ public final class DataEmptyDelegate extends EmptyAdapterBuilder.Delegate {
     private final LoadingPolicy mLoadingPolicy;
 
     @NonNull
-    private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
+    private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
             notifyEmptyChanged();

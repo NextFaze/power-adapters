@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
+import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
 public abstract class DataWrapper<T> extends AbstractData<T> {
