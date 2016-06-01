@@ -29,7 +29,7 @@ public abstract class DataWatcher {
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             dispatchDataChange();
         }
     };

@@ -168,7 +168,7 @@ public final class OffsetDataTest {
     @Test
     public void moveNotifiesOfChange() {
         mFakeData.move(1, 2, 1);
-        verify(mObserver).onChange();
+        verify(mObserver).onChanged();
         verifyNoMoreInteractions(mObserver);
     }
 

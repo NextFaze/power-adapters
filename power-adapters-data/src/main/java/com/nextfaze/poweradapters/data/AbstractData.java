@@ -135,11 +135,11 @@ public abstract class AbstractData<T> implements Data<T> {
     }
 
     /** Dispatch a data change notification on the UI thread. */
-    protected void notifyDataChanged() {
+    protected void notifyDataSetChanged() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mDataObservers.notifyDataChanged();
+                mDataObservers.notifyDataSetChanged();
             }
         });
     }

@@ -9,7 +9,7 @@ public final class DataBindingAdapter extends BindingAdapter {
     @NonNull
     private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.DataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             notifyDataSetChanged();
         }
 

@@ -60,8 +60,8 @@ public final class AbstractDataTest {
         DataObserver dataObserver = mock(DataObserver.class);
         mData.registerDataObserver(dataObserver);
         assertThat(mData.getDataObserverCount()).isEqualTo(1);
-        mData.notifyDataChanged();
-        verify(dataObserver).onChange();
+        mData.notifyDataSetChanged();
+        verify(dataObserver).onChanged();
         verifyNoMoreInteractions(dataObserver);
     }
 
@@ -71,7 +71,7 @@ public final class AbstractDataTest {
         mData.registerDataObserver(dataObserver);
         mData.unregisterDataObserver(dataObserver);
         assertThat(mData.getDataObserverCount()).isEqualTo(0);
-        mData.notifyDataChanged();
+        mData.notifyDataSetChanged();
         verifyZeroInteractions(dataObserver);
     }
 
@@ -139,8 +139,8 @@ public final class AbstractDataTest {
     @Test
     public void notifyDataChanged() {
         DataObserver dataObserver = setUpDataObserver();
-        mData.notifyDataChanged();
-        verify(dataObserver).onChange();
+        mData.notifyDataSetChanged();
+        verify(dataObserver).onChanged();
         verifyNoMoreInteractions(dataObserver);
     }
 

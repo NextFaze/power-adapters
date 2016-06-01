@@ -87,7 +87,7 @@ final class LimitData<T> extends DataWrapper<T> {
             notifyItemRangeMoved(innerFromPosition, innerToPosition, innerItemCount);
         } else {
             // TODO: Split into a removal and an insertion?
-            notifyDataChanged();
+            notifyDataSetChanged();
         }
     }
 }

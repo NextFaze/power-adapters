@@ -35,7 +35,7 @@ final class LoadNextAdapter extends PowerAdapterWrapper {
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             updateVisible();
         }
     };

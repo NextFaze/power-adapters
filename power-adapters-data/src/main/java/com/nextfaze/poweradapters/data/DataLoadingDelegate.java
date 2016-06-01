@@ -12,7 +12,7 @@ public final class DataLoadingDelegate extends LoadingAdapterBuilder.Delegate {
     @NonNull
     private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             notifyEmptyChanged();
         }
     };

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 public interface DataObserver {
-    void onChange();
+    void onChanged();
 
     void onItemRangeChanged(int positionStart, int itemCount);
 

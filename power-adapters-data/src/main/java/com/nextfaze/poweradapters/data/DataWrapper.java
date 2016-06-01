@@ -10,7 +10,7 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             forwardChanged();
         }
 
@@ -152,7 +152,7 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     }
 
     protected void forwardChanged() {
-        notifyDataChanged();
+        notifyDataSetChanged();
     }
 
     protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {

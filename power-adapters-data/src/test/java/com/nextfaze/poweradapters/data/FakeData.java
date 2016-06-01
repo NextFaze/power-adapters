@@ -147,7 +147,7 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         boolean removed = mData.removeAll(collection);
         if (removed && mNotificationsEnabled) {
             // TODO: Fine-grained change notification.
-            notifyDataChanged();
+            notifyDataSetChanged();
         }
         return removed;
     }
@@ -157,7 +157,7 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
         boolean changed = mData.retainAll(collection);
         if (changed && mNotificationsEnabled) {
             // TODO: Fine-grained change notification.
-            notifyDataChanged();
+            notifyDataSetChanged();
         }
         return changed;
     }

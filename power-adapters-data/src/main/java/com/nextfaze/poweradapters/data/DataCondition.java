@@ -9,7 +9,7 @@ final class DataCondition<T> extends Condition {
     @NonNull
     private final com.nextfaze.poweradapters.data.DataObserver mDataObserver = new com.nextfaze.poweradapters.data.SimpleDataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             notifyChanged();
         }
     };

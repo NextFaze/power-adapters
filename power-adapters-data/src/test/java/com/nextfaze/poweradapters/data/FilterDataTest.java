@@ -76,7 +76,7 @@ public final class FilterDataTest {
     public void coarseGrainedChangeDecomposedIntoFineGrained() {
         mData.setNotificationsEnabled(false);
         mData.add("bass");
-        mData.notifyDataChanged();
+        mData.notifyDataSetChanged();
         verify(mFilterDataObserver).onItemRangeChanged(0, 1);
         verify(mFilterDataObserver).onItemRangeChanged(1, 1);
         verify(mFilterDataObserver).onItemRangeChanged(2, 1);

@@ -26,7 +26,7 @@ public final class RxData {
                 subscriber.onNext(data);
                 final DataObserver dataObserver = new SimpleDataObserver() {
                     @Override
-                    public void onChange() {
+                    public void onChanged() {
                         if (!subscriber.isUnsubscribed()) {
                             subscriber.onNext(data);
                         }
@@ -52,7 +52,7 @@ public final class RxData {
                 ThreadUtils.assertUiThread();
                 final DataObserver dataObserver = new DataObserver() {
                     @Override
-                    public void onChange() {
+                    public void onChanged() {
                         if (!subscriber.isUnsubscribed()) {
                             subscriber.onNext(Change.newChange(0, data.size()));
                         }

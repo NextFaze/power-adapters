@@ -75,6 +75,6 @@ final class OffsetData<T> extends DataWrapper<T> {
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
         // TODO: Fine-grained notifications.
         // TODO: Drop notification entirely if out of range.
-        notifyDataChanged();
+        notifyDataSetChanged();
     }
 }

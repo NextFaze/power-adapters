@@ -21,7 +21,7 @@ public abstract class DataAdapter<T> extends BaseAdapter {
     @NonNull
     private final DataObserver mDataObserver = new SimpleDataObserver() {
         @Override
-        public void onChange() {
+        public void onChanged() {
             notifyDataSetChanged();
         }
     };
