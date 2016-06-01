@@ -7,16 +7,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.InterruptedIOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 
 import static android.os.Looper.getMainLooper;
@@ -49,13 +45,7 @@ abstract class Task<T> {
                 if (isCanceled()) {
                     return null;
                 }
-                doWorkStarted();
-                T result;
-                try {
-                    result = doCall();
-                } finally {
-                    doWorkEnded();
-                }
+                T result = doCall();
                 if (isCanceled()) {
                     return null;
                 }
@@ -74,16 +64,6 @@ abstract class Task<T> {
     @Getter
     @Nullable
     private volatile Thread mExecutingThread;
-
-    @Getter
-    @Setter
-    private boolean mStackTraceEnabled = true;
-
-    @Getter
-    private Executor mExecutor;
-
-    @Getter
-    private StackTraceElement[] mLaunchStackTrace;
 
     private boolean mCanceled;
     private volatile boolean mExecuted;
@@ -173,67 +153,16 @@ abstract class Task<T> {
         }
     }
 
-    private void doWorkStarted() {
-        try {
-            post(new Action() {
-                @Override
-                public void run() throws Throwable {
-                    onWorkStarted();
-                }
-            });
-        } catch (InterruptedException | InterruptedIOException e) {
-            // Ignore interruptions.
-        } catch (Throwable e) {
-            logError("onWorkStarted", e);
-        }
-    }
-
-    private void doWorkEnded() {
-        try {
-            post(new Action() {
-                @Override
-                public void run() throws Throwable {
-                    onWorkEnded();
-                }
-            });
-        } catch (InterruptedException | InterruptedIOException e) {
-            // Ignore interruptions.
-        } catch (Throwable e) {
-            logError("onWorkEnded", e);
-        }
-    }
-
-    public static void setDefaultExecutor(@NonNull ExecutorService executor) {
-        sExecutor = executor;
-    }
-
-    public Task() {
-        executor(sExecutor);
+    Task() {
     }
 
     @NonNull
-    public Task<T> executor(@Nullable Executor executor) {
-        mExecutor = executor;
-        return this;
-    }
-
-    @NonNull
-    public Task<T> execute() {
-        if (mStackTraceEnabled) {
-            return execute(Thread.currentThread().getStackTrace());
-        } else {
-            return execute(null);
-        }
-    }
-
-    @NonNull
-    private Task<T> execute(@Nullable StackTraceElement[] launchStackTrace) {
-        mLaunchStackTrace = launchStackTrace;
+    Task<T> execute() {
         synchronized (this) {
             mCanceled = false;
         }
         mExecuted = true;
-        mExecutor.execute(mFutureTask);
+        sExecutor.execute(mFutureTask);
         return this;
     }
 
@@ -242,7 +171,7 @@ abstract class Task<T> {
      * @return <code>true</code> if the task was canceled, otherwise <code>false</code>.
      * @see #cancel(boolean)
      */
-    public boolean cancel() {
+    boolean cancel() {
         return cancel(true);
     }
 
@@ -252,7 +181,7 @@ abstract class Task<T> {
      * @param mayInterruptIfRunning Interrupts the running thread if <code>true</code>.
      * @return <code>true</code> if the task was canceled, otherwise <code>false</code>.
      */
-    public boolean cancel(boolean mayInterruptIfRunning) {
+    boolean cancel(boolean mayInterruptIfRunning) {
         if (!isExecuted()) {
             return false;
         }
@@ -270,19 +199,17 @@ abstract class Task<T> {
             // We don't care about why cancel threw.
         }
 
-        // TODO: By invoking onCanceled here, it's possible that onWorkEnded will be called at the end instead of straight after onWorkStarted.
-
         doCanceled();
         return true;
     }
 
-    public boolean isCanceled() {
+    boolean isCanceled() {
         synchronized (this) {
             return mCanceled;
         }
     }
 
-    public boolean isExecuted() {
+    boolean isExecuted() {
         return mExecuted;
     }
 
@@ -307,14 +234,6 @@ abstract class Task<T> {
 
     /** Called after all other callbacks, as long as the task was executed at all. */
     protected void onFinally() throws Throwable {
-    }
-
-    /** Called immediately before {@link #call()} to indicate the actual work is beginning. */
-    protected void onWorkStarted() throws Throwable {
-    }
-
-    /** Called immediately after {@link #call()}, regardless of its success, to indicate the actual work is finishing. */
-    protected void onWorkEnded() throws Throwable {
     }
 
     private void post(final Action action) throws Throwable {
@@ -346,15 +265,6 @@ abstract class Task<T> {
     }
 
     private void logError(String callbackName, Throwable e) {
-        if (mLaunchStackTrace != null) {
-            concatStackTrace(e, mLaunchStackTrace);
-        }
         Log.e(TAG, callbackName + " error", e);
-    }
-
-    private static void concatStackTrace(Throwable e, StackTraceElement[] stackTraceElements) {
-        ArrayList<StackTraceElement> stack = new ArrayList<>(Arrays.asList(e.getStackTrace()));
-        stack.addAll(Arrays.asList(stackTraceElements));
-        e.setStackTrace(stack.toArray(new StackTraceElement[stack.size()]));
     }
 }
