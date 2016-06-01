@@ -19,7 +19,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
 /**
@@ -33,7 +33,7 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
 
     @NonNull
-    private final ArrayList<T> mData = new ArrayList<>();
+    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(this);
 
     @NonNull
     private final ThreadFactory mThreadFactory;
@@ -84,87 +84,49 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     @Override
-    public final boolean contains(Object object) {
+    public final boolean contains(@Nullable Object object) {
         return mData.contains(object);
     }
 
     @Override
-    public final int indexOf(Object object) {
+    public final int indexOf(@Nullable Object object) {
         return mData.indexOf(object);
     }
 
     @Override
-    public final int lastIndexOf(Object object) {
+    public final int lastIndexOf(@Nullable Object object) {
         return mData.lastIndexOf(object);
     }
 
-    @UiThread
     @Override
     public final T remove(int index) {
-        T removed = mData.remove(index);
-        notifyItemRemoved(index);
-        return removed;
+        return mData.remove(index);
     }
 
-    @UiThread
     @Override
     public final boolean add(@NonNull T t) {
-        if (mData.add(t)) {
-            notifyItemInserted(mData.size() - 1);
-            return true;
-        }
-        return false;
+        return mData.add(t);
     }
 
-    @UiThread
     @Override
     public final void add(int index, T object) {
         mData.add(index, object);
-        notifyItemInserted(index);
     }
 
-    @UiThread
     @Override
     public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        int oldSize = mData.size();
-        mData.addAll(collection);
-        int newSize = mData.size();
-        if (newSize != oldSize) {
-            int count = mData.size() - oldSize;
-            notifyItemRangeInserted(oldSize, count);
-            return true;
-        }
-        return false;
+        return mData.addAll(collection);
     }
 
-    @UiThread
     @Override
     public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        int oldSize = mData.size();
-        mData.addAll(index, collection);
-        int newSize = mData.size();
-        if (newSize != oldSize) {
-            int count = mData.size() - oldSize;
-            notifyItemRangeInserted(index, count);
-            return true;
-        }
-        return false;
+        return mData.addAll(index, collection);
     }
 
-    @UiThread
     @Override
     public final boolean remove(@NonNull Object obj) {
-        //noinspection SuspiciousMethodCalls
-        int index = mData.indexOf(obj);
-        if (index != -1) {
-            mData.remove(index);
-            notifyItemRemoved(index);
-            return true;
-        }
-        return false;
+        return mData.remove(obj);
     }
-
-    // TODO: Notify of change if modified from iterator.
 
     @UiThread
     @NonNull
@@ -193,34 +155,19 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mData.containsAll(collection);
     }
 
-    @UiThread
     @Override
     public final boolean removeAll(@NonNull Collection<?> collection) {
-        boolean removed = mData.removeAll(collection);
-        if (removed) {
-            // TODO: Fine-grained change notification.
-            notifyDataChanged();
-        }
-        return removed;
+        return mData.removeAll(collection);
     }
 
-    @UiThread
     @Override
     public final boolean retainAll(@NonNull Collection<?> collection) {
-        boolean changed = mData.retainAll(collection);
-        if (changed) {
-            // TODO: Fine-grained change notification.
-            notifyDataChanged();
-        }
-        return changed;
+        return mData.retainAll(collection);
     }
 
-    @UiThread
     @Override
     public final T set(int index, T object) {
-        T t = mData.set(index, object);
-        notifyItemChanged(index);
-        return t;
+        return mData.set(index, object);
     }
 
     @UiThread
@@ -230,10 +177,11 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         return mData.toArray();
     }
 
+    @SuppressWarnings("SuspiciousToArrayCall")
     @UiThread
     @NonNull
     @Override
-    public final <T> T[] toArray(@NonNull T[] contents) {
+    public final <E> E[] toArray(@NonNull E[] contents) {
         return mData.toArray(contents);
     }
 
@@ -252,7 +200,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @UiThread
     @Override
     public final void clear() {
-        clearElementsWithCallback(true);
+        mClear = false;
+        onClear();
+        mData.clear();
     }
 
     @Override
@@ -312,7 +262,9 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
             proceed();
         }
         if (mClear) {
-            clearElementsWithCallback(true);
+            mClear = false;
+            onClear();
+            mData.clear();
         }
         startThreadIfNeeded();
     }
@@ -335,18 +287,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     /** Called when loading is about to begin from the start. Always called from the UI thread. */
     @UiThread
     protected void onLoadBegin() {
-    }
-
-    private void clearElementsWithCallback(boolean notifyRemoved) {
-        mClear = false;
-        int size = mData.size();
-        if (size > 0) {
-            onClear();
-            mData.clear();
-            if (notifyRemoved) {
-                notifyItemRangeRemoved(0, size);
-            }
-        }
     }
 
     private boolean startThreadIfNeeded() {
@@ -438,37 +378,14 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     }
 
     private void overwriteResult(@NonNull List<? extends T> result) {
-        int oldSize = mData.size();
-        clearElementsWithCallback(false);
-        appendNonNullElements(result);
-        int newSize = mData.size();
-        int deltaSize = newSize - oldSize;
-        int changed = min(oldSize, newSize);
-        if (changed > 0) {
-            notifyItemRangeChanged(0, changed);
-        }
-        if (deltaSize < 0) {
-            notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
-        } else if (deltaSize > 0) {
-            notifyItemRangeInserted(oldSize, abs(deltaSize));
-        }
+        mClear = false;
+        onClear();
+        mData.clear();
+        mData.addAll(result);
     }
 
     private void appendResult(@NonNull List<? extends T> result) {
-        int oldSize = mData.size();
-        appendNonNullElements(result);
-        int deltaSize = mData.size() - oldSize;
-        if (deltaSize > 0) {
-            notifyItemRangeInserted(oldSize, deltaSize);
-        }
-    }
-
-    private void appendNonNullElements(@NonNull List<? extends T> result) {
-        for (T t : result) {
-            if (t != null) {
-                mData.add(t);
-            }
-        }
+        mData.addAll(result);
     }
 
     private void setLoading(final boolean loading) {
