@@ -11,6 +11,8 @@ import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 
+import static com.nextfaze.poweradapters.data.rx.ThreadUtils.assertUiThread;
+
 public final class RxData {
 
     private RxData() {
@@ -22,7 +24,7 @@ public final class RxData {
         return Observable.create(new Observable.OnSubscribe<Data<T>>() {
             @Override
             public void call(final Subscriber<? super Data<T>> subscriber) {
-                ThreadUtils.assertUiThread();
+                assertUiThread();
                 subscriber.onNext(data);
                 final DataObserver dataObserver = new SimpleDataObserver() {
                     @Override
@@ -45,44 +47,94 @@ public final class RxData {
 
     @CheckResult
     @NonNull
-    public static Observable<Change> changes(@NonNull final Data<?> data) {
-        return Observable.create(new Observable.OnSubscribe<Change>() {
+    public static Observable<ChangeEvent> changes(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<ChangeEvent>() {
             @Override
-            public void call(final Subscriber<? super Change> subscriber) {
-                ThreadUtils.assertUiThread();
-                final DataObserver dataObserver = new DataObserver() {
-                    @Override
-                    public void onChanged() {
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(Change.newChange(0, data.size()));
-                        }
-                    }
-
+            public void call(final Subscriber<? super ChangeEvent> subscriber) {
+                assertUiThread();
+                final DataObserver dataObserver = new Observer() {
                     @Override
                     public void onItemRangeChanged(int positionStart, int itemCount) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(Change.newChange(positionStart, itemCount));
+                            subscriber.onNext(new ChangeEvent(positionStart, itemCount));
                         }
                     }
+                };
+                data.registerDataObserver(dataObserver);
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterDataObserver(dataObserver);
+                    }
+                });
+            }
+        });
+    }
 
+    @CheckResult
+    @NonNull
+    public static Observable<InsertEvent> inserts(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<InsertEvent>() {
+            @Override
+            public void call(final Subscriber<? super InsertEvent> subscriber) {
+                assertUiThread();
+                final DataObserver dataObserver = new Observer() {
                     @Override
                     public void onItemRangeInserted(int positionStart, int itemCount) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(Change.newInsert(positionStart, itemCount));
+                            subscriber.onNext(new InsertEvent(positionStart, itemCount));
                         }
                     }
+                };
+                data.registerDataObserver(dataObserver);
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterDataObserver(dataObserver);
+                    }
+                });
+            }
+        });
+    }
 
+    @CheckResult
+    @NonNull
+    public static Observable<RemoveEvent> removes(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<RemoveEvent>() {
+            @Override
+            public void call(final Subscriber<? super RemoveEvent> subscriber) {
+                assertUiThread();
+                final DataObserver dataObserver = new Observer() {
                     @Override
                     public void onItemRangeRemoved(int positionStart, int itemCount) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(Change.newRemove(positionStart, itemCount));
+                            subscriber.onNext(new RemoveEvent(positionStart, itemCount));
                         }
                     }
+                };
+                data.registerDataObserver(dataObserver);
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        data.unregisterDataObserver(dataObserver);
+                    }
+                });
+            }
+        });
+    }
 
+    @CheckResult
+    @NonNull
+    public static Observable<MoveEvent> moves(@NonNull final Data<?> data) {
+        return Observable.create(new Observable.OnSubscribe<MoveEvent>() {
+            @Override
+            public void call(final Subscriber<? super MoveEvent> subscriber) {
+                assertUiThread();
+                final DataObserver dataObserver = new Observer() {
                     @Override
                     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(Change.newMove(fromPosition, toPosition, itemCount));
+                            subscriber.onNext(new MoveEvent(fromPosition, toPosition, itemCount));
                         }
                     }
                 };
@@ -103,7 +155,7 @@ public final class RxData {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
-                ThreadUtils.assertUiThread();
+                assertUiThread();
                 subscriber.onNext(data.isLoading());
                 final LoadingObserver loadingObserver = new LoadingObserver() {
                     @Override
@@ -171,5 +223,11 @@ public final class RxData {
                 });
             }
         });
+    }
+
+    private static class Observer extends SimpleDataObserver {
+        @Override
+        public void onChanged() {
+        }
     }
 }
