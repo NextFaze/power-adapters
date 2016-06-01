@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters.binding;
 
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
@@ -15,12 +14,12 @@ import java.util.WeakHashMap;
 public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull
-    private final WeakHashMap<ViewType, Binder> mBinders = new WeakHashMap<>();
+    private final WeakHashMap<ViewType, Binder<?, ?>> mBinders = new WeakHashMap<>();
 
     @NonNull
     private final Mapper mMapper;
 
-    public BindingAdapter(@NonNull Mapper mapper) {
+    protected BindingAdapter(@NonNull Mapper mapper) {
         mMapper = mapper;
     }
 
@@ -30,9 +29,9 @@ public abstract class BindingAdapter extends PowerAdapter {
     @NonNull
     @Override
     public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        Binder binder = mBinders.get(viewType);
+        Binder<?, ?> binder = mBinders.get(viewType);
         if (binder == null) {
-            // Should never happen, as callers are required to invoke getItemViewType(int) before invoking this method.
+            // Should never happen, as callers are expected to invoke getItemViewType(int) before invoking this method.
             throw new AssertionError("No binder associated with view type");
         }
         return binder.newView(parent);
@@ -49,7 +48,7 @@ public abstract class BindingAdapter extends PowerAdapter {
     @Override
     public final ViewType getItemViewType(int position) {
         Object item = getItem(position);
-        Binder binder = binderOrThrow(item, position);
+        Binder<Object, ?> binder = binderOrThrow(item, position);
         ViewType viewType = binder.getViewType(item, position);
         mBinders.put(viewType, binder);
         return viewType;
@@ -68,20 +67,17 @@ public abstract class BindingAdapter extends PowerAdapter {
     }
 
     @Override
-    public boolean hasStableIds() {
+    public final boolean hasStableIds() {
         return mMapper.hasStableIds();
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
-    private Binder binderOrThrow(@NonNull Object item, int position) {
-        Binder binder = mMapper.getBinder(item, position);
-        assertBinder(binder, position, item);
-        return binder;
-    }
-
-    private void assertBinder(@Nullable Binder binder, int position, Object item) {
+    private Binder<Object, View> binderOrThrow(@NonNull Object item, int position) {
+        Binder<Object, View> binder = (Binder<Object, View>) mMapper.getBinder(item, position);
         if (binder == null) {
-            throw new AssertionError("No binder for position " + position + ", item " + item);
+            throw new AssertionError("No binder for item " + item + " at position " + position);
         }
+        return binder;
     }
 }

@@ -1,17 +1,35 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
-public abstract class BinderWrapper implements Binder {
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
+
+public abstract class BinderWrapper<T, V extends View> implements Binder<T, V> {
 
     @NonNull
-    private final Binder mBinder;
+    private final Binder<? super T, ? super V> mBinder;
 
-    protected BinderWrapper(@NonNull Binder binder) {
+    @NonNull
+    static <T, V extends View> Binder<? super T, ? extends V> overrideLayout(@NonNull Binder<? super T, V> binder,
+                                                                             @LayoutRes final int layoutResource) {
+        if (layoutResource <= 0) {
+            return binder;
+        }
+        return new BinderWrapper<T, V>(binder) {
+            @NonNull
+            @Override
+            public View newView(@NonNull ViewGroup viewGroup) {
+                return layoutInflater(viewGroup).inflate(layoutResource, viewGroup, false);
+            }
+        };
+    }
+
+    protected BinderWrapper(@NonNull Binder<? super T, ? super V> binder) {
         mBinder = binder;
     }
 
@@ -22,24 +40,24 @@ public abstract class BinderWrapper implements Binder {
     }
 
     @Override
-    public void bindView(@NonNull Object item, @NonNull View v, @NonNull Holder holder) {
-        mBinder.bindView(item, v, holder);
+    public void bindView(@NonNull T t, @NonNull V v, @NonNull Holder holder) {
+        mBinder.bindView(t, v, holder);
     }
 
     @Override
-    public boolean isEnabled(@NonNull Object obj, int position) {
-        return mBinder.isEnabled(obj, position);
+    public boolean isEnabled(@NonNull T t, int position) {
+        return mBinder.isEnabled(t, position);
     }
 
     @Override
-    public long getItemId(@NonNull Object obj, int position) {
-        return mBinder.getItemId(obj, position);
+    public long getItemId(@NonNull T t, int position) {
+        return mBinder.getItemId(t, position);
     }
 
     @NonNull
     @Override
-    public ViewType getViewType(@NonNull Object obj, int position) {
-        return mBinder.getViewType(obj, position);
+    public ViewType getViewType(@NonNull T t, int position) {
+        return mBinder.getViewType(t, position);
     }
 
     @Override

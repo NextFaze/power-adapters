@@ -6,7 +6,7 @@ import android.view.View;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.binding.MapperBuilder;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
@@ -16,7 +16,7 @@ import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRe
 public final class LongLivedDataFragment extends BaseFragment {
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
+    private final Mapper mMapper = new MapperBuilder()
             .bind(NewsItem.class, new NewsItemBinder())
             .build();
 

@@ -14,7 +14,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.binding.MapperBuilder;
 import com.nextfaze.poweradapters.binding.TypedBinder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -38,7 +38,7 @@ public final class LaunchActivity extends AppCompatActivity {
     );
 
     @NonNull
-    private final Binder mSampleBinder = new TypedBinder<Sample, TextView>(android.R.layout.simple_list_item_1) {
+    private final Binder<Sample, TextView> mSampleBinder = new TypedBinder<Sample, TextView>(android.R.layout.simple_list_item_1) {
         @Override
         protected void bind(@NonNull final Sample sample, @NonNull TextView v, @NonNull Holder holder) {
             v.setText(sample.getName());
@@ -52,7 +52,7 @@ public final class LaunchActivity extends AppCompatActivity {
     };
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
+    private final Mapper mMapper = new MapperBuilder()
             .bind(Sample.class, mSampleBinder)
             .build();
 

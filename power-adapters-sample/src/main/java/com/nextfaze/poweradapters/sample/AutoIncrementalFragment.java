@@ -8,7 +8,7 @@ import android.widget.ListView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.binding.MapperBuilder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
@@ -22,7 +22,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
     private final NewsIncrementalData mData = new NewsIncrementalData(50, 10);
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
+    private final Mapper mMapper = new MapperBuilder()
             .bind(NewsItem.class, new NewsItemBinder())
             .build();
 

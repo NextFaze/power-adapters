@@ -11,7 +11,7 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
+import com.nextfaze.poweradapters.binding.MapperBuilder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.binding.ViewHolderBinder;
 import com.nextfaze.poweradapters.data.Data;
@@ -30,7 +30,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     private final NewsMultiTypeData mData = new NewsMultiTypeData();
 
     @NonNull
-    private final Binder mNewsItemBinder = new ViewHolderBinder<NewsItem, NewsItemHolder>(android.R.layout.simple_list_item_1) {
+    private final Binder<NewsItem, View> mNewsItemBinder = new ViewHolderBinder<NewsItem, NewsItemHolder>(android.R.layout.simple_list_item_1) {
         @NonNull
         @Override
         protected NewsItemHolder newViewHolder(@NonNull View v) {
@@ -46,7 +46,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     };
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
+    private final Mapper mMapper = new MapperBuilder()
             .bind(NewsItem.class, mNewsItemBinder)
             .bind(NewsSection.class, new NewsSectionBinder())
             .build();

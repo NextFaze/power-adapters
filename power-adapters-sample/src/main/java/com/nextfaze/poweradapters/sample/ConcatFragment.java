@@ -63,10 +63,10 @@ public class ConcatFragment extends BaseFragment {
 
     @NonNull
     private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull final NewsIncrementalData data,
-                                                               @NonNull Binder newsItemBinder) {
-        Binder removeItemBinder = new BinderWrapper(newsItemBinder) {
+                                                               @NonNull Binder<NewsItem, TextView> newsItemBinder) {
+        Binder<NewsItem, TextView> removeItemBinder = new BinderWrapper<NewsItem, TextView>(newsItemBinder) {
             @Override
-            public void bindView(@NonNull final Object item, @NonNull View v, @NonNull final Holder holder) {
+            public void bindView(@NonNull final NewsItem item, @NonNull TextView v, @NonNull final Holder holder) {
                 super.bindView(item, v, holder);
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override

@@ -17,11 +17,11 @@ public interface Mapper {
      * support the object.
      */
     @Nullable
-    Binder getBinder(@NonNull Object item, int position);
+    Binder<?, ?> getBinder(@NonNull Object item, int position);
 
     /** Return a collection containing all of the possible binders this mapper could respond with. */
     @NonNull
-    Collection<? extends Binder> getAllBinders();
+    Collection<? extends Binder<?, ?>> getAllBinders();
 
     /**
      * Returns whether the IDs supplied by all binders are considered stable.

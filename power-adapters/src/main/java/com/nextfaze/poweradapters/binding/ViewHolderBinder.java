@@ -10,7 +10,7 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
-public abstract class ViewHolderBinder<T, H extends ViewHolder> extends AbstractBinder {
+public abstract class ViewHolderBinder<T, H extends ViewHolder> extends AbstractBinder<T, View> {
 
     @NonNull
     private final WeakMap<View, H> mViewHolders = new WeakMap<>();
@@ -44,34 +44,18 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Abstract
     }
 
     @Override
-    public final void bindView(@NonNull Object obj, @NonNull View v, @NonNull Holder holder) {
+    public final void bindView(@NonNull T t, @NonNull View v, @NonNull Holder holder) {
         H h = mViewHolders.get(v);
         if (h == null) {
             h = newViewHolder(v);
             mViewHolders.put(v, h);
         }
         //noinspection unchecked
-        bindViewHolder((T) obj, h, holder);
+        bindViewHolder(t, h, holder);
     }
 
     @Override
-    public final boolean isEnabled(@NonNull Object obj, int position) {
-        //noinspection unchecked
-        return isEnabledChecked((T) obj, position);
-    }
-
-    @Override
-    public final long getItemId(@NonNull Object obj, int position) {
-        //noinspection unchecked
-        return getItemIdChecked((T) obj, position);
-    }
-
-    protected long getItemIdChecked(@NonNull T t, int position) {
-        return super.getItemId(t, position);
-    }
-
-    @SuppressWarnings("UnusedParameters")
-    protected boolean isEnabledChecked(@NonNull T t, int position) {
+    public boolean isEnabled(@NonNull T t, int position) {
         return mEnabled;
     }
 

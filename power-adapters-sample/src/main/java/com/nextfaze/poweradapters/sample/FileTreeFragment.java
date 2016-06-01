@@ -105,7 +105,7 @@ public class FileTreeFragment extends BaseFragment {
     @NonNull
     private PowerAdapter createFilesAdapterSimple(@NonNull final File file, final int depth, final boolean tree) {
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
-        Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
+        Binder<File, TextView> binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
             protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
                 v.setText(formatFile(file, depth));
@@ -152,7 +152,7 @@ public class FileTreeFragment extends BaseFragment {
                 overrideData != null ? overrideData : new DirectoryData(file, MAX_DISPLAYED_FILES_PER_DIR);
         final AtomicReference<TreeAdapter> treeAdapterRef = new AtomicReference<>();
 
-        Binder binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
+        Binder<File, TextView> binder = new TypedBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
             protected void bind(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
                 v.setText(formatFile(file, depth));

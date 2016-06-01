@@ -21,13 +21,13 @@ public class MapperWrapper implements Mapper {
 
     @Nullable
     @Override
-    public Binder getBinder(@NonNull Object item, int position) {
+    public Binder<?, ?> getBinder(@NonNull Object item, int position) {
         return mMapper.getBinder(item, position);
     }
 
     @NonNull
     @Override
-    public Collection<? extends Binder> getAllBinders() {
+    public Collection<? extends Binder<?, ?>> getAllBinders() {
         return mMapper.getAllBinders();
     }
 
