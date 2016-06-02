@@ -11,7 +11,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.Predicate;
@@ -78,13 +77,6 @@ public final class ConcatFragment extends BaseFragment {
             }
         };
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(removeItemBinder));
-
-        adapter = new DividerAdapterBuilder()
-                .innerResource(R.layout.list_divider_item_inner)
-                .leadingResource(R.layout.list_divider_item)
-                .trailingResource(R.layout.list_divider_item_trailing)
-                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
-                .build(adapter);
 
         // Header
         adapter = adapter
