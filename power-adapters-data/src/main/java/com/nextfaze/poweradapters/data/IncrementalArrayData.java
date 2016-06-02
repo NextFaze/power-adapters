@@ -4,9 +4,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
@@ -27,7 +25,6 @@ import static java.lang.Thread.currentThread;
  * has no more data. Cannot contain {@code null} elements. Not thread-safe.
  * @param <T> The type of element this data contains.
  */
-@Accessors(prefix = "m")
 public abstract class IncrementalArrayData<T> extends AbstractData<T> implements List<T> {
 
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
@@ -431,8 +428,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         }
     }
 
-    @Getter
-    @Accessors(prefix = "m")
     public static final class Result<T> {
 
         @SuppressWarnings("unchecked")
@@ -458,6 +453,15 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
         @NonNull
         public static <T> Result<T> noneRemaining() {
             return NONE_REMAINING;
+        }
+
+        @NonNull
+        public List<? extends T> getElements() {
+            return mElements;
+        }
+
+        public int getRemaining() {
+            return mRemaining;
         }
     }
 }

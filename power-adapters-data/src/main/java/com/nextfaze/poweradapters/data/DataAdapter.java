@@ -5,13 +5,11 @@ import android.widget.BaseAdapter;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /** Presents the contents of a {@link Data} instance, and responds to change events. */
-@Accessors(prefix = "m")
 public abstract class DataAdapter<T> extends BaseAdapter {
 
     @NonNull

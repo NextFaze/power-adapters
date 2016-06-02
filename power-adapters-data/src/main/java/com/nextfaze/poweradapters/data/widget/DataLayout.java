@@ -26,7 +26,6 @@ import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.R;
 import com.nextfaze.poweradapters.data.internal.DataWatcher;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -63,7 +62,6 @@ import static java.util.Collections.singleton;
  * @see DataLayout.LayoutParams
  * @see DataLayout#invalidateComponentMapping()
  */
-@Accessors(prefix = "m")
 public class DataLayout extends RelativeLayout {
 
     private static final String TAG = DataLayout.class.getSimpleName();

@@ -4,12 +4,9 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 /** Wraps another {@link PowerAdapter} optionally, delegating work to it. The wrapped adapter can be reassigned freely. */
-@Accessors(prefix = "m")
 public final class DelegateAdapter extends PowerAdapter {
 
     @NonNull
@@ -40,7 +37,6 @@ public final class DelegateAdapter extends PowerAdapter {
         }
     };
 
-    @Getter
     @Nullable
     private PowerAdapter mDelegate;
 
@@ -67,6 +63,11 @@ public final class DelegateAdapter extends PowerAdapter {
                 notifyItemRangeInserted(0, insertCount);
             }
         }
+    }
+
+    @Nullable
+    public PowerAdapter getDelegate() {
+        return mDelegate;
     }
 
     @Override

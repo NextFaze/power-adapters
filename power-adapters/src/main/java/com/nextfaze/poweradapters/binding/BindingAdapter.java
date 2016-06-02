@@ -6,11 +6,9 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.WeakHashMap;
 
-@Accessors(prefix = "m")
 public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull

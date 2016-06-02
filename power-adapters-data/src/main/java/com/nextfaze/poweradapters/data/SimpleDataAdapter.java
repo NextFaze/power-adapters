@@ -5,9 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
-@Accessors(prefix = "m")
 public abstract class SimpleDataAdapter<T> extends DataAdapter<T> {
 
     @LayoutRes

@@ -1,7 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.List;
 import static java.util.Collections.addAll;
 import static java.util.Collections.emptyList;
 
-@Accessors(prefix = "m")
 public final class ImmutableData<T> extends AbstractData<T> {
 
     private static final ImmutableData<Object> EMPTY = new ImmutableData<>(emptyList());

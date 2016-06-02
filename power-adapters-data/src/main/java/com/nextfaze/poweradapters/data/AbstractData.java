@@ -5,14 +5,12 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
 import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.Iterator;
 
 /**
  * Skeleton {@link Data} implementation that provides observer management and sensible default method implementations.
  */
-@Accessors(prefix = "m")
 public abstract class AbstractData<T> implements Data<T> {
 
     @NonNull

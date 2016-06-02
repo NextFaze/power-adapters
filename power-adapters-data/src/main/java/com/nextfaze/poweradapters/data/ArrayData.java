@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters.data;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +14,6 @@ import java.util.ListIterator;
  * thread-safe.
  * @param <T> The type of element this data contains.
  */
-@Accessors(prefix = "m")
 public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
 
     /** The backing array of non-null elements. */

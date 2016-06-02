@@ -4,7 +4,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.WeakHashMap;
 
@@ -12,7 +11,6 @@ import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-@Accessors(prefix = "m")
 final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull

@@ -5,9 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.io.InterruptedIOException;
 import java.util.concurrent.Callable;
@@ -17,7 +15,6 @@ import java.util.concurrent.FutureTask;
 
 import static android.os.Looper.getMainLooper;
 
-@Accessors(prefix = "m")
 abstract class Task<T> {
 
     private static final String TAG = Task.class.getSimpleName();
@@ -61,7 +58,6 @@ abstract class Task<T> {
         }
     });
 
-    @Getter
     @Nullable
     private volatile Thread mExecutingThread;
 

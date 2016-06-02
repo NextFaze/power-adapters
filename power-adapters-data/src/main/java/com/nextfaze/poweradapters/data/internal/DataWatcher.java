@@ -7,7 +7,6 @@ import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.ErrorObserver;
 import com.nextfaze.poweradapters.data.LoadingObserver;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +20,6 @@ import static java.util.Arrays.asList;
  * Convenience class for observing {@link Data} instances, and ensuring observers are correctly
  * registered/unregistered.
  */
-@Accessors(prefix = "m")
 public abstract class DataWatcher {
 
     private static final String TAG = DataWatcher.class.getSimpleName();
