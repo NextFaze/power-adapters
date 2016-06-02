@@ -54,7 +54,6 @@ public final class DataBindingAdapter extends BindingAdapter {
         return mData.size();
     }
 
-
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
