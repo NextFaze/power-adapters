@@ -320,19 +320,19 @@ public abstract class Data<T> implements Iterable<T> {
 
     @SuppressWarnings("unchecked")
     @NonNull
-    public <O> Data<O> compose(@NonNull Transformer<? super T, ? extends O> transformer) {
+    public final <O> Data<O> compose(@NonNull Transformer<? super T, ? extends O> transformer) {
         return ((Transformer<T, O>) transformer).transform(this);
     }
 
     /** Filters the specified data based on a predicate. */
     @NonNull
-    public Data<T> filter(@NonNull Predicate<? super T> predicate) {
+    public final Data<T> filter(@NonNull Predicate<? super T> predicate) {
         return new FilterData<>(this, predicate);
     }
 
     /** Filter the specified data by class. The resulting elements are guaranteed to be of the given type. */
     @NonNull
-    public Data<T> filter(@NonNull final Class<T> type) {
+    public final Data<T> filter(@NonNull final Class<T> type) {
         //noinspection unchecked
         return new FilterData<>(this, new Predicate<Object>() {
             @Override
@@ -344,12 +344,12 @@ public abstract class Data<T> implements Iterable<T> {
 
     /** Transforms the specified data by applying {@code function} to each element. */
     @NonNull
-    public <O> Data<O> transform(@NonNull Function<? super T, ? extends O> function) {
+    public final <O> Data<O> transform(@NonNull Function<? super T, ? extends O> function) {
         return new TransformData<>(this, function);
     }
 
     @NonNull
-    public Data<T> offset(int offset) {
+    public final Data<T> offset(int offset) {
         if (offset <= 0) {
             return this;
         }
@@ -357,7 +357,7 @@ public abstract class Data<T> implements Iterable<T> {
     }
 
     @NonNull
-    public Data<T> limit(int limit) {
+    public final Data<T> limit(int limit) {
         if (limit == Integer.MAX_VALUE) {
             return this;
         }
