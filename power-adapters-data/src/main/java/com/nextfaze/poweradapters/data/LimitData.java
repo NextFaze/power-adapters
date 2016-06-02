@@ -2,20 +2,43 @@ package com.nextfaze.poweradapters.data;
 
 import lombok.NonNull;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 final class LimitData<T> extends DataWrapper<T> {
 
     @NonNull
     private final Data<? extends T> mData;
 
-    private final int mLimit;
+    private int mLimit;
+
+    LimitData(@NonNull Data<? extends T> data) {
+        super(data);
+        mData = data;
+    }
 
     LimitData(@NonNull Data<? extends T> data, int limit) {
         super(data);
         mData = data;
         mLimit = max(0, limit);
+    }
+
+    public int getLimit() {
+        return mLimit;
+    }
+
+    public void setLimit(int limit) {
+        limit = max(0, limit);
+        if (limit != mLimit) {
+            int oldSize = size();
+            mLimit = limit;
+            int newSize = size();
+            int deltaSize = newSize - oldSize;
+            if (deltaSize < 0) {
+                notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
+            } else if (deltaSize > 0) {
+                notifyItemRangeInserted(oldSize, deltaSize);
+            }
+        }
     }
 
     @NonNull
