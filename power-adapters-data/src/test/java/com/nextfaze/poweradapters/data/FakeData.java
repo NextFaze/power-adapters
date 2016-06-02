@@ -9,7 +9,7 @@ import java.util.ListIterator;
 
 import static java.util.Arrays.asList;
 
-public class FakeData<T> extends AbstractData<T> implements List<T> {
+public class FakeData<T> extends Data<T> implements List<T> {
 
     @NonNull
     private final ArrayList<T> mData = new ArrayList<>();
@@ -23,11 +23,6 @@ public class FakeData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final int size() {
         return mData.size();
-    }
-
-    @Override
-    public final boolean isEmpty() {
-        return mData.isEmpty();
     }
 
     @Override

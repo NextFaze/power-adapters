@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters.data;
 import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
-public abstract class DataWrapper<T> extends AbstractData<T> {
+public abstract class DataWrapper<T> extends Data<T> {
 
     @NonNull
     private final Data<?> mData;
@@ -97,11 +97,6 @@ public abstract class DataWrapper<T> extends AbstractData<T> {
     @Override
     public int available() {
         return mData.available();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return mData.isEmpty();
     }
 
     @Override

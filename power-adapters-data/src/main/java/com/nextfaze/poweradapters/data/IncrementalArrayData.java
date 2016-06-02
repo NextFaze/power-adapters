@@ -25,7 +25,7 @@ import static java.lang.Thread.currentThread;
  * has no more data. Cannot contain {@code null} elements. Not thread-safe.
  * @param <T> The type of element this data contains.
  */
-public abstract class IncrementalArrayData<T> extends AbstractData<T> implements List<T> {
+public abstract class IncrementalArrayData<T> extends Data<T> implements List<T> {
 
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
 
@@ -73,11 +73,6 @@ public abstract class IncrementalArrayData<T> extends AbstractData<T> implements
     @Override
     public final int size() {
         return mData.size();
-    }
-
-    @Override
-    public final boolean isEmpty() {
-        return mData.isEmpty();
     }
 
     @Override

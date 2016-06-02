@@ -9,12 +9,12 @@ import java.util.Collection;
 final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @NonNull
-    private final AbstractData<E> mData;
+    private final Data<E> mData;
 
     @NonNull
     private final ArrayList<E> mArray = new ArrayList<>();
 
-    NotifyingArrayList(@NonNull AbstractData<E> data) {
+    NotifyingArrayList(@NonNull Data<E> data) {
         mData = data;
     }
 

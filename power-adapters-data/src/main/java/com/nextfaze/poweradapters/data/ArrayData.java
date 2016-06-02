@@ -14,7 +14,7 @@ import java.util.ListIterator;
  * thread-safe.
  * @param <T> The type of element this data contains.
  */
-public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
+public abstract class ArrayData<T> extends Data<T> implements List<T> {
 
     /** The backing array of non-null elements. */
     @NonNull
@@ -48,11 +48,6 @@ public abstract class ArrayData<T> extends AbstractData<T> implements List<T> {
     @Override
     public final int size() {
         return mData.size();
-    }
-
-    @Override
-    public final boolean isEmpty() {
-        return mData.isEmpty();
     }
 
     @Override

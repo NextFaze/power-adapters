@@ -17,12 +17,12 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public final class AbstractDataTest {
+public final class DataTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
 
-    private AbstractData<?> mData;
+    private Data<?> mData;
 
     @Mock
     private DataObserver mWrapperDataObserver;
@@ -39,7 +39,7 @@ public final class AbstractDataTest {
     @Before
     public void setUp() throws Exception {
         // Must create spy here, instead of using @Spy annotation, for reasons unknown
-        mData = spy(AbstractData.class);
+        mData = spy(Data.class);
     }
 
     @Test
