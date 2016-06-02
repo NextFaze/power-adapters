@@ -318,6 +318,12 @@ public abstract class Data<T> implements Iterable<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @NonNull
+    public <O> Data<O> compose(@NonNull Transformer<? super T, ? extends O> transformer) {
+        return ((Transformer<T, O>) transformer).transform(this);
+    }
+
     /** Filters the specified data based on a predicate. */
     @NonNull
     public Data<T> filter(@NonNull Predicate<? super T> predicate) {
@@ -361,5 +367,10 @@ public abstract class Data<T> implements Iterable<T> {
     @NonNull
     public static <T> Data<T> emptyData() {
         return emptyImmutableData();
+    }
+
+    public interface Transformer<T, R> {
+        @NonNull
+        Data<R> transform(@NonNull Data<T> data);
     }
 }
