@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -25,11 +24,10 @@ import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.data.DataConditions.*;
+import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 abstract class BaseFragment extends Fragment {
 
@@ -41,9 +39,6 @@ abstract class BaseFragment extends Fragment {
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
-
-    @Bind(R.id.list)
-    ListView mListView;
 
     @Bind(R.id.recycler)
     RecyclerView mRecyclerView;
@@ -64,15 +59,14 @@ abstract class BaseFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setAddDuration(ANIMATION_DURATION);
         animator.setRemoveDuration(ANIMATION_DURATION);
         animator.setChangeDuration(ANIMATION_DURATION);
         animator.setMoveDuration(ANIMATION_DURATION);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mRecyclerView.setItemAnimator(animator);
         mDataLayout.setErrorFormatter(new SimpleErrorFormatter());
-        showCollectionView(CollectionView.LIST_VIEW);
     }
 
     @Override
@@ -112,28 +106,17 @@ abstract class BaseFragment extends Fragment {
         });
     }
 
+    void setAdapter(@NonNull PowerAdapter adapter) {
+        mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
+    }
+
     void scrollToEnd() {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mListView.smoothScrollToPosition(mListView.getCount() - 1);
                 mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
             }
         }, SCROLL_TO_END_DELAY);
-    }
-
-    void showCollectionView(@NonNull CollectionView collectionView) {
-        switch (collectionView) {
-            case LIST_VIEW:
-                mListView.setVisibility(VISIBLE);
-                mRecyclerView.setVisibility(INVISIBLE);
-                break;
-
-            case RECYCLER_VIEW:
-                mListView.setVisibility(INVISIBLE);
-                mRecyclerView.setVisibility(VISIBLE);
-                break;
-        }
     }
 
     void showToast(@NonNull String msg) {
@@ -179,9 +162,5 @@ abstract class BaseFragment extends Fragment {
                 return adapter.append(asAdapter(layoutResource).showOnlyWhile(isEmpty(data).and(not(isLoading(data)))));
             }
         };
-    }
-
-    enum CollectionView {
-        LIST_VIEW, RECYCLER_VIEW
     }
 }

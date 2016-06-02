@@ -2,9 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
@@ -13,8 +11,6 @@ import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
-
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public final class AutoIncrementalFragment extends BaseFragment {
 
@@ -37,12 +33,6 @@ public final class AutoIncrementalFragment extends BaseFragment {
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.list)
-    ListView mListView;
-
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,10 +50,8 @@ public final class AutoIncrementalFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        mListView.setAdapter(toListAdapter(mAdapter));
-        mRecyclerView.setAdapter(toRecyclerAdapter(mAdapter));
+        setAdapter(mAdapter);
         mDataLayout.setData(mData);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     @Override

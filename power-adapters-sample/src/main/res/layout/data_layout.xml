@@ -7,36 +7,15 @@
         android:id="@+id/data_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:ignore="HardcodedText"
-        app:contentView="@+id/content"
-        app:emptyView="@+id/empty"
-        app:loadingView="@+id/loading"
-        app:errorView="@+id/error">
+        tools:ignore="HardcodedText">
 
     <!-- Content -->
 
-    <FrameLayout
-            android:id="@+id/content"
+    <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <!-- ListView -->
-
-        <ListView
-                android:id="@+id/list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:dividerHeight="0dp"
-                android:divider="@null"/>
-
-        <!-- RecyclerView -->
-
-        <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-    </FrameLayout>
+            android:layout_height="match_parent"
+            app:layout_component="content"/>
 
     <!-- Empty -->
 
@@ -45,7 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="List is empty!"/>
+            android:text="List is empty!"
+            app:layout_component="empty"/>
 
     <!-- Loading -->
 
@@ -54,7 +34,8 @@
             android:id="@+id/loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true"
+            app:layout_component="loading"/>
 
     <!-- Error -->
 
@@ -64,6 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:textColor="#ffff0000"
-            android:textStyle="italic"/>
+            android:textStyle="italic"
+            app:layout_component="error"/>
 
 </com.nextfaze.poweradapters.data.widget.DataLayout>

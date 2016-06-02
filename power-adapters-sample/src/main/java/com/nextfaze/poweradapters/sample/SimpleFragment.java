@@ -3,14 +3,12 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.ListView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
 public final class SimpleFragment extends BaseFragment {
@@ -23,9 +21,6 @@ public final class SimpleFragment extends BaseFragment {
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
-
-    @Bind(R.id.list)
-    ListView mListView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +37,7 @@ public final class SimpleFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListView.setAdapter(toListAdapter(mAdapter));
+        setAdapter(mAdapter);
         mDataLayout.setData(mData);
     }
 

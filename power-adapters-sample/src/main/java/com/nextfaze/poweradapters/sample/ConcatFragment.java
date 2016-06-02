@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.Bind;
@@ -37,9 +35,8 @@ import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.data;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
-public class ConcatFragment extends BaseFragment {
+public final class ConcatFragment extends BaseFragment {
 
     private static final int ADAPTER_COUNT = 10;
 
@@ -48,9 +45,6 @@ public class ConcatFragment extends BaseFragment {
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
-
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
 
     public ConcatFragment() {
         Random random = new Random(1);
@@ -212,10 +206,8 @@ public class ConcatFragment extends BaseFragment {
                     }
                 })
                 .toList();
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        mRecyclerView.setAdapter(toRecyclerAdapter(concat(adapters)));
+        setAdapter(concat(adapters));
         mDataLayout.setDatas(datas);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     private static final class ColoredBinder extends NewsItemBinder {

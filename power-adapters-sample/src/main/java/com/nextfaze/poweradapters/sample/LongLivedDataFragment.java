@@ -11,8 +11,6 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
-
 public final class LongLivedDataFragment extends BaseFragment {
 
     @NonNull
@@ -38,9 +36,8 @@ public final class LongLivedDataFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView.setAdapter(toRecyclerAdapter(mAdapter));
+        setAdapter(mAdapter);
         mDataLayout.setData(mData);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     @Override

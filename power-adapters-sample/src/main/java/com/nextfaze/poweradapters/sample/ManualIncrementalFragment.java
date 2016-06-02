@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -14,7 +13,6 @@ import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public final class ManualIncrementalFragment extends BaseFragment {
 
@@ -53,9 +51,6 @@ public final class ManualIncrementalFragment extends BaseFragment {
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,9 +68,8 @@ public final class ManualIncrementalFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView.setAdapter(toRecyclerAdapter(mAdapter));
+        setAdapter(mAdapter);
         mDataLayout.setData(mData);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
     @Override

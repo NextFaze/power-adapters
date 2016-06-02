@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.Bind;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
@@ -21,7 +20,6 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
 
 public final class MultipleBindingsFragment extends BaseFragment {
@@ -57,9 +55,6 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.list)
-    ListView mListView;
-
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
         return new DataBindingAdapter(data, mMapper)
@@ -85,7 +80,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListView.setAdapter(toListAdapter(mAdapter));
+        setAdapter(mAdapter);
         mDataLayout.setData(mData);
     }
 

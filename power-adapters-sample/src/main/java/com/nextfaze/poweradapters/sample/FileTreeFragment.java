@@ -3,8 +3,6 @@ package com.nextfaze.poweradapters.sample;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,15 +31,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static android.graphics.Typeface.DEFAULT;
 import static android.graphics.Typeface.DEFAULT_BOLD;
-import static android.support.v7.widget.LinearLayoutManager.VERTICAL;
 import static com.google.common.base.Strings.repeat;
 import static com.nextfaze.poweradapters.Condition.isTrue;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isLoading;
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
-public class FileTreeFragment extends BaseFragment {
+public final class FileTreeFragment extends BaseFragment {
 
     private static final int MAX_DISPLAYED_FILES_PER_DIR = Integer.MAX_VALUE;
 
@@ -53,9 +49,6 @@ public class FileTreeFragment extends BaseFragment {
 
     @Bind(R.id.data_layout)
     DataLayout mDataLayout;
-
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
 
     @Nullable
     private TreeAdapter mRootTreeAdapter;
@@ -78,9 +71,7 @@ public class FileTreeFragment extends BaseFragment {
 //        PowerAdapter adapter = createFilesAdapterSimple(mRootFile, 0, true);
 //        mDataLayout.setData(ImmutableData.of(1));
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), VERTICAL, false));
-        mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
-        showCollectionView(CollectionView.RECYCLER_VIEW);
+        setAdapter(adapter);
     }
 
     @Override
@@ -209,7 +200,7 @@ public class FileTreeFragment extends BaseFragment {
             @Override
             public View create(@NonNull ViewGroup parent) {
                 TextView headerView = (TextView) LayoutInflater.from(getActivity())
-                        .inflate(android.R.layout.simple_list_item_1, mRecyclerView, false);
+                        .inflate(android.R.layout.simple_list_item_1, parent, false);
                 headerView.setBackgroundColor(0x20FFFFFF);
                 headerView.setText(formatDir(file, depth));
                 headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
