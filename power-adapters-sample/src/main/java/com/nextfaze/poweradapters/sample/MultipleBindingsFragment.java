@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -52,7 +52,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private final PowerAdapter mAdapter = createSimpleAdapter(mData);
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
     @NonNull

@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import butterknife.Bind;
+import butterknife.BindView;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
@@ -19,7 +19,7 @@ public final class SimpleFragment extends BaseFragment {
     @NonNull
     private final PowerAdapter mAdapter = new DataBindingAdapter(mData, singletonMapper(new NewsItemBinder()));
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
     @Override

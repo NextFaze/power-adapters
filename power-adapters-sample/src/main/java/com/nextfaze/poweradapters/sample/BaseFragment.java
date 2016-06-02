@@ -15,8 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.data.Data;
@@ -37,11 +38,13 @@ abstract class BaseFragment extends Fragment {
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.recycler)
+    @BindView(R.id.recycler)
     RecyclerView mRecyclerView;
+
+    private Unbinder mUnbinder;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,7 +61,7 @@ abstract class BaseFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ButterKnife.bind(this, view);
+        mUnbinder = ButterKnife.bind(this, view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setAddDuration(ANIMATION_DURATION);
         animator.setRemoveDuration(ANIMATION_DURATION);
@@ -76,7 +79,7 @@ abstract class BaseFragment extends Fragment {
         // if your adapter and/or data instance out-live the view hierarchy, which is a common occurrence.
         // Try commenting-out the following line to trigger LeakCanary for a demonstration of this scenario.
         mRecyclerView.setAdapter(null);
-        ButterKnife.unbind(this);
+        mUnbinder.unbind();
         super.onDestroyView();
     }
 

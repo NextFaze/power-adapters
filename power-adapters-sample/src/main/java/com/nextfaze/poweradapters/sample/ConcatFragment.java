@@ -7,7 +7,7 @@ import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -43,7 +43,7 @@ public final class ConcatFragment extends BaseFragment {
     @NonNull
     private final List<Pair<NewsIncrementalData, PowerAdapter>> mPairs = new ArrayList<>();
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
     public ConcatFragment() {

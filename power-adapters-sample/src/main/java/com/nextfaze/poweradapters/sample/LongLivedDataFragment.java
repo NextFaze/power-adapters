@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import butterknife.Bind;
+import butterknife.BindView;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.MapperBuilder;
@@ -22,7 +22,7 @@ public final class LongLivedDataFragment extends BaseFragment {
 
     private PowerAdapter mAdapter;
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
     @Override

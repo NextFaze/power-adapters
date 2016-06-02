@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.nextfaze.poweradapters.Holder;
@@ -47,7 +47,7 @@ public final class FileTreeFragment extends BaseFragment {
     @Nullable
     private final Data<File> mRootData = new DirectoryData(mRootFile, MAX_DISPLAYED_FILES_PER_DIR);
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
     @Nullable

@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.Holder;
@@ -53,7 +53,7 @@ public final class LaunchActivity extends AppCompatActivity {
     @NonNull
     private final PowerAdapter mAdapter = new ListBindingAdapter<>(singletonMapper(mSampleBinder), mSamples);
 
-    @Bind(R.id.launch_activity_list)
+    @BindView(R.id.launch_activity_list)
     ListView mListView;
 
     @Override
