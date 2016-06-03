@@ -35,6 +35,7 @@ public class OffsetAdapterTest {
         mFakeAdapter = spy(new FakeAdapter(count));
         mOffsetAdapter = new OffsetAdapter(mFakeAdapter, offset);
         mOffsetAdapter.registerDataObserver(mObserver);
+        mOffsetAdapter.registerDataObserver(new VerifyingObserver(mOffsetAdapter));
         verify(mFakeAdapter).onFirstObserverRegistered();
     }
 
