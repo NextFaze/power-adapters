@@ -60,7 +60,12 @@ final class OffsetData<T> extends DataWrapper<T> {
 
     @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
-        notifyItemRangeInserted(max(0, innerPositionStart - mOffset), innerItemCount);
+        int totalInnerItemCountPreInsert = super.size() - innerItemCount;
+        int remainingSpace = max(0, mOffset - totalInnerItemCountPreInsert);
+        int insertCount = innerItemCount - remainingSpace;
+        if (insertCount > 0) {
+            notifyItemRangeInserted(max(0, innerPositionStart - mOffset), insertCount);
+        }
     }
 
     @Override

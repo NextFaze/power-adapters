@@ -119,6 +119,24 @@ public final class OffsetDataTest {
     }
 
     @Test
+    public void insertFromEmpty() {
+        configure(5, 0);
+        mFakeData.insert(0, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
+        assertContains("f", "g", "h", "i", "j");
+        verify(mObserver).onItemRangeInserted(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void insertFromBelowOffset() {
+        configure(5, 3);
+        mFakeData.insert(1, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
+        assertContains("e", "f", "g", "h", "i", "j", "1", "2");
+        verify(mObserver).onItemRangeInserted(0, 8);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
     public void insertWithinBounds() {
         mFakeData.insert(6, "a", "b", "c");
         assertContains("5", "a", "b", "c", "6", "7", "8", "9");
