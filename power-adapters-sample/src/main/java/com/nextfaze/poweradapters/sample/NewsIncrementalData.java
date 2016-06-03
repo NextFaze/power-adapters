@@ -18,6 +18,10 @@ final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
         this(100, 20);
     }
 
+    NewsIncrementalData(int total) {
+        this(total, total);
+    }
+
     NewsIncrementalData(int total, int increment) {
         mTotal = total;
         mIncrement = increment;

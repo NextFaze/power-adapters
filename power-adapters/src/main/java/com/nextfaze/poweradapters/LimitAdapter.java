@@ -8,6 +8,12 @@ final class LimitAdapter extends PowerAdapterWrapper {
 
     private int mLimit;
 
+    /**
+     * Maintain our own item count, because we split notifications, and our {@link #getItemCount()} is expected to
+     * remain consistent with those notifications.
+     */
+    private int mItemCount;
+
     public LimitAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
     }
@@ -38,6 +44,13 @@ final class LimitAdapter extends PowerAdapterWrapper {
 
     @Override
     public int getItemCount() {
+        if (getObserverCount() > 0) {
+            return mItemCount;
+        }
+        return getLimitedItemCount();
+    }
+
+    private int getLimitedItemCount() {
         return max(0, min(mLimit, super.getItemCount()));
     }
 
@@ -55,6 +68,24 @@ final class LimitAdapter extends PowerAdapterWrapper {
     @Override
     public boolean isEnabled(int position) {
         return super.isEnabled(assertWithinRange(position));
+    }
+
+    @Override
+    protected void onFirstObserverRegistered() {
+        super.onFirstObserverRegistered();
+        mItemCount = max(0, min(mLimit, super.getItemCount()));
+    }
+
+    @Override
+    protected void onLastObserverUnregistered() {
+        super.onLastObserverUnregistered();
+        mItemCount = 0;
+    }
+
+    @Override
+    protected void forwardChanged() {
+        super.forwardChanged();
+        mItemCount = max(0, min(mLimit, super.getItemCount()));
     }
 
     @Override
@@ -77,9 +108,11 @@ final class LimitAdapter extends PowerAdapterWrapper {
                     int remainingSpace = mLimit - innerTotalPreInsert;
                     int removeCount = insertCount - remainingSpace;
                     if (removeCount > 0) {
+                        mItemCount -= removeCount;
                         notifyItemRangeRemoved(innerTotalPreInsert - removeCount, removeCount);
                     }
                 }
+                mItemCount += insertCount;
                 notifyItemRangeInserted(innerPositionStart, insertCount);
             }
         }
@@ -94,10 +127,12 @@ final class LimitAdapter extends PowerAdapterWrapper {
                 notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart);
             } else {
                 int removeCount = min(mLimit - innerPositionStart, innerItemCount);
+                mItemCount -= removeCount;
                 notifyItemRangeRemoved(innerPositionStart, removeCount);
                 if (innerPositionStart + innerItemCount >= mLimit) {
                     int insertCount = innerTotalPreRemove - innerPositionStart - innerItemCount;
                     if (insertCount > 0) {
+                        mItemCount += insertCount;
                         notifyItemRangeInserted(innerPositionStart, insertCount);
                     }
                 }
