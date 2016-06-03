@@ -50,6 +50,7 @@ public final class ConcatAdapterTest {
         );
         mConcatAdapter = new ConcatAdapter.Builder().addAll(mChildAdapters).build();
         mConcatAdapter.registerDataObserver(mObserver);
+        mConcatAdapter.registerDataObserver(new VerifyingObserver(mConcatAdapter));
         for (PowerAdapter adapter : mChildAdapters) {
             verify(adapter).registerDataObserver(any(DataObserver.class));
             verify(adapter).onFirstObserverRegistered();
@@ -155,5 +156,65 @@ public final class ConcatAdapterTest {
                 .verify(mConcatAdapter);
         verify(mObserver).onItemRangeMoved(8, 10, 2);
         verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void childState1() {
+        List<FakeAdapter> childAdapters = newArrayList(
+                spy(new FakeAdapter(1)),
+                spy(new FakeAdapter(0)),
+                spy(new FakeAdapter(1))
+        );
+        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(childAdapters).build();
+        concatAdapter.registerDataObserver(mObserver);
+        for (PowerAdapter adapter : childAdapters) {
+            verify(adapter).registerDataObserver(any(DataObserver.class));
+            verify(adapter).onFirstObserverRegistered();
+        }
+        verifySubAdapterAllGetCalls()
+                .checkRange(childAdapters.get(0), 0, 1)
+                .checkRange(childAdapters.get(2), 0, 1)
+                .verify(concatAdapter);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void childState2() {
+        List<FakeAdapter> childAdapters = newArrayList(
+                spy(new FakeAdapter(12)),
+                spy(new FakeAdapter(6)),
+                spy(new FakeAdapter(0)),
+                spy(new FakeAdapter(0)),
+                spy(new FakeAdapter(11))
+        );
+        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(childAdapters).build();
+        concatAdapter.registerDataObserver(mObserver);
+        for (PowerAdapter adapter : childAdapters) {
+            verify(adapter).registerDataObserver(any(DataObserver.class));
+            verify(adapter).onFirstObserverRegistered();
+        }
+        verifySubAdapterAllGetCalls()
+                .checkRange(childAdapters.get(0), 0, 12)
+                .checkRange(childAdapters.get(1), 0, 6)
+                .checkRange(childAdapters.get(4), 0, 11)
+                .verify(concatAdapter);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void itemCountConsistentWhenChildAdaptersAreDependent() {
+        FakeAdapter fakeAdapter = spy(new FakeAdapter(3));
+        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(fakeAdapter, fakeAdapter).build();
+        DataObserver observer = mock(DataObserver.class);
+        concatAdapter.registerDataObserver(observer);
+        concatAdapter.registerDataObserver(new VerifyingObserver(concatAdapter));
+        fakeAdapter.insert(0, 1);
+        verifySubAdapterAllGetCalls()
+                .checkRange(fakeAdapter, 0, 4)
+                .checkRange(fakeAdapter, 0, 4)
+                .verify(concatAdapter);
+        verify(observer).onItemRangeInserted(3, 1); // Could be (0, 1), (4, 1) also
+        verify(observer).onItemRangeInserted(0, 1);
+        verifyNoMoreInteractions(observer);
     }
 }
