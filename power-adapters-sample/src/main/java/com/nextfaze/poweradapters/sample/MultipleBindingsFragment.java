@@ -6,7 +6,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.BindView;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -17,7 +16,6 @@ import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.binding.ViewHolderBinder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
@@ -53,9 +51,6 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private final PowerAdapter mAdapter = createSimpleAdapter(mData);
 
-    @BindView(R.id.data_layout)
-    DataLayout mDataLayout;
-
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
         return new DataBindingAdapter(data, mMapper)
@@ -82,7 +77,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setAdapter(mAdapter);
-        mDataLayout.setData(mData);
+        setData(mData);
     }
 
     @Override
@@ -107,7 +102,6 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @Override
     void onInvalidateClick() {
         mData.invalidate();
-        showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 
     void onClearClick() {

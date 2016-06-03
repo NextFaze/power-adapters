@@ -3,25 +3,17 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import android.support.v7.app.AlertDialog;
 import android.view.View;
-import android.widget.TextView;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.binding.Binder;
-import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.IncrementalArrayData;
-import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -34,37 +26,24 @@ import static com.nextfaze.poweradapters.sample.Utils.*;
 
 public final class ConcatFragment extends BaseFragment {
 
+    private static final Random RANDOM = new Random(3);
+
     private static final int ADAPTER_COUNT = 10;
 
     @NonNull
     private final List<Pair<NewsIncrementalData, PowerAdapter>> mPairs = new ArrayList<>();
 
-    @BindView(R.id.data_layout)
-    DataLayout mDataLayout;
-
     public ConcatFragment() {
-        Random random = new Random(3);
         for (int i = 0; i < ADAPTER_COUNT; i++) {
             NewsIncrementalData data = new NewsIncrementalData(15, 5);
-            mPairs.add(createPair(data, new ColoredBinder(random.nextInt())));
+            mPairs.add(createPair(data, new ColoredBinder(data, RANDOM.nextInt())));
         }
     }
 
     @NonNull
-    private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull final NewsIncrementalData data,
-                                                               @NonNull Binder<NewsItem, TextView> newsItemBinder) {
-        Binder<NewsItem, TextView> removeItemBinder = new BinderWrapper<NewsItem, TextView>(newsItemBinder) {
-            @Override
-            public void bindView(@NonNull final NewsItem item, @NonNull TextView v, @NonNull final Holder holder) {
-                super.bindView(item, v, holder);
-                v.setOnClickListener(v1 -> data.remove(item));
-                v.setOnLongClickListener(v1 -> {
-                    showEditDialog(data, holder.getPosition());
-                    return true;
-                });
-            }
-        };
-        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(removeItemBinder));
+    private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull NewsIncrementalData data,
+                                                               @NonNull NewsItemBinder newsItemBinder) {
+        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(newsItemBinder));
 
         // Header
         adapter = adapter.prepend(asAdapter(R.layout.news_header_item));
@@ -84,53 +63,6 @@ public final class ConcatFragment extends BaseFragment {
         adapter = adapter.compose(appendEmptyMessage(data));
 
         return new Pair<>(data, adapter);
-    }
-
-    private void showEditDialog(@NonNull final IncrementalArrayData<NewsItem> data, final int position) {
-        new AlertDialog.Builder(getActivity())
-                .setItems(new CharSequence[] {
-                        "Add 1 Before",
-                        "Add 1 After",
-                        "Change 1",
-                        "Add 3 Before",
-                        "Add 3 After",
-                        "Remove all"
-                }, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            data.add(position, new NewsItem("Foobar"));
-                            break;
-
-                        case 1:
-                            data.add(position + 1, new NewsItem("Foobar"));
-                            break;
-
-                        case 2:
-                            data.set(position, new NewsItem("Changed"));
-                            break;
-
-                        case 3:
-                            data.addAll(position, Arrays.asList(
-                                    new NewsItem("Foobar"),
-                                    new NewsItem("Foobar"),
-                                    new NewsItem("Foobar")
-                            ));
-                            break;
-
-                        case 4:
-                            data.addAll(position + 1, Arrays.asList(
-                                    new NewsItem("Foobar"),
-                                    new NewsItem("Foobar"),
-                                    new NewsItem("Foobar")
-                            ));
-                            break;
-
-                        case 5:
-                            data.clear();
-                            break;
-                    }
-                })
-                .show();
     }
 
     @Override
@@ -165,12 +97,13 @@ public final class ConcatFragment extends BaseFragment {
 
         private final int mColor;
 
-        ColoredBinder(int color) {
+        ColoredBinder(@NonNull NewsIncrementalData data, int color) {
+            super(data);
             mColor = color;
         }
 
         @Override
-        public void bindView(@NonNull NewsItem newsItem, @NonNull TextView v, @NonNull Holder holder) {
+        public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
             super.bindView(newsItem, v, holder);
             v.setBackgroundColor(mColor);
         }

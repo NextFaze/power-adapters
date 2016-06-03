@@ -13,6 +13,6 @@ final class NewsSimpleData extends ArrayData<NewsItem> {
     @NonNull
     @Override
     protected List<? extends NewsItem> load() throws Throwable {
-        return mNewsService.getNewsFlaky();
+        return mNewsService.getNews();
     }
 }

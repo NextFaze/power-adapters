@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:background="?android:attr/selectableItemBackground">
+
+    <!-- Title -->
+
+    <TextView android:id="@+id/title"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_centerInParent="true"
+              android:layout_alignParentLeft="true"
+              android:textSize="18sp"/>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_centerVertical="true"
+                  android:layout_alignParentRight="true">
+
+        <!-- Multiple checkbox -->
+
+        <CheckBox android:id="@+id/multiple_check_box"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginRight="8dp"
+                  android:text="5"/>
+
+        <!-- Insert before button -->
+
+        <Button android:id="@+id/insert_before_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Insert Before"/>
+
+        <!-- Remove button -->
+
+        <Button android:id="@+id/remove_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remove"/>
+
+        <!-- Insert after button -->
+
+        <Button android:id="@+id/insert_after_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Insert After"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

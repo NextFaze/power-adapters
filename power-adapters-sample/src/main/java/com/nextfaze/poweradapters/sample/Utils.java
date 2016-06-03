@@ -1,20 +1,34 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.data.Data;
+import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import lombok.NonNull;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.*;
 
+@SuppressWarnings("Guava")
 final class Utils {
 
     private Utils() {
+    }
+
+    @NonNull
+    static PowerAdapter createNewsAdapter(@NonNull NewsIncrementalData data) {
+        return new DataBindingAdapter(data, singletonMapper(new NewsItemBinder(data)));
     }
 
     @NonNull
@@ -39,5 +53,29 @@ final class Utils {
         };
         Condition dataHasMoreAvailable = data(data, d -> !d.isLoading() && !d.isEmpty() && d.available() > 0);
         return adapter -> adapter.append(asAdapter(loadNextButton).showOnlyWhile(dataHasMoreAvailable));
+    }
+
+    static void showEditDialog(@NonNull Context context, @NonNull NewsIncrementalData data, int position) {
+        List<Item> items = ImmutableList.of(
+                new Item("Change", v -> data.set(position, new NewsItem("Changed"))),
+                new Item("Clear", v -> data.clear())
+        );
+        String[] itemTitles = FluentIterable.from(items).transform(item -> item.title).toArray(String.class);
+        new AlertDialog.Builder(context)
+                .setItems(itemTitles, (dialog, which) -> items.get(which).onClickListener.onClick(null))
+                .show();
+    }
+
+    static class Item {
+        @NonNull
+        final String title;
+
+        @NonNull
+        final View.OnClickListener onClickListener;
+
+        Item(@NonNull String title, @NonNull View.OnClickListener onClickListener) {
+            this.title = title;
+            this.onClickListener = onClickListener;
+        }
     }
 }

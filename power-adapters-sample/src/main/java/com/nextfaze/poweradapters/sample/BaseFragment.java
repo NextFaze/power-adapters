@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -18,6 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
@@ -37,6 +37,9 @@ abstract class BaseFragment extends Fragment {
 
     @BindView(R.id.recycler)
     RecyclerView mRecyclerView;
+
+    @Nullable
+    private Data mData;
 
     private Unbinder mUnbinder;
 
@@ -80,26 +83,17 @@ abstract class BaseFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Reload").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onReloadClick();
-                return true;
-            }
+        menu.add("Reload").setOnMenuItemClickListener(item -> {
+            onReloadClick();
+            return true;
         });
-        menu.add("Refresh").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onRefreshClick();
-                return true;
-            }
+        menu.add("Refresh").setOnMenuItemClickListener(item -> {
+            onRefreshClick();
+            return true;
         });
-        menu.add("Invalidate").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateClick();
-                return true;
-            }
+        menu.add("Invalidate").setOnMenuItemClickListener(item -> {
+            onInvalidateClick();
+            return true;
         });
     }
 
@@ -107,22 +101,18 @@ abstract class BaseFragment extends Fragment {
         mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
     }
 
+    void setData(@NonNull Data<?> data) {
+        mData = data;
+        mDataLayout.setData(data);
+    }
+
     void scrollToEnd() {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
-            }
-        }, SCROLL_TO_END_DELAY);
+        mHandler.postDelayed(() ->
+                mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1), SCROLL_TO_END_DELAY);
     }
 
     void showToast(@NonNull String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @NonNull
-    SampleApplication getSampleApplication() {
-        return (SampleApplication) getActivity().getApplication();
     }
 
     void onReloadClick() {

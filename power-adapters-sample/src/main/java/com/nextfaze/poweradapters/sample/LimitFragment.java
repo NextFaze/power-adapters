@@ -3,24 +3,18 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
-import butterknife.BindView;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+import static com.nextfaze.poweradapters.sample.Utils.createNewsAdapter;
 
-public final class SimpleFragment extends BaseFragment {
-
-    @NonNull
-    private final NewsSimpleData mData = new NewsSimpleData();
+public final class LimitFragment extends BaseFragment {
 
     @NonNull
-    private final PowerAdapter mAdapter = new DataBindingAdapter(mData, singletonMapper(new NewsItemBinder()));
+    private final NewsIncrementalData mData = new NewsIncrementalData();
 
-    @BindView(R.id.data_layout)
-    DataLayout mDataLayout;
+    @NonNull
+    private final PowerAdapter mAdapter = createNewsAdapter(mData);
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +32,7 @@ public final class SimpleFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setAdapter(mAdapter);
-        mDataLayout.setData(mData);
+        setData(mData);
     }
 
     @Override
@@ -54,6 +48,5 @@ public final class SimpleFragment extends BaseFragment {
     @Override
     void onInvalidateClick() {
         mData.invalidate();
-        showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 }

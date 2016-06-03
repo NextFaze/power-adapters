@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -27,11 +26,10 @@ public final class LaunchActivity extends AppCompatActivity {
 
     @NonNull
     private final List<Sample> mSamples = ImmutableList.of(
-            new Sample("Simple", SimpleFragment.class),
+            new Sample("Limit", LimitFragment.class),
             new Sample("Multiple Bindings", MultipleBindingsFragment.class),
             new Sample("Auto Incremental", AutoIncrementalFragment.class),
             new Sample("Manual Incremental", ManualIncrementalFragment.class),
-            new Sample("Long-Lived Data", LongLivedDataFragment.class),
             new Sample("Concatenation", ConcatFragment.class),
             new Sample("File Tree", FileTreeFragment.class)
     );
@@ -41,12 +39,7 @@ public final class LaunchActivity extends AppCompatActivity {
         @Override
         public void bindView(@NonNull final Sample sample, @NonNull TextView v, @NonNull Holder holder) {
             v.setText(sample.getName());
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSampleClick(sample);
-                }
-            });
+            v.setOnClickListener(v1 -> onSampleClick(sample));
         }
     };
 

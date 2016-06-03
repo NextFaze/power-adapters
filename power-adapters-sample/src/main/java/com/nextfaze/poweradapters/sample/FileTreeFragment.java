@@ -6,11 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.BindView;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.nextfaze.poweradapters.Holder;
@@ -21,7 +18,6 @@ import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import java.io.File;
@@ -48,9 +44,6 @@ public final class FileTreeFragment extends BaseFragment {
     @Nullable
     private final Data<File> mRootData = new DirectoryData(mRootFile, MAX_DISPLAYED_FILES_PER_DIR);
 
-    @BindView(R.id.data_layout)
-    DataLayout mDataLayout;
-
     @Nullable
     private TreeAdapter mRootTreeAdapter;
 
@@ -66,7 +59,7 @@ public final class FileTreeFragment extends BaseFragment {
 
         // Async adapter.
         PowerAdapter adapter = createFilesAdapter(mRootData, mRootFile, 0);
-        mDataLayout.setData(mRootData);
+        setData(mRootData);
 
         // Simple, non-async adapter.
 //        PowerAdapter adapter = createFilesAdapterSimple(mRootFile, 0, true);
@@ -78,19 +71,13 @@ public final class FileTreeFragment extends BaseFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Expand All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                expandAll();
-                return true;
-            }
+        menu.add("Expand All").setOnMenuItemClickListener(item -> {
+            expandAll();
+            return true;
         });
-        menu.add("Collapse All").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                collapseAll();
-                return true;
-            }
+        menu.add("Collapse All").setOnMenuItemClickListener(item -> {
+            collapseAll();
+            return true;
         });
     }
 
@@ -102,12 +89,9 @@ public final class FileTreeFragment extends BaseFragment {
             public void bindView(@NonNull final File file, @NonNull TextView v, @NonNull final Holder holder) {
                 v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (tree && file.isDirectory()) {
-                            treeAdapterRef.get().toggleExpanded(holder.getPosition());
-                        }
+                v.setOnClickListener(v1 -> {
+                    if (tree && file.isDirectory()) {
+                        treeAdapterRef.get().toggleExpanded(holder.getPosition());
                     }
                 });
             }
@@ -118,16 +102,12 @@ public final class FileTreeFragment extends BaseFragment {
                 .limit(MAX_DISPLAYED_FILES_PER_DIR)
                 .toList();
         PowerAdapter adapter = new FileAdapter(files, singletonMapper(binder));
-        treeAdapterRef.set(new TreeAdapter(adapter, new TreeAdapter.ChildAdapterSupplier() {
-            @NonNull
-            @Override
-            public PowerAdapter get(int position) {
-                File file = files.get(position);
-                if (file.isDirectory()) {
-                    return createFilesAdapterSimple(file, depth + 1, true);
-                }
-                return PowerAdapter.EMPTY;
+        treeAdapterRef.set(new TreeAdapter(adapter, position -> {
+            File file1 = files.get(position);
+            if (file1.isDirectory()) {
+                return createFilesAdapterSimple(file1, depth + 1, true);
             }
+            return PowerAdapter.EMPTY;
         }));
         if (tree) {
             adapter = treeAdapterRef.get();
@@ -150,16 +130,13 @@ public final class FileTreeFragment extends BaseFragment {
                 v.setText(formatFile(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
                 if (file.isDirectory()) {
-                    v.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            TreeAdapter treeAdapter = treeAdapterRef.get();
-                            int position = holder.getPosition();
-                            if (treeAdapter.isExpanded(position)) {
-                                treeAdapter.setExpanded(position, false);
-                            } else {
-                                treeAdapter.setExpanded(position, true);
-                            }
+                    v.setOnClickListener(v1 -> {
+                        TreeAdapter treeAdapter = treeAdapterRef.get();
+                        int position = holder.getPosition();
+                        if (treeAdapter.isExpanded(position)) {
+                            treeAdapter.setExpanded(position, false);
+                        } else {
+                            treeAdapter.setExpanded(position, true);
                         }
                     });
                 }
@@ -167,16 +144,12 @@ public final class FileTreeFragment extends BaseFragment {
         };
 
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(binder));
-        treeAdapterRef.set(new TreeAdapter(adapter, new TreeAdapter.ChildAdapterSupplier() {
-            @NonNull
-            @Override
-            public PowerAdapter get(int position) {
-                File file = data.get(position);
-                if (file.isDirectory()) {
-                    return createFilesAdapter(null, file, depth + 1);
-                }
-                return PowerAdapter.EMPTY;
+        treeAdapterRef.set(new TreeAdapter(adapter, position -> {
+            File file1 = data.get(position);
+            if (file1.isDirectory()) {
+                return createFilesAdapter(null, file1, depth + 1);
             }
+            return PowerAdapter.EMPTY;
         }));
         adapter = treeAdapterRef.get();
 
@@ -196,17 +169,13 @@ public final class FileTreeFragment extends BaseFragment {
 
     @NonNull
     private ViewFactory directoryHeader(@NonNull final File file, final int depth) {
-        return new ViewFactory() {
-            @NonNull
-            @Override
-            public View create(@NonNull ViewGroup parent) {
-                TextView headerView = (TextView) LayoutInflater.from(getActivity())
-                        .inflate(android.R.layout.simple_list_item_1, parent, false);
-                headerView.setBackgroundColor(0x20FFFFFF);
-                headerView.setText(formatDir(file, depth));
-                headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
-                return headerView;
-            }
+        return parent -> {
+            TextView headerView = (TextView) LayoutInflater.from(getActivity())
+                    .inflate(android.R.layout.simple_list_item_1, parent, false);
+            headerView.setBackgroundColor(0x20FFFFFF);
+            headerView.setText(formatDir(file, depth));
+            headerView.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+            return headerView;
         };
     }
 
