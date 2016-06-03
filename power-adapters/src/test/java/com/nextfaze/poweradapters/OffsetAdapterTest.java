@@ -126,6 +126,33 @@ public class OffsetAdapterTest {
     }
 
     @Test
+    public void insertFromEmpty() {
+        configure(5, 0);
+        mFakeAdapter.insert(0, 10);
+        verifyState(5, 5);
+        verify(mObserver).onItemRangeInserted(0, 5);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void insertFromBelowOffset() {
+        configure(5, 3);
+        mFakeAdapter.insert(1, 10);
+        verifyState(5, 8);
+        verify(mObserver).onItemRangeInserted(0, 8);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
+    public void insertFromBelowOffset2() {
+        configure(10, 5);
+        mFakeAdapter.insert(3, 20);
+        verifyState(10, 15);
+        verify(mObserver).onItemRangeInserted(0, 15);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
     public void insertWithinBounds() {
         configure(5, 10);
         mFakeAdapter.insert(6, 3);
