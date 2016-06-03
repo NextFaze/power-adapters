@@ -15,9 +15,7 @@ final class NewsMultiTypeData extends ArrayData<Object> {
     @Override
     protected List<Object> load() throws Exception {
         ArrayList<Object> data = new ArrayList<>();
-        data.add(new NewsSection("Latest News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        data.add(new NewsSection("Yesterdays News"));
+//        data.add(new NewsSection("Latest News"));
         data.addAll(mNewsService.getNewsFlaky());
         return data;
     }

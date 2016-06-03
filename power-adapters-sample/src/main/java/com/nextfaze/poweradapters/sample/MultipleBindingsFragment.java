@@ -2,6 +2,8 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -18,9 +20,8 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
+import static com.nextfaze.poweradapters.data.DataConditions.data;
 
 public final class MultipleBindingsFragment extends BaseFragment {
 
@@ -58,7 +59,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
         return new DataBindingAdapter(data, mMapper)
-                .prepend(asAdapter(R.layout.news_header_item).showOnlyWhile(not(isEmpty(data))))
+                .prepend(asAdapter(R.layout.news_header_item).showOnlyWhile(data(data, d -> !d.isEmpty())))
                 .compose(new DividerAdapterBuilder()
                         .innerResource(R.layout.list_divider_item)
                         .outerResource(R.layout.list_divider_item)
@@ -85,6 +86,15 @@ public final class MultipleBindingsFragment extends BaseFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.add("Clear").setOnMenuItemClickListener(item -> {
+            onClearClick();
+            return true;
+        });
+    }
+
+    @Override
     void onReloadClick() {
         mData.reload();
     }
@@ -98,6 +108,10 @@ public final class MultipleBindingsFragment extends BaseFragment {
     void onInvalidateClick() {
         mData.invalidate();
         showToast("Data invalidated; background the app or change orientation to trigger reload");
+    }
+
+    void onClearClick() {
+        mData.clear();
     }
 
     static final class NewsItemHolder extends ViewHolder {

@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -13,7 +12,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.data.Data;
@@ -30,10 +28,9 @@ import java.util.Random;
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
-import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
-import static com.nextfaze.poweradapters.data.DataConditions.data;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
+import static com.nextfaze.poweradapters.sample.Utils.*;
 
 public final class ConcatFragment extends BaseFragment {
 
@@ -46,11 +43,10 @@ public final class ConcatFragment extends BaseFragment {
     DataLayout mDataLayout;
 
     public ConcatFragment() {
-        Random random = new Random(1);
+        Random random = new Random(3);
         for (int i = 0; i < ADAPTER_COUNT; i++) {
-            NewsIncrementalData data = new NewsIncrementalData(random.nextInt(10), 3);
-            ColoredBinder binder = new ColoredBinder(random.nextInt());
-            mPairs.add(createPair(data, binder));
+            NewsIncrementalData data = new NewsIncrementalData(15, 5);
+            mPairs.add(createPair(data, new ColoredBinder(random.nextInt())));
         }
     }
 
@@ -61,26 +57,17 @@ public final class ConcatFragment extends BaseFragment {
             @Override
             public void bindView(@NonNull final NewsItem item, @NonNull TextView v, @NonNull final Holder holder) {
                 super.bindView(item, v, holder);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        data.remove(item);
-                    }
-                });
-                v.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        showEditDialog(data, holder.getPosition());
-                        return true;
-                    }
+                v.setOnClickListener(v1 -> data.remove(item));
+                v.setOnLongClickListener(v1 -> {
+                    showEditDialog(data, holder.getPosition());
+                    return true;
                 });
             }
         };
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(removeItemBinder));
 
         // Header
-        adapter = adapter
-                .prepend(asAdapter(R.layout.news_header_item));
+        adapter = adapter.prepend(asAdapter(R.layout.news_header_item));
 
         // Loading indicator
         adapter = adapter.compose(appendLoadingIndicator(data));
@@ -88,28 +75,13 @@ public final class ConcatFragment extends BaseFragment {
         data.setLookAheadRowCount(-1);
 
         // Load next button
-        LoadNextAdapter loadNextAdapter =
-                new LoadNextAdapter(adapter, data, asViewFactory(R.layout.list_load_next_item));
-        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                data.loadNext();
-            }
-        });
-        adapter = loadNextAdapter;
+        adapter = adapter.compose(appendLoadNextButton(data, v -> data.loadNext()));
 
         // Footer
-        adapter = adapter
-                .append(asAdapter(R.layout.news_footer_item).showOnlyWhile(not(isEmpty(data))));
+        adapter = adapter.append(asAdapter(R.layout.news_footer_item).showOnlyWhile(not(isEmpty(data))));
 
         // Empty message
-        adapter = adapter
-                .append(asAdapter(R.layout.list_empty_item).showOnlyWhile(data(data, new Predicate<Data<?>>() {
-                    @Override
-                    public boolean apply(Data<?> data) {
-                        return data.isEmpty() && !data.isLoading();
-                    }
-                })));
+        adapter = adapter.compose(appendEmptyMessage(data));
 
         return new Pair<>(data, adapter);
     }
@@ -123,42 +95,39 @@ public final class ConcatFragment extends BaseFragment {
                         "Add 3 Before",
                         "Add 3 After",
                         "Remove all"
-                }, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                data.add(position, new NewsItem("Foobar"));
-                                break;
+                }, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            data.add(position, new NewsItem("Foobar"));
+                            break;
 
-                            case 1:
-                                data.add(position + 1, new NewsItem("Foobar"));
-                                break;
+                        case 1:
+                            data.add(position + 1, new NewsItem("Foobar"));
+                            break;
 
-                            case 2:
-                                data.set(position, new NewsItem("Changed"));
-                                break;
+                        case 2:
+                            data.set(position, new NewsItem("Changed"));
+                            break;
 
-                            case 3:
-                                data.addAll(position, Arrays.asList(
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar")
-                                ));
-                                break;
+                        case 3:
+                            data.addAll(position, Arrays.asList(
+                                    new NewsItem("Foobar"),
+                                    new NewsItem("Foobar"),
+                                    new NewsItem("Foobar")
+                            ));
+                            break;
 
-                            case 4:
-                                data.addAll(position + 1, Arrays.asList(
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar")
-                                ));
-                                break;
+                        case 4:
+                            data.addAll(position + 1, Arrays.asList(
+                                    new NewsItem("Foobar"),
+                                    new NewsItem("Foobar"),
+                                    new NewsItem("Foobar")
+                            ));
+                            break;
 
-                            case 5:
-                                data.clear();
-                                break;
-                        }
+                        case 5:
+                            data.clear();
+                            break;
                     }
                 })
                 .show();
@@ -183,20 +152,10 @@ public final class ConcatFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         List<Data<?>> datas = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, Data<?>>() {
-                    @Override
-                    public Data<?> apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
-                        return pair.first;
-                    }
-                })
+                .transform((Function<Pair<NewsIncrementalData, PowerAdapter>, Data<?>>) pair -> pair.first)
                 .toList();
         List<PowerAdapter> adapters = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, PowerAdapter>() {
-                    @Override
-                    public PowerAdapter apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
-                        return pair.second;
-                    }
-                })
+                .transform(pair -> pair.second)
                 .toList();
         setAdapter(concat(adapters));
         mDataLayout.setDatas(datas);

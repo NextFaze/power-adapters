@@ -12,6 +12,8 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
+import static com.nextfaze.poweradapters.sample.Utils.appendLoadingIndicator;
+
 public final class AutoIncrementalFragment extends BaseFragment {
 
     @NonNull

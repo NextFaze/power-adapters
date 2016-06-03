@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -19,15 +18,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.Predicate;
-import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;
-import static com.nextfaze.poweradapters.Condition.not;
-import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.data.DataConditions.*;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 abstract class BaseFragment extends Fragment {
@@ -138,32 +132,5 @@ abstract class BaseFragment extends Fragment {
     }
 
     void onInvalidateClick() {
-    }
-
-    @NonNull
-    PowerAdapter.Transformer appendLoadingIndicator(@NonNull final Data<?> data) {
-        return new PowerAdapter.Transformer() {
-            @NonNull
-            @Override
-            public PowerAdapter transform(@NonNull PowerAdapter adapter) {
-                return adapter.append(asAdapter(R.layout.list_loading_item).showOnlyWhile(data(data, new Predicate<Data<?>>() {
-                    @Override
-                    public boolean apply(Data<?> data) {
-                        return data.isLoading() && !data.isEmpty();
-                    }
-                })));
-            }
-        };
-    }
-
-    @NonNull
-    PowerAdapter.Transformer appendEmptyMessage(@NonNull final Data<?> data, @LayoutRes final int layoutResource) {
-        return new PowerAdapter.Transformer() {
-            @NonNull
-            @Override
-            public PowerAdapter transform(@NonNull PowerAdapter adapter) {
-                return adapter.append(asAdapter(layoutResource).showOnlyWhile(isEmpty(data).and(not(isLoading(data)))));
-            }
-        };
     }
 }

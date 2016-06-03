@@ -36,6 +36,7 @@ import static com.nextfaze.poweradapters.Condition.isTrue;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isLoading;
+import static com.nextfaze.poweradapters.sample.Utils.appendEmptyMessage;
 
 public final class FileTreeFragment extends BaseFragment {
 
@@ -188,7 +189,7 @@ public final class FileTreeFragment extends BaseFragment {
                 .append(asAdapter(R.layout.list_loading_item).showOnlyWhile(isTrue(depth != 0).and(isLoading(data))));
 
         // Empty message
-        adapter = adapter.compose(appendEmptyMessage(data, R.layout.list_empty_item));
+        adapter = adapter.compose(appendEmptyMessage(data));
 
         return adapter;
     }

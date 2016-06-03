@@ -12,7 +12,8 @@ import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.sample.Utils.appendLoadNextButton;
+import static com.nextfaze.poweradapters.sample.Utils.appendLoadingIndicator;
 
 public final class ManualIncrementalFragment extends BaseFragment {
 
@@ -34,18 +35,9 @@ public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
-        PowerAdapter adapter = new DataBindingAdapter(data, mMapper).compose(appendLoadingIndicator(data));
-        // TODO: Replace LoadNextAdapter with showOnlyWhile()
-        // "Load next" adapter lets user click the button to load next increment of results.
-        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, asViewFactory(R.layout.list_load_next_item));
-        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                onLoadNextClick();
-            }
-        });
-        adapter = loadNextAdapter;
-        return adapter;
+        return new DataBindingAdapter(data, mMapper)
+                .compose(appendLoadingIndicator(data))
+                .compose(appendLoadNextButton(data, v -> onLoadNextClick()));
     }
 
     @BindView(R.id.data_layout)
