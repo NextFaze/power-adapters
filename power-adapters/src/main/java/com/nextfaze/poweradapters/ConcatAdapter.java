@@ -7,8 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -29,7 +27,7 @@ final class ConcatAdapter extends PowerAdapter {
     @NonNull
     private final SparseArray<Entry> mEntryMapping = new SparseArray<>();
 
-    private ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
+    ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
         int i = 0;
         for (PowerAdapter adapter : adapters) {
             mEntries.append(i, new Entry(adapter, i));
@@ -314,40 +312,4 @@ final class ConcatAdapter extends PowerAdapter {
         int transform(int position);
     }
 
-    static final class Builder {
-
-        @NonNull
-        private final ArrayList<PowerAdapter> mAdapters = new ArrayList<>();
-
-        @NonNull
-        Builder add(@NonNull PowerAdapter adapter) {
-            mAdapters.add(adapter);
-            return this;
-        }
-
-        @NonNull
-        Builder addAll(@NonNull PowerAdapter... adapters) {
-            Collections.addAll(mAdapters, adapters);
-            return this;
-        }
-
-        @NonNull
-        Builder addAll(@NonNull Iterable<? extends PowerAdapter> adapters) {
-            for (PowerAdapter adapter : adapters) {
-                mAdapters.add(adapter);
-            }
-            return this;
-        }
-
-        @NonNull
-        PowerAdapter build() {
-            if (mAdapters.isEmpty()) {
-                return EMPTY;
-            }
-            if (mAdapters.size() == 1) {
-                return mAdapters.get(0);
-            }
-            return new ConcatAdapter(mAdapters);
-        }
-    }
 }

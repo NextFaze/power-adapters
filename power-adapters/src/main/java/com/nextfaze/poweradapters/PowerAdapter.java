@@ -342,7 +342,7 @@ public abstract class PowerAdapter {
         if (adapters.length == 0) {
             return this;
         }
-        return new ConcatAdapter.Builder().addAll(adapters).add(this).build();
+        return new ConcatAdapterBuilder().addAll(adapters).add(this).build();
     }
 
     @CheckResult
@@ -351,7 +351,7 @@ public abstract class PowerAdapter {
         if (adapters.length == 0) {
             return this;
         }
-        return new ConcatAdapter.Builder().add(this).addAll(adapters).build();
+        return new ConcatAdapterBuilder().add(this).addAll(adapters).build();
     }
 
     @CheckResult
@@ -394,7 +394,7 @@ public abstract class PowerAdapter {
         if (adapters.length == 1) {
             return adapters[0];
         }
-        return new ConcatAdapter.Builder().addAll(adapters).build();
+        return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
     @CheckResult
@@ -403,13 +403,13 @@ public abstract class PowerAdapter {
         if (adapters.isEmpty()) {
             return EMPTY;
         }
-        return new ConcatAdapter.Builder().addAll(adapters).build();
+        return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> adapters) {
-        return new ConcatAdapter.Builder().addAll(adapters).build();
+        return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
     @CheckResult

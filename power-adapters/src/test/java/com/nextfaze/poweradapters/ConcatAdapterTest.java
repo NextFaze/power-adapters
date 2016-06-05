@@ -48,7 +48,7 @@ public final class ConcatAdapterTest {
                 spy(new FakeAdapter(4)),
                 spy(new FakeAdapter(5))
         );
-        mConcatAdapter = new ConcatAdapter.Builder().addAll(mChildAdapters).build();
+        mConcatAdapter = new ConcatAdapterBuilder().addAll(mChildAdapters).build();
         mConcatAdapter.registerDataObserver(mObserver);
         mConcatAdapter.registerDataObserver(new VerifyingObserver(mConcatAdapter));
         for (PowerAdapter adapter : mChildAdapters) {
@@ -76,7 +76,7 @@ public final class ConcatAdapterTest {
     @Test
     public void parentRegistersObserversOnChildAdaptersWhenFirstExternalObserverRegisters() {
         PowerAdapter childAdapter = mock(PowerAdapter.class);
-        PowerAdapter concatAdapter = new ConcatAdapter.Builder().add(childAdapter).build();
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder().add(childAdapter).build();
         concatAdapter.registerDataObserver(mock(DataObserver.class));
         verify(childAdapter, times(1)).registerDataObserver(any(DataObserver.class));
     }
@@ -88,7 +88,7 @@ public final class ConcatAdapterTest {
                 mock(PowerAdapter.class),
                 mock(PowerAdapter.class)
         );
-        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(childAdapters).build();
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder().addAll(childAdapters).build();
         concatAdapter.registerDataObserver(mObserver);
         concatAdapter.unregisterDataObserver(mObserver);
         for (PowerAdapter adapter : childAdapters) {
@@ -165,7 +165,7 @@ public final class ConcatAdapterTest {
                 spy(new FakeAdapter(0)),
                 spy(new FakeAdapter(1))
         );
-        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(childAdapters).build();
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder().addAll(childAdapters).build();
         concatAdapter.registerDataObserver(mObserver);
         for (PowerAdapter adapter : childAdapters) {
             verify(adapter).registerDataObserver(any(DataObserver.class));
@@ -187,7 +187,7 @@ public final class ConcatAdapterTest {
                 spy(new FakeAdapter(0)),
                 spy(new FakeAdapter(11))
         );
-        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(childAdapters).build();
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder().addAll(childAdapters).build();
         concatAdapter.registerDataObserver(mObserver);
         for (PowerAdapter adapter : childAdapters) {
             verify(adapter).registerDataObserver(any(DataObserver.class));
@@ -204,7 +204,7 @@ public final class ConcatAdapterTest {
     @Test
     public void itemCountConsistentWhenChildAdaptersAreDependent() {
         FakeAdapter fakeAdapter = spy(new FakeAdapter(3));
-        PowerAdapter concatAdapter = new ConcatAdapter.Builder().addAll(fakeAdapter, fakeAdapter).build();
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder().addAll(fakeAdapter, fakeAdapter).build();
         DataObserver observer = mock(DataObserver.class);
         concatAdapter.registerDataObserver(observer);
         concatAdapter.registerDataObserver(new VerifyingObserver(concatAdapter));
