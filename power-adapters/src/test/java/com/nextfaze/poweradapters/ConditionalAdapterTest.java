@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public class ConditionalAdapterTest {
+public final class ConditionalAdapterTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
@@ -47,9 +47,7 @@ public class ConditionalAdapterTest {
     private void setCondition(@NonNull Condition condition) {
         mFakeAdapter = spy(new FakeAdapter(10));
         mConditionalAdapter = new ConditionalAdapter(mFakeAdapter, condition);
-        // Register a second observer that won't be verified, to avoid having to verify the insertion that may follow
-        // if the specified condition evaluates to true.
-        mConditionalAdapter.registerDataObserver(mock(DataObserver.class));
+        mConditionalAdapter.registerDataObserver(new VerifyingObserver(mConditionalAdapter));
         mConditionalAdapter.registerDataObserver(mObserver);
     }
 
