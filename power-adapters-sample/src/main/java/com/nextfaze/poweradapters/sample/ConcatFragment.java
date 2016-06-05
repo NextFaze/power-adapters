@@ -73,9 +73,7 @@ public final class ConcatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        for (Pair<NewsIncrementalData, PowerAdapter> pair : mPairs) {
-            pair.first.close();
-        }
+        forEachData(data -> data.close());
         super.onDestroy();
     }
 
@@ -93,6 +91,27 @@ public final class ConcatFragment extends BaseFragment {
         mDataLayout.setDatas(datas);
     }
 
+    @Override
+    void onReloadClick() {
+        forEachData(data -> data.reload());
+    }
+
+    @Override
+    void onRefreshClick() {
+        forEachData(data -> data.refresh());
+    }
+
+    @Override
+    void onInvalidateClick() {
+        forEachData(data -> data.invalidate());
+    }
+
+    private void forEachData(@NonNull Action<NewsIncrementalData> action) {
+        for (Pair<NewsIncrementalData, PowerAdapter> pair : mPairs) {
+            action.run(pair.first);
+        }
+    }
+
     private static final class ColoredBinder extends NewsItemBinder {
 
         private final int mColor;
@@ -107,5 +126,9 @@ public final class ConcatFragment extends BaseFragment {
             super.bindView(newsItem, v, holder);
             v.setBackgroundColor(mColor);
         }
+    }
+
+    private interface Action<T> {
+        void run(@NonNull T t);
     }
 }
