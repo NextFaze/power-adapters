@@ -19,38 +19,29 @@ public class PowerAdapterWrapper extends PowerAdapter {
     private final DataObserver mDataSetObserver = new DataObserver() {
         @Override
         public void onChanged() {
-            mShadowItemCount = mAdapter.getItemCount();
             forwardChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            validateItemCount();
             forwardItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            mShadowItemCount += itemCount;
-            validateItemCount();
             forwardItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            mShadowItemCount -= itemCount;
-            validateItemCount();
             forwardItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            validateItemCount();
             forwardItemRangeMoved(fromPosition, toPosition, itemCount);
         }
     };
-
-    private int mShadowItemCount;
 
     public PowerAdapterWrapper(@NonNull PowerAdapter adapter) {
         mAdapter = adapter;
@@ -151,7 +142,6 @@ public class PowerAdapterWrapper extends PowerAdapter {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        mShadowItemCount = mAdapter.getItemCount();
         mAdapter.registerDataObserver(mDataSetObserver);
     }
 
@@ -180,17 +170,5 @@ public class PowerAdapterWrapper extends PowerAdapter {
 
     protected void forwardItemRangeMoved(int innerFromPosition, int innerToPosition, int innerItemCount) {
         notifyItemRangeMoved(innerToOuter(innerFromPosition), innerToOuter(innerToPosition), innerItemCount);
-    }
-
-    /**
-     * Check the item count by comparing with our shadow count. If they don't match, perhaps one or more {@link
-     * PowerAdapter}s are poorly-behaved.
-     */
-    private void validateItemCount() {
-        int itemCount = mAdapter.getItemCount();
-        if (mShadowItemCount != itemCount) {
-            throw new IllegalStateException("Inconsistency detected: expected item count " +
-                    mShadowItemCount + " but it is " + itemCount);
-        }
     }
 }
