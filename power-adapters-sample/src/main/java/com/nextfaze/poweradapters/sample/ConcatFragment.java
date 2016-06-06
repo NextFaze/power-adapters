@@ -31,18 +31,18 @@ public final class ConcatFragment extends BaseFragment {
     private static final int ADAPTER_COUNT = 10;
 
     @NonNull
-    private final List<Pair<NewsIncrementalData, PowerAdapter>> mPairs = new ArrayList<>();
+    private final List<Pair<NewsData, PowerAdapter>> mPairs = new ArrayList<>();
 
     public ConcatFragment() {
         for (int i = 0; i < ADAPTER_COUNT; i++) {
-            NewsIncrementalData data = new NewsIncrementalData(15, 5);
+            NewsData data = new NewsData(15, 5);
             mPairs.add(createPair(data, new ColoredBinder(data, RANDOM.nextInt())));
         }
     }
 
     @NonNull
-    private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull NewsIncrementalData data,
-                                                               @NonNull NewsItemBinder newsItemBinder) {
+    private Pair<NewsData, PowerAdapter> createPair(@NonNull NewsData data,
+                                                    @NonNull NewsItemBinder newsItemBinder) {
         PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(newsItemBinder));
 
         // Header
@@ -82,7 +82,7 @@ public final class ConcatFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         List<Data<?>> datas = FluentIterable.from(mPairs)
-                .transform((Function<Pair<NewsIncrementalData, PowerAdapter>, Data<?>>) pair -> pair.first)
+                .transform((Function<Pair<NewsData, PowerAdapter>, Data<?>>) pair -> pair.first)
                 .toList();
         List<PowerAdapter> adapters = FluentIterable.from(mPairs)
                 .transform(pair -> pair.second)
@@ -106,8 +106,8 @@ public final class ConcatFragment extends BaseFragment {
         forEachData(data -> data.invalidate());
     }
 
-    private void forEachData(@NonNull Action<NewsIncrementalData> action) {
-        for (Pair<NewsIncrementalData, PowerAdapter> pair : mPairs) {
+    private void forEachData(@NonNull Action<NewsData> action) {
+        for (Pair<NewsData, PowerAdapter> pair : mPairs) {
             action.run(pair.first);
         }
     }
@@ -116,7 +116,7 @@ public final class ConcatFragment extends BaseFragment {
 
         private final int mColor;
 
-        ColoredBinder(@NonNull NewsIncrementalData data, int color) {
+        ColoredBinder(@NonNull NewsData data, int color) {
             super(data);
             mColor = color;
         }

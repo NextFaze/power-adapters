@@ -27,7 +27,7 @@ final class Utils {
     }
 
     @NonNull
-    static PowerAdapter createNewsAdapter(@NonNull NewsIncrementalData data) {
+    static PowerAdapter createNewsAdapter(@NonNull NewsData data) {
         return new DataBindingAdapter(data, singletonMapper(new NewsItemBinder(data)));
     }
 
@@ -55,9 +55,9 @@ final class Utils {
         return adapter -> adapter.append(asAdapter(loadNextButton).showOnlyWhile(dataHasMoreAvailable));
     }
 
-    static void showEditDialog(@NonNull Context context, @NonNull NewsIncrementalData data, int position) {
+    static void showEditDialog(@NonNull Context context, @NonNull List<? super Object> data, int position) {
         List<Item> items = ImmutableList.of(
-                new Item("Change", v -> data.set(position, new NewsItem("Changed"))),
+                new Item("Change", v -> data.set(position, NewsItem.create("Changed"))),
                 new Item("Clear", v -> data.clear())
         );
         String[] itemTitles = FluentIterable.from(items).transform(item -> item.title).toArray(String.class);

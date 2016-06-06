@@ -11,7 +11,7 @@ import static com.nextfaze.poweradapters.sample.Utils.*;
 public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
-    private final NewsIncrementalData mData = new NewsIncrementalData(100, 5);
+    private final NewsData mData = new NewsData(100, 5);
 
     @NonNull
     private final PowerAdapter mAdapter = createNewsAdapter(mData)

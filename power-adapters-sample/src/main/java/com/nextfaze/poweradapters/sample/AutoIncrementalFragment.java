@@ -12,7 +12,7 @@ import static com.nextfaze.poweradapters.sample.Utils.createNewsAdapter;
 public final class AutoIncrementalFragment extends BaseFragment {
 
     @NonNull
-    private final NewsIncrementalData mData = new NewsIncrementalData(50, 10);
+    private final NewsData mData = new NewsData(50, 10);
 
     @NonNull
     private final PowerAdapter mAdapter = createNewsAdapter(mData).compose(appendLoadingIndicator(mData));

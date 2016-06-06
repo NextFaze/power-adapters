@@ -11,7 +11,7 @@ import static com.nextfaze.poweradapters.sample.Utils.createNewsAdapter;
 public final class LimitFragment extends BaseFragment {
 
     @NonNull
-    private final NewsIncrementalData mData = new NewsIncrementalData(4);
+    private final NewsData mData = new NewsData(4);
 
     @NonNull
     private final PowerAdapter mAdapter = createNewsAdapter(mData).limit(5);

@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import lombok.NonNull;
 
-final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
+final class NewsData extends IncrementalArrayData<Object> {
 
     @NonNull
     private final NewsService mNewsService = new NewsService();
@@ -14,15 +14,15 @@ final class NewsIncrementalData extends IncrementalArrayData<NewsItem> {
 
     private volatile int mOffset;
 
-    NewsIncrementalData() {
+    NewsData() {
         this(100, 20);
     }
 
-    NewsIncrementalData(int total) {
+    NewsData(int total) {
         this(total, total);
     }
 
-    NewsIncrementalData(int total, int increment) {
+    NewsData(int total, int increment) {
         mTotal = total;
         mIncrement = increment;
     }

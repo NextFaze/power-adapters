@@ -2,14 +2,13 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
+import com.nextfaze.poweradapters.binding.BinderWrapper;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.binding.MapperBuilder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
@@ -20,6 +19,8 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.data.DataConditions.data;
+import static com.nextfaze.poweradapters.sample.NewsItem.Type.POLITICS;
+import static java.util.Collections.singleton;
 
 public final class MultipleBindingsFragment extends BaseFragment {
 
@@ -27,25 +28,36 @@ public final class MultipleBindingsFragment extends BaseFragment {
     private final NewsMultiTypeData mData = new NewsMultiTypeData();
 
     @NonNull
-    private final Binder<NewsItem, View> mNewsItemBinder = new ViewHolderBinder<NewsItem, NewsItemHolder>(android.R.layout.simple_list_item_1) {
+    private final Binder<NewsItem, NewsItemView> mPoliticsNewsItemBinder = new BinderWrapper<NewsItem, NewsItemView>(new NewsItemBinder(mData)) {
+        @Override
+        public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
+            super.bindView(newsItem, v, holder);
+            v.setTags(singleton("Boring!"));
+        }
+    };
+
+    @NonNull
+    private final Binder<BlogPost, View> mBlogPostBinder = new ViewHolderBinder<BlogPost, BlogPostHolder>(android.R.layout.simple_list_item_1) {
         @NonNull
         @Override
-        protected NewsItemHolder newViewHolder(@NonNull View v) {
-            return new NewsItemHolder(v);
+        protected BlogPostHolder newViewHolder(@NonNull View v) {
+            return new BlogPostHolder(v);
         }
 
         @Override
-        protected void bindViewHolder(@NonNull NewsItem newsItem,
-                                      @NonNull NewsItemHolder newsItemHolder,
+        protected void bindViewHolder(@NonNull BlogPost blogPost,
+                                      @NonNull BlogPostHolder blogPostHolder,
                                       @NonNull Holder holder) {
-            newsItemHolder.labelView.setText(newsItem.getTitle());
+            blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
         }
     };
 
     @NonNull
     private final Mapper mMapper = new MapperBuilder()
-            .bind(NewsItem.class, mNewsItemBinder)
             .bind(NewsSection.class, new NewsSectionBinder())
+            .bind(NewsItem.class, mPoliticsNewsItemBinder, newsItem -> newsItem.getType() == POLITICS)
+            .bind(NewsItem.class, new NewsItemBinder(mData))
+            .bind(BlogPost.class, mBlogPostBinder)
             .build();
 
     @NonNull
@@ -81,15 +93,6 @@ public final class MultipleBindingsFragment extends BaseFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Clear").setOnMenuItemClickListener(item -> {
-            onClearClick();
-            return true;
-        });
-    }
-
-    @Override
     void onReloadClick() {
         mData.reload();
     }
@@ -104,16 +107,12 @@ public final class MultipleBindingsFragment extends BaseFragment {
         mData.invalidate();
     }
 
-    void onClearClick() {
-        mData.clear();
-    }
-
-    static final class NewsItemHolder extends ViewHolder {
+    private static final class BlogPostHolder extends ViewHolder {
 
         @NonNull
         final TextView labelView;
 
-        NewsItemHolder(@NonNull View view) {
+        BlogPostHolder(@NonNull View view) {
             super(view);
             labelView = (TextView) view.findViewById(android.R.id.text1);
         }

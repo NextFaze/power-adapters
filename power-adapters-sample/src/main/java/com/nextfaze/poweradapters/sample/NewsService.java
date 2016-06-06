@@ -27,7 +27,7 @@ final class NewsService {
         Thread.sleep(1000);
         ArrayList<NewsItem> newsItems = new ArrayList<>();
         for (int i = 0; i < 10; ++i) {
-            newsItems.add(new NewsItem(format("News Item #%s", i)));
+            newsItems.add(NewsItem.create(format("News Item #%s", i)));
         }
         return newsItems;
     }
@@ -37,7 +37,7 @@ final class NewsService {
         Thread.sleep(1000);
         ArrayList<NewsItem> newsItems = new ArrayList<>();
         for (int i = offset; i < offset + count; ++i) {
-            newsItems.add(new NewsItem(format("News Item #%s", i)));
+            newsItems.add(NewsItem.create(format("News Item #%s", i)));
         }
         return newsItems;
     }
