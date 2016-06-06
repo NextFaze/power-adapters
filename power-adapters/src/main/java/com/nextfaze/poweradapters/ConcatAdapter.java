@@ -1,101 +1,83 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CallSuper;
-import android.support.annotation.Nullable;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 final class ConcatAdapter extends PowerAdapter {
 
-    /** Reused to wrap an adapter and automatically offset all position calls. */
     @NonNull
-    private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
-
-    @NonNull
-    private final SparseArray<Entry> mEntries = new SparseArray<>();
+    private final Entry[] mEntries;
 
     @NonNull
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
-    /** Maps outer entry start positions to entries. */
     @NonNull
-    private final SparseArray<Entry> mEntryMapping = new SparseArray<>();
-
-    ConcatAdapter(@NonNull Iterable<? extends PowerAdapter> adapters) {
-        int i = 0;
-        for (PowerAdapter adapter : adapters) {
-            mEntries.append(i, new Entry(adapter, i));
-            i++;
+    private final RangeMapping mMapping = new RangeMapping(new RangeMapping.RangeClient() {
+        @Override
+        public int size() {
+            return mEntries.length;
         }
+
+        @Override
+        public int getRangeCount(int position) {
+            return mEntries[position].getItemCount();
+        }
+
+        @Override
+        public void setOffset(int position, int offset) {
+            mEntries[position].setOffset(offset);
+        }
+    });
+
+    private final boolean mStableIds;
+
+    ConcatAdapter(@NonNull List<? extends PowerAdapter> adapters) {
+        mEntries = new Entry[adapters.size()];
+        for (int i = 0; i < mEntries.length; i++) {
+            mEntries[i] = new Entry(adapters.get(i));
+        }
+        // If only a single entry, it's safe to forward it's value directly.
+        // Otherwise, must return false because IDs returned by multiple
+        // child adapters may collide, falsely indicating equality.
+        mStableIds = mEntries.length == 1 && mEntries[0].mAdapter.hasStableIds();
     }
 
     private void rebuild() {
-        int outerStart = 0;
-        mEntryMapping.clear();
-        for (int i = 0; i < mEntries.size(); i++) {
-            Entry entry = mEntries.valueAt(i);
-            entry.mOuterStart = outerStart;
-            int itemCount = entry.getItemCount();
-            if (itemCount > 0) {
-                mEntryMapping.put(entry.mOuterStart, entry);
-            }
-            outerStart += itemCount;
-        }
+        mMapping.rebuild();
     }
 
     @NonNull
     private Entry outerPositionToEntry(int outerPosition) {
-        int entryIndex = mEntryMapping.indexOfKey(outerPosition);
-        if (entryIndex >= 0) {
-            return mEntryMapping.valueAt(entryIndex);
-        }
-        return mEntryMapping.valueAt(-entryIndex - 2);
+        return mEntries[mMapping.findPosition(outerPosition)];
     }
 
     @NonNull
-    private OffsetAdapter outerToAdapter(int outerPosition) {
+    private PowerAdapter outerToAdapter(int outerPosition) {
         Entry entry = outerPositionToEntry(outerPosition);
         if (entry.getItemCount() <= 0) {
             throw new AssertionError();
         }
-        return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, entry.getOuterStart());
-    }
-
-    private int outerToChild(int outerPosition) {
-        Entry entry = outerPositionToEntry(outerPosition);
-        return outerPosition - entry.getOuterStart();
-    }
-
-    @NonNull
-    private PowerAdapter adapterForViewType(@NonNull ViewType viewType) {
-        return mAdaptersByViewType.get(viewType);
+        return entry.mAdapter;
     }
 
     @Override
     public int getItemCount() {
-        if (mEntries.size() == 0) {
+        if (mEntries.length == 0) {
             return 0;
         }
-        Entry entry = mEntries.valueAt(mEntries.size() - 1);
-        return entry.getOuterStart() + entry.getItemCount();
+        Entry entry = mEntries[mEntries.length - 1];
+        return entry.getOffset() + entry.getItemCount();
     }
 
     @Override
     public boolean hasStableIds() {
-        //noinspection SimplifiableIfStatement
-        if (mEntries.size() == 1) {
-            // Only a single entry, so it's safe to forward it's value directly.
-            return mEntries.valueAt(0).mAdapter.hasStableIds();
-        }
-        // Otherwise, must return false because IDs returned by multiple
-        // child adapters may collide, falsely indicating equality.
-        return false;
+        return mStableIds;
     }
 
     @Override
@@ -111,16 +93,16 @@ final class ConcatAdapter extends PowerAdapter {
     @NonNull
     @Override
     public ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = outerToAdapter(position);
-        ViewType viewType = offsetAdapter.getViewType(position);
-        mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
+        PowerAdapter subAdapter = outerToAdapter(position);
+        ViewType viewType = subAdapter.getItemViewType(position);
+        mAdaptersByViewType.put(viewType, subAdapter);
         return viewType;
     }
 
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        return adapterForViewType(viewType).newView(parent, viewType);
+        return mAdaptersByViewType.get(viewType).newView(parent, viewType);
     }
 
     @Override
@@ -145,8 +127,8 @@ final class ConcatAdapter extends PowerAdapter {
     }
 
     private void updateEntryObservers() {
-        for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).updateObserver();
+        for (Entry mEntry : mEntries) {
+            mEntry.updateObserver();
         }
     }
 
@@ -163,60 +145,46 @@ final class ConcatAdapter extends PowerAdapter {
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(childToOuter(positionStart), itemCount);
+                notifyItemRangeChanged(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 mShadowItemCount += itemCount;
                 rebuild();
-                notifyItemRangeInserted(childToOuter(positionStart), itemCount);
+                notifyItemRangeInserted(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
                 mShadowItemCount -= itemCount;
                 rebuild();
-                notifyItemRangeRemoved(childToOuter(positionStart), itemCount);
+                notifyItemRangeRemoved(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                notifyItemRangeMoved(childToOuter(fromPosition), childToOuter(toPosition), itemCount);
+                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
             }
         };
 
         @NonNull
-        private final Transform mTransform = new Transform() {
-            @Override
-            public int transform(int position) {
-                return outerToChild(position);
-            }
-        };
+        private final SubAdapter mAdapter;
 
-        @NonNull
-        private final PowerAdapter mAdapter;
-
-        private final int mPosition;
-
-        @Nullable
-        private PowerAdapter mObservedAdapter;
+        private boolean mObserving;
 
         private int mShadowItemCount;
 
-        private int mOuterStart;
-
-        Entry(@NonNull PowerAdapter adapter, int position) {
-            mAdapter = adapter;
-            mPosition = position;
+        Entry(@NonNull PowerAdapter adapter) {
+            mAdapter = new SubAdapter(adapter);
         }
 
-        int childToOuter(int childPosition) {
-            return getOuterStart() + childPosition;
+        void setOffset(int offset) {
+            mAdapter.setOffset(offset);
         }
 
-        int getOuterStart() {
-            return mOuterStart;
+        int getOffset() {
+            return mAdapter.getOffset();
         }
 
         int getItemCount() {
@@ -224,92 +192,23 @@ final class ConcatAdapter extends PowerAdapter {
         }
 
         void updateObserver() {
-            PowerAdapter adapter = getObserverCount() > 0 ? mAdapter : null;
-            if (adapter != mObservedAdapter) {
-                if (mObservedAdapter != null) {
-                    mObservedAdapter.unregisterDataObserver(mDataObserver);
+            boolean observe = getObserverCount() > 0;
+            if (observe != mObserving) {
+                if (mObserving) {
+                    mAdapter.unregisterDataObserver(mDataObserver);
                     mShadowItemCount = 0;
                 }
-                mObservedAdapter = adapter;
-                if (mObservedAdapter != null) {
-                    mObservedAdapter.registerDataObserver(mDataObserver);
-                    mShadowItemCount = mObservedAdapter.getItemCount();
+                mObserving = observe;
+                if (mObserving) {
+                    mAdapter.registerDataObserver(mDataObserver);
+                    mShadowItemCount = mAdapter.getItemCount();
                 }
             }
         }
 
         @Override
         public String toString() {
-            return "[pos: " + mPosition + ", outerStart: " + mOuterStart + ", count: " + getItemCount()  + "]";
+            return "[OuterStart: " + getOffset() + ", count: " + getItemCount()  + "]";
         }
     }
-
-    private static final class OffsetAdapter {
-
-        @NonNull
-        private final WeakHashMap<Holder, OffsetHolder> mHolders = new WeakHashMap<>();
-
-        private PowerAdapter mAdapter;
-        private Transform mTransform;
-
-        /** The starting position at which this adapter appears in outer coordinate space. */
-        private int mOffset;
-
-        @NonNull
-        OffsetAdapter set(@NonNull PowerAdapter adapter, @NonNull Transform transform, int offset) {
-            mAdapter = adapter;
-            mTransform = transform;
-            mOffset = offset;
-            return this;
-        }
-
-        long getItemId(int position) {
-            return mAdapter.getItemId(position - mOffset);
-        }
-
-        boolean isEnabled(int position) {
-            return mAdapter.isEnabled(position - mOffset);
-        }
-
-        @NonNull
-        View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-            return mAdapter.newView(parent, viewType);
-        }
-
-        void bindView(@NonNull View view, @NonNull Holder holder) {
-            OffsetHolder offsetHolder = mHolders.get(holder);
-            if (offsetHolder == null) {
-                offsetHolder = new OffsetHolder(holder);
-                mHolders.put(holder, offsetHolder);
-            }
-            offsetHolder.transform = mTransform;
-            offsetHolder.offset = mOffset;
-            mAdapter.bindView(view, offsetHolder);
-        }
-
-        @NonNull
-        ViewType getViewType(int position) {
-            return mAdapter.getItemViewType(position - mOffset);
-        }
-
-        private static final class OffsetHolder extends HolderWrapper {
-
-            Transform transform;
-            int offset;
-
-            OffsetHolder(@NonNull Holder holder) {
-                super(holder);
-            }
-
-            @Override
-            public int getPosition() {
-                return transform.transform(super.getPosition());
-            }
-        }
-    }
-
-    private interface Transform {
-        int transform(int position);
-    }
-
 }
