@@ -52,6 +52,10 @@ public final class WrappingDividerAdapterTest {
         mDividerAdapter.registerDataObserver(mObserver);
     }
 
+    // TODO: Check newView/bindView maps to correct divider items.
+
+    // TODO: Check isEnabled/getItemViewType maps to correct divider items.
+
     @Test
     public void itemCountGreaterThanOne() {
         configure(5, SHOW_LEADING);
@@ -219,4 +223,6 @@ public final class WrappingDividerAdapterTest {
         verify(mObserver).onItemRangeInserted(5, 5);
         verifyNoMoreInteractions(mObserver);
     }
+
+    // TODO: Check the above again with certain dividers absent, eg. leading + trailing, but no inner.
 }
