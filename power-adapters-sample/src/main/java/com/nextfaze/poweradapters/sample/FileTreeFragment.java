@@ -74,7 +74,7 @@ public final class FileTreeFragment extends BaseFragment {
         Binder<File, TextView> binder = new AbstractBinder<File, TextView>(android.R.layout.simple_list_item_1) {
             @Override
             public void bindView(@NonNull File file, @NonNull TextView v, @NonNull final Holder holder) {
-                v.setText(formatFile(file, depth));
+                v.setText(formatFileLabel(file, depth));
                 v.setTypeface(file.isDirectory() ? DEFAULT_BOLD : DEFAULT);
                 if (file.isDirectory()) {
                     v.setOnClickListener(v1 -> {
@@ -131,7 +131,7 @@ public final class FileTreeFragment extends BaseFragment {
     }
 
     @NonNull
-    private static String formatFile(@NonNull File file, int depth) {
+    private static String formatFileLabel(@NonNull File file, int depth) {
         return repeat("    ", depth) + (file.isDirectory() ? file.getName() + "/" : file.getName());
     }
 }
