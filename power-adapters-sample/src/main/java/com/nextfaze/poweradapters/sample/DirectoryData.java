@@ -1,16 +1,16 @@
 package com.nextfaze.poweradapters.sample;
 
-import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.data.ArrayData;
 import lombok.NonNull;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.emptyList;
 
 final class DirectoryData extends ArrayData<File> {
+
+    private static final int FAKE_FILE_LIMIT = 5;
 
     @NonNull
     private final File mDir;
@@ -30,14 +30,24 @@ final class DirectoryData extends ArrayData<File> {
     @NonNull
     @Override
     protected List<? extends File> load() throws Throwable {
-        // Fake sleep to better demonstrate async. loading.
-        Thread.sleep(1000);
-        File[] files = mDir.listFiles();
-        if (files == null) {
-            return emptyList();
+        Thread.sleep(200);
+        return fakeDirContents();
+    }
+
+    @NonNull
+    private List<File> fakeDirContents() {
+        ArrayList<File> files = new ArrayList<>();
+        for (int i = 0; i < FAKE_FILE_LIMIT && i < mLimit; i++) {
+            if (shouldBeDir(i)) {
+                files.add(new File("Dir #" + i, true));
+            } else {
+                files.add(new File("File #" + i, false));
+            }
         }
-        return FluentIterable.of(files)
-                .limit(mLimit)
-                .toList();
+        return files;
+    }
+
+    private static boolean shouldBeDir(int i) {
+        return i == 2 || i == 3;
     }
 }

@@ -32,27 +32,25 @@ final class Utils {
     }
 
     @NonNull
-    static PowerAdapter.Transformer appendLoadingIndicator(@NonNull Data<?> data) {
-        return adapter -> adapter.append(asAdapter(R.layout.list_loading_item)
-                .showOnlyWhile(data(data, d -> d.isLoading() && !d.isEmpty())));
+    static PowerAdapter emptyMessage(@NonNull Data<?> data) {
+        return asAdapter(R.layout.list_empty_item).showOnlyWhile(isEmpty(data).and(not(isLoading(data))));
     }
 
     @NonNull
-    static PowerAdapter.Transformer appendEmptyMessage(@NonNull Data<?> data) {
-        return adapter -> adapter.append(asAdapter(R.layout.list_empty_item)
-                .showOnlyWhile(isEmpty(data).and(not(isLoading(data)))));
+    static PowerAdapter loadingIndicator(@NonNull Data<?> data) {
+        return asAdapter(R.layout.list_loading_item).showOnlyWhile(data(data, d -> d.isLoading() && !d.isEmpty()));
     }
 
     @NonNull
-    static PowerAdapter.Transformer appendLoadNextButton(@NonNull Data<?> data,
-                                                         @NonNull View.OnClickListener onClickListener) {
+    static PowerAdapter loadNextButton(@NonNull Data<?> data,
+                                       @NonNull View.OnClickListener onClickListener) {
         ViewFactory loadNextButton = parent -> {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_load_next_item, parent, false);
             v.setOnClickListener(onClickListener);
             return v;
         };
         Condition dataHasMoreAvailable = data(data, d -> !d.isLoading() && !d.isEmpty() && d.available() > 0);
-        return adapter -> adapter.append(asAdapter(loadNextButton).showOnlyWhile(dataHasMoreAvailable));
+        return asAdapter(loadNextButton).showOnlyWhile(dataHasMoreAvailable);
     }
 
     static void showEditDialog(@NonNull Context context, @NonNull List<? super Object> data, int position) {

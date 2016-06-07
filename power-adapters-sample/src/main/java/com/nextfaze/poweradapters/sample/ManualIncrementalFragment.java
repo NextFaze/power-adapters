@@ -15,8 +15,8 @@ public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
     private final PowerAdapter mAdapter = createNewsAdapter(mData)
-            .compose(appendLoadingIndicator(mData))
-            .compose(appendLoadNextButton(mData, v -> onLoadNextClick()));
+            .append(loadingIndicator(mData))
+            .append(loadNextButton(mData, v -> onLoadNextClick()));
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

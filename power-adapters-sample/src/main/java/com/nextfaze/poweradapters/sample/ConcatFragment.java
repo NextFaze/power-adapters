@@ -49,18 +49,18 @@ public final class ConcatFragment extends BaseFragment {
         adapter = adapter.prepend(asAdapter(R.layout.news_header_item));
 
         // Loading indicator
-        adapter = adapter.compose(appendLoadingIndicator(data));
+        adapter = adapter.append(loadingIndicator(data));
 
         data.setLookAheadRowCount(-1);
 
         // Load next button
-        adapter = adapter.compose(appendLoadNextButton(data, v -> data.loadNext()));
+        adapter = adapter.append(loadNextButton(data, v -> data.loadNext()));
 
         // Footer
         adapter = adapter.append(asAdapter(R.layout.news_footer_item).showOnlyWhile(not(isEmpty(data))));
 
         // Empty message
-        adapter = adapter.compose(appendEmptyMessage(data));
+        adapter = adapter.append(emptyMessage(data));
 
         return new Pair<>(data, adapter);
     }
