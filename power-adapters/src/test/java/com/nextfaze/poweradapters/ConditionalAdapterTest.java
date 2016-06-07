@@ -223,6 +223,17 @@ public final class ConditionalAdapterTest {
     }
 
     @Test
+    public void childInsertionUponFirstRegistrationIsNotDuplicated() {
+        PowerAdapter fakeAdapter = new FakeAdapter(10);
+        ConditionalAdapter nestedConditionalAdapter = new ConditionalAdapter(fakeAdapter, always());
+        ConditionalAdapter conditionalAdapter = new ConditionalAdapter(nestedConditionalAdapter, always());
+        conditionalAdapter.registerDataObserver(new VerifyingObserver(conditionalAdapter));
+        conditionalAdapter.registerDataObserver(mObserver);
+        assertThat(conditionalAdapter.getItemCount()).isEqualTo(10);
+        verifyNoMoreInteractions(mObserver);
+    }
+
+    @Test
     public void childRemovalIsSuppressedWhileConditionIsFalse() {
         setCondition(Condition.never());
         mFakeAdapter.remove(9, 1);

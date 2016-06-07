@@ -54,8 +54,8 @@ public final class DelegateAdapter extends PowerAdapter {
         if (delegate != mDelegate) {
             int removeCount = mDelegate != null ? mDelegate.getItemCount() : 0;
             mDelegate = delegate;
-            updateObservers();
             int insertCount = mDelegate != null ? mDelegate.getItemCount() : 0;
+            updateObservers();
             if (removeCount > 0) {
                 notifyItemRangeRemoved(0, removeCount);
             }

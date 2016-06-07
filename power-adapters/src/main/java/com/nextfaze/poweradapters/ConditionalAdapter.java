@@ -127,8 +127,8 @@ final class ConditionalAdapter extends PowerAdapter {
         if (visible != mVisible) {
             int removeCount = mVisible ? mAdapter.getItemCount() : 0;
             mVisible = visible;
-            updateDataObserver();
             int insertCount = mVisible ? mAdapter.getItemCount() : 0;
+            updateDataObserver();
             if (removeCount > 0) {
                 notifyItemRangeRemoved(0, removeCount);
             }
