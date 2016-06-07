@@ -4,6 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
+import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -108,11 +109,59 @@ public final class ConcatAdapterTest {
     }
 
     @Test
-    public void bindViewDelegatedToChild() {
+    public void childBindViewDelegated() {
         mConcatAdapter.bindView(mItemView, holder(8));
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
         verify(mChildAdapters.get(2)).bindView(eq(mItemView), argThat(holderWithPosition(1)));
+    }
+
+    @Test
+    public void childBindViewHolderPositionUnchangedAfterDifferentChildInsert() {
+        TestHolder holder = new TestHolder(8);
+        Holder innerHolder = bindViewAndReturnInnerHolder(mChildAdapters.get(2), holder);
+        assertThat(innerHolder.getPosition()).isEqualTo(1);
+        mChildAdapters.get(0).insert(0, 10);
+        holder.setPosition(18);
+        assertThat(innerHolder.getPosition()).isEqualTo(1);
+    }
+
+    @Test
+    public void childBindViewHolderPositionUpdatedAfterSameChildInsert() {
+        TestHolder holder = new TestHolder(8);
+        Holder innerHolder = bindViewAndReturnInnerHolder(mChildAdapters.get(2), holder);
+        assertThat(innerHolder.getPosition()).isEqualTo(1);
+        mChildAdapters.get(2).insert(0, 3);
+        holder.setPosition(11);
+        assertThat(innerHolder.getPosition()).isEqualTo(4);
+    }
+
+    @Test
+    public void childBindViewHolderPositionUnchangedAfterDifferentChildRemove() {
+        TestHolder holder = new TestHolder(5);
+        Holder innerHolder = bindViewAndReturnInnerHolder(mChildAdapters.get(1), holder);
+        assertThat(innerHolder.getPosition()).isEqualTo(2);
+        mChildAdapters.get(0).remove(1, 1);
+        holder.setPosition(4);
+        assertThat(innerHolder.getPosition()).isEqualTo(2);
+    }
+
+    @Test
+    public void childBindViewHolderPositionUpdatedAfterSameChildRemove() {
+        TestHolder holder = new TestHolder(5);
+        Holder innerHolder = bindViewAndReturnInnerHolder(mChildAdapters.get(1), holder);
+        assertThat(innerHolder.getPosition()).isEqualTo(2);
+        mChildAdapters.get(1).remove(0, 1);
+        holder.setPosition(4);
+        assertThat(innerHolder.getPosition()).isEqualTo(1);
+    }
+
+    @NonNull
+    private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
+        mConcatAdapter.bindView(mItemView, topLevelHolder);
+        ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
+        verify(adapter).bindView(eq(mItemView), captor.capture());
+        return captor.getValue();
     }
 
     @Test

@@ -15,12 +15,7 @@ final class AdapterTestUtils {
 
     @NonNull
     static Holder holder(final int position) {
-        return new Holder() {
-            @Override
-            public int getPosition() {
-                return position;
-            }
-        };
+        return new TestHolder(position);
     }
 
     static void verifyNewViewNeverCalled(@NonNull PowerAdapter adapter) {
