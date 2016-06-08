@@ -4,6 +4,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import lombok.NonNull;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.ListIterator;
  * thread-safe.
  * @param <T> The type of element this data contains.
  */
-public abstract class ArrayData<T> extends Data<T> implements List<T> {
+public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable {
 
     /** The backing array of non-null elements. */
     @NonNull
@@ -39,6 +40,7 @@ public abstract class ArrayData<T> extends Data<T> implements List<T> {
     }
 
     @CallSuper
+    @Override
     public void close() {
         cancelTask();
         mData.clear();
