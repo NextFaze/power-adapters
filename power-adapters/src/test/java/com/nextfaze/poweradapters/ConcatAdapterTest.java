@@ -266,4 +266,11 @@ public final class ConcatAdapterTest {
         verify(observer).onItemRangeInserted(0, 1);
         verifyNoMoreInteractions(observer);
     }
+
+    @Test
+    public void itemCountWithoutObserverReflectsChildAdapters() {
+        PowerAdapter concatAdapter = new ConcatAdapterBuilder()
+                .addAll(new FakeAdapter(10), new FakeAdapter(20), new FakeAdapter(5)).build();
+        assertThat(concatAdapter.getItemCount()).isEqualTo(35);
+    }
 }

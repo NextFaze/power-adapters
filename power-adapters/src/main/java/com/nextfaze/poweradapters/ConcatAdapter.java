@@ -50,6 +50,9 @@ final class ConcatAdapter extends PowerAdapter {
 
     @Override
     public int getItemCount() {
+        if (getObserverCount() <= 0) {
+            rebuild();
+        }
         if (mEntries.length == 0) {
             return 0;
         }
@@ -182,6 +185,9 @@ final class ConcatAdapter extends PowerAdapter {
         }
 
         int getItemCount() {
+            if (!mObserving) {
+                return mAdapter.getItemCount();
+            }
             return mShadowItemCount;
         }
 
