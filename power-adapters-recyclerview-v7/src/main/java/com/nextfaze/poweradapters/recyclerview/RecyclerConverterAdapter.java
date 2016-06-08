@@ -113,8 +113,8 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     public void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.registerAdapterDataObserver(observer);
         if (mAdapterDataObservers.add(observer) && mAdapterDataObservers.size() == 1) {
-            mPowerAdapter.registerDataObserver(mDataSetObserver);
             mShadowItemCount = mPowerAdapter.getItemCount();
+            mPowerAdapter.registerDataObserver(mDataSetObserver);
         }
     }
 

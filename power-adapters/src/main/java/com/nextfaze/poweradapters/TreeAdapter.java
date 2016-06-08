@@ -417,8 +417,8 @@ public final class TreeAdapter extends PowerAdapter {
                 }
                 mObserving = observe;
                 if (mObserving) {
-                    mAdapter.registerDataObserver(mDataObserver);
                     mShadowItemCount = mAdapter.getItemCount();
+                    mAdapter.registerDataObserver(mDataObserver);
                 }
             }
         }
