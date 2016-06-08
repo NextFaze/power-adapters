@@ -4,7 +4,7 @@ import lombok.NonNull;
 
 import static java.lang.Math.*;
 
-final class LimitAdapter extends PowerAdapterWrapper {
+public final class LimitAdapter extends PowerAdapterWrapper {
 
     private int mLimit;
 

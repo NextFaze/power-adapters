@@ -4,7 +4,7 @@ import lombok.NonNull;
 
 import static java.lang.Math.*;
 
-final class OffsetAdapter extends PowerAdapterWrapper {
+public final class OffsetAdapter extends PowerAdapterWrapper {
 
     private int mOffset;
 
