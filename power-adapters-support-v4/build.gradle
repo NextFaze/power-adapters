@@ -1,10 +1,12 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
     compile project(':power-adapters')
