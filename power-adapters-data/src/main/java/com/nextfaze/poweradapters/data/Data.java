@@ -332,9 +332,9 @@ public abstract class Data<T> implements Iterable<T> {
 
     /** Filter the specified data by class. The resulting elements are guaranteed to be of the given type. */
     @NonNull
-    public final Data<T> filter(@NonNull final Class<T> type) {
+    public final <O> Data<O> filter(@NonNull final Class<O> type) {
         //noinspection unchecked
-        return new FilterData<>(this, new Predicate<Object>() {
+        return (Data<O>) new FilterData<>(this, new Predicate<Object>() {
             @Override
             public boolean apply(Object o) {
                 return type.isInstance(o);
