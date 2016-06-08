@@ -29,10 +29,7 @@ import static com.nextfaze.poweradapters.sample.Utils.emptyMessage;
 public final class FileTreeFragment extends BaseFragment {
 
     @NonNull
-    private final File mRootFile = File.rootFile();
-
-    @NonNull
-    private final Data<File> mRootData = new DirectoryData(mRootFile);
+    private final File mRootFile = File.rootDir();
 
     @Nullable
     private TreeAdapter mRootTreeAdapter;
@@ -46,8 +43,9 @@ public final class FileTreeFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setAdapter(createFilesAdapter(mRootData, mRootFile, 0));
-        setData(mRootData);
+        Data<File> rootData = new DirectoryData(mRootFile);
+        setAdapter(createFilesAdapter(rootData, mRootFile, 0));
+        setData(rootData);
     }
 
     @Override

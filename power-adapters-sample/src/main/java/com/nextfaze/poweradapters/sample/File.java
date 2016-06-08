@@ -23,7 +23,7 @@ final class File {
     private final boolean mDir;
 
     @NonNull
-    static File rootFile() {
+    static File rootDir() {
         return new File(new Random(1), "/", 5, true);
     }
 
