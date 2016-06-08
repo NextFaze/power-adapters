@@ -48,24 +48,6 @@ final class ConcatAdapter extends PowerAdapter {
         mStableIds = mEntries.length == 1 && mEntries[0].mAdapter.hasStableIds();
     }
 
-    private void rebuild() {
-        mMapping.rebuild();
-    }
-
-    @NonNull
-    private Entry outerPositionToEntry(int outerPosition) {
-        return mEntries[mMapping.findPosition(outerPosition)];
-    }
-
-    @NonNull
-    private PowerAdapter outerToAdapter(int outerPosition) {
-        Entry entry = outerPositionToEntry(outerPosition);
-        if (entry.getItemCount() <= 0) {
-            throw new AssertionError();
-        }
-        return entry.mAdapter;
-    }
-
     @Override
     public int getItemCount() {
         if (mEntries.length == 0) {
@@ -115,7 +97,6 @@ final class ConcatAdapter extends PowerAdapter {
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         updateEntryObservers();
-        // Rebuild index immediately. It will be updated incrementally later.
         rebuild();
     }
 
@@ -126,9 +107,22 @@ final class ConcatAdapter extends PowerAdapter {
         updateEntryObservers();
     }
 
+    private void rebuild() {
+        mMapping.rebuild();
+    }
+
+    @NonNull
+    private PowerAdapter outerToAdapter(int outerPosition) {
+        Entry entry = mEntries[mMapping.findPosition(outerPosition)];
+        if (entry.getItemCount() <= 0) {
+            throw new AssertionError();
+        }
+        return entry.mAdapter;
+    }
+
     private void updateEntryObservers() {
-        for (Entry mEntry : mEntries) {
-            mEntry.updateObserver();
+        for (Entry entry : mEntries) {
+            entry.updateObserver();
         }
     }
 
@@ -208,7 +202,7 @@ final class ConcatAdapter extends PowerAdapter {
 
         @Override
         public String toString() {
-            return "[OuterStart: " + getOffset() + ", count: " + getItemCount()  + "]";
+            return "[offset: " + getOffset() + ", count: " + getItemCount()  + "]";
         }
     }
 }
