@@ -494,6 +494,22 @@ public final class TreeAdapterTest {
     }
 
     @Test
+    public void rootRemovalItemCountIsConsistent() {
+        final FakeAdapter childAdapter = new FakeAdapter(10);
+        FakeAdapter rootAdapter = new FakeAdapter(1);
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+            @NonNull
+            @Override
+            public PowerAdapter get(int position) {
+                return childAdapter;
+            }
+        });
+        treeAdapter.registerDataObserver(new VerifyingObserver(treeAdapter));
+        rootAdapter.clear();
+        assertThat(treeAdapter.getItemCount()).isEqualTo(0);
+    }
+
+    @Test
     public void rootMoveIsTranslatedAndIncludesExpandedChildren() {
         DataObserver observer = registerMockDataObserver();
         mRootAdapter.move(1, 2, 1);

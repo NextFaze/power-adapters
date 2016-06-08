@@ -190,6 +190,9 @@ public final class TreeAdapter extends PowerAdapter {
 
     @Override
     public int getItemCount() {
+        if (getObserverCount() <= 0) {
+            return 0;
+        }
         if (mEntries.size() == 0) {
             return 0;
         }
@@ -237,8 +240,12 @@ public final class TreeAdapter extends PowerAdapter {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
+        int insertCount = mRootAdapter.getItemCount();
         mRootAdapter.registerDataObserver(mRootDataObserver);
         rebuildAllEntries();
+        if (insertCount > 0) {
+            notifyItemRangeInserted(0, insertCount);
+        }
         updateEntryObservers();
     }
 
@@ -289,7 +296,7 @@ public final class TreeAdapter extends PowerAdapter {
             mEntries.add(entry);
             entry.setAdapter(mAutoExpand ? getChildAdapter(i) : null);
         }
-        mMapping.rebuild();
+        rebuild();
     }
 
     private void rebuild() {
@@ -405,6 +412,9 @@ public final class TreeAdapter extends PowerAdapter {
         }
 
         int getItemCount() {
+            if (!mObserving) {
+                return 0;
+            }
             return mShadowItemCount + 1;
         }
 
