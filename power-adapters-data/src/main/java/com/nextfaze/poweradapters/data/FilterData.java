@@ -1,20 +1,15 @@
 package com.nextfaze.poweradapters.data;
 
-import android.os.Handler;
 import android.util.SparseIntArray;
-import com.android.internal.util.Predicate;
 import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
 
-import static android.os.Looper.getMainLooper;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
 
 /** Maintains an index into the wrapped data instance. */
 final class FilterData<T> extends DataWrapper<T> {
-
-    @NonNull
-    private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
     private final Data<? extends T> mData;

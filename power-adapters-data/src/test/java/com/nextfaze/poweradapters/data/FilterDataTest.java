@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
-import com.android.internal.util.Predicate;
 import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;

@@ -3,8 +3,8 @@ package com.nextfaze.poweradapters.data;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
-import com.android.internal.util.Predicate;
 import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
 
 import java.util.Iterator;
