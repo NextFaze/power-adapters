@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import lombok.NonNull;
 
 public class FakeAdapter extends PowerAdapter {
@@ -26,8 +25,7 @@ public class FakeAdapter extends PowerAdapter {
     @Override
     public long getItemId(int position) {
         assertWithinRange(position);
-        // TODO: This isn't a stable ID. Not sure what else to return though.
-        return position;
+        return NO_ID;
     }
 
     @Override
@@ -39,7 +37,7 @@ public class FakeAdapter extends PowerAdapter {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        return new FrameLayout(parent.getContext());
+        return new View(parent.getContext());
     }
 
     @Override
@@ -48,7 +46,7 @@ public class FakeAdapter extends PowerAdapter {
 
     @Override
     public boolean hasStableIds() {
-        return true;
+        return false;
     }
 
     @Override
