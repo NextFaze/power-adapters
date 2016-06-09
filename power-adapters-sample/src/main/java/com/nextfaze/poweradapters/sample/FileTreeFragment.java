@@ -22,7 +22,6 @@ import static android.graphics.Typeface.DEFAULT_BOLD;
 import static com.google.common.base.Strings.repeat;
 import static com.nextfaze.poweradapters.Condition.isTrue;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isLoading;
 import static com.nextfaze.poweradapters.sample.Utils.emptyMessage;
 
@@ -88,7 +87,7 @@ public final class FileTreeFragment extends BaseFragment {
             }
         };
 
-        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(binder));
+        PowerAdapter adapter = new DataBindingAdapter(data, binder);
         treeAdapterRef.set(new TreeAdapter(adapter, position -> {
             File f = data.get(position);
             if (f.isDirectory()) {

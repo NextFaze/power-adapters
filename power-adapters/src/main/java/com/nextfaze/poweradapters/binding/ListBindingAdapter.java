@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+
 /**
  * A mutable {@link BindingAdapter} implementation that automatically generates notifications when its contents
  * changes. This class does not accept {@code null} elements.
@@ -18,6 +20,16 @@ public final class ListBindingAdapter<E> extends BindingAdapter implements List<
     @NonNull
     private final NotifyingArrayList<E> mData = new NotifyingArrayList<>(this);
 
+    @SafeVarargs
+    public ListBindingAdapter(@NonNull Binder<?, ?> binder, @NonNull E... items) {
+        this(singletonMapper(binder), items);
+    }
+
+    public ListBindingAdapter(@NonNull Binder<?, ?> binder, @NonNull List<? extends E> list) {
+        this(singletonMapper(binder), list);
+    }
+
+    @SafeVarargs
     public ListBindingAdapter(@NonNull Mapper mapper, @NonNull E... items) {
         super(mapper);
         Collections.addAll(mData, items);

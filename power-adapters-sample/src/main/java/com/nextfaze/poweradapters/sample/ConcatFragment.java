@@ -20,7 +20,6 @@ import java.util.Random;
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.PowerAdapter.concat;
-import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
 import static com.nextfaze.poweradapters.sample.Utils.*;
 
@@ -43,7 +42,7 @@ public final class ConcatFragment extends BaseFragment {
     @NonNull
     private Pair<NewsData, PowerAdapter> createPair(@NonNull NewsData data,
                                                     @NonNull NewsItemBinder newsItemBinder) {
-        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(newsItemBinder));
+        PowerAdapter adapter = new DataBindingAdapter(data, newsItemBinder);
 
         // Header
         adapter = adapter.prepend(asAdapter(R.layout.news_header_item));

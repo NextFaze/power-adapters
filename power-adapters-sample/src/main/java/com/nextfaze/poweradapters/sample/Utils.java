@@ -17,7 +17,6 @@ import java.util.List;
 
 import static com.nextfaze.poweradapters.Condition.not;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
-import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.data.DataConditions.*;
 
 @SuppressWarnings("Guava")
@@ -28,7 +27,7 @@ final class Utils {
 
     @NonNull
     static PowerAdapter createNewsAdapter(@NonNull NewsData data) {
-        return new DataBindingAdapter(data, singletonMapper(new NewsItemBinder(data)));
+        return new DataBindingAdapter(data, new NewsItemBinder(data));
     }
 
     @NonNull
