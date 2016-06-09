@@ -403,6 +403,13 @@ public abstract class PowerAdapter {
         return new ConditionalAdapter(this, condition);
     }
 
+    /** Overrides all notifications to be {@link #notifyDataSetChanged()}, which in most cases disables animation. */
+    @CheckResult
+    @NonNull
+    public final PowerAdapter useDegenerateNotifications() {
+        return new DegenerateNotificationsAdapter(this);
+    }
+
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull PowerAdapter... adapters) {
