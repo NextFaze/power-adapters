@@ -347,11 +347,29 @@ public abstract class PowerAdapter {
 
     @CheckResult
     @NonNull
+    public final PowerAdapter prepend(@NonNull ViewFactory... views) {
+        if (views.length == 0) {
+            return this;
+        }
+        return prepend(asAdapter(views));
+    }
+
+    @CheckResult
+    @NonNull
     public final PowerAdapter append(@NonNull PowerAdapter... adapters) {
         if (adapters.length == 0) {
             return this;
         }
         return new ConcatAdapterBuilder().add(this).addAll(adapters).build();
+    }
+
+    @CheckResult
+    @NonNull
+    public final PowerAdapter append(@NonNull ViewFactory... views) {
+        if (views.length == 0) {
+            return this;
+        }
+        return append(asAdapter(views));
     }
 
     @CheckResult
