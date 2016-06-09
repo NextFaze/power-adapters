@@ -22,6 +22,7 @@ public final class TreeAdapter extends PowerAdapter {
         @Override
         public void onChanged() {
             rebuildAllEntries();
+            updateEntryAdapters();
             notifyDataSetChanged();
         }
 
@@ -42,7 +43,7 @@ public final class TreeAdapter extends PowerAdapter {
             rebuild();
             notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
             for (int i = positionStart; i < positionStart + itemCount; i++) {
-                mEntries.get(i).setAdapter(mAutoExpand ? getChildAdapter(i) : null);
+                mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
             }
         }
 
@@ -131,21 +132,9 @@ public final class TreeAdapter extends PowerAdapter {
      * PowerAdapter#hasStableIds()}
      */
     public void restoreInstanceState(@Nullable Parcelable parcelable) {
-        if (parcelable != null) {
-            mState = (TreeState) parcelable;
-            applyExpandedState();
-        }
-    }
-
-    private void applyExpandedState() {
-        if (mRootAdapter.hasStableIds() && !mState.isEmpty()) {
-            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
-                long itemId = mRootAdapter.getItemId(i);
-                if (itemId != NO_ID) {
-                    setExpanded(i, mState.isExpanded(itemId));
-                }
-            }
-        }
+        mState = parcelable instanceof TreeState ? (TreeState) parcelable : new TreeState();
+        rebuildAllEntries();
+        updateEntryAdapters();
     }
 
     public boolean isAutoExpand() {
@@ -157,17 +146,24 @@ public final class TreeAdapter extends PowerAdapter {
     }
 
     public boolean isExpanded(int position) {
+        if (mRootAdapter.hasStableIds()) {
+            return mState.isExpanded(mRootAdapter.getItemId(position));
+        }
         Entry entry = mEntries.get(position);
         return entry != null && entry.getAdapter() != null;
     }
 
     public void setExpanded(int position, boolean expanded) {
-        long itemId = mRootAdapter.getItemId(position);
-        Entry entry = mEntries.get(position);
-        boolean isExpanded = entry.getAdapter() != null;
-        if (expanded != isExpanded) {
-            entry.setAdapter(expanded ? getChildAdapter(position) : null);
+        if (mRootAdapter.hasStableIds()) {
+            long itemId = mRootAdapter.getItemId(position);
             mState.setExpanded(itemId, expanded);
+        }
+        if (position < mEntries.size()) {
+            Entry entry = mEntries.get(position);
+            boolean alreadyExpanded = entry.getAdapter() != null;
+            if (expanded != alreadyExpanded) {
+                entry.setAdapter(expanded ? getChildAdapter(position) : null);
+            }
         }
     }
 
@@ -178,7 +174,7 @@ public final class TreeAdapter extends PowerAdapter {
     }
 
     public void setAllExpanded(boolean expanded) {
-        for (int i = 0; i < mEntries.size(); i++) {
+        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
             setExpanded(i, expanded);
         }
     }
@@ -246,6 +242,7 @@ public final class TreeAdapter extends PowerAdapter {
         if (insertCount > 0) {
             notifyItemRangeInserted(0, insertCount);
         }
+        updateEntryAdapters();
         updateEntryObservers();
     }
 
@@ -292,9 +289,7 @@ public final class TreeAdapter extends PowerAdapter {
     private void rebuildAllEntries() {
         mEntries.clear();
         for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
-            Entry entry = new Entry();
-            mEntries.add(entry);
-            entry.setAdapter(mAutoExpand ? getChildAdapter(i) : null);
+            mEntries.add(new Entry());
         }
         rebuild();
     }
@@ -303,10 +298,25 @@ public final class TreeAdapter extends PowerAdapter {
         mMapping.rebuild();
     }
 
+    private void updateEntryAdapters() {
+        for (int i = 0; i < mEntries.size(); i++) {
+            mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
+        }
+    }
+
     private void updateEntryObservers() {
         for (int i = 0; i < mEntries.size(); i++) {
             mEntries.get(i).updateObserver();
         }
+    }
+
+    private boolean shouldExpand(int rootPosition) {
+        // Expand if either:
+        // - Auto expand is enabled
+        // - The saved state indicates this root position is expanded, and the root adapter has stable ids
+        return mAutoExpand || mRootAdapter.hasStableIds() &&
+                rootPosition < mRootAdapter.getItemCount() &&
+                mState.isExpanded(mRootAdapter.getItemId(rootPosition));
     }
 
     @NonNull

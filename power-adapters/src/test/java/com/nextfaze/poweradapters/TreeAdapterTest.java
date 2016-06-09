@@ -5,8 +5,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
+import com.nextfaze.poweradapters.TreeAdapter.ChildAdapterSupplier;
 import lombok.NonNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +20,7 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,7 +44,7 @@ public final class TreeAdapterTest {
 
     private FakeAdapter mRootAdapter;
     private List<FakeAdapter> mChildAdapters;
-    private TreeAdapter.ChildAdapterSupplier mChildAdapterSupplier;
+    private ChildAdapterSupplier mChildAdapterSupplier;
     private TreeAdapter mTreeAdapter;
     private ViewGroup mParent;
     private View mItemView;
@@ -54,7 +57,7 @@ public final class TreeAdapterTest {
                 spy(new FakeAdapter(3)),
                 spy(new FakeAdapter(3))
         );
-        mChildAdapterSupplier = spy(new TreeAdapter.ChildAdapterSupplier() {
+        mChildAdapterSupplier = spy(new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -97,6 +100,23 @@ public final class TreeAdapterTest {
         mTreeAdapter.setAllExpanded(false);
         mTreeAdapter.setExpanded(1, true);
         assertThat(mTreeAdapter.getItemCount()).isEqualTo(6);
+    }
+
+    @Test
+    public void itemCountIsConsistentWithPreExpandedPosition() {
+        final FakeAdapter childAdapter = new FakeAdapter(10);
+        FakeLongAdapter rootAdapter = new FakeLongAdapter();
+        rootAdapter.add(5L);
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new ChildAdapterSupplier() {
+            @NonNull
+            @Override
+            public PowerAdapter get(int position) {
+                return childAdapter;
+            }
+        });
+        treeAdapter.setExpanded(0, true);
+        treeAdapter.registerDataObserver(new VerifyingObserver(treeAdapter));
+        assertThat(treeAdapter.getItemCount()).isEqualTo(11);
     }
 
     @Test
@@ -235,7 +255,7 @@ public final class TreeAdapterTest {
     @Test
     public void treeRegistersObserversOnChildAdaptersWhenFirstExternalObserverRegisters() {
         final PowerAdapter childAdapter = mock(PowerAdapter.class);
-        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(3), new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(3), new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -254,7 +274,7 @@ public final class TreeAdapterTest {
                 mock(PowerAdapter.class),
                 mock(PowerAdapter.class)
         );
-        TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -275,7 +295,7 @@ public final class TreeAdapterTest {
     @Test
     public void treeRegistersObserverOnRootAdapterWhenFirstExternalObserverRegisters() {
         PowerAdapter rootAdapter = mock(PowerAdapter.class);
-        TreeAdapter.ChildAdapterSupplier adapterSupplier = mock(TreeAdapter.ChildAdapterSupplier.class);
+        ChildAdapterSupplier adapterSupplier = mock(ChildAdapterSupplier.class);
         when(adapterSupplier.get(anyInt())).thenReturn(mock(PowerAdapter.class));
         TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, adapterSupplier);
         treeAdapter.setAutoExpand(true);
@@ -285,7 +305,7 @@ public final class TreeAdapterTest {
 
     @Test
     public void treeUnregistersObserverFromRootAdapterWhenLastExternalObserverUnregisters() {
-        TreeAdapter.ChildAdapterSupplier adapterSupplier = mock(TreeAdapter.ChildAdapterSupplier.class);
+        ChildAdapterSupplier adapterSupplier = mock(ChildAdapterSupplier.class);
         when(adapterSupplier.get(anyInt())).thenReturn(mock(PowerAdapter.class));
         PowerAdapter rootAdapter = mock(PowerAdapter.class);
         TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, adapterSupplier);
@@ -394,7 +414,7 @@ public final class TreeAdapterTest {
         FakeAdapter rootAdapter = new FakeAdapter(1);
         PowerAdapter oldChildAdapter = mock(PowerAdapter.class);
         final AtomicReference<PowerAdapter> childAdapterRef = new AtomicReference<>(oldChildAdapter);
-        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -415,7 +435,7 @@ public final class TreeAdapterTest {
     @Test
     public void rootChangeRemovesAndInsertsChildItemsIfExpandedAndChildAdapterInstanceChanges() {
         // TreeAdapter child adapters must change each invocation for this test.
-        TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -438,7 +458,20 @@ public final class TreeAdapterTest {
         mRootAdapter.change(1, 1);
         mRootAdapter.change(0, 1);
         mRootAdapter.change(2, 1);
-        verifyStateAllExpanded();
+        verifySubAdapterAllGetCalls()
+                .check(mRootAdapter, 0)
+                .check(mChildAdapters.get(0), 0)
+                .check(mChildAdapters.get(0), 1)
+                .check(mChildAdapters.get(0), 2)
+                .check(mRootAdapter, 1)
+                .check(mChildAdapters.get(1), 0)
+                .check(mChildAdapters.get(1), 1)
+                .check(mChildAdapters.get(1), 2)
+                .check(mRootAdapter, 2)
+                .check(mChildAdapters.get(2), 0)
+                .check(mChildAdapters.get(2), 1)
+                .check(mChildAdapters.get(2), 2)
+                .verify(mTreeAdapter);
     }
 
     @Test
@@ -497,7 +530,7 @@ public final class TreeAdapterTest {
     public void rootRemovalItemCountIsConsistent() {
         final FakeAdapter childAdapter = new FakeAdapter(10);
         FakeAdapter rootAdapter = new FakeAdapter(1);
-        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -508,6 +541,13 @@ public final class TreeAdapterTest {
         rootAdapter.clear();
         assertThat(treeAdapter.getItemCount()).isEqualTo(0);
     }
+
+    @Ignore
+    @Test
+    public void rootRemovalRemovesSavedState() {
+        // TODO: Check that a root removal removes the saved state entry for that root ID.
+    }
+
 
     @Test
     public void rootMoveIsTranslatedAndIncludesExpandedChildren() {
@@ -563,7 +603,7 @@ public final class TreeAdapterTest {
     @Test
     public void childInsertionGeneratesTreeInsertion() {
         final FakeAdapter childAdapter = new FakeAdapter(3);
-        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(1), new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -582,7 +622,7 @@ public final class TreeAdapterTest {
     @Test
     public void childRemovalGeneratesTreeRemoval() {
         final FakeAdapter childAdapter = new FakeAdapter(3);
-        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(1), new TreeAdapter.ChildAdapterSupplier() {
+        TreeAdapter treeAdapter = new TreeAdapter(new FakeAdapter(1), new ChildAdapterSupplier() {
             @NonNull
             @Override
             public PowerAdapter get(int position) {
@@ -696,53 +736,74 @@ public final class TreeAdapterTest {
     }
 
     @Test
-    public void saveRestoreState() {
-        mTreeAdapter.setExpanded(0, true);
-        mTreeAdapter.setExpanded(1, false);
-        mTreeAdapter.setExpanded(2, true);
+    public void restoreStateWorksWithoutObserverRegistered() {
+        final List<FakeAdapter> childAdapters = newArrayList(
+                new FakeAdapter(3),
+                new FakeAdapter(3),
+                new FakeAdapter(3)
+        );
+        FakeLongAdapter rootAdapter = new FakeLongAdapter();
+        Collections.addAll(rootAdapter, 1L, 3L, 5L);
+        ChildAdapterSupplier childAdapterSupplier = new ChildAdapterSupplier() {
+            @NonNull
+            @Override
+            public PowerAdapter get(int position) {
+                return childAdapters.get(position);
+            }
+        };
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, childAdapterSupplier);
+        treeAdapter.setExpanded(0, true);
+        treeAdapter.setExpanded(1, false);
+        treeAdapter.setExpanded(2, true);
+        assertThat(treeAdapter.isExpanded(0)).isTrue();
+        assertThat(treeAdapter.isExpanded(1)).isFalse();
+        assertThat(treeAdapter.isExpanded(2)).isTrue();
+        Parcelable state = treeAdapter.saveInstanceState();
+        TreeAdapter treeAdapter2 = new TreeAdapter(rootAdapter, childAdapterSupplier);
+        treeAdapter2.restoreInstanceState(state);
+        assertThat(treeAdapter2.isExpanded(0)).isTrue();
+        assertThat(treeAdapter2.isExpanded(1)).isFalse();
+        assertThat(treeAdapter2.isExpanded(2)).isTrue();
+    }
+
+    @Test
+    public void restoreStateWorksWithObserverRegistered() {
+        final List<FakeAdapter> childAdapters = newArrayList(
+                spy(new FakeAdapter(3)),
+                spy(new FakeAdapter(3)),
+                spy(new FakeAdapter(3))
+        );
+        FakeLongAdapter rootAdapter = spy(new FakeLongAdapter());
+        Collections.addAll(rootAdapter, 1L, 3L, 5L);
+        ChildAdapterSupplier childAdapterSupplier = new ChildAdapterSupplier() {
+            @NonNull
+            @Override
+            public PowerAdapter get(int position) {
+                return childAdapters.get(position);
+            }
+        };
+        TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, childAdapterSupplier);
+        treeAdapter.setExpanded(0, true);
+        treeAdapter.setExpanded(1, false);
+        treeAdapter.setExpanded(2, true);
+        assertThat(treeAdapter.isExpanded(0)).isTrue();
+        assertThat(treeAdapter.isExpanded(1)).isFalse();
+        assertThat(treeAdapter.isExpanded(2)).isTrue();
+        Parcelable state = treeAdapter.saveInstanceState();
+        TreeAdapter treeAdapter2 = new TreeAdapter(rootAdapter, childAdapterSupplier);
+        treeAdapter2.registerDataObserver(mock(DataObserver.class));
+        treeAdapter2.restoreInstanceState(state);
+        assertThat(treeAdapter2.isExpanded(0)).isTrue();
+        assertThat(treeAdapter2.isExpanded(1)).isFalse();
+        assertThat(treeAdapter2.isExpanded(2)).isTrue();
         resetAll();
-        verifySavedState(mTreeAdapter);
-        Parcelable state = mTreeAdapter.saveInstanceState();
-        TreeAdapter treeAdapter = new TreeAdapter(mRootAdapter, mChildAdapterSupplier);
-        treeAdapter.registerDataObserver(mock(DataObserver.class));
-        treeAdapter.restoreInstanceState(state);
-        resetAll();
-        verifySavedState(treeAdapter);
-    }
-
-    private void verifySavedState(@NonNull TreeAdapter treeAdapter) {
         verifySubAdapterAllGetCalls()
-                .check(mRootAdapter, 0)
-                .checkRange(mChildAdapters.get(0), 0, 3)
-                .check(mRootAdapter, 1)
-                .check(mRootAdapter, 2)
-                .checkRange(mChildAdapters.get(2), 0, 3)
-                .verify(treeAdapter);
-    }
-
-    private void verifyStateNoneExpanded() {
-        verifySubAdapterAllGetCalls()
-                .check(mRootAdapter, 0)
-                .check(mRootAdapter, 1)
-                .check(mRootAdapter, 2)
-                .verify(mTreeAdapter);
-    }
-
-    private void verifyStateAllExpanded() {
-        verifySubAdapterAllGetCalls()
-                .check(mRootAdapter, 0)
-                .check(mChildAdapters.get(0), 0)
-                .check(mChildAdapters.get(0), 1)
-                .check(mChildAdapters.get(0), 2)
-                .check(mRootAdapter, 1)
-                .check(mChildAdapters.get(1), 0)
-                .check(mChildAdapters.get(1), 1)
-                .check(mChildAdapters.get(1), 2)
-                .check(mRootAdapter, 2)
-                .check(mChildAdapters.get(2), 0)
-                .check(mChildAdapters.get(2), 1)
-                .check(mChildAdapters.get(2), 2)
-                .verify(mTreeAdapter);
+                .check(rootAdapter, 0)
+                .checkRange(childAdapters.get(0), 0, 3)
+                .check(rootAdapter, 1)
+                .check(rootAdapter, 2)
+                .checkRange(childAdapters.get(2), 0, 3)
+                .verify(treeAdapter2);
     }
 
     private void resetAll() {
