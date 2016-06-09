@@ -55,6 +55,18 @@ public final class LimitAdapterTest {
         verifyState(5);
     }
 
+    @Test
+    public void setLimitNotifiesOfInsertion() {
+        mLimitAdapter.setLimit(10);
+        verify(mObserver).onItemRangeInserted(5, 5);
+    }
+
+    @Test
+    public void setLimitNotifiesOfRemoval() {
+        mLimitAdapter.setLimit(0);
+        verify(mObserver).onItemRangeRemoved(0, 5);
+    }
+
     @Test(expected = IndexOutOfBoundsException.class)
     public void getItemViewTypeOutOfBoundsThrows() {
         mLimitAdapter.getItemViewType(7);

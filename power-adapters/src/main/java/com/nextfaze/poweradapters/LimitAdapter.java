@@ -30,9 +30,10 @@ public final class LimitAdapter extends PowerAdapterWrapper {
     public void setLimit(int limit) {
         limit = max(0, limit);
         if (limit != mLimit) {
-            int oldSize = getItemCount();
+            int oldSize = getLimitedItemCount();
             mLimit = limit;
-            int newSize = getItemCount();
+            int newSize = getLimitedItemCount();
+            mItemCount = newSize;
             int deltaSize = newSize - oldSize;
             if (deltaSize < 0) {
                 notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));
