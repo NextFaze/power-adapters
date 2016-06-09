@@ -46,10 +46,10 @@ final class VerifyingObserver implements DataObserver {
     }
 
     private void validate() {
-        int itemCount = mAdapter.getItemCount();
-        if (mShadowItemCount != itemCount) {
+        int actualItemCount = mAdapter.getItemCount();
+        if (mShadowItemCount != actualItemCount) {
             throw new IllegalStateException("Inconsistency detected: expected item count " +
-                    mShadowItemCount + " but it is " + itemCount);
+                    mShadowItemCount + " but it is " + actualItemCount);
         }
     }
 }

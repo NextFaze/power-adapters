@@ -21,7 +21,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final DataObserver mRootDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
-            rebuildAllEntries();
+            rebuildAllEntriesAndRangeTable();
             updateEntryAdapters();
             notifyDataSetChanged();
         }
@@ -40,7 +40,7 @@ public final class TreeAdapter extends PowerAdapter {
             for (int i = positionStart; i < positionStart + itemCount; i++) {
                 addEntry(i);
             }
-            rebuild();
+            rebuildRangeTable();
             notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
             for (int i = positionStart; i < positionStart + itemCount; i++) {
                 mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
@@ -54,7 +54,7 @@ public final class TreeAdapter extends PowerAdapter {
             for (int i = 0; i < itemCount; i++) {
                 removeCount += removeEntry(positionStart);
             }
-            rebuild();
+            rebuildRangeTable();
             notifyItemRangeRemoved(removeStart, removeCount);
         }
 
@@ -67,7 +67,7 @@ public final class TreeAdapter extends PowerAdapter {
             int outerFromPosition = rootToOuter(fromPosition);
             int outerToPosition = rootToOuter(toPosition);
             moveEntries(fromPosition, toPosition, itemCount);
-            rebuild();
+            rebuildRangeTable();
             notifyItemRangeMoved(outerFromPosition, outerToPosition, moveCount);
         }
     };
@@ -88,7 +88,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final WeakHashMap<ViewType, PowerAdapter> mAdaptersByViewType = new WeakHashMap<>();
 
     @NonNull
-    private final RangeMapping mMapping = new RangeMapping(new RangeMapping.RangeClient() {
+    private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
         @Override
         public int size() {
             return mEntries.size();
@@ -103,7 +103,10 @@ public final class TreeAdapter extends PowerAdapter {
         public void setOffset(int position, int offset) {
             mEntries.get(position).setOffset(offset);
         }
-    });
+    };
+
+    @NonNull
+    private final RangeTable mRangeTable = new RangeTable();
 
     @NonNull
     private TreeState mState = new TreeState();
@@ -133,7 +136,7 @@ public final class TreeAdapter extends PowerAdapter {
      */
     public void restoreInstanceState(@Nullable Parcelable parcelable) {
         mState = parcelable instanceof TreeState ? (TreeState) parcelable : new TreeState();
-        rebuildAllEntries();
+        rebuildAllEntriesAndRangeTable();
         updateEntryAdapters();
     }
 
@@ -238,7 +241,7 @@ public final class TreeAdapter extends PowerAdapter {
         super.onFirstObserverRegistered();
         int insertCount = mRootAdapter.getItemCount();
         mRootAdapter.registerDataObserver(mRootDataObserver);
-        rebuildAllEntries();
+        rebuildAllEntriesAndRangeTable();
         if (insertCount > 0) {
             notifyItemRangeInserted(0, insertCount);
         }
@@ -286,16 +289,16 @@ public final class TreeAdapter extends PowerAdapter {
         }
     }
 
-    private void rebuildAllEntries() {
+    private void rebuildAllEntriesAndRangeTable() {
         mEntries.clear();
         for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
             mEntries.add(new Entry());
         }
-        rebuild();
+        rebuildRangeTable();
     }
 
-    private void rebuild() {
-        mMapping.rebuild();
+    private void rebuildRangeTable() {
+        mRangeTable.rebuild(mShadowRangeClient);
     }
 
     private void updateEntryAdapters() {
@@ -321,7 +324,7 @@ public final class TreeAdapter extends PowerAdapter {
 
     @NonNull
     private PowerAdapter outerToAdapter(int outerPosition) {
-        int entryIndex = mMapping.findPosition(outerPosition);
+        int entryIndex = mRangeTable.findPosition(outerPosition);
         Entry entry = mEntries.get(entryIndex);
         if (entry.getItemCount() <= 0) {
             throw new AssertionError();
@@ -340,7 +343,7 @@ public final class TreeAdapter extends PowerAdapter {
     }
 
     private int outerToRoot(int outerPosition) {
-        int entryIndex = mMapping.findPosition(outerPosition);
+        int entryIndex = mRangeTable.findPosition(outerPosition);
         Entry entry = mEntries.get(entryIndex);
         return outerPosition - (entry.getOffset() - entryIndex);
     }
@@ -356,7 +359,7 @@ public final class TreeAdapter extends PowerAdapter {
             @Override
             public void onChanged() {
                 mShadowItemCount = mAdapter.getItemCount();
-                rebuild();
+                rebuildRangeTable();
                 notifyDataSetChanged();
             }
 
@@ -368,14 +371,14 @@ public final class TreeAdapter extends PowerAdapter {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 mShadowItemCount += itemCount;
-                rebuild();
+                rebuildRangeTable();
                 notifyItemRangeInserted(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
                 mShadowItemCount -= itemCount;
-                rebuild();
+                rebuildRangeTable();
                 notifyItemRangeRemoved(positionStart, itemCount);
             }
 

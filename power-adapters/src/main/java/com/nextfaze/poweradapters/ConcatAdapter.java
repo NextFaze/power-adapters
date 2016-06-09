@@ -18,7 +18,7 @@ final class ConcatAdapter extends PowerAdapter {
     private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
     @NonNull
-    private final RangeMapping mMapping = new RangeMapping(new RangeMapping.RangeClient() {
+    private final RangeTable.RangeClient mRealRangeClient = new RangeTable.RangeClient() {
         @Override
         public int size() {
             return mEntries.length;
@@ -26,16 +26,39 @@ final class ConcatAdapter extends PowerAdapter {
 
         @Override
         public int getRangeCount(int position) {
-            return mEntries[position].getItemCount();
+            return mEntries[position].mAdapter.getItemCount();
         }
 
         @Override
         public void setOffset(int position, int offset) {
             mEntries[position].setOffset(offset);
         }
-    });
+    };
+
+    @NonNull
+    private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
+        @Override
+        public int size() {
+            return mEntries.length;
+        }
+
+        @Override
+        public int getRangeCount(int position) {
+            return mEntries[position].mShadowItemCount;
+        }
+
+        @Override
+        public void setOffset(int position, int offset) {
+            mEntries[position].setOffset(offset);
+        }
+    };
+
+    @NonNull
+    private final RangeTable mRangeTable = new RangeTable();
 
     private final boolean mStableIds;
+
+    private int mItemCount;
 
     ConcatAdapter(@NonNull List<? extends PowerAdapter> adapters) {
         mEntries = new Entry[adapters.size()];
@@ -50,14 +73,7 @@ final class ConcatAdapter extends PowerAdapter {
 
     @Override
     public int getItemCount() {
-        if (getObserverCount() <= 0) {
-            rebuild();
-        }
-        if (mEntries.length == 0) {
-            return 0;
-        }
-        Entry entry = mEntries[mEntries.length - 1];
-        return entry.getOffset() + entry.getItemCount();
+        return mItemCount;
     }
 
     @Override
@@ -99,34 +115,38 @@ final class ConcatAdapter extends PowerAdapter {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        updateEntryObservers();
-        rebuild();
+        mItemCount = mRangeTable.rebuild(mRealRangeClient);
+        if (mItemCount > 0) {
+            notifyItemRangeInserted(0, mItemCount);
+        }
+        for (Entry entry : mEntries) {
+            entry.mShadowItemCount = entry.mAdapter.getItemCount();
+        }
+        for (Entry entry : mEntries) {
+            entry.register();
+        }
     }
 
     @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
-        updateEntryObservers();
-    }
-
-    private void rebuild() {
-        mMapping.rebuild();
+        for (Entry entry : mEntries) {
+            entry.mShadowItemCount = 0;
+        }
+        for (Entry entry : mEntries) {
+            entry.unregister();
+        }
+        mItemCount = 0;
     }
 
     @NonNull
     private PowerAdapter outerToAdapter(int outerPosition) {
-        Entry entry = mEntries[mMapping.findPosition(outerPosition)];
+        Entry entry = mEntries[mRangeTable.findPosition(outerPosition)];
         if (entry.getItemCount() <= 0) {
             throw new AssertionError();
         }
         return entry.mAdapter;
-    }
-
-    private void updateEntryObservers() {
-        for (Entry entry : mEntries) {
-            entry.updateObserver();
-        }
     }
 
     private final class Entry {
@@ -136,7 +156,7 @@ final class ConcatAdapter extends PowerAdapter {
             @Override
             public void onChanged() {
                 mShadowItemCount = mAdapter.getItemCount();
-                rebuild();
+                mItemCount = mRangeTable.rebuild(mShadowRangeClient);
                 notifyDataSetChanged();
             }
 
@@ -148,14 +168,14 @@ final class ConcatAdapter extends PowerAdapter {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 mShadowItemCount += itemCount;
-                rebuild();
+                mItemCount = mRangeTable.rebuild(mShadowRangeClient);
                 notifyItemRangeInserted(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
                 mShadowItemCount -= itemCount;
-                rebuild();
+                mItemCount = mRangeTable.rebuild(mShadowRangeClient);
                 notifyItemRangeRemoved(positionStart, itemCount);
             }
 
@@ -185,24 +205,20 @@ final class ConcatAdapter extends PowerAdapter {
         }
 
         int getItemCount() {
-            if (!mObserving) {
-                return mAdapter.getItemCount();
-            }
             return mShadowItemCount;
         }
 
-        void updateObserver() {
-            boolean observe = getObserverCount() > 0;
-            if (observe != mObserving) {
-                if (mObserving) {
-                    mAdapter.unregisterDataObserver(mDataObserver);
-                    mShadowItemCount = 0;
-                }
-                mObserving = observe;
-                if (mObserving) {
-                    mShadowItemCount = mAdapter.getItemCount();
-                    mAdapter.registerDataObserver(mDataObserver);
-                }
+        void register() {
+            if (!mObserving) {
+                mAdapter.registerDataObserver(mDataObserver);
+                mObserving = true;
+            }
+        }
+
+        void unregister() {
+            if (mObserving) {
+                mAdapter.unregisterDataObserver(mDataObserver);
+                mObserving = false;
             }
         }
 
