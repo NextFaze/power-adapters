@@ -356,6 +356,15 @@ public abstract class PowerAdapter {
 
     @CheckResult
     @NonNull
+    public final PowerAdapter prepend(@NonNull @LayoutRes int... layoutResources) {
+        if (layoutResources.length == 0) {
+            return this;
+        }
+        return prepend(asAdapter(layoutResources));
+    }
+
+    @CheckResult
+    @NonNull
     public final PowerAdapter append(@NonNull PowerAdapter... adapters) {
         if (adapters.length == 0) {
             return this;
@@ -370,6 +379,15 @@ public abstract class PowerAdapter {
             return this;
         }
         return append(asAdapter(views));
+    }
+
+    @CheckResult
+    @NonNull
+    public final PowerAdapter append(@NonNull @LayoutRes int... layoutResources) {
+        if (layoutResources.length == 0) {
+            return this;
+        }
+        return append(asAdapter(layoutResources));
     }
 
     @CheckResult
