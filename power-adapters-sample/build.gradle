@@ -1,7 +1,6 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
-        classpath rootProject.ext.androidMavenGradlePlugin
         classpath rootProject.ext.gradleRetrolambda
         classpath rootProject.ext.androidApt
     }
@@ -10,7 +9,6 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
