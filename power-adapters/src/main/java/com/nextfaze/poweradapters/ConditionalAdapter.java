@@ -51,9 +51,7 @@ final class ConditionalAdapter extends PowerAdapter {
 
     private boolean mVisible;
 
-    private boolean mObservingData;
-
-    private boolean mObservingCondition;
+    private boolean mObservingAdapter;
 
     ConditionalAdapter(@NonNull PowerAdapter adapter, @NonNull Condition condition) {
         mAdapter = adapter;
@@ -109,17 +107,38 @@ final class ConditionalAdapter extends PowerAdapter {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        updateDataObserver();
-        updateConditionObserver();
-        updateVisible();
+        mCondition.registerObserver(mObserver);
+        boolean visible = mCondition.eval();
+        if (visible != mVisible) {
+            int removeCount = mVisible ? mAdapter.getItemCount() : 0;
+            mVisible = visible;
+            int insertCount = mVisible ? mAdapter.getItemCount() : 0;
+            if (removeCount > 0) {
+                notifyItemRangeRemoved(0, removeCount);
+            }
+            if (insertCount > 0) {
+                notifyItemRangeInserted(0, insertCount);
+            }
+            if (mVisible != mObservingAdapter) {
+                mObservingAdapter = mVisible;
+                if (mObservingAdapter) {
+                    mAdapter.registerDataObserver(mDataObserver);
+                } else {
+                    mAdapter.unregisterDataObserver(mDataObserver);
+                }
+            }
+        }
     }
 
     @CallSuper
     @Override
     protected void onLastObserverUnregistered() {
         super.onLastObserverUnregistered();
-        updateDataObserver();
-        updateConditionObserver();
+        if (mObservingAdapter) {
+            mObservingAdapter = false;
+            mAdapter.unregisterDataObserver(mDataObserver);
+        }
+        mCondition.unregisterObserver(mObserver);
     }
 
     private void updateVisible() {
@@ -128,41 +147,20 @@ final class ConditionalAdapter extends PowerAdapter {
             int removeCount = mVisible ? mAdapter.getItemCount() : 0;
             mVisible = visible;
             int insertCount = mVisible ? mAdapter.getItemCount() : 0;
-            updateDataObserver();
             if (removeCount > 0) {
                 notifyItemRangeRemoved(0, removeCount);
             }
             if (insertCount > 0) {
                 notifyItemRangeInserted(0, insertCount);
             }
-        }
-    }
-
-    private void updateDataObserver() {
-        // Only observe wrapped adapter if:
-        // - Our own clients are observing us
-        // - The adapter is currently visible according to the condition
-        boolean observe = mVisible && getObserverCount() > 0;
-        if (observe != mObservingData) {
-            mObservingData = observe;
-            if (mObservingData) {
-                mAdapter.registerDataObserver(mDataObserver);
-            } else {
-                mAdapter.unregisterDataObserver(mDataObserver);
-            }
-        }
-    }
-
-    private void updateConditionObserver() {
-        // Only observe condition if:
-        // - Our own clients are observing us
-        boolean observe = getObserverCount() > 0;
-        if (observe != mObservingCondition) {
-            mObservingCondition = observe;
-            if (mObservingCondition) {
-                mCondition.registerObserver(mObserver);
-            } else {
-                mCondition.unregisterObserver(mObserver);
+            boolean observe = mVisible && getObserverCount() > 0;
+            if (observe != mObservingAdapter) {
+                mObservingAdapter = observe;
+                if (mObservingAdapter) {
+                    mAdapter.registerDataObserver(mDataObserver);
+                } else {
+                    mAdapter.unregisterDataObserver(mDataObserver);
+                }
             }
         }
     }
