@@ -48,7 +48,7 @@ public final class WrappingDividerAdapterTest {
                 .outerResource(RESOURCE)
                 .emptyPolicy(emptyPolicy)
                 .build(mFakeAdapter);
-        mDividerAdapter.registerDataObserver(new VerifyingObserver(mDividerAdapter));
+        mDividerAdapter.registerDataObserver(new VerifyingAdapterObserver(mDividerAdapter));
         mDividerAdapter.registerDataObserver(mObserver);
     }
 

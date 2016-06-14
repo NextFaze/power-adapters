@@ -36,7 +36,7 @@ public final class LimitAdapterTest {
         mFakeAdapter = spy(new FakeAdapter(count));
         mLimitAdapter = new LimitAdapter(mFakeAdapter, limit);
         mLimitAdapter.registerDataObserver(mObserver);
-        mLimitAdapter.registerDataObserver(new VerifyingObserver(mLimitAdapter));
+        mLimitAdapter.registerDataObserver(new VerifyingAdapterObserver(mLimitAdapter));
         verify(mFakeAdapter).onFirstObserverRegistered();
     }
 

@@ -6,14 +6,14 @@ import lombok.NonNull;
  * Used to ensure that notifications emitted by the specified {@link PowerAdapter} are consistent with its {@link
  * PowerAdapter#getItemCount()} return value.
  */
-final class VerifyingObserver implements DataObserver {
+final class VerifyingAdapterObserver implements DataObserver {
 
     private int mShadowItemCount;
 
     @NonNull
     private final PowerAdapter mAdapter;
 
-    VerifyingObserver(@NonNull PowerAdapter adapter) {
+    VerifyingAdapterObserver(@NonNull PowerAdapter adapter) {
         mAdapter = adapter;
         mShadowItemCount = mAdapter.getItemCount();
     }

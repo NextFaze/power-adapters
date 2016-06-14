@@ -66,7 +66,7 @@ public final class TreeAdapterTest {
         });
         mTreeAdapter = new TreeAdapter(mRootAdapter, mChildAdapterSupplier);
         mTreeAdapter.registerDataObserver(mObserver);
-        mTreeAdapter.registerDataObserver(new VerifyingObserver(mTreeAdapter));
+        mTreeAdapter.registerDataObserver(new VerifyingAdapterObserver(mTreeAdapter));
         mTreeAdapter.setAllExpanded(true);
         mParent = new FrameLayout(RuntimeEnvironment.application);
         mItemView = new View(RuntimeEnvironment.application);
@@ -115,7 +115,7 @@ public final class TreeAdapterTest {
             }
         });
         treeAdapter.setExpanded(0, true);
-        treeAdapter.registerDataObserver(new VerifyingObserver(treeAdapter));
+        treeAdapter.registerDataObserver(new VerifyingAdapterObserver(treeAdapter));
         assertThat(treeAdapter.getItemCount()).isEqualTo(11);
     }
 
@@ -537,7 +537,7 @@ public final class TreeAdapterTest {
                 return childAdapter;
             }
         });
-        treeAdapter.registerDataObserver(new VerifyingObserver(treeAdapter));
+        treeAdapter.registerDataObserver(new VerifyingAdapterObserver(treeAdapter));
         rootAdapter.clear();
         assertThat(treeAdapter.getItemCount()).isEqualTo(0);
     }

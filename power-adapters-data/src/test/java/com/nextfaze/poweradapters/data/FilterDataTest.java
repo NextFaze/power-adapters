@@ -48,6 +48,7 @@ public final class FilterDataTest {
         addAll(mData, "bear", "cat", "foo", "bar", "baz", "fish");
         mFilterData = new FilterData<>(mData, contains("b"));
         mFilterData.registerDataObserver(mFilterDataObserver);
+        mFilterData.registerDataObserver(new VerifyingDataObserver(mFilterData));
         mFilterData.registerLoadingObserver(mFilterLoadingObserver);
         mFilterData.registerAvailableObserver(mFilterAvailableObserver);
         mFilterData.registerErrorObserver(mFilterErrorObserver);

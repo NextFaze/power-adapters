@@ -47,7 +47,7 @@ public final class ConditionalAdapterTest {
     private void setCondition(@NonNull Condition condition) {
         mFakeAdapter = spy(new FakeAdapter(10));
         mConditionalAdapter = new ConditionalAdapter(mFakeAdapter, condition);
-        mConditionalAdapter.registerDataObserver(new VerifyingObserver(mConditionalAdapter));
+        mConditionalAdapter.registerDataObserver(new VerifyingAdapterObserver(mConditionalAdapter));
         mConditionalAdapter.registerDataObserver(mObserver);
     }
 
@@ -76,7 +76,7 @@ public final class ConditionalAdapterTest {
     public void parentUnregistersFromConditionUponLastExternalObserverUnregistering() {
         Condition condition = mock(Condition.class);
         ConditionalAdapter conditionalAdapter = new ConditionalAdapter(mock(PowerAdapter.class), condition);
-        DataObserver observer = new VerifyingObserver(conditionalAdapter);
+        DataObserver observer = new VerifyingAdapterObserver(conditionalAdapter);
         conditionalAdapter.registerDataObserver(observer);
         conditionalAdapter.unregisterDataObserver(observer);
         ArgumentCaptor<Observer> captor = ArgumentCaptor.forClass(Observer.class);
@@ -89,7 +89,7 @@ public final class ConditionalAdapterTest {
         ValueCondition condition = new ValueCondition();
         PowerAdapter childAdapter = mock(PowerAdapter.class);
         ConditionalAdapter conditionalAdapter = new ConditionalAdapter(childAdapter, condition);
-        conditionalAdapter.registerDataObserver(new VerifyingObserver(conditionalAdapter));
+        conditionalAdapter.registerDataObserver(new VerifyingAdapterObserver(conditionalAdapter));
         verify(childAdapter, never()).registerDataObserver(any(DataObserver.class));
         condition.set(true);
         verify(childAdapter).registerDataObserver(any(DataObserver.class));
@@ -106,7 +106,7 @@ public final class ConditionalAdapterTest {
     public void conditionIsEvaluatedUponFirstObserverRegistered() {
         Condition condition = mock(Condition.class);
         ConditionalAdapter conditionalAdapter = new ConditionalAdapter(mock(PowerAdapter.class), condition);
-        conditionalAdapter.registerDataObserver(new VerifyingObserver(conditionalAdapter));
+        conditionalAdapter.registerDataObserver(new VerifyingAdapterObserver(conditionalAdapter));
         verify(condition).eval();
     }
 
@@ -227,7 +227,7 @@ public final class ConditionalAdapterTest {
         PowerAdapter fakeAdapter = new FakeAdapter(10);
         ConditionalAdapter nestedConditionalAdapter = new ConditionalAdapter(fakeAdapter, always());
         ConditionalAdapter conditionalAdapter = new ConditionalAdapter(nestedConditionalAdapter, always());
-        conditionalAdapter.registerDataObserver(new VerifyingObserver(conditionalAdapter));
+        conditionalAdapter.registerDataObserver(new VerifyingAdapterObserver(conditionalAdapter));
         conditionalAdapter.registerDataObserver(mObserver);
         assertThat(conditionalAdapter.getItemCount()).isEqualTo(10);
         verifyNoMoreInteractions(mObserver);
