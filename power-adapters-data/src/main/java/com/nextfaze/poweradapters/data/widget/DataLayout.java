@@ -171,6 +171,9 @@ public class DataLayout extends RelativeLayout {
     private OnVisibleChangeListener mOnVisibleChangeListener;
 
     @Nullable
+    private OnVisibleComponentChangeListener mOnVisibleComponentChangeListener;
+
+    @Nullable
     private OnErrorListener mOnErrorListener;
 
     /** Animator used to show views. */
@@ -443,6 +446,15 @@ public class DataLayout extends RelativeLayout {
     }
 
     @Nullable
+    public OnVisibleComponentChangeListener getOnVisibleComponentChangeListener() {
+        return mOnVisibleComponentChangeListener;
+    }
+
+    public void setOnVisibleComponentChangeListener(@Nullable OnVisibleComponentChangeListener onVisibleComponentChangeListener) {
+        mOnVisibleComponentChangeListener = onVisibleComponentChangeListener;
+    }
+
+    @Nullable
     public final OnErrorListener getOnErrorListener() {
         return mOnErrorListener;
     }
@@ -636,6 +648,12 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
+    private void dispatchVisibleComponentChanged(@Nullable View oldComponent, @Nullable View newComponent) {
+        if (mOnVisibleComponentChangeListener != null) {
+            mOnVisibleComponentChangeListener.onVisibleComponentChange(oldComponent, newComponent);
+        }
+    }
+
     /** Called to apply an error message when an error occurs. Assigns the text to the error view by default. */
     protected void applyErrorMessage(@Nullable CharSequence errorMessage) {
         if (mErrorView instanceof TextView) {
@@ -724,6 +742,7 @@ public class DataLayout extends RelativeLayout {
             if (newView != null) {
                 animateIn(newView, !animated);
             }
+            dispatchVisibleComponentChanged(oldView, newView);
         }
     }
 
@@ -882,6 +901,11 @@ public class DataLayout extends RelativeLayout {
     /** Callback interface for when the visible state of this view changes. */
     public interface OnVisibleChangeListener {
         void onVisibleChanged(boolean visible);
+    }
+
+    /** Callback interface for when the visible component view changes. */
+    public interface OnVisibleComponentChangeListener {
+        void onVisibleComponentChange(@Nullable View oldComponent, @Nullable View newComponent);
     }
 
     /** Callback interface for when an error message is to be applied to the view hierarchy. */
