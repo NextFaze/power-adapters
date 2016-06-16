@@ -100,6 +100,9 @@ public abstract class Condition {
 
     @NonNull
     public static Condition and(@NonNull final Condition a, @NonNull final Condition b) {
+        if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
+            return isTrue(a.eval() && b.eval());
+        }
         return new CompoundCondition(a, b) {
             @Override
             public boolean eval() {
@@ -110,6 +113,9 @@ public abstract class Condition {
 
     @NonNull
     public static Condition or(@NonNull final Condition a, @NonNull final Condition b) {
+        if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
+            return isTrue(a.eval() || b.eval());
+        }
         return new CompoundCondition(a, b) {
             @Override
             public boolean eval() {
@@ -120,6 +126,9 @@ public abstract class Condition {
 
     @NonNull
     public static Condition xor(@NonNull final Condition a, @NonNull final Condition b) {
+        if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
+            return isTrue((a.eval() || b.eval()) && !(a.eval() && b.eval()));
+        }
         return new CompoundCondition(a, b) {
             @Override
             public boolean eval() {
@@ -130,6 +139,9 @@ public abstract class Condition {
 
     @NonNull
     public static Condition not(@NonNull final Condition condition) {
+        if (condition instanceof ConstantCondition) {
+            return isTrue(!condition.eval());
+        }
         return new CompoundCondition(condition) {
             @Override
             public boolean eval() {
