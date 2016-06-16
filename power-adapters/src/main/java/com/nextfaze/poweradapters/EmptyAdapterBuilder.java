@@ -60,7 +60,7 @@ public final class EmptyAdapterBuilder implements PowerAdapter.Transformer {
         if (mItem == null) {
             return adapter;
         }
-        final Delegate delegate = mDelegate != null ? mDelegate : new DefaultDelegate(adapter);
+        Delegate delegate = mDelegate != null ? mDelegate : new DefaultDelegate(adapter);
         return concat(adapter, asAdapter(mItem.withEnabled(mEnabled)).showOnlyWhile(delegate.mCondition));
     }
 

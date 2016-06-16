@@ -8,6 +8,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 
 import static com.nextfaze.poweradapters.Condition.adapter;
+import static com.nextfaze.poweradapters.Condition.always;
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
@@ -81,30 +82,27 @@ public final class HeaderAdapterBuilder implements PowerAdapter.Transformer {
     public enum EmptyPolicy {
         /** Show the headers when the wrapped adapter is empty. */
         SHOW {
+            @NonNull
             @Override
-            boolean shouldShow(@NonNull PowerAdapter adapter) {
-                return true;
+            Condition asCondition(@NonNull PowerAdapter adapter) {
+                return always();
             }
         },
         /** Hide the headers when the wrapped adapter is empty. */
         HIDE {
             @Override
-            boolean shouldShow(@NonNull PowerAdapter adapter) {
-                return adapter.getItemCount() > 0;
+            @NonNull
+            Condition asCondition(@NonNull PowerAdapter adapter) {
+                return adapter(adapter, new Predicate<PowerAdapter>() {
+                    @Override
+                    public boolean apply(PowerAdapter adapter) {
+                        return adapter.getItemCount() > 0;
+                    }
+                });
             }
         };
 
-        /** Evaluate whether the items should show based on the wrapped adapter. */
-        abstract boolean shouldShow(@NonNull PowerAdapter adapter);
-
         @NonNull
-        Condition asCondition(@NonNull PowerAdapter adapter) {
-            return adapter(adapter, new Predicate<PowerAdapter>() {
-                @Override
-                public boolean apply(PowerAdapter adapter) {
-                    return shouldShow(adapter);
-                }
-            });
-        }
+        abstract Condition asCondition(@NonNull PowerAdapter adapter);
     }
 }
