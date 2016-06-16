@@ -234,8 +234,7 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
                     onClear();
                     mDirty = false;
                     mClear = false;
-                    mData.clear();
-                    mData.addAll(data);
+                    mData.replaceAll(data);
                     setAvailable(0);
                     mTask = null;
                     loadDataIfAppropriate();

@@ -381,8 +381,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
     private void overwriteResult(@NonNull List<? extends T> result) {
         mClear = false;
         onClear();
-        mData.clear();
-        mData.addAll(result);
+        mData.replaceAll(result);
     }
 
     private void appendResult(@NonNull List<? extends T> result) {
