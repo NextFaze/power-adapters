@@ -4,6 +4,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
+import com.nextfaze.poweradapters.NotifyingArrayList;
 import lombok.NonNull;
 
 import java.io.Closeable;
@@ -31,7 +32,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
 
     @NonNull
-    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(this);
+    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(mDataObservable);
 
     @NonNull
     private final ThreadFactory mThreadFactory;
@@ -60,6 +61,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
         this(DEFAULT_THREAD_FACTORY);
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected IncrementalArrayData(@NonNull ThreadFactory threadFactory) {
         mThreadFactory = threadFactory;
     }
@@ -359,8 +361,13 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
                 InterruptedException interruptedException = new InterruptedException();
                 interruptedException.initCause(e);
                 throw interruptedException;
-            } catch (Throwable e) {
-                notifyError(e);
+            } catch (final Throwable e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyError(e);
+                    }
+                });
                 mError = true;
                 setLoading(false);
             }

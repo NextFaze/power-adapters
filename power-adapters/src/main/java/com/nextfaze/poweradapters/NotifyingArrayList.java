@@ -6,21 +6,23 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static java.lang.Math.min;
+
 /** @hide Not intended for public use. */
-public final class NotifyingArrayList<E2> extends AbstractList<E2> {
+public final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @NonNull
-    private final PowerAdapter mParent;
+    private final DataObservable mDataObservable;
 
     @NonNull
-    private final ArrayList<E2> mArray = new ArrayList<>();
+    private final ArrayList<E> mArray = new ArrayList<>();
 
-    public NotifyingArrayList(@NonNull PowerAdapter parent) {
-        mParent = parent;
+    public NotifyingArrayList(@NonNull DataObservable dataObservable) {
+        mDataObservable = dataObservable;
     }
 
     @Override
-    public E2 get(int location) {
+    public E get(int location) {
         return mArray.get(location);
     }
 
@@ -30,57 +32,57 @@ public final class NotifyingArrayList<E2> extends AbstractList<E2> {
     }
 
     @Override
-    public E2 set(int index, @NonNull E2 object) {
-        E2 e = mArray.set(index, object);
-        mParent.notifyItemChanged(index);
+    public E set(int index, @NonNull E object) {
+        E e = mArray.set(index, object);
+        mDataObservable.notifyItemChanged(index);
         return e;
     }
 
     @Override
-    public boolean add(@NonNull E2 e) {
+    public boolean add(@NonNull E e) {
         if (mArray.add(e)) {
-            mParent.notifyItemInserted(mArray.size() - 1);
+            mDataObservable.notifyItemInserted(mArray.size() - 1);
             return true;
         }
         return false;
     }
 
     @Override
-    public void add(int index, @NonNull E2 object) {
+    public void add(int index, @NonNull E object) {
         mArray.add(index, object);
-        mParent.notifyItemInserted(index);
+        mDataObservable.notifyItemInserted(index);
     }
 
     @Override
-    public final boolean addAll(@NonNull Collection<? extends E2> collection) {
+    public boolean addAll(@NonNull Collection<? extends E> collection) {
         int oldSize = mArray.size();
         mArray.addAll(collection);
         int newSize = mArray.size();
         if (newSize != oldSize) {
             int count = mArray.size() - oldSize;
-            mParent.notifyItemRangeInserted(oldSize, count);
+            mDataObservable.notifyItemRangeInserted(oldSize, count);
             return true;
         }
         return false;
     }
 
     @Override
-    public final boolean addAll(int index, @NonNull Collection<? extends E2> collection) {
+    public boolean addAll(int index, @NonNull Collection<? extends E> collection) {
         int oldSize = mArray.size();
         mArray.addAll(index, collection);
         int newSize = mArray.size();
         if (newSize != oldSize) {
             int count = mArray.size() - oldSize;
-            mParent.notifyItemRangeInserted(index, count);
+            mDataObservable.notifyItemRangeInserted(index, count);
             return true;
         }
         return false;
     }
 
     @Override
-    public E2 remove(int index) {
-        E2 removed = mArray.remove(index);
-        mParent.notifyItemRemoved(index);
+    public E remove(int index) {
+        E removed = mArray.remove(index);
+        mDataObservable.notifyItemRemoved(index);
         return removed;
     }
 
@@ -90,7 +92,7 @@ public final class NotifyingArrayList<E2> extends AbstractList<E2> {
         int index = mArray.indexOf(obj);
         if (index != -1) {
             mArray.remove(index);
-            mParent.notifyItemRemoved(index);
+            mDataObservable.notifyItemRemoved(index);
             return true;
         }
         return false;
@@ -101,7 +103,36 @@ public final class NotifyingArrayList<E2> extends AbstractList<E2> {
         int size = mArray.size();
         if (size > 0) {
             mArray.clear();
-            mParent.notifyItemRangeRemoved(0, size);
+            mDataObservable.notifyItemRangeRemoved(0, size);
+        }
+    }
+
+    public void trimToSize() {
+        mArray.trimToSize();
+    }
+
+    public void ensureCapacity(int minimumCapacity) {
+        mArray.ensureCapacity(minimumCapacity);
+    }
+
+    public void replaceAll(@NonNull Collection<? extends E> collection) {
+        int oldSize = mArray.size();
+        int newSize = collection.size();
+        int deltaSize = newSize - oldSize;
+        mArray.clear();
+        for (E e : collection) {
+            if (e != null) {
+                mArray.add(e);
+            }
+        }
+        int changed = min(oldSize, newSize);
+        if (changed > 0) {
+            mDataObservable.notifyItemRangeChanged(0, changed);
+        }
+        if (deltaSize < 0) {
+            mDataObservable.notifyItemRangeRemoved(oldSize + deltaSize, -deltaSize);
+        } else if (deltaSize > 0) {
+            mDataObservable.notifyItemRangeInserted(oldSize, deltaSize);
         }
     }
 }

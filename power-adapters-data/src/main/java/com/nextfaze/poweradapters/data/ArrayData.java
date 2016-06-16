@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import com.nextfaze.poweradapters.NotifyingArrayList;
 import lombok.NonNull;
 
 import java.io.Closeable;
@@ -19,7 +20,7 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
 
     /** The backing array of non-null elements. */
     @NonNull
-    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(this);
+    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(mDataObservable);
 
     @Nullable
     private Task<?> mTask;
@@ -201,6 +202,7 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
     protected abstract List<? extends T> load() throws Throwable;
 
     /** Called prior to elements being cleared. Always called from the UI thread. */
+    @SuppressWarnings("WeakerAccess")
     protected void onClear() {
     }
 
@@ -263,26 +265,16 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
     }
 
     private void setLoading(final boolean loading) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mLoading != loading) {
-                    mLoading = loading;
-                    notifyLoadingChanged();
-                }
-            }
-        });
+        if (mLoading != loading) {
+            mLoading = loading;
+            notifyLoadingChanged();
+        }
     }
 
     private void setAvailable(final int available) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mAvailable != available) {
-                    mAvailable = available;
-                    notifyAvailableChanged();
-                }
-            }
-        });
+        if (mAvailable != available) {
+            mAvailable = available;
+            notifyAvailableChanged();
+        }
     }
 }

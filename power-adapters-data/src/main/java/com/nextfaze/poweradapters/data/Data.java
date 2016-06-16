@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
+import com.nextfaze.poweradapters.DataObservable;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
@@ -12,7 +13,7 @@ import java.util.Iterator;
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
 
 /**
- * Provides access to an asynchronously loaded list of elements.
+ * Provides access to a (possibly asynchronously loaded) list of elements.
  * <h3>Loading</h3>
  * <p>
  * A {@code Data} instance may be in a loading state, which it broadcasts to interested observers so they can present
@@ -25,31 +26,29 @@ import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
  * <h3>Threading</h3>
  * <p>
  * In general this class is not thread-safe. It's intended to be accessed from the UI thread only.
- * <h3>Notifications</h3>
- * Change notifications must be dispatched BEFORE the other notifications.
  * </p>
  */
 public abstract class Data<T> implements Iterable<T> {
-
-    @NonNull
-    private final DataObservers mDataObservers = new DataObservers();
-
-    @NonNull
-    private final AvailableObservers mAvailableObservers = new AvailableObservers();
-
-    @NonNull
-    private final LoadingObservers mLoadingObservers = new LoadingObservers();
-
-    @NonNull
-    private final ErrorObservers mErrorObservers = new ErrorObservers();
-
-    @NonNull
-    private final CoalescingPoster mPoster = new CoalescingPoster();
 
     /** Flag indicating the intent to present information in a user interface. */
     public static final int FLAG_PRESENTATION = 1;
 
     public static final int UNKNOWN = -1;
+
+    @NonNull
+    final DataObservable mDataObservable = new DataObservable();
+
+    @NonNull
+    final AvailableObservable mAvailableObservable = new AvailableObservable();
+
+    @NonNull
+    final LoadingObservable mLoadingObservable = new LoadingObservable();
+
+    @NonNull
+    final ErrorObservable mErrorObservable = new ErrorObservable();
+
+    @NonNull
+    private final CoalescingPoster mPoster = new CoalescingPoster();
 
     /**
      * Retrieve the element at the specified position. Equivalent to calling {@link #get(int, int)} without any flags.
@@ -136,48 +135,48 @@ public abstract class Data<T> implements Iterable<T> {
 
     @UiThread
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservers.register(dataObserver);
-        if (mDataObservers.size() == 1) {
+        mDataObservable.registerObserver(dataObserver);
+        if (mDataObservable.getObserverCount() == 1) {
             onFirstDataObserverRegistered();
         }
     }
 
     @UiThread
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        mDataObservers.unregister(dataObserver);
-        if (mDataObservers.size() == 0) {
+        mDataObservable.unregisterObserver(dataObserver);
+        if (mDataObservable.getObserverCount() == 0) {
             onLastDataObserverUnregistered();
         }
     }
 
     @UiThread
     public void registerAvailableObserver(@NonNull AvailableObserver availableObserver) {
-        mAvailableObservers.register(availableObserver);
+        mAvailableObservable.registerObserver(availableObserver);
     }
 
     @UiThread
     public void unregisterAvailableObserver(@NonNull AvailableObserver availableObserver) {
-        mAvailableObservers.unregister(availableObserver);
+        mAvailableObservable.unregisterObserver(availableObserver);
     }
 
     @UiThread
     public void registerLoadingObserver(@NonNull LoadingObserver loadingObserver) {
-        mLoadingObservers.register(loadingObserver);
+        mLoadingObservable.registerObserver(loadingObserver);
     }
 
     @UiThread
     public void unregisterLoadingObserver(@NonNull LoadingObserver loadingObserver) {
-        mLoadingObservers.unregister(loadingObserver);
+        mLoadingObservable.unregisterObserver(loadingObserver);
     }
 
     @UiThread
     public void registerErrorObserver(@NonNull ErrorObserver errorObserver) {
-        mErrorObservers.register(errorObserver);
+        mErrorObservable.registerObserver(errorObserver);
     }
 
     @UiThread
     public void unregisterErrorObserver(@NonNull ErrorObserver errorObserver) {
-        mErrorObservers.unregister(errorObserver);
+        mErrorObservable.unregisterObserver(errorObserver);
     }
 
     @UiThread
@@ -199,118 +198,192 @@ public abstract class Data<T> implements Iterable<T> {
 
     /** Returns the number of registered data observers. */
     protected final int getDataObserverCount() {
-        return mDataObservers.size();
+        return mDataObservable.getObserverCount();
     }
 
     /** Returns the number of registered loading observers. */
     protected final int getLoadingObserverCount() {
-        return mLoadingObservers.size();
+        return mLoadingObservable.getObserverCount();
     }
 
     /** Returns the number of registered available observers. */
     protected final int getAvailableObserverCount() {
-        return mAvailableObservers.size();
+        return mAvailableObservable.getObserverCount();
     }
 
     /** Returns the number of registered error observers. */
     protected final int getErrorObserverCount() {
-        return mErrorObservers.size();
+        return mErrorObservable.getObserverCount();
     }
 
-    /** Dispatch a data change notification on the UI thread. */
-    protected void notifyDataSetChanged() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyDataSetChanged();
-            }
-        });
+    /**
+     * Notify any registered observers that the data set has changed.
+     * <p>
+     * <p>There are two different classes of data change events, item changes and structural
+     * changes. Item changes are when a single item has its data updated but no positional
+     * changes have occurred. Structural changes are when items are inserted, removed or moved
+     * within the data set.</p>
+     * <p>
+     * <p>This event does not specify what about the data set has changed, forcing
+     * any observers to assume that all existing items and structure may no longer be valid.
+     * @see #notifyItemChanged(int)
+     * @see #notifyItemInserted(int)
+     * @see #notifyItemRemoved(int)
+     * @see #notifyItemRangeChanged(int, int)
+     * @see #notifyItemRangeInserted(int, int)
+     * @see #notifyItemRangeRemoved(int, int)
+     */
+    protected final void notifyDataSetChanged() {
+        mDataObservable.notifyDataSetChanged();
     }
 
-    protected void notifyItemChanged(final int position) {
-        notifyItemRangeChanged(position, 1);
+    /**
+     * Notify any registered observers that the item at <code>position</code> has changed.
+     * <p>
+     * <p>This is an item change event, not a structural change event. It indicates that any
+     * reflection of the data at <code>position</code> is out of date and should be updated.
+     * The item at <code>position</code> retains the same identity.</p>
+     * @param position Position of the item that has changed
+     * @see #notifyItemRangeChanged(int, int)
+     */
+    protected final void notifyItemChanged(int position) {
+        mDataObservable.notifyItemChanged(position);
     }
 
-    protected void notifyItemRangeChanged(final int positionStart, final int itemCount) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyItemRangeChanged(positionStart, itemCount);
-            }
-        });
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items starting at
+     * position <code>positionStart</code> have changed.
+     * <p>
+     * <p>This is an item change event, not a structural change event. It indicates that
+     * any reflection of the data in the given position range is out of date and should
+     * be updated. The items in the given range retain the same identity.</p>
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
+     * @param positionStart Position of the first item that has changed
+     * @param itemCount Number of items that have changed
+     * @see #notifyItemChanged(int)
+     */
+    protected final void notifyItemRangeChanged(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeChanged(positionStart, itemCount);
     }
 
-    protected void notifyItemInserted(int position) {
-        notifyItemRangeInserted(position, 1);
+    /**
+     * Notify any registered observers that the item reflected at <code>position</code>
+     * has been newly inserted. The item previously at <code>position</code> is now at
+     * position <code>position + 1</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     * @param position Position of the newly inserted item in the data set
+     * @see #notifyItemRangeInserted(int, int)
+     */
+    protected final void notifyItemInserted(int position) {
+        mDataObservable.notifyItemInserted(position);
     }
 
-    protected void notifyItemRangeInserted(final int positionStart, final int itemCount) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyItemRangeInserted(positionStart, itemCount);
-            }
-        });
+    /**
+     * Notify any registered observers that the currently reflected <code>itemCount</code>
+     * items starting at <code>positionStart</code> have been newly inserted. The items
+     * previously located at <code>positionStart</code> and beyond can now be found starting
+     * at position <code>positionStart + itemCount</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
+     * @param positionStart Position of the first item that was inserted
+     * @param itemCount Number of items inserted
+     * @see #notifyItemInserted(int)
+     */
+    protected final void notifyItemRangeInserted(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeInserted(positionStart, itemCount);
     }
 
-    protected void notifyItemMoved(int fromPosition, int toPosition) {
-        notifyItemRangeMoved(fromPosition, toPosition, 1);
+    /**
+     * Notify any registered observers that the item reflected at <code>fromPosition</code>
+     * has been moved to <code>toPosition</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     * @param fromPosition Previous position of the item.
+     * @param toPosition New position of the item.
+     */
+    protected final void notifyItemMoved(int fromPosition, int toPosition) {
+        mDataObservable.notifyItemMoved(fromPosition, toPosition);
     }
 
-    protected void notifyItemRangeMoved(final int fromPosition, final int toPosition, final int itemCount) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-            }
-        });
+    protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+        mDataObservable.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
     }
 
-    protected void notifyItemRemoved(int position) {
-        notifyItemRangeRemoved(position, 1);
+    /**
+     * Notify any registered observers that the item previously located at <code>position</code>
+     * has been removed from the data set. The items previously located at and after
+     * <code>position</code> may now be found at <code>oldPosition - 1</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     * @param position Position of the item that has now been removed
+     * @see #notifyItemRangeRemoved(int, int)
+     */
+    protected final void notifyItemRemoved(int position) {
+        mDataObservable.notifyItemRemoved(position);
     }
 
-    protected void notifyItemRangeRemoved(final int positionStart, final int itemCount) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDataObservers.notifyItemRangeRemoved(positionStart, itemCount);
-            }
-        });
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items previously
+     * located at <code>positionStart</code> have been removed from the data set. The items
+     * previously located at and after <code>positionStart + itemCount</code> may now be found
+     * at <code>oldPosition - itemCount</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the data
+     * set are still considered up to date and will not be rebound, though their positions
+     * may be altered.</p>
+     * <p>
+     * Does nothing if {@code itemCount} is zero.
+     * @param positionStart Previous position of the first item that was removed
+     * @param itemCount Number of items removed from the data set
+     */
+    protected final void notifyItemRangeRemoved(int positionStart, int itemCount) {
+        mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
     }
 
     /** Dispatch a available change notification on the UI thread. */
-    protected void notifyAvailableChanged() {
+    protected final void notifyAvailableChanged() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAvailableObservers.notifyAvailableChanged();
+                mAvailableObservable.notifyAvailableChanged();
             }
         });
     }
 
     /** Dispatch a loading change notification on the UI thread. */
-    protected void notifyLoadingChanged() {
+    protected final void notifyLoadingChanged() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mLoadingObservers.notifyLoadingChanged();
+                mLoadingObservable.notifyLoadingChanged();
             }
         });
     }
 
     /** Dispatch an error notification on the UI thread. */
-    protected void notifyError(@NonNull final Throwable e) {
+    protected final void notifyError(@NonNull final Throwable e) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mErrorObservers.notifyError(e);
+                mErrorObservable.notifyError(e);
             }
         });
     }
 
     /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
-    protected void runOnUiThread(@NonNull Runnable runnable) {
+    protected final void runOnUiThread(@NonNull Runnable runnable) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             runnable.run();
         } else {

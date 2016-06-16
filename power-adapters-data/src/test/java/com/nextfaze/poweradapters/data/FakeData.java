@@ -196,7 +196,6 @@ public class FakeData<T> extends Data<T> implements List<T> {
         }
     }
 
-    @SafeVarargs
     public final void insert(int index, @NonNull T... items) {
         if (items.length > 0) {
             mData.addAll(index, asList(items));
@@ -206,7 +205,6 @@ public class FakeData<T> extends Data<T> implements List<T> {
         }
     }
 
-    @SafeVarargs
     public final void change(int index, @NonNull T... items) {
         if (items.length > 0) {
             for (int i = 0; i < items.length; i++) {
@@ -284,10 +282,5 @@ public class FakeData<T> extends Data<T> implements List<T> {
 
     public void setNotificationsEnabled(boolean notificationsEnabled) {
         mNotificationsEnabled = notificationsEnabled;
-    }
-
-    @Override
-    public void notifyError(@NonNull Throwable e) {
-        super.notifyError(e);
     }
 }

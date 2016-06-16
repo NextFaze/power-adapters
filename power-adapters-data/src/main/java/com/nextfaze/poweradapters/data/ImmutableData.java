@@ -9,6 +9,7 @@ import java.util.List;
 import static java.util.Collections.addAll;
 import static java.util.Collections.emptyList;
 
+@SuppressWarnings("WeakerAccess")
 public final class ImmutableData<T> extends Data<T> {
 
     private static final ImmutableData<Object> EMPTY = new ImmutableData<>(emptyList());
@@ -45,7 +46,7 @@ public final class ImmutableData<T> extends Data<T> {
         return (ImmutableData<T>) EMPTY;
     }
 
-    ImmutableData(@NonNull List<? extends T> elements) {
+    private ImmutableData(@NonNull List<? extends T> elements) {
         mElements = elements;
     }
 

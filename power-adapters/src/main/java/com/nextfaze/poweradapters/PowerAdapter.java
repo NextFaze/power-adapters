@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
@@ -72,7 +71,7 @@ public abstract class PowerAdapter {
     public static final int NO_ID = -1;
 
     @NonNull
-    private final ArrayList<DataObserver> mObservers = new ArrayList<>();
+    final DataObservable mDataObservable = new DataObservable();
 
     /**
      * Returns the total number of items in the data set hold by the adapter.
@@ -128,30 +127,23 @@ public abstract class PowerAdapter {
 
     @CallSuper
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
-        if (mObservers.contains(dataObserver)) {
-            throw new IllegalStateException("Observer is already registered.");
-        }
-        mObservers.add(dataObserver);
-        if (mObservers.size() == 1) {
+        mDataObservable.registerObserver(dataObserver);
+        if (mDataObservable.getObserverCount() == 1) {
             onFirstObserverRegistered();
         }
     }
 
     @CallSuper
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
-        int index = mObservers.indexOf(dataObserver);
-        if (index == -1) {
-            throw new IllegalStateException("Observer was not registered.");
-        }
-        mObservers.remove(index);
-        if (mObservers.size() == 0) {
+        mDataObservable.unregisterObserver(dataObserver);
+        if (mDataObservable.getObserverCount() == 0) {
             onLastObserverUnregistered();
         }
     }
 
     /** Returns the number of registered observers. */
     protected final int getObserverCount() {
-        return mObservers.size();
+        return mDataObservable.getObserverCount();
     }
 
     /** Called when the first observer has registered with this adapter. */
@@ -193,9 +185,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemRangeRemoved(int, int)
      */
     protected final void notifyDataSetChanged() {
-        for (int i = mObservers.size() - 1; i >= 0; i--) {
-            mObservers.get(i).onChanged();
-        }
+        mDataObservable.notifyDataSetChanged();
     }
 
     /**
@@ -208,7 +198,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemRangeChanged(int, int)
      */
     protected final void notifyItemChanged(int position) {
-        notifyItemRangeChanged(position, 1);
+        mDataObservable.notifyItemChanged(position);
     }
 
     /**
@@ -225,11 +215,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemChanged(int)
      */
     protected final void notifyItemRangeChanged(int positionStart, int itemCount) {
-        if (itemCount > 0) {
-            for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
-            }
-        }
+        mDataObservable.notifyItemRangeChanged(positionStart, itemCount);
     }
 
     /**
@@ -244,7 +230,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemRangeInserted(int, int)
      */
     protected final void notifyItemInserted(int position) {
-        notifyItemRangeInserted(position, 1);
+        mDataObservable.notifyItemInserted(position);
     }
 
     /**
@@ -263,11 +249,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemInserted(int)
      */
     protected final void notifyItemRangeInserted(int positionStart, int itemCount) {
-        if (itemCount > 0) {
-            for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onItemRangeInserted(positionStart, itemCount);
-            }
-        }
+        mDataObservable.notifyItemRangeInserted(positionStart, itemCount);
     }
 
     /**
@@ -281,15 +263,11 @@ public abstract class PowerAdapter {
      * @param toPosition New position of the item.
      */
     protected final void notifyItemMoved(int fromPosition, int toPosition) {
-        notifyItemRangeMoved(fromPosition, toPosition, 1);
+        mDataObservable.notifyItemMoved(fromPosition, toPosition);
     }
 
     protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-        if (itemCount > 0) {
-            for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onItemRangeMoved(fromPosition, toPosition, itemCount);
-            }
-        }
+        mDataObservable.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
     }
 
     /**
@@ -304,7 +282,7 @@ public abstract class PowerAdapter {
      * @see #notifyItemRangeRemoved(int, int)
      */
     protected final void notifyItemRemoved(int position) {
-        notifyItemRangeRemoved(position, 1);
+        mDataObservable.notifyItemRemoved(position);
     }
 
     /**
@@ -322,11 +300,7 @@ public abstract class PowerAdapter {
      * @param itemCount Number of items removed from the data set
      */
     protected final void notifyItemRangeRemoved(int positionStart, int itemCount) {
-        if (itemCount > 0) {
-            for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onItemRangeRemoved(positionStart, itemCount);
-            }
-        }
+        mDataObservable.notifyItemRangeRemoved(positionStart, itemCount);
     }
 
     /** Applies the specified {@link Transformer} to this adapter, and returns the result. */
