@@ -177,6 +177,12 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
+    protected void forwardChanged() {
+        mItemCount = getAdapter().getItemCount();
+        notifyDataSetChanged();
+    }
+
+    @Override
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {
         final int innerTotalCountAfter = super.getItemCount();
         final int innerTotalCountBefore = innerTotalCountAfter - innerItemCount;

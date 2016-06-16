@@ -11,8 +11,20 @@ public class FakeAdapter extends PowerAdapter {
 
     private int mItemCount;
 
+    @NonNull
+    private NotificationType mNotificationType = NotificationType.FINE;
+
     public FakeAdapter(int itemCount) {
         mItemCount = itemCount;
+    }
+
+    @NonNull
+    public NotificationType getNotificationType() {
+        return mNotificationType;
+    }
+
+    public void setNotificationType(@NonNull NotificationType notificationType) {
+        mNotificationType = notificationType;
     }
 
     @NonNull
@@ -56,7 +68,11 @@ public class FakeAdapter extends PowerAdapter {
 
     public void insert(int positionStart, int itemCount) {
         mItemCount += itemCount;
-        notifyItemRangeInserted(positionStart, itemCount);
+        if (mNotificationType == NotificationType.COARSE) {
+            notifyDataSetChanged();
+        } else {
+            notifyItemRangeInserted(positionStart, itemCount);
+        }
     }
 
     public void append(int itemCount) {
@@ -68,15 +84,27 @@ public class FakeAdapter extends PowerAdapter {
             throw new IndexOutOfBoundsException();
         }
         mItemCount -= itemCount;
-        notifyItemRangeRemoved(positionStart, itemCount);
+        if (mNotificationType == NotificationType.COARSE) {
+            notifyDataSetChanged();
+        } else {
+            notifyItemRangeRemoved(positionStart, itemCount);
+        }
     }
 
     public void change(int positionStart, int itemCount) {
-        notifyItemRangeChanged(positionStart, itemCount);
+        if (mNotificationType == NotificationType.COARSE) {
+            notifyDataSetChanged();
+        } else {
+            notifyItemRangeChanged(positionStart, itemCount);
+        }
     }
 
     public void move(int fromPosition, int toPosition, int itemCount) {
-        notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        if (mNotificationType == NotificationType.COARSE) {
+            notifyDataSetChanged();
+        } else {
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
+        }
     }
 
     public void clear() {
@@ -87,5 +115,9 @@ public class FakeAdapter extends PowerAdapter {
         if (position >= mItemCount) {
             throw new IndexOutOfBoundsException();
         }
+    }
+
+    public enum NotificationType {
+        COARSE, FINE
     }
 }

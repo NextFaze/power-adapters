@@ -14,6 +14,7 @@ import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.*;
+import static com.nextfaze.poweradapters.FakeAdapter.NotificationType.COARSE;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -84,6 +85,15 @@ public final class WrappingDividerAdapterTest {
     public void itemCountZeroShowLeadingAndTrailing() {
         configure(0, SHOW_LEADING_AND_TRAILING);
         assertThat(mDividerAdapter.getItemCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void itemCountConsistentAfterCoarseNotification() {
+        configure(10);
+        mFakeAdapter.setNotificationType(COARSE);
+        mFakeAdapter.insert(0, 10);
+        assertThat(mDividerAdapter.getItemCount()).isEqualTo(20);
+        verify(mObserver).onChanged();
     }
 
     @Test
