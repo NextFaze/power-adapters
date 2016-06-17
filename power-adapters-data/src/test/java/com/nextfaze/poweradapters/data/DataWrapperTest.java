@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,21 +107,25 @@ public final class DataWrapperTest {
 
     // TODO: Test the forward callbacks.
 
+    @Ignore
     @Test
     public void forwardDataChange() {
         throw new UnsupportedOperationException();
     }
 
+    @Ignore
     @Test
     public void forwardLoadingChange() {
         throw new UnsupportedOperationException();
     }
 
+    @Ignore
     @Test
     public void forwardAvailableChange() {
         throw new UnsupportedOperationException();
     }
 
+    @Ignore
     @Test
     public void forwardErrorChange() {
         throw new UnsupportedOperationException();
@@ -193,13 +198,6 @@ public final class DataWrapperTest {
     @NonNull
     private static DataWrapper<?> newDataWrapper(@NonNull Data<?> data) {
         return new TestDataWrapper<>(data);
-    }
-
-    private void verifyZeroObserverInteractions() {
-        verifyZeroInteractions(mWrapperDataObserver);
-        verifyZeroInteractions(mWrapperLoadingObserver);
-        verifyZeroInteractions(mWrapperAvailableObserver);
-        verifyZeroInteractions(mWrapperErrorObserver);
     }
 
     static class TestDataWrapper<T> extends DataWrapper<T> {

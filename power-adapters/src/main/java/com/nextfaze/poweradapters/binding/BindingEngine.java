@@ -19,7 +19,7 @@ final class BindingEngine {
     @NonNull
     private final ItemAccessor mItemAccessor;
 
-    protected BindingEngine(@NonNull Mapper mapper, @NonNull ItemAccessor itemAccessor) {
+    BindingEngine(@NonNull Mapper mapper, @NonNull ItemAccessor itemAccessor) {
         mMapper = mapper;
         mItemAccessor = itemAccessor;
     }
