@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters.support;
 
 import android.database.DataSetObserver;
 import android.support.annotation.Nullable;
-import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.FixedPagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.DataObserver;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-final class ConverterPagerAdapter extends PagerAdapter {
+final class ConverterPagerAdapter extends FixedPagerAdapter {
 
     @NonNull
     private final Recycler mRecycler = new Recycler();
