@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.support;
 
 import android.database.DataSetObserver;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.view.FixedPagerAdapter;
 import android.view.View;
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-final class ConverterPagerAdapter extends FixedPagerAdapter {
+public class ConverterPagerAdapter extends FixedPagerAdapter {
 
     @NonNull
     private final Recycler mRecycler = new Recycler();
@@ -46,10 +47,11 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
     @NonNull
     public final PowerAdapter mAdapter;
 
-    ConverterPagerAdapter(@NonNull PowerAdapter adapter) {
+    public ConverterPagerAdapter(@NonNull PowerAdapter adapter) {
         mAdapter = adapter;
     }
 
+    @CallSuper
     @Override
     public void registerDataSetObserver(DataSetObserver observer) {
         super.registerDataSetObserver(observer);
@@ -58,6 +60,7 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
         }
     }
 
+    @CallSuper
     @Override
     public void unregisterDataSetObserver(DataSetObserver observer) {
         super.unregisterDataSetObserver(observer);
@@ -67,7 +70,7 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
     }
 
     @Override
-    public int getCount() {
+    public final int getCount() {
         return mAdapter.getItemCount();
     }
 
@@ -78,7 +81,7 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public final Object instantiateItem(ViewGroup container, int position) {
         ViewType viewType = mAdapter.getItemViewType(position);
         View v = mRecycler.get(viewType);
         if (v == null) {
@@ -97,7 +100,7 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public final void destroyItem(ViewGroup container, int position, Object object) {
         View v = (View) object;
         ViewType itemViewType = mViewTypes.get(v);
         container.removeView(v);
@@ -105,7 +108,7 @@ final class ConverterPagerAdapter extends FixedPagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object o) {
+    public final boolean isViewFromObject(View view, Object o) {
         return view == o;
     }
 
