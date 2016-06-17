@@ -1,6 +1,28 @@
-# Power Adapters
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
 
-# Motivation
+- [Power Adapters](#power-adapters)
+- [Feature Summary](#feature-summary)
+- [Usage](#usage)
+  - [Adapter Composition](#adapter-composition)
+  - [Data Type Binding](#data-type-binding)
+    - [Binder](#binder)
+    - [Mapper](#mapper)
+  - [Conversion](#conversion)
+  - [Asynchronous Data Loading](#asynchronous-data-loading)
+    - [Basic Data Usage](#basic-data-usage)
+    - [Invalidating and Reloading](#invalidating-and-reloading)
+    - [DataLayout](#datalayout)
+    - [RxJava Module](#rxjava-module)
+    - [Data Views](#data-views)
+  - [Samples](#samples)
+- [Build](#build)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Power Adapters
 
 Presenting large data sets efficiently can be a challenging part of Android development. It gets more complicated as we
 begin to handle edge cases and add additional decorations like headers. We also often find ourselves repeating
