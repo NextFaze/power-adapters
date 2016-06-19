@@ -35,7 +35,7 @@ public abstract class PowerAdapter {
 
         @NonNull
         @Override
-        public ViewType getItemViewType(int position) {
+        public Object getItemViewType(int position) {
             throw new UnsupportedOperationException();
         }
 
@@ -46,7 +46,7 @@ public abstract class PowerAdapter {
 
         @NonNull
         @Override
-        public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+        public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
             throw new UnsupportedOperationException();
         }
 
@@ -100,13 +100,16 @@ public abstract class PowerAdapter {
     }
 
     /**
-     * Get the type of view for item at {@code position}, for the purpose of view recycling.
+     * Get the type of view for item at {@code position}, for the purpose of view recycling. By default, returns
+     * {@code this}, which implies this adapter supports a single view type.
      * @param position The position of the item within the adapter's data set whose view type we
      * want.
-     * @return A {@link ViewType} object that is unique for this type of view throughout the process.
+     * @return An object that is unique for this type of view for the lifetime of this adapter.
      */
     @NonNull
-    public abstract ViewType getItemViewType(int position);
+    public Object getItemViewType(int position) {
+        return this;
+    }
 
     /**
      * Returns true if the item at the specified position is not a separator.
@@ -121,7 +124,7 @@ public abstract class PowerAdapter {
     }
 
     @NonNull
-    public abstract View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType);
+    public abstract View newView(@NonNull ViewGroup parent, @NonNull Object viewType);
 
     public abstract void bindView(@NonNull View view, @NonNull Holder holder);
 

@@ -62,7 +62,7 @@ public final class LimitAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return super.getItemViewType(assertWithinRange(position));
     }
 

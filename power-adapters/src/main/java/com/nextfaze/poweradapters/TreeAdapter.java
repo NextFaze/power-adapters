@@ -85,7 +85,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final ArrayList<Entry> mEntries = new ArrayList<>();
 
     @NonNull
-    private final WeakHashMap<ViewType, PowerAdapter> mAdaptersByViewType = new WeakHashMap<>();
+    private final WeakHashMap<Object, PowerAdapter> mAdaptersByViewType = new WeakHashMap<>();
 
     @NonNull
     private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
@@ -217,16 +217,16 @@ public final class TreeAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         PowerAdapter adapter = outerToAdapter(position);
-        ViewType viewType = adapter.getItemViewType(position);
+        Object viewType = adapter.getItemViewType(position);
         mAdaptersByViewType.put(viewType, adapter);
         return viewType;
     }
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return adapterForViewType(viewType).newView(parent, viewType);
     }
 
@@ -337,7 +337,7 @@ public final class TreeAdapter extends PowerAdapter {
     }
 
     @NonNull
-    private PowerAdapter adapterForViewType(@NonNull ViewType viewType) {
+    private PowerAdapter adapterForViewType(@NonNull Object viewType) {
         PowerAdapter adapter = mAdaptersByViewType.get(viewType);
         return adapter != null ? adapter : mRootAdapter;
     }

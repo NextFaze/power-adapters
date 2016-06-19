@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 public abstract class BindingAdapter extends PowerAdapter {
@@ -27,7 +26,7 @@ public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public final View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return mEngine.newView(parent, viewType);
     }
 
@@ -38,7 +37,7 @@ public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public final ViewType getItemViewType(int position) {
+    public final Object getItemViewType(int position) {
         return mEngine.getItemViewType(position);
     }
 

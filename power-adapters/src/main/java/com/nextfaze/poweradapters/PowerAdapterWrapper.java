@@ -79,7 +79,7 @@ public class PowerAdapterWrapper extends PowerAdapter {
      */
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return mAdapter.getItemViewType(outerToInner(position));
     }
 
@@ -95,7 +95,7 @@ public class PowerAdapterWrapper extends PowerAdapter {
 
     @Override
     @NonNull
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return mAdapter.newView(parent, viewType);
     }
 

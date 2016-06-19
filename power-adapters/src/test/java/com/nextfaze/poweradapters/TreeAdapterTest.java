@@ -320,7 +320,7 @@ public final class TreeAdapterTest {
 
     @Test
     public void rootNewViewDelegation() {
-        ViewType viewType = mTreeAdapter.getItemViewType(4);
+        Object viewType = mTreeAdapter.getItemViewType(4);
         mTreeAdapter.newView(mParent, viewType);
         verify(mRootAdapter).newView(mParent, viewType);
     }
@@ -585,7 +585,7 @@ public final class TreeAdapterTest {
 
     @Test
     public void childNewViewDelegated() {
-        ViewType viewType = mTreeAdapter.getItemViewType(3);
+        Object viewType = mTreeAdapter.getItemViewType(3);
         mTreeAdapter.newView(mParent, viewType);
         verify(mChildAdapters.get(0)).newView(mParent, viewType);
         verifyNewViewNeverCalled(mChildAdapters.get(1));

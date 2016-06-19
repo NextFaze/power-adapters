@@ -131,7 +131,7 @@ public final class ConditionalAdapterTest {
     @Test
     public void parentDelegatesNewViewToChildWhileConditionIsTrue() {
         setCondition(always());
-        ViewType viewType = mConditionalAdapter.getItemViewType(9);
+        Object viewType = mConditionalAdapter.getItemViewType(9);
         mConditionalAdapter.newView(mParent, viewType);
         verify(mFakeAdapter).newView(mParent, viewType);
     }
@@ -139,7 +139,7 @@ public final class ConditionalAdapterTest {
     @Test(expected = Throwable.class)
     public void parentThrowsFromNewViewWhileConditionIsFalse() {
         setCondition(Condition.never());
-        mConditionalAdapter.newView(mParent, ViewTypes.create());
+        mConditionalAdapter.newView(mParent, new Object());
     }
 
     @Test

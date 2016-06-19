@@ -24,7 +24,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
 
     @NonNull
-    private final Map<ViewType, Integer> mViewTypeObjectToInt = new HashMap<>();
+    private final Map<Object, Integer> mViewTypeObjectToInt = new HashMap<>();
 
     @NonNull
     private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
@@ -102,7 +102,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        ViewType viewType = mPowerAdapter.getItemViewType(position);
+        Object viewType = mPowerAdapter.getItemViewType(position);
         Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
         if (viewTypeInt == null) {
             viewTypeInt = mNextViewTypeInt++;

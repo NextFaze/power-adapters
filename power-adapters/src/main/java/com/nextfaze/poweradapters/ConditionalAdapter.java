@@ -75,7 +75,7 @@ final class ConditionalAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return adapter().getItemViewType(position);
     }
 
@@ -94,7 +94,7 @@ final class ConditionalAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return adapter().newView(parent, viewType);
     }
 

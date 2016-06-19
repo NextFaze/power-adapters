@@ -15,7 +15,7 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final WeakHashMap<ViewType, ViewTypeWrapper> mViewTypes = new WeakHashMap<>();
+    private final WeakHashMap<Object, ViewTypeWrapper> mViewTypes = new WeakHashMap<>();
 
     @NonNull
     private final WeakHashMap<ViewGroup, DividerViewHolder> mViewMetadata = new WeakHashMap<>();
@@ -69,7 +69,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         int innerItemCount = super.getItemCount();
         if (innerItemCount == 0) {
             if (isLeadingVisible(innerItemCount) && position == 0) {
@@ -81,7 +81,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
                 return mTrailingItem;
             }
         }
-        ViewType innerViewType = super.getItemViewType(position);
+        Object innerViewType = super.getItemViewType(position);
         ViewTypeWrapper viewTypeWrapper = mViewTypes.get(innerViewType);
         if (viewTypeWrapper == null) {
             viewTypeWrapper = new ViewTypeWrapper();
@@ -93,7 +93,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         if (viewType == mLeadingItem) {
             return mLeadingItem.create(parent);
         }
@@ -255,9 +255,9 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         }
     }
 
-    private static final class ViewTypeWrapper implements ViewType {
+    private static final class ViewTypeWrapper {
         @NonNull
-        ViewType viewType;
+        Object viewType;
     }
 
     private final class DividerViewHolder {

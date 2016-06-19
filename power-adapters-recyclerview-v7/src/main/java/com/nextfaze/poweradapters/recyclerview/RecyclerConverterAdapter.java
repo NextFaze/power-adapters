@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import java.util.HashSet;
@@ -62,10 +61,10 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     };
 
     @NonNull
-    private final Map<ViewType, Integer> mViewTypeObjectToInt = new ArrayMap<>();
+    private final Map<Object, Integer> mViewTypeObjectToInt = new ArrayMap<>();
 
     @NonNull
-    private final Map<Integer, ViewType> mViewTypeIntToObject = new ArrayMap<>();
+    private final Map<Integer, Object> mViewTypeIntToObject = new ArrayMap<>();
 
     private int mNextViewTypeInt;
 
@@ -89,7 +88,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
 
     @Override
     public int getItemViewType(int position) {
-        ViewType viewType = mPowerAdapter.getItemViewType(position);
+        Object viewType = mPowerAdapter.getItemViewType(position);
         Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
         if (viewTypeInt == null) {
             viewTypeInt = mNextViewTypeInt++;

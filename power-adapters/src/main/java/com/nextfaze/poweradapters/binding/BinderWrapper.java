@@ -4,7 +4,6 @@ import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
@@ -56,7 +55,7 @@ public abstract class BinderWrapper<T, V extends View> implements Binder<T, V> {
 
     @NonNull
     @Override
-    public ViewType getViewType(@NonNull T t, int position) {
+    public Object getViewType(@NonNull T t, int position) {
         return mBinder.getViewType(t, position);
     }
 

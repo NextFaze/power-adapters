@@ -4,10 +4,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
+@SuppressWarnings("WeakerAccess")
 public class FakeAdapter extends PowerAdapter {
-
-    @NonNull
-    private final ViewType mViewType = ViewTypes.create();
 
     private int mItemCount;
 
@@ -18,6 +16,7 @@ public class FakeAdapter extends PowerAdapter {
         mItemCount = itemCount;
     }
 
+    @SuppressWarnings("unused")
     @NonNull
     public NotificationType getNotificationType() {
         return mNotificationType;
@@ -29,9 +28,9 @@ public class FakeAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         assertWithinRange(position);
-        return mViewType;
+        return super.getItemViewType(position);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class FakeAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return new View(parent.getContext());
     }
 

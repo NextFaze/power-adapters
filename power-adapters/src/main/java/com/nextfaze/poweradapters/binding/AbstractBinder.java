@@ -5,16 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
-import com.nextfaze.poweradapters.ViewType;
-import com.nextfaze.poweradapters.ViewTypes;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 public abstract class AbstractBinder<T, V extends View> implements Binder<T, V> {
-
-    @NonNull
-    private final ViewType mViewType = ViewTypes.create();
 
     @NonNull
     private final ViewFactory mViewFactory;
@@ -48,9 +43,10 @@ public abstract class AbstractBinder<T, V extends View> implements Binder<T, V> 
         return false;
     }
 
+    /** By default, returns {@code this}, implying this binder supports a single view type. */
     @NonNull
     @Override
-    public ViewType getViewType(@NonNull T t, int position) {
-        return mViewType;
+    public Object getViewType(@NonNull T t, int position) {
+        return this;
     }
 }

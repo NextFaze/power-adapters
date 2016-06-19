@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 /**
@@ -16,7 +15,7 @@ public interface Binder<T, V extends View> {
      * @param parent The destination parent view group of the view.
      * @return A new view capable of presenting the object that this binder expects later in its {@link
      * #bindView(Object, View, Holder)} method.
-     * @see PowerAdapter#newView(ViewGroup, ViewType)
+     * @see PowerAdapter#newView(ViewGroup, Object)
      */
     @NonNull
     View newView(@NonNull ViewGroup parent);
@@ -40,7 +39,7 @@ public interface Binder<T, V extends View> {
 
     /** @see PowerAdapter#getItemViewType(int) */
     @NonNull
-    ViewType getViewType(@NonNull T t, int position);
+    Object getViewType(@NonNull T t, int position);
 
     /** @see PowerAdapter#hasStableIds() */
     boolean hasStableIds();

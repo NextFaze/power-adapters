@@ -19,7 +19,7 @@ final class AdapterTestUtils {
     }
 
     static void verifyNewViewNeverCalled(@NonNull PowerAdapter adapter) {
-        verify(adapter, never()).newView(any(ViewGroup.class), any(ViewType.class));
+        verify(adapter, never()).newView(any(ViewGroup.class), any(Object.class));
     }
 
     static void verifyBindViewNeverCalled(@NonNull PowerAdapter adapter) {

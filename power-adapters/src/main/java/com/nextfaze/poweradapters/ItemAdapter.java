@@ -49,7 +49,7 @@ final class ItemAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return mItems.get(position);
     }
 
@@ -60,7 +60,7 @@ final class ItemAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         Item item = (Item) viewType;
         // Note: cannot defensively remove view from parent first,
         // because AdapterView doesn't support removeView() in older versions.

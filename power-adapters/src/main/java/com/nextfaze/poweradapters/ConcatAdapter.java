@@ -15,7 +15,7 @@ final class ConcatAdapter extends PowerAdapter {
     private final Entry[] mEntries;
 
     @NonNull
-    private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
+    private final Map<Object, PowerAdapter> mAdaptersByViewType = new HashMap<>();
 
     @NonNull
     private final RangeTable.RangeClient mRealRangeClient = new RangeTable.RangeClient() {
@@ -93,16 +93,16 @@ final class ConcatAdapter extends PowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         PowerAdapter subAdapter = outerToAdapter(position);
-        ViewType viewType = subAdapter.getItemViewType(position);
+        Object viewType = subAdapter.getItemViewType(position);
         mAdaptersByViewType.put(viewType, subAdapter);
         return viewType;
     }
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return mAdaptersByViewType.get(viewType).newView(parent, viewType);
     }
 

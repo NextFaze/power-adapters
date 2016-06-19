@@ -101,7 +101,7 @@ public final class ConcatAdapterTest {
 
     @Test
     public void newViewDelegatedToChild() {
-        ViewType viewType = mConcatAdapter.getItemViewType(4);
+        Object viewType = mConcatAdapter.getItemViewType(4);
         mConcatAdapter.newView(mParent, viewType);
         verifyNewViewNeverCalled(mChildAdapters.get(0));
         verify(mChildAdapters.get(1)).newView(mParent, viewType);

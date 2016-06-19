@@ -10,7 +10,6 @@ import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.SimpleDataObserver;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import java.util.ArrayDeque;
@@ -35,7 +34,7 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
     };
 
     @NonNull
-    private final WeakHashMap<View, ViewType> mViewTypes = new WeakHashMap<>();
+    private final WeakHashMap<View, Object> mViewTypes = new WeakHashMap<>();
 
     @NonNull
     private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
@@ -82,7 +81,7 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
 
     @Override
     public final Object instantiateItem(ViewGroup container, int position) {
-        ViewType viewType = mAdapter.getItemViewType(position);
+        Object viewType = mAdapter.getItemViewType(position);
         View v = mRecycler.get(viewType);
         if (v == null) {
             v = mAdapter.newView(container, viewType);
@@ -102,7 +101,7 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
     @Override
     public final void destroyItem(ViewGroup container, int position, Object object) {
         View v = (View) object;
-        ViewType itemViewType = mViewTypes.get(v);
+        Object itemViewType = mViewTypes.get(v);
         container.removeView(v);
         mRecycler.put(itemViewType, v);
     }
@@ -125,9 +124,9 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
     private static final class Recycler {
 
         @NonNull
-        private final Map<ViewType, Deque<View>> mViews = new HashMap<>();
+        private final Map<Object, Deque<View>> mViews = new HashMap<>();
 
-        void put(@NonNull ViewType itemViewType, @NonNull View v) {
+        void put(@NonNull Object itemViewType, @NonNull View v) {
             Deque<View> views = mViews.get(itemViewType);
             if (views == null) {
                 views = new ArrayDeque<>();
@@ -137,7 +136,7 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
         }
 
         @Nullable
-        View get(@NonNull ViewType itemViewType) {
+        View get(@NonNull Object itemViewType) {
             Deque<View> views = mViews.get(itemViewType);
             if (views == null) {
                 return null;

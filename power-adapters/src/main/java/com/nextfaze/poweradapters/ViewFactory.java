@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
-public interface ViewFactory extends ViewType {
+public interface ViewFactory {
     @NonNull
     View create(@NonNull ViewGroup parent);
 }

@@ -4,7 +4,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ListAdapter;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import java.util.Collections;
@@ -48,7 +47,7 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public final View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return mEngine.newView(parent, viewType);
     }
 
@@ -59,7 +58,7 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
 
     @NonNull
     @Override
-    public final ViewType getItemViewType(int position) {
+    public final Object getItemViewType(int position) {
         return mEngine.getItemViewType(position);
     }
 

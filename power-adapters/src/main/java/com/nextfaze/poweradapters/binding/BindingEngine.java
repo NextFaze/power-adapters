@@ -3,7 +3,6 @@ package com.nextfaze.poweradapters.binding;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import java.util.WeakHashMap;
@@ -11,7 +10,7 @@ import java.util.WeakHashMap;
 final class BindingEngine {
 
     @NonNull
-    private final WeakHashMap<ViewType, Binder<?, ?>> mBinders = new WeakHashMap<>();
+    private final WeakHashMap<Object, Binder<?, ?>> mBinders = new WeakHashMap<>();
 
     @NonNull
     private final Mapper mMapper;
@@ -30,7 +29,7 @@ final class BindingEngine {
     }
 
     @NonNull
-    View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         Binder<?, ?> binder = mBinders.get(viewType);
         if (binder == null) {
             // Should never happen, as callers are expected to invoke getItemViewType(int) before invoking this method.
@@ -46,10 +45,10 @@ final class BindingEngine {
     }
 
     @NonNull
-    ViewType getItemViewType(int position) {
+    Object getItemViewType(int position) {
         Object item = getItem(position);
         Binder<Object, ?> binder = binderOrThrow(item, position);
-        ViewType viewType = binder.getViewType(item, position);
+        Object viewType = binder.getViewType(item, position);
         mBinders.put(viewType, binder);
         return viewType;
     }
