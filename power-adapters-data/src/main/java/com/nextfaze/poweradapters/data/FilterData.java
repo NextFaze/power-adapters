@@ -8,14 +8,14 @@ import lombok.NonNull;
 import static java.lang.Math.abs;
 import static java.lang.String.format;
 
-/** Maintains an index into the wrapped data instance. */
-final class FilterData<T> extends DataWrapper<T> {
+/** Provides a filtered view of the wrapped data. */
+public final class FilterData<T> extends DataWrapper<T> {
 
     @NonNull
     private final Data<? extends T> mData;
 
     @NonNull
-    private final Predicate<? super T> mPredicate;
+    private Predicate<? super T> mPredicate;
 
     @NonNull
     private final Index mIndex = new Index();
@@ -45,10 +45,31 @@ final class FilterData<T> extends DataWrapper<T> {
 
     private boolean mEntireIndexDirty = true;
 
-    FilterData(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
+    public FilterData(@NonNull Data<? extends T> data) {
+        this(data, new Predicate<T>() {
+            @Override
+            public boolean apply(T t) {
+                return true;
+            }
+        });
+    }
+
+    public FilterData(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
         super(data);
         mData = data;
         mPredicate = predicate;
+    }
+
+    @NonNull
+    public Predicate<? super T> getPredicate() {
+        return mPredicate;
+    }
+
+    public void setPredicate(@NonNull Predicate<? super T> predicate) {
+        if (!equal(predicate, mPredicate)) {
+            mPredicate = predicate;
+            changeIndexRange(0, mData.size(), false, true, true);
+        }
     }
 
     @NonNull
@@ -204,17 +225,17 @@ final class FilterData<T> extends DataWrapper<T> {
     }
 
     private void buildCompleteIndex() {
-        changeIndexRange(0, mData.size(), false);
+        changeIndexRange(0, mData.size(), false, false, false);
     }
 
     @Override
     protected void forwardChanged() {
-        changeIndexRange(0, mData.size(), true);
+        changeIndexRange(0, mData.size(), true, true, true);
     }
 
     @Override
     protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
-        changeIndexRange(innerPositionStart, innerItemCount, true);
+        changeIndexRange(innerPositionStart, innerItemCount, true, true, true);
     }
 
     @Override
@@ -240,7 +261,11 @@ final class FilterData<T> extends DataWrapper<T> {
     protected void forwardAvailableChanged() {
     }
 
-    private void changeIndexRange(final int innerPositionStart, final int itemCount, boolean notify) {
+    private void changeIndexRange(final int innerPositionStart,
+                                  final int itemCount,
+                                  boolean notifyChanges,
+                                  boolean notifyInsertions,
+                                  boolean notifyRemovals) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             T t = mData.get(innerPosition);
             boolean include = apply(t);
@@ -251,13 +276,13 @@ final class FilterData<T> extends DataWrapper<T> {
                 if (include) {
                     // Item should be included. Overwrite mapping and notify of a change.
                     mIndex.put(innerPosition);
-                    if (notify) {
+                    if (notifyChanges) {
                         notifyItemChanged(outerPosition);
                     }
                 } else {
                     // Item shouldn't be included. Remove mapping and notify of removal.
                     mIndex.removeAt(outerPosition);
-                    if (notify) {
+                    if (notifyRemovals) {
                         notifyItemRemoved(outerPosition);
                     }
                 }
@@ -268,7 +293,7 @@ final class FilterData<T> extends DataWrapper<T> {
                     // Take advantage of indexOfKey() binary search result value to find out what the mapping should be.
                     int insertionIndex = outerPosition >= 0 ? outerPosition : -outerPosition - 1;
                     mIndex.put(innerPosition);
-                    if (notify) {
+                    if (notifyInsertions) {
                         notifyItemInserted(insertionIndex);
                     }
                 }
@@ -354,6 +379,10 @@ final class FilterData<T> extends DataWrapper<T> {
 
     private boolean apply(@NonNull T t) {
         return mPredicate.apply(t);
+    }
+
+    private static boolean equal(Object a, Object b) {
+        return (a == null) ? (b == null) : a.equals(b);
     }
 
     private static int sign(int v) {

@@ -28,7 +28,7 @@ public final class FilterDataTest {
     private Data<?> mMockData;
 
     private FakeData<String> mData;
-    private Data<String> mFilterData;
+    private FilterData<String> mFilterData;
 
     @Mock
     private DataObserver mFilterDataObserver;
@@ -183,6 +183,29 @@ public final class FilterDataTest {
         assertThat(mData).containsExactly("fish", "bear", "cat", "foo", "bar", "baz").inOrder();
         assertThat(mFilterData).containsExactly("bear", "bar", "baz").inOrder();
         verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void reassignFilterNotifiesCorrectly() {
+        DataObserver observer = mock(DataObserver.class);
+        mFilterData.registerDataObserver(observer);
+        mFilterData.setPredicate(contains("a"));
+        assertThat(mFilterData).containsExactly("bear", "cat", "bar", "baz");
+        verify(observer).onItemRangeInserted(1, 1);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
+    public void reassignFilterNotifiesCorrectly2() {
+        DataObserver observer = mock(DataObserver.class);
+        mFilterData.registerDataObserver(observer);
+        mFilterData.setPredicate(contains("f"));
+        assertThat(mFilterData).containsExactly("foo", "fish");
+        verify(observer).onItemRangeRemoved(0, 1);
+        verify(observer).onItemRangeInserted(0, 1);
+        verify(observer, times(2)).onItemRangeRemoved(1, 1);
+        verify(observer).onItemRangeInserted(1, 1);
+        verifyNoMoreInteractions(observer);
     }
 
     private void verifyNoMoreObserverInteractions() {

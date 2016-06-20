@@ -69,6 +69,11 @@ public abstract class DataWrapper<T> extends Data<T> {
         mData = data;
     }
 
+    @NonNull
+    public Data<?> getData() {
+        return mData;
+    }
+
     @Override
     public void invalidate() {
         mData.invalidate();
