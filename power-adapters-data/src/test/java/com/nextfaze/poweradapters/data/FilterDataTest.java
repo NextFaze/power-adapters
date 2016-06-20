@@ -190,7 +190,7 @@ public final class FilterDataTest {
         DataObserver observer = mock(DataObserver.class);
         mFilterData.registerDataObserver(observer);
         mFilterData.setPredicate(contains("a"));
-        assertThat(mFilterData).containsExactly("bear", "cat", "bar", "baz");
+        assertThat(mFilterData).containsExactly("bear", "cat", "bar", "baz").inOrder();
         verify(observer).onItemRangeInserted(1, 1);
         verifyNoMoreInteractions(observer);
     }
@@ -200,7 +200,7 @@ public final class FilterDataTest {
         DataObserver observer = mock(DataObserver.class);
         mFilterData.registerDataObserver(observer);
         mFilterData.setPredicate(contains("f"));
-        assertThat(mFilterData).containsExactly("foo", "fish");
+        assertThat(mFilterData).containsExactly("foo", "fish").inOrder();
         verify(observer).onItemRangeRemoved(0, 1);
         verify(observer).onItemRangeInserted(0, 1);
         verify(observer, times(2)).onItemRangeRemoved(1, 1);

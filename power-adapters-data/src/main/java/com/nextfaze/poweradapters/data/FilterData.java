@@ -212,18 +212,6 @@ public final class FilterData<T> extends DataWrapper<T> {
         }
     }
 
-    private void unregisterAll() {
-        mObservingData = false;
-        if (mObservingLoading) {
-            mData.unregisterLoadingObserver(mLoadingObserver);
-            mObservingLoading = false;
-        }
-        if (mObservingAvailable) {
-            mData.unregisterAvailableObserver(mAvailableObserver);
-            mObservingAvailable = false;
-        }
-    }
-
     private void buildCompleteIndex() {
         changeIndexRange(0, mData.size(), false, false, false);
     }
@@ -319,7 +307,7 @@ public final class FilterData<T> extends DataWrapper<T> {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             int outerPosition = mIndex.indexOfKey(innerPosition);
             if (outerPosition >= 0) {
-                mIndex.delete(innerPosition);
+                mIndex.removeAt(outerPosition);
                 notifyItemRemoved(outerPosition);
             }
         }
