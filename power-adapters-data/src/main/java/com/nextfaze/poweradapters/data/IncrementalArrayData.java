@@ -4,7 +4,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
-import com.nextfaze.poweradapters.NotifyingArrayList;
+import com.nextfaze.poweradapters.internal.NotifyingArrayList;
 import lombok.NonNull;
 
 import java.io.Closeable;

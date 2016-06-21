@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import com.nextfaze.poweradapters.NotifyingArrayList;
+import com.nextfaze.poweradapters.internal.NotifyingArrayList;
 import lombok.NonNull;
 
 import java.io.Closeable;

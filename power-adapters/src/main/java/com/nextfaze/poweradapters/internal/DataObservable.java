@@ -1,5 +1,6 @@
-package com.nextfaze.poweradapters;
+package com.nextfaze.poweradapters.internal;
 
+import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
 import java.util.ArrayList;

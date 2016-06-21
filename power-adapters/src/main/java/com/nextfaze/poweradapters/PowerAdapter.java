@@ -6,6 +6,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.internal.DataObservable;
 import lombok.NonNull;
 
 import java.util.Collection;

@@ -4,9 +4,9 @@ import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.UiThread;
-import com.nextfaze.poweradapters.DataObservable;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
+import com.nextfaze.poweradapters.internal.DataObservable;
 import lombok.NonNull;
 
 import java.util.Comparator;

@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters;
 
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.internal.NotificationType;
 import lombok.NonNull;
 
 @SuppressWarnings("WeakerAccess")

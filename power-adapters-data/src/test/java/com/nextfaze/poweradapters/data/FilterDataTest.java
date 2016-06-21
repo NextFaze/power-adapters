@@ -15,7 +15,7 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.nextfaze.poweradapters.NotificationType.COARSE;
+import static com.nextfaze.poweradapters.internal.NotificationType.COARSE;
 import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
