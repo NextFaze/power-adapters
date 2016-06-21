@@ -1,243 +1,137 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.Nullable;
+import com.nextfaze.poweradapters.NotificationType;
+import com.nextfaze.poweradapters.NotifyingArrayList;
 import lombok.NonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
 import static java.util.Arrays.asList;
 
+@SuppressWarnings("WeakerAccess")
 public class FakeData<T> extends Data<T> implements List<T> {
 
     @NonNull
-    private final ArrayList<T> mData = new ArrayList<>();
-
-    private boolean mNotificationsEnabled = true;
+    private final NotifyingArrayList<T> mData = new NotifyingArrayList<>(mDataObservable);
 
     private int mAvailable = UNKNOWN;
 
     private boolean mLoading;
 
     @Override
-    public final int size() {
+    public int size() {
         return mData.size();
     }
 
     @Override
-    public final boolean contains(Object object) {
+    public boolean contains(@Nullable Object object) {
         return mData.contains(object);
     }
 
     @Override
-    public final int indexOf(Object object) {
+    public int indexOf(@Nullable Object object) {
         return mData.indexOf(object);
     }
 
     @Override
-    public final int lastIndexOf(Object object) {
+    public int lastIndexOf(@Nullable Object object) {
         return mData.lastIndexOf(object);
     }
 
     @Override
-    public final T remove(int index) {
-        T removed = mData.remove(index);
-        if (mNotificationsEnabled) {
-            notifyItemRemoved(index);
-        }
-        return removed;
+    public T remove(int index) {
+        return mData.remove(index);
     }
 
     @Override
-    public final boolean add(@NonNull T t) {
-        if (mData.add(t)) {
-            if (mNotificationsEnabled) {
-                notifyItemInserted(mData.size() - 1);
-            }
-            return true;
-        }
-        return false;
+    public boolean add(@NonNull T t) {
+        return mData.add(t);
     }
 
     @Override
-    public final void add(int index, T object) {
+    public void add(int index, T object) {
         mData.add(index, object);
-        if (mNotificationsEnabled) {
-            notifyItemInserted(index);
-        }
     }
 
     @Override
-    public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        int oldSize = mData.size();
-        mData.addAll(collection);
-        int newSize = mData.size();
-        if (newSize != oldSize) {
-            int count = mData.size() - oldSize;
-            if (mNotificationsEnabled) {
-                notifyItemRangeInserted(oldSize, count);
-            }
-            return true;
-        }
-        return false;
+    public boolean addAll(@NonNull Collection<? extends T> collection) {
+        return mData.addAll(collection);
     }
 
     @Override
-    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        int oldSize = mData.size();
-        mData.addAll(index, collection);
-        int newSize = mData.size();
-        if (newSize != oldSize) {
-            int count = mData.size() - oldSize;
-            if (mNotificationsEnabled) {
-                notifyItemRangeInserted(index, count);
-            }
-            return true;
-        }
-        return false;
+    public boolean addAll(int index, @NonNull Collection<? extends T> collection) {
+        return mData.addAll(index, collection);
     }
 
     @Override
-    public final boolean remove(@NonNull Object obj) {
-        //noinspection SuspiciousMethodCalls
-        int index = mData.indexOf(obj);
-        if (index != -1) {
-            mData.remove(index);
-            if (mNotificationsEnabled) {
-                notifyItemRemoved(index);
-            }
-            return true;
-        }
-        return false;
+    public void clear() {
+        mData.clear();
     }
 
-    // TODO: Notify of change if modified from iterator.
+    @Override
+    public boolean remove(@NonNull Object obj) {
+        return mData.remove(obj);
+    }
 
     @NonNull
     @Override
-    public final ListIterator<T> listIterator() {
+    public ListIterator<T> listIterator() {
         return mData.listIterator();
     }
 
     @NonNull
     @Override
-    public final ListIterator<T> listIterator(int location) {
+    public ListIterator<T> listIterator(int location) {
         return mData.listIterator(location);
     }
 
     @NonNull
     @Override
-    public final List<T> subList(int start, int end) {
+    public List<T> subList(int start, int end) {
         return mData.subList(start, end);
     }
 
     @Override
-    public final boolean containsAll(@NonNull Collection<?> collection) {
+    public boolean containsAll(@NonNull Collection<?> collection) {
         return mData.containsAll(collection);
     }
 
     @Override
-    public final boolean removeAll(@NonNull Collection<?> collection) {
-        boolean removed = mData.removeAll(collection);
-        if (removed && mNotificationsEnabled) {
-            // TODO: Fine-grained change notification.
-            notifyDataSetChanged();
-        }
-        return removed;
+    public boolean removeAll(@NonNull Collection<?> collection) {
+        return mData.removeAll(collection);
     }
 
     @Override
-    public final boolean retainAll(@NonNull Collection<?> collection) {
-        boolean changed = mData.retainAll(collection);
-        if (changed && mNotificationsEnabled) {
-            // TODO: Fine-grained change notification.
-            notifyDataSetChanged();
-        }
-        return changed;
+    public boolean retainAll(@NonNull Collection<?> collection) {
+        return mData.retainAll(collection);
     }
 
     @Override
-    public final T set(int index, T object) {
-        T t = mData.set(index, object);
-        if (mNotificationsEnabled) {
-            notifyItemChanged(index);
-        }
-        return t;
+    public T set(int index, T object) {
+        return mData.set(index, object);
     }
 
     @NonNull
     @Override
-    public final Object[] toArray() {
+    public Object[] toArray() {
         return mData.toArray();
     }
 
+    @SuppressWarnings("SuspiciousToArrayCall")
     @NonNull
     @Override
-    public final <T> T[] toArray(@NonNull T[] contents) {
+    public <E> E[] toArray(@NonNull E[] contents) {
         return mData.toArray(contents);
     }
 
     @NonNull
     @Override
-    public final T get(int position, int flags) {
+    public T get(int position, int flags) {
         //noinspection ConstantConditions
         return mData.get(position);
-    }
-
-    @Override
-    public final void clear() {
-        int size = mData.size();
-        if (size > 0) {
-            mData.clear();
-            if (mNotificationsEnabled) {
-                notifyItemRangeRemoved(0, size);
-            }
-        }
-    }
-
-    public final void insert(int index, @NonNull T... items) {
-        if (items.length > 0) {
-            mData.addAll(index, asList(items));
-            if (mNotificationsEnabled) {
-                notifyItemRangeInserted(index, items.length);
-            }
-        }
-    }
-
-    public final void change(int index, @NonNull T... items) {
-        if (items.length > 0) {
-            for (int i = 0; i < items.length; i++) {
-                mData.set(index + i, items[i]);
-            }
-            if (mNotificationsEnabled) {
-                notifyItemRangeChanged(index, items.length);
-            }
-        }
-    }
-
-    public final void remove(int index, int count) {
-        if (count > 0) {
-            for (int i = 0; i < count; i++) {
-                mData.remove(index);
-            }
-            if (mNotificationsEnabled) {
-                notifyItemRangeRemoved(index, count);
-            }
-        }
-    }
-
-    public final void move(int fromPosition, int toPosition, int itemCount) {
-        ArrayList<T> copy = new ArrayList<>();
-        for (int i = 0; i < itemCount; i++) {
-            copy.add(mData.remove(fromPosition));
-        }
-        for (int i = 0; i < itemCount; i++) {
-            mData.add(toPosition + i, copy.get(i));
-        }
-        if (mNotificationsEnabled) {
-            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-        }
     }
 
     @Override
@@ -276,11 +170,36 @@ public class FakeData<T> extends Data<T> implements List<T> {
         }
     }
 
-    public boolean isNotificationsEnabled() {
-        return mNotificationsEnabled;
+    @SuppressWarnings("unchecked")
+    public void insert(int index, @NonNull T... items) {
+        mData.addAll(index, asList(items));
     }
 
-    public void setNotificationsEnabled(boolean notificationsEnabled) {
-        mNotificationsEnabled = notificationsEnabled;
+    @SuppressWarnings("unchecked")
+    public void append(@NonNull T... items) {
+        addAll(asList(items));
+    }
+
+    @SuppressWarnings("unchecked")
+    public void change(int index, @NonNull T... items) {
+        mData.setAll(index, asList(items));
+    }
+
+    public void remove(int index, int count) {
+        mData.remove(index, count);
+    }
+
+    public void move(int fromPosition, int toPosition, int itemCount) {
+        mData.move(fromPosition, toPosition, itemCount);
+    }
+
+    @SuppressWarnings("unused")
+    @NonNull
+    public NotificationType getNotificationType() {
+        return mData.getNotificationType();
+    }
+
+    public void setNotificationType(@NonNull NotificationType notificationType) {
+        mData.setNotificationType(notificationType);
     }
 }

@@ -77,22 +77,14 @@ public final class LimitDataTest {
 
     @Test
     public void changeNormal() {
-        mData.setNotificationsEnabled(false);
-        for (int i = 0; i < 3; i++) {
-            mData.set(0, "y");
-        }
-        mData.notifyItemRangeChanged(0, 3);
+        mData.change(0, "y", "y", "y");
         verify(mObserver).onItemRangeChanged(0, 3);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void changeBoundaryStraddlingClipped() {
-        mData.setNotificationsEnabled(false);
-        for (int i = 0; i < 3; i++) {
-            mData.set(3, "x");
-        }
-        mData.notifyItemRangeChanged(3, 3);
+        mData.change(3, "x", "x", "x");
         verify(mObserver).onItemRangeChanged(3, 2);
         verifyNoMoreInteractions(mObserver);
     }

@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.*;
-import static com.nextfaze.poweradapters.FakeAdapter.NotificationType.COARSE;
+import static com.nextfaze.poweradapters.NotificationType.COARSE;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 

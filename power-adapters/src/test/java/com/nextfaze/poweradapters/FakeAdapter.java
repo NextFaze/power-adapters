@@ -16,16 +16,6 @@ public class FakeAdapter extends PowerAdapter {
         mItemCount = itemCount;
     }
 
-    @SuppressWarnings("unused")
-    @NonNull
-    public NotificationType getNotificationType() {
-        return mNotificationType;
-    }
-
-    public void setNotificationType(@NonNull NotificationType notificationType) {
-        mNotificationType = notificationType;
-    }
-
     @NonNull
     @Override
     public Object getItemViewType(int position) {
@@ -67,11 +57,7 @@ public class FakeAdapter extends PowerAdapter {
 
     public void insert(int positionStart, int itemCount) {
         mItemCount += itemCount;
-        if (mNotificationType == NotificationType.COARSE) {
-            notifyDataSetChanged();
-        } else {
-            notifyItemRangeInserted(positionStart, itemCount);
-        }
+        mNotificationType.notifyItemRangeInserted(mDataObservable, positionStart, itemCount);
     }
 
     public void append(int itemCount) {
@@ -83,40 +69,34 @@ public class FakeAdapter extends PowerAdapter {
             throw new IndexOutOfBoundsException();
         }
         mItemCount -= itemCount;
-        if (mNotificationType == NotificationType.COARSE) {
-            notifyDataSetChanged();
-        } else {
-            notifyItemRangeRemoved(positionStart, itemCount);
-        }
+        mNotificationType.notifyItemRangeRemoved(mDataObservable, positionStart, itemCount);
     }
 
     public void change(int positionStart, int itemCount) {
-        if (mNotificationType == NotificationType.COARSE) {
-            notifyDataSetChanged();
-        } else {
-            notifyItemRangeChanged(positionStart, itemCount);
-        }
+        mNotificationType.notifyItemRangeChanged(mDataObservable, positionStart, itemCount);
     }
 
     public void move(int fromPosition, int toPosition, int itemCount) {
-        if (mNotificationType == NotificationType.COARSE) {
-            notifyDataSetChanged();
-        } else {
-            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
-        }
+        mNotificationType.notifyItemRangeMoved(mDataObservable, fromPosition, toPosition, itemCount);
     }
 
     public void clear() {
         remove(0, mItemCount);
     }
 
+    @SuppressWarnings("unused")
+    @NonNull
+    public NotificationType getNotificationType() {
+        return mNotificationType;
+    }
+
+    public void setNotificationType(@NonNull NotificationType notificationType) {
+        mNotificationType = notificationType;
+    }
+
     private void assertWithinRange(int position) {
         if (position >= mItemCount) {
             throw new IndexOutOfBoundsException();
         }
-    }
-
-    public enum NotificationType {
-        COARSE, FINE
     }
 }
