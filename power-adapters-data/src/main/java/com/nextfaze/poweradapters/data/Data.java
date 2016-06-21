@@ -2,12 +2,14 @@ package com.nextfaze.poweradapters.data;
 
 import android.os.Looper;
 import android.support.annotation.CallSuper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.UiThread;
 import com.nextfaze.poweradapters.DataObservable;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
 
+import java.util.Comparator;
 import java.util.Iterator;
 
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
@@ -392,18 +394,21 @@ public abstract class Data<T> implements Iterable<T> {
     }
 
     @SuppressWarnings("unchecked")
+    @CheckResult
     @NonNull
     public final <O> Data<O> compose(@NonNull Transformer<? super T, ? extends O> transformer) {
         return ((Transformer<T, O>) transformer).transform(this);
     }
 
-    /** Filters the specified data based on a predicate. */
+    /** Filters this data based on a predicate. */
+    @CheckResult
     @NonNull
     public final Data<T> filter(@NonNull Predicate<? super T> predicate) {
         return new FilterData<>(this, predicate);
     }
 
-    /** Filter the specified data by class. The resulting elements are guaranteed to be of the given type. */
+    /** Filter this data by class. The resulting elements are guaranteed to be of the given type. */
+    @CheckResult
     @NonNull
     public final <O> Data<O> filter(@NonNull final Class<O> type) {
         //noinspection unchecked
@@ -415,12 +420,21 @@ public abstract class Data<T> implements Iterable<T> {
         });
     }
 
-    /** Transforms the specified data by applying {@code function} to each element. */
+    /** Sorts this data using the specified {@link Comparator}. */
+    @CheckResult
+    @NonNull
+    public final Data<T> sort(@NonNull Comparator<? super T> comparator) {
+        return new SortData<>(this, comparator);
+    }
+
+    /** Transforms this data by applying {@code function} to each element. */
+    @CheckResult
     @NonNull
     public final <O> Data<O> transform(@NonNull Function<? super T, ? extends O> function) {
         return new TransformData<>(this, function);
     }
 
+    @CheckResult
     @NonNull
     public final Data<T> offset(int offset) {
         if (offset <= 0) {
@@ -429,6 +443,7 @@ public abstract class Data<T> implements Iterable<T> {
         return new OffsetData<>(this, offset);
     }
 
+    @CheckResult
     @NonNull
     public final Data<T> limit(int limit) {
         if (limit == Integer.MAX_VALUE) {
