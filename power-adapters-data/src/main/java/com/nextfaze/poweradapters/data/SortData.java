@@ -22,18 +22,18 @@ final class SortData<T> extends DataWrapper<T> {
         mComparator = comparator;
     }
 
-    @NonNull
-    @Override
-    public T get(int position, int flags) {
-        return mData.get(mIndex.outerToInner(position));
-    }
-
     @Override
     public int size() {
         if (getDataObserverCount() <= 0) {
             return mData.size();
         }
         return mIndex.size();
+    }
+
+    @NonNull
+    @Override
+    public T get(int position, int flags) {
+        return mData.get(mIndex.outerToInner(position));
     }
 
     @Override

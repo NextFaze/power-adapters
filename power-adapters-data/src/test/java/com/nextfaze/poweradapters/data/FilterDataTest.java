@@ -80,11 +80,6 @@ public final class FilterDataTest {
         mFilterData.get(5);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void getWithoutObservingDataThrows() {
-        new FilterData<>(mData, always()).get(0);
-    }
-
     @Test
     public void coarseGrainedChangeDecomposedIntoFineGrained() {
         mData.setNotificationType(COARSE);
@@ -155,46 +150,11 @@ public final class FilterDataTest {
     }
 
     @Test
-    public void moveForwardsSingle() {
+    public void moveNotifiesOfChange() {
         mData.move(0, 5, 1);
         assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
         assertContains("bar", "baz", "bear");
-        verify(mFilterDataObserver).onItemRangeMoved(0, 2, 1);
-        verifyNoMoreObserverInteractions();
-    }
-
-    @Test
-    public void moveForwardsMultiple() {
-        mData.move(0, 2, 2);
-        assertThat(mData).containsExactly("foo", "bar", "bear", "cat", "baz", "fish").inOrder();
-        assertThat(mFilterData).containsExactly("bar", "bear", "baz").inOrder();
-        verify(mFilterDataObserver).onItemRangeMoved(0, 1, 1);
-        verifyNoMoreObserverInteractions();
-    }
-
-    @Test
-    public void moveForwardsExcludedEnd() {
-        mData.move(0, 5, 1);
-        assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
-        assertContains("bar", "baz", "bear");
-        verify(mFilterDataObserver).onItemRangeMoved(0, 2, 1);
-        verifyNoMoreObserverInteractions();
-    }
-
-    @Test
-    public void moveBackwardsMultiple() {
-        mData.move(3, 0, 2);
-        assertThat(mData).containsExactly("bar", "baz", "bear", "cat", "foo", "fish").inOrder();
-        assertContains("bar", "baz", "bear");
-        verify(mFilterDataObserver).onItemRangeMoved(1, 0, 2);
-        verifyNoMoreObserverInteractions();
-    }
-
-    @Test
-    public void moveBackwardsExcludedEnd() {
-        mData.move(5, 0, 1);
-        assertThat(mData).containsExactly("fish", "bear", "cat", "foo", "bar", "baz").inOrder();
-        assertContains("bear", "bar", "baz");
+        verify(mFilterDataObserver).onChanged();
         verifyNoMoreObserverInteractions();
     }
 
