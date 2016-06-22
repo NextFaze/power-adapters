@@ -159,7 +159,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
                 }
             }
         } else {
-            for (int j = itemCount - 1; j >= 0; j--) {
+            for (int j = 0; j < itemCount; j++) {
                 for (int i = fromPosition + j; i > toPosition + j; i--) {
                     swap(mArray, i, i - 1);
                 }
