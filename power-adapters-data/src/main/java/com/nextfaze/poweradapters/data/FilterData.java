@@ -1,8 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
-import android.util.SparseIntArray;
 import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
+
+import java.util.ArrayList;
 
 import static java.lang.String.format;
 
@@ -71,12 +72,13 @@ public final class FilterData<T> extends DataWrapper<T> {
         if (position < 0 || position >= mIndex.size()) {
             throw new IndexOutOfBoundsException(format("Position %s, size %s", position, mIndex.size()));
         }
+        int innerSize = mData.size();
         int innerPosition = mIndex.outerToInner(position);
-        if (innerPosition < 0 || innerPosition >= mData.size()) {
+        if (innerPosition < 0 || innerPosition >= innerSize) {
             // Throw a useful error message if a bug results in an index inconsistency.
             throw new AssertionError(
                     format("Index inconsistency: index entry at position %s points to inner position %s, but inner data size is %s. The inner data content may have changed without a corresponding change notification.",
-                            position, innerPosition, mData.size()));
+                            position, innerPosition, innerSize));
         }
         return mData.get(innerPosition, flags);
     }
@@ -120,38 +122,37 @@ public final class FilterData<T> extends DataWrapper<T> {
 
     private void changeIndexRange(final int innerPositionStart,
                                   final int itemCount,
-                                  boolean notifyChanges,
-                                  boolean notifyInsertions,
-                                  boolean notifyRemovals) {
+                                  final boolean notifyChanges,
+                                  final boolean notifyInsertions,
+                                  final boolean notifyRemovals) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             T t = mData.get(innerPosition);
             boolean include = apply(t);
-            // Check for existing mapping.
-            int outerPosition = mIndex.innerToOuter(innerPosition);
-            if (outerPosition >= 0) {
+            // Search for existing mapping.
+            int i = mIndex.binarySearch(innerPosition);
+            if (i >= 0) {
                 // Mapping already exists.
                 if (include) {
-                    // Item should be included. Overwrite mapping and notify of a change.
-                    mIndex.put(innerPosition);
+                    // Item should be included. Notify of a change.
                     if (notifyChanges) {
-                        notifyItemChanged(outerPosition);
+                        notifyItemChanged(i);
                     }
                 } else {
                     // Item shouldn't be included. Remove mapping and notify of removal.
-                    mIndex.remove(outerPosition);
+                    mIndex.remove(i);
                     if (notifyRemovals) {
-                        notifyItemRemoved(outerPosition);
+                        notifyItemRemoved(i);
                     }
                 }
             } else {
                 // No mapping exists.
                 if (include) {
                     // Item should be included. Insert new mapping and notify of insertion.
-                    // Take advantage of indexOfKey() binary search result value to find out what the mapping should be.
-                    int insertionIndex = outerPosition >= 0 ? outerPosition : -outerPosition - 1;
-                    mIndex.put(innerPosition);
+                    // Use binary search result value to find out what the notification position should be.
+                    int insertionOuterPosition = ~i;
+                    mIndex.add(insertionOuterPosition, innerPosition);
                     if (notifyInsertions) {
-                        notifyItemInserted(insertionIndex);
+                        notifyItemInserted(insertionOuterPosition);
                     }
                 }
             }
@@ -159,25 +160,29 @@ public final class FilterData<T> extends DataWrapper<T> {
     }
 
     private void insertIndexRange(final int innerPositionStart, final int itemCount) {
-        // Take advantage of indexOfKey() binary search result value to find out what the mapping should be.
-        int idx = mIndex.innerToOuter(innerPositionStart);
-        int insertionIndex = idx >= 0 ? idx : -idx - 1;
+        int i = mIndex.binarySearch(innerPositionStart);
+        // Use binary search result value to find out what the mapping should be.
+        int insertionOuterPosition = i >= 0 ? i : ~i;
+        mIndex.shift(insertionOuterPosition, +itemCount);
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
             T t = mData.get(innerPosition);
             if (apply(t)) {
-                mIndex.put(innerPosition);
-                notifyItemInserted(insertionIndex);
-                insertionIndex++;
+                mIndex.add(insertionOuterPosition, innerPosition);
+                notifyItemInserted(insertionOuterPosition);
+                insertionOuterPosition++;
             }
         }
     }
 
     private void removeIndexRange(final int innerPositionStart, final int itemCount) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
-            int outerPosition = mIndex.innerToOuter(innerPosition);
-            if (outerPosition >= 0) {
-                mIndex.remove(outerPosition);
-                notifyItemRemoved(outerPosition);
+            int i = mIndex.binarySearch(innerPosition);
+            if (i >= 0) {
+                mIndex.remove(i);
+                mIndex.shift(i, -1);
+                notifyItemRemoved(i);
+            } else {
+                mIndex.shift(~i, -1);
             }
         }
     }
@@ -192,27 +197,47 @@ public final class FilterData<T> extends DataWrapper<T> {
 
     private static final class Index {
 
+        /** Sorted list of inner data positions. */
         @NonNull
-        private final SparseIntArray mArray = new SparseIntArray();
+        private final ArrayList<Integer> mArray = new ArrayList<>();
 
         int size() {
             return mArray.size();
         }
 
-        void put(int innerPosition) {
-            mArray.put(innerPosition, 0);
-        }
-
         void remove(int outerPosition) {
-            mArray.removeAt(outerPosition);
-        }
-
-        int innerToOuter(int innerPosition) {
-            return mArray.indexOfKey(innerPosition);
+            mArray.remove(outerPosition);
         }
 
         int outerToInner(int outerPosition) {
-            return mArray.keyAt(outerPosition);
+            return mArray.get(outerPosition);
+        }
+
+        void add(int outerPosition, int innerPosition) {
+            mArray.add(outerPosition, innerPosition);
+        }
+
+        void shift(int outerPositionStart, int delta) {
+            for (int i = outerPositionStart; i < mArray.size(); i++) {
+                mArray.set(i, mArray.get(i) + delta);
+            }
+        }
+
+        int binarySearch(int innerPosition) {
+            int lo = 0;
+            int hi = mArray.size() - 1;
+            while (lo <= hi) {
+                int mid = (lo + hi) >>> 1;
+                int midVal = mArray.get(mid);
+                if (midVal < innerPosition) {
+                    lo = mid + 1;
+                } else if (midVal > innerPosition) {
+                    hi = mid - 1;
+                } else {
+                    return mid;
+                }
+            }
+            return ~lo;
         }
     }
 }

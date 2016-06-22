@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.internal.NotificationType.COARSE;
 import static java.util.Collections.addAll;
@@ -93,28 +94,30 @@ public final class FilterDataTest {
     }
 
     @Test
-    public void changeIncludedElementNotifies() {
+    public void changeIncludedElement() {
         mData.change(3, "boo");
         verify(mFilterDataObserver).onItemRangeChanged(1, 1);
         verifyNoMoreInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void changeExcludedToIncludedElementNotifies() {
+    public void changeExcludedToIncludedElement() {
         mData.change(1, "abba");
+        assertContains("bear", "abba", "bar", "baz");
         verify(mFilterDataObserver).onItemRangeInserted(1, 1);
         verifyNoMoreInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void changeIncludedToExcludedElementNotifies() {
+    public void changeIncludedToExcludedElement() {
         mData.change(4, "fowl");
+        assertContains("bear", "bar");
         verify(mFilterDataObserver).onItemRangeRemoved(2, 1);
         verifyNoMoreInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void appendOfIncludedElementNotifies() {
+    public void appendOfIncludedElement() {
         mData.append("bro");
         assertContains("bear", "bar", "baz", "bro");
         verify(mFilterDataObserver).onItemRangeInserted(3, 1);
@@ -122,35 +125,37 @@ public final class FilterDataTest {
     }
 
     @Test
-    public void insertionOfIncludedElementNotifies() {
+    public void insertionOfIncludedElement() {
         mData.insert(2, "baa");
-        assertContains("bear", "bar", "baa", "baz");
+        assertContains("bear", "baa", "bar", "baz");
         verify(mFilterDataObserver).onItemRangeInserted(1, 1);
         verifyNoMoreInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void insertionOfExcludedElementDoesNotNotify() {
+    public void insertionOfExcludedElement() {
         mData.insert(4, "fowl");
-        assertContains("bear","bar", "baz");
+        assertContains("bear", "bar", "baz");
         verifyZeroInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void removalOfIncludedElementNotifies() {
+    public void removalOfIncludedElement() {
         mData.remove("bar");
+        assertContains("bear", "baz");
         verify(mFilterDataObserver).onItemRangeRemoved(1, 1);
         verifyNoMoreInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void removalOfExcludedElementDoesNotNotify() {
+    public void removalOfExcludedElement() {
         mData.remove("foo");
+        assertContains("bear", "bar", "baz");
         verifyZeroInteractions(mFilterDataObserver);
     }
 
     @Test
-    public void moveNotifiesOfChange() {
+    public void moveForwardsSingle() {
         mData.move(0, 5, 1);
         assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
         assertContains("bar", "baz", "bear");
@@ -159,7 +164,43 @@ public final class FilterDataTest {
     }
 
     @Test
-    public void reassignFilterNotifiesCorrectly() {
+    public void moveForwardsMultiple() {
+        mData.move(0, 2, 2);
+        assertThat(mData).containsExactly("foo", "bar", "bear", "cat", "baz", "fish").inOrder();
+        assertThat(mFilterData).containsExactly("bar", "bear", "baz").inOrder();
+        verify(mFilterDataObserver).onChanged();
+        verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void moveForwardsExcludedEnd() {
+        mData.move(0, 5, 1);
+        assertThat(mData).containsExactly("cat", "foo", "bar", "baz", "fish", "bear").inOrder();
+        assertContains("bar", "baz", "bear");
+        verify(mFilterDataObserver).onChanged();
+        verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void moveBackwardsMultiple() {
+        mData.move(3, 0, 2);
+        assertThat(mData).containsExactly("bar", "baz", "bear", "cat", "foo", "fish").inOrder();
+        assertContains("bar", "baz", "bear");
+        verify(mFilterDataObserver).onChanged();
+        verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void moveBackwardsExcludedEnd() {
+        mData.move(5, 0, 1);
+        assertThat(mData).containsExactly("fish", "bear", "cat", "foo", "bar", "baz").inOrder();
+        assertContains("bear", "bar", "baz");
+        verify(mFilterDataObserver).onChanged();
+        verifyNoMoreObserverInteractions();
+    }
+
+    @Test
+    public void reassignFilter() {
         DataObserver observer = mock(DataObserver.class);
         mFilterData.registerDataObserver(observer);
         mFilterData.setPredicate(contains("a"));
@@ -169,7 +210,7 @@ public final class FilterDataTest {
     }
 
     @Test
-    public void reassignFilterNotifiesCorrectly2() {
+    public void reassignFilter2() {
         DataObserver observer = mock(DataObserver.class);
         mFilterData.registerDataObserver(observer);
         mFilterData.setPredicate(contains("f"));
@@ -209,6 +250,7 @@ public final class FilterDataTest {
     }
 
     private void assertContains(@NonNull Object... items) {
+        System.out.println("Contents: " + newArrayList(mFilterData));
         assertThat(mFilterData).containsExactly(items).inOrder();
     }
 }
