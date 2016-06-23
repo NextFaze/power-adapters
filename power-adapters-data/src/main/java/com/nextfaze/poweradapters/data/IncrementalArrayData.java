@@ -10,10 +10,8 @@ import lombok.NonNull;
 import java.io.Closeable;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -27,7 +25,7 @@ import static java.lang.Thread.currentThread;
  * has no more data. Cannot contain {@code null} elements. Not thread-safe.
  * @param <T> The type of element this data contains.
  */
-public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>, Closeable {
+public abstract class IncrementalArrayData<T> extends Data<T> implements Closeable {
 
     private static final ThreadFactory DEFAULT_THREAD_FACTORY = new NamedThreadFactory("Incremental Array Data Thread %d");
 
@@ -79,109 +77,6 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
         return mData.size();
     }
 
-    @Override
-    public final boolean contains(@Nullable Object object) {
-        return mData.contains(object);
-    }
-
-    @Override
-    public final int indexOf(@Nullable Object object) {
-        return mData.indexOf(object);
-    }
-
-    @Override
-    public final int lastIndexOf(@Nullable Object object) {
-        return mData.lastIndexOf(object);
-    }
-
-    @Override
-    public final T remove(int index) {
-        return mData.remove(index);
-    }
-
-    @Override
-    public final boolean add(@NonNull T t) {
-        return mData.add(t);
-    }
-
-    @Override
-    public final void add(int index, T object) {
-        mData.add(index, object);
-    }
-
-    @Override
-    public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        return mData.addAll(collection);
-    }
-
-    @Override
-    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        return mData.addAll(index, collection);
-    }
-
-    @Override
-    public final boolean remove(@NonNull Object obj) {
-        return mData.remove(obj);
-    }
-
-    @UiThread
-    @NonNull
-    @Override
-    public final ListIterator<T> listIterator() {
-        return mData.listIterator();
-    }
-
-    @UiThread
-    @NonNull
-    @Override
-    public final ListIterator<T> listIterator(int location) {
-        return mData.listIterator(location);
-    }
-
-    @UiThread
-    @NonNull
-    @Override
-    public final List<T> subList(int start, int end) {
-        return mData.subList(start, end);
-    }
-
-    @UiThread
-    @Override
-    public final boolean containsAll(@NonNull Collection<?> collection) {
-        return mData.containsAll(collection);
-    }
-
-    @Override
-    public final boolean removeAll(@NonNull Collection<?> collection) {
-        return mData.removeAll(collection);
-    }
-
-    @Override
-    public final boolean retainAll(@NonNull Collection<?> collection) {
-        return mData.retainAll(collection);
-    }
-
-    @Override
-    public final T set(int index, T object) {
-        return mData.set(index, object);
-    }
-
-    @UiThread
-    @NonNull
-    @Override
-    public final Object[] toArray() {
-        return mData.toArray();
-    }
-
-    @SuppressWarnings("SuspiciousToArrayCall")
-    @UiThread
-    @NonNull
-    @Override
-    public final <E> E[] toArray(@NonNull E[] contents) {
-        return mData.toArray(contents);
-    }
-
-    @UiThread
     @NonNull
     @Override
     public final T get(int position, int flags) {
@@ -193,8 +88,6 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
         return mData.get(position);
     }
 
-    @UiThread
-    @Override
     public final void clear() {
         mClear = false;
         onClear();
@@ -247,6 +140,16 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements List<T>
     @Override
     public final int available() {
         return mAvailable;
+    }
+
+    /**
+     * Returns this {@link IncrementalArrayData} as a mutable list. Operations performed on the returned {@link List}
+     * are reflected in this {@link IncrementalArrayData}, and the correct notifications will be issued.
+     */
+    @NonNull
+    @Override
+    public List<T> asList() {
+        return mData;
     }
 
     @CallSuper

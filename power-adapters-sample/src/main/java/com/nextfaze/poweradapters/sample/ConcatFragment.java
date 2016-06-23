@@ -116,7 +116,7 @@ public final class ConcatFragment extends BaseFragment {
         private final int mColor;
 
         ColoredBinder(@NonNull NewsData data, int color) {
-            super(data);
+            super(data.asList());
             mColor = color;
         }
 

@@ -27,7 +27,7 @@ final class Utils {
 
     @NonNull
     static PowerAdapter createNewsAdapter(@NonNull NewsData data) {
-        return new DataBindingAdapter(data, new NewsItemBinder(data));
+        return new DataBindingAdapter(data, new NewsItemBinder(data.asList()));
     }
 
     @NonNull

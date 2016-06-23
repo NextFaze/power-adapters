@@ -7,16 +7,14 @@ import lombok.NonNull;
 
 import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Simple mutable {@link Data} implementation backed by an {@link ArrayList}. Cannot contain {@code null} elements. Not
  * thread-safe.
  * @param <T> The type of element this data contains.
  */
-public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable {
+public abstract class ArrayData<T> extends Data<T> implements Closeable {
 
     /** The backing array of non-null elements. */
     @NonNull
@@ -53,102 +51,6 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
         return mData.size();
     }
 
-    @Override
-    public final boolean contains(@Nullable Object object) {
-        return mData.contains(object);
-    }
-
-    @Override
-    public final int indexOf(@Nullable Object object) {
-        return mData.indexOf(object);
-    }
-
-    @Override
-    public final int lastIndexOf(@Nullable Object object) {
-        return mData.lastIndexOf(object);
-    }
-
-    @Override
-    public final T remove(int index) {
-        return mData.remove(index);
-    }
-
-    @Override
-    public final boolean add(@NonNull T t) {
-        return mData.add(t);
-    }
-
-    @Override
-    public final void add(int index, T object) {
-        mData.add(index, object);
-    }
-
-    @Override
-    public final boolean addAll(@NonNull Collection<? extends T> collection) {
-        return mData.addAll(collection);
-    }
-
-    @Override
-    public final boolean addAll(int index, @NonNull Collection<? extends T> collection) {
-        return mData.addAll(index, collection);
-    }
-
-    @Override
-    public final boolean remove(@NonNull Object obj) {
-        return mData.remove(obj);
-    }
-
-    @NonNull
-    @Override
-    public final ListIterator<T> listIterator() {
-        return mData.listIterator();
-    }
-
-    @NonNull
-    @Override
-    public final ListIterator<T> listIterator(int location) {
-        return mData.listIterator(location);
-    }
-
-    @NonNull
-    @Override
-    public final List<T> subList(int start, int end) {
-        return mData.subList(start, end);
-    }
-
-    @Override
-    public final boolean containsAll(@NonNull Collection<?> collection) {
-        return mData.containsAll(collection);
-    }
-
-    @Override
-    public final boolean removeAll(@NonNull Collection<?> collection) {
-        return mData.removeAll(collection);
-    }
-
-    @Override
-    public final boolean retainAll(@NonNull Collection<?> collection) {
-        return mData.retainAll(collection);
-    }
-
-    @Override
-    public final T set(int index, T object) {
-        return mData.set(index, object);
-    }
-
-    @NonNull
-    @Override
-    public final Object[] toArray() {
-        return mData.toArray();
-    }
-
-    @SuppressWarnings("SuspiciousToArrayCall")
-    @NonNull
-    @Override
-    public final <E> E[] toArray(@NonNull E[] contents) {
-        return mData.toArray(contents);
-    }
-
     @NonNull
     @Override
     public final T get(int position, int flags) {
@@ -156,7 +58,6 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
         return mData.get(position);
     }
 
-    @Override
     public final void clear() {
         onClear();
         mData.clear();
@@ -195,6 +96,16 @@ public abstract class ArrayData<T> extends Data<T> implements List<T>, Closeable
     @Override
     public final int available() {
         return mAvailable;
+    }
+
+    /**
+     * Returns this {@link ArrayData} as a mutable list. Operations performed on the returned {@link List} are reflected
+     * in this {@link ArrayData}, and the correct notifications will be issued.
+     */
+    @NonNull
+    @Override
+    public List<T> asList() {
+        return mData;
     }
 
     /** Called in a background thread to load the data set. */

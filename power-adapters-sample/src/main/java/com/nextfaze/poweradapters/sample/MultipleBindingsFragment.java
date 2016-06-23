@@ -28,7 +28,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     private final NewsMultiTypeData mData = new NewsMultiTypeData();
 
     @NonNull
-    private final Binder<NewsItem, NewsItemView> mPoliticsNewsItemBinder = new BinderWrapper<NewsItem, NewsItemView>(new NewsItemBinder(mData)) {
+    private final Binder<NewsItem, NewsItemView> mPoliticsNewsItemBinder = new BinderWrapper<NewsItem, NewsItemView>(new NewsItemBinder(mData.asList())) {
         @Override
         public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
             super.bindView(newsItem, v, holder);
@@ -56,7 +56,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     private final Mapper mMapper = new MapperBuilder()
             .bind(NewsSection.class, new NewsSectionBinder())
             .bind(NewsItem.class, mPoliticsNewsItemBinder, newsItem -> newsItem.getType() == POLITICS)
-            .bind(NewsItem.class, new NewsItemBinder(mData))
+            .bind(NewsItem.class, new NewsItemBinder(mData.asList()))
             .bind(BlogPost.class, mBlogPostBinder)
             .build();
 
