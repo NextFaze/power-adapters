@@ -234,5 +234,38 @@ public final class WrappingDividerAdapterTest {
         verifyNoMoreInteractions(mObserver);
     }
 
+    @Test
+    public void itemCountIsConsistentWhenChildIssuesInsertionUponRegisterObserverShowLeading() {
+        PowerAdapter adapter = new FakeAdapter(5).append(new FakeAdapter(5));
+        PowerAdapter dividerAdapter = new DividerAdapterBuilder()
+                .innerResource(RESOURCE)
+                .outerResource(RESOURCE)
+                .emptyPolicy(SHOW_LEADING)
+                .build(adapter);
+        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+    }
+
+    @Test
+    public void itemCountIsConsistentWhenChildIssuesInsertionUponRegisterObserverShowTrailing() {
+        PowerAdapter adapter = new FakeAdapter(5).append(new FakeAdapter(5));
+        PowerAdapter dividerAdapter = new DividerAdapterBuilder()
+                .innerResource(RESOURCE)
+                .outerResource(RESOURCE)
+                .emptyPolicy(SHOW_TRAILING)
+                .build(adapter);
+        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+    }
+
+    @Test
+    public void itemCountIsConsistentWhenChildIssuesInsertionUponRegisterObserverShowLeadingAndTrailing() {
+        PowerAdapter adapter = new FakeAdapter(5).append(new FakeAdapter(5));
+        PowerAdapter dividerAdapter = new DividerAdapterBuilder()
+                .innerResource(RESOURCE)
+                .outerResource(RESOURCE)
+                .emptyPolicy(SHOW_LEADING_AND_TRAILING)
+                .build(adapter);
+        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+    }
+
     // TODO: Check the above again with certain dividers absent, eg. leading + trailing, but no inner.
 }
