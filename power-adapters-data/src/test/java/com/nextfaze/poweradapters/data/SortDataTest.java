@@ -44,11 +44,15 @@ public final class SortDataTest {
         assertContentsSorted();
     }
 
-    private void assertContentsSorted() {
-        List<Integer> sortedFakeItems = newArrayList(mFakeData);
-        sort(sortedFakeItems);
-        System.out.println("Contents: " + newArrayList(mSortData));
-        assertThat(mSortData).containsExactlyElementsIn(sortedFakeItems).inOrder();
+    @Test
+    public void sizeIndicatesFullyAccessibleRangeWhenNoObserversRegistered() {
+        FakeData<Integer> fakeData = new FakeData<>();
+        fakeData.insert(0, 1, 2, 3);
+        SortData<Integer> sortData = new SortData<>(fakeData, Ordering.<Integer>natural());
+        int size = sortData.size();
+        for (int i = 0; i < size; i++) {
+            sortData.get(i);
+        }
     }
 
     @Test
@@ -160,5 +164,12 @@ public final class SortDataTest {
         DataObserver observer = mock(DataObserver.class);
         mSortData.registerDataObserver(observer);
         return observer;
+    }
+
+    private void assertContentsSorted() {
+        List<Integer> sortedFakeItems = newArrayList(mFakeData);
+        sort(sortedFakeItems);
+        System.out.println("Contents: " + newArrayList(mSortData));
+        assertThat(mSortData).containsExactlyElementsIn(sortedFakeItems).inOrder();
     }
 }

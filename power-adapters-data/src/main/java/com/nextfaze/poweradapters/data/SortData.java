@@ -24,9 +24,6 @@ final class SortData<T> extends DataWrapper<T> {
 
     @Override
     public int size() {
-        if (getDataObserverCount() <= 0) {
-            return mData.size();
-        }
         return mIndex.size();
     }
 
@@ -40,6 +37,16 @@ final class SortData<T> extends DataWrapper<T> {
     protected void onFirstDataObserverRegistered() {
         super.onFirstDataObserverRegistered();
         rebuild();
+        int itemCount = mIndex.size();
+        if (itemCount > 0) {
+            notifyItemRangeInserted(0, itemCount);
+        }
+    }
+
+    @Override
+    protected void onLastDataObserverUnregistered() {
+        super.onLastDataObserverUnregistered();
+        mIndex.clear();
     }
 
     @Override

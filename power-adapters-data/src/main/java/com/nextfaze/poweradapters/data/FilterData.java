@@ -50,20 +50,7 @@ public final class FilterData<T> extends DataWrapper<T> {
 
     @Override
     public int size() {
-        if (getDataObserverCount() <= 0) {
-            return calculateSize();
-        }
         return mIndex.size();
-    }
-
-    private int calculateSize() {
-        int totalSize = 0;
-        for (int i = 0; i < mData.size(); i++) {
-            if (apply(mData.get(i))) {
-                totalSize++;
-            }
-        }
-        return totalSize;
     }
 
     @NonNull
@@ -87,6 +74,16 @@ public final class FilterData<T> extends DataWrapper<T> {
     protected void onFirstDataObserverRegistered() {
         super.onFirstDataObserverRegistered();
         rebuild();
+        int itemCount = mIndex.size();
+        if (itemCount > 0) {
+            notifyItemRangeChanged(0, itemCount);
+        }
+    }
+
+    @Override
+    protected void onLastDataObserverUnregistered() {
+        super.onLastDataObserverUnregistered();
+        mIndex.clear();
     }
 
     private void rebuild() {
@@ -200,6 +197,10 @@ public final class FilterData<T> extends DataWrapper<T> {
         /** Sorted list of inner data positions. */
         @NonNull
         private final ArrayList<Integer> mArray = new ArrayList<>();
+
+        void clear() {
+            mArray.clear();
+        }
 
         int size() {
             return mArray.size();
