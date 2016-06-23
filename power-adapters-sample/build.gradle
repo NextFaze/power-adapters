@@ -15,7 +15,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName '1.0'
@@ -29,6 +29,7 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
+        disable 'DefaultLocale', 'RtlHardcoded', 'HardcodedText', 'GoogleAppIndexingWarning'
     }
 }
 
