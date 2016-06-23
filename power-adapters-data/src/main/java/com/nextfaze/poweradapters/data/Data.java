@@ -9,8 +9,10 @@ import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.internal.DataObservable;
 import lombok.NonNull;
 
+import java.util.AbstractList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
 
@@ -48,6 +50,19 @@ public abstract class Data<T> implements Iterable<T> {
 
     @NonNull
     final ErrorObservable mErrorObservable = new ErrorObservable();
+
+    @NonNull
+    private final List<T> mList = new AbstractList<T>() {
+        @Override
+        public T get(int location) {
+            return Data.this.get(location);
+        }
+
+        @Override
+        public int size() {
+            return Data.this.size();
+        }
+    };
 
     @NonNull
     private final CoalescingPoster mPoster = new CoalescingPoster();
@@ -450,6 +465,13 @@ public abstract class Data<T> implements Iterable<T> {
             return this;
         }
         return new LimitData<>(this, limit);
+    }
+
+    /** Returns this {@link Data} as an immutable list. */
+    @CheckResult
+    @NonNull
+    public List<T> asList() {
+        return mList;
     }
 
     @NonNull
