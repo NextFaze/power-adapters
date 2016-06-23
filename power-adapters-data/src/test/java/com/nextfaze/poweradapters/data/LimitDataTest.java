@@ -16,7 +16,6 @@ import org.robolectric.annotation.Config;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
-import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -36,14 +35,14 @@ public final class LimitDataTest {
     public void setUp() throws Exception {
         mData = new FakeData<>();
         //noinspection SpellCheckingInspection
-        addAll(mData, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
+        mData.insert(0, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
         mLimitedData = new LimitData<>(mData, 5);
         mLimitedData.registerDataObserver(mObserver);
     }
 
     private void configure(int limit, @NonNull String... elements) {
         mData = new FakeData<>();
-        addAll(mData, elements);
+        mData.insert(0, elements);
         mLimitedData = new LimitData<>(mData, limit);
         mLimitedData.registerDataObserver(mObserver);
     }

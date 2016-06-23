@@ -17,7 +17,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.Collections.addAll;
 import static java.util.Collections.sort;
 import static org.mockito.Mockito.*;
 
@@ -35,8 +34,7 @@ public final class SortDataTest {
     @Before
     public void setUp() throws Exception {
         mFakeData = new FakeData<>();
-        // 0, 5, 10, 15, 20, 25
-        addAll(mFakeData, 0, 10, 5, 15, 25, 20);
+        mFakeData.insert(0, 0, 10, 5, 15, 25, 20);
         mSortData = new SortData<>(mFakeData, Ordering.natural());
         mSortData.registerDataObserver(new VerifyingDataObserver(mSortData));
     }

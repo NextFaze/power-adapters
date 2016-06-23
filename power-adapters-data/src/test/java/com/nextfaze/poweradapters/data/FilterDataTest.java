@@ -17,7 +17,6 @@ import org.robolectric.annotation.Config;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.internal.NotificationType.COARSE;
-import static java.util.Collections.addAll;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -48,7 +47,7 @@ public final class FilterDataTest {
     @Before
     public void setUp() throws Exception {
         mData = new FakeData<>();
-        addAll(mData, "bear", "cat", "foo", "bar", "baz", "fish");
+        mData.insert(0, "bear", "cat", "foo", "bar", "baz", "fish");
         mFilterData = new FilterData<>(mData, contains("b"));
         mFilterData.registerDataObserver(mFilterDataObserver);
         mFilterData.registerDataObserver(new VerifyingDataObserver(mFilterData));

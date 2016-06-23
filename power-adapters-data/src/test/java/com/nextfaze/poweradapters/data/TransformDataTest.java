@@ -11,7 +11,6 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static java.util.Collections.addAll;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -25,7 +24,7 @@ public final class TransformDataTest {
     @Before
     public void setUp() throws Exception {
         mData = new FakeData<>();
-        addAll(mData, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
+        mData.insert(0, "a", "bc", "def", "ghij", "klmno", "pqrstu", "vwxyz12");
     }
 
     @Test
