@@ -167,7 +167,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
-        mItemCount = getItemCount(super.getItemCount());
+        updateItemCount(super.getItemCount());
     }
 
     @Override
@@ -178,7 +178,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @Override
     protected void forwardChanged() {
-        mItemCount = getAdapter().getItemCount();
+        updateItemCount();
         notifyDataSetChanged();
     }
 
@@ -189,22 +189,24 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         final boolean rangeIncludesFirstItem = innerPositionStart == 0;
         final boolean rangeIncludesLastItem = innerPositionStart + innerItemCount >= innerTotalCountAfter;
 
+        setItemCount(getItemCount(innerTotalCountBefore));
+
         // Became non-empty?
         if (innerTotalCountBefore == 0 && innerTotalCountAfter > 0) {
             // Remove single leading.
             if (isLeadingVisible(innerTotalCountBefore)) {
-                mItemCount--;
+                adjustItemCount(-1);
                 notifyItemRemoved(0);
             }
 
             // Remove single trailing.
             if (isTrailingVisible(innerTotalCountBefore)) {
-                mItemCount--;
+                adjustItemCount(-1);
                 notifyItemRemoved(getItemCount(innerTotalCountBefore) - 1);
             }
         }
 
-        mItemCount = innerTotalCountAfter;
+        setItemCount(innerTotalCountAfter);
         super.forwardItemRangeInserted(innerPositionStart, innerItemCount);
 
         // Leading might turn into an inner.
@@ -225,21 +227,20 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         final boolean rangeIncludesFirstItem = innerPositionStart == 0;
         final boolean rangeIncludesLastItem = innerPositionStart + innerItemCount >= innerTotalCountBefore;
 
-
-        mItemCount = innerTotalCountAfter;
+        setItemCount(innerTotalCountAfter);
         super.forwardItemRangeRemoved(innerPositionStart, innerItemCount);
 
         // Became empty?
         if (innerTotalCountBefore > 0 && innerTotalCountAfter == 0) {
             // Add single leading.
             if (isLeadingVisible(innerTotalCountAfter)) {
-                mItemCount++;
+                adjustItemCount(+1);
                 notifyItemInserted(0);
             }
 
             // Add single trailing.
             if (isTrailingVisible(innerTotalCountAfter)) {
-                mItemCount++;
+                adjustItemCount(+1);
                 notifyItemInserted(getItemCount(innerTotalCountAfter) - 1);
             }
         }
@@ -252,6 +253,31 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         // Inner might turn into a trailing.
         if (rangeIncludesLastItem && innerTotalCountAfter > 0 && innerTotalCountBefore > 1) {
             notifyItemChanged(getItemCount(innerTotalCountAfter) - 1);
+        }
+    }
+
+    private void updateItemCount() {
+        updateItemCount(super.getItemCount());
+    }
+
+    private void updateItemCount(int innerItemCount) {
+        mItemCount = getItemCount(innerItemCount);
+        validateItemCount();
+    }
+
+    private void setItemCount(int itemCount) {
+        mItemCount = itemCount;
+        validateItemCount();
+    }
+
+    private void adjustItemCount(int delta) {
+        mItemCount += delta;
+        validateItemCount();
+    }
+
+    private void validateItemCount() {
+        if (mItemCount < 0) {
+            throw new AssertionError("Unexpected item count: " + mItemCount);
         }
     }
 
