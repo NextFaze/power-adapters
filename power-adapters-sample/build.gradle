@@ -1,8 +1,8 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
-        classpath rootProject.ext.gradleRetrolambda
-        classpath rootProject.ext.androidApt
+        classpath  'me.tatarka:gradle-retrolambda:3.2.5'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
 }
 

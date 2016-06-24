@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.util.List;
 
 import static com.nextfaze.poweradapters.sample.Utils.showEditDialog;
+import static java.lang.Math.max;
 import static java.util.Collections.emptySet;
 
 class NewsItemBinder extends AbstractBinder<NewsItem, NewsItemView> {
@@ -23,29 +24,32 @@ class NewsItemBinder extends AbstractBinder<NewsItem, NewsItemView> {
     public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
         v.setNewsItem(newsItem);
         v.setTags(emptySet());
-        v.setOnClickListener(v1 -> onNewsItemClick(newsItem, v, holder.getPosition()));
-        v.setRemoveOnClickListener(v1 -> mList.remove(holder.getPosition()));
-        v.setInsertBeforeOnClickListener(v1 -> onInsertBeforeClick(newsItem, v, holder.getPosition()));
-        v.setInsertAfterOnClickListener(v1 -> onInsertAfterClick(newsItem, v, holder.getPosition()));
+        v.setOnClickListener(v1 -> onClick(v, holder.getPosition()));
+        v.setOnRemoveListener(count -> onRemove(holder.getPosition(), count));
+        v.setOnInsertBeforeListener(count -> onInsertBefore(holder.getPosition(), count));
+        v.setOnInsertAfterListener(count -> onInsertAfter(holder.getPosition(), count));
     }
 
-    private void onNewsItemClick(@NonNull NewsItem newsItem, @NonNull NewsItemView v, int position) {
+    private void onClick(@NonNull NewsItemView v, int position) {
         showEditDialog(v.getContext(), mList, position);
     }
 
-    private void onInsertBeforeClick(@NonNull NewsItem newsItem, @NonNull NewsItemView newsItemView, int position) {
-        if (newsItemView.isMultipleChecked()) {
-            mList.addAll(position, BlogPost.create(5));
-        } else {
-            mList.add(position, BlogPost.create());
+    private void onRemove(int position, int count) {
+        if (count == 1) {
+            mList.remove(position);
+        } else if (count > 1) {
+            int index = max(0, position - count / 2);
+            for (int i = 0; i < count && mList.size() > 0; i++) {
+                mList.remove(index);
+            }
         }
     }
 
-    private void onInsertAfterClick(@NonNull NewsItem newsItem, @NonNull NewsItemView newsItemView, int position) {
-        if (newsItemView.isMultipleChecked()) {
-            mList.addAll(position + 1, BlogPost.create(5));
-        } else {
-            mList.add(position + 1, BlogPost.create());
-        }
+    private void onInsertBefore(int position, int count) {
+        mList.addAll(position, BlogPost.create(count));
+    }
+
+    private void onInsertAfter(int position, int count) {
+        mList.addAll(position + 1, BlogPost.create(count));
     }
 }

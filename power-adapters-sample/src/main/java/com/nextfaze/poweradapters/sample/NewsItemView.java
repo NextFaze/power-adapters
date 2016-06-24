@@ -3,12 +3,12 @@ package com.nextfaze.poweradapters.sample;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -21,26 +21,26 @@ import static java.lang.String.format;
 @Accessors(prefix = "m")
 public final class NewsItemView extends RelativeLayout {
 
+    private static final int CLICK_COUNT = 1;
+    private static final int LONG_CLICK_COUNT = 5;
+
     @BindView(R.id.title)
     TextView mTitleView;
 
     @BindView(R.id.tags)
     TextView mTagsView;
 
-    @BindView(R.id.multiple_check_box)
-    CheckBox mMultipleCheckBox;
+    @Setter
+    @Nullable
+    private OnRemoveListener mOnRemoveListener;
 
     @Setter
     @Nullable
-    private OnClickListener mRemoveOnClickListener;
+    private OnInsertListener mOnInsertBeforeListener;
 
     @Setter
     @Nullable
-    private OnClickListener mInsertBeforeOnClickListener;
-
-    @Setter
-    @Nullable
-    private OnClickListener mInsertAfterOnClickListener;
+    private OnInsertListener mOnInsertAfterListener;
 
     public NewsItemView(Context context) {
         this(context, null);
@@ -58,27 +58,47 @@ public final class NewsItemView extends RelativeLayout {
 
     @OnClick(R.id.remove_button)
     void onRemoveClick() {
-        if (mRemoveOnClickListener != null) {
-            mRemoveOnClickListener.onClick(this);
+        if (mOnRemoveListener != null) {
+            mOnRemoveListener.onRemove(CLICK_COUNT);
         }
+    }
+
+    @OnLongClick(R.id.remove_button)
+    boolean onRemoveLongClick() {
+        if (mOnRemoveListener != null) {
+            mOnRemoveListener.onRemove(LONG_CLICK_COUNT);
+        }
+        return true;
     }
 
     @OnClick(R.id.insert_before_button)
     void onInsertBeforeClick() {
-        if (mInsertBeforeOnClickListener != null) {
-            mInsertBeforeOnClickListener.onClick(this);
+        if (mOnInsertBeforeListener != null) {
+            mOnInsertBeforeListener.onInsert(CLICK_COUNT);
         }
+    }
+
+    @OnLongClick(R.id.insert_before_button)
+    boolean onInsertBeforeLongClick() {
+        if (mOnInsertBeforeListener != null) {
+            mOnInsertBeforeListener.onInsert(LONG_CLICK_COUNT);
+        }
+        return true;
     }
 
     @OnClick(R.id.insert_after_button)
     void onInsertAfterClick() {
-        if (mInsertAfterOnClickListener != null) {
-            mInsertAfterOnClickListener.onClick(this);
+        if (mOnInsertAfterListener != null) {
+            mOnInsertAfterListener.onInsert(CLICK_COUNT);
         }
     }
 
-    public boolean isMultipleChecked() {
-        return mMultipleCheckBox.isChecked();
+    @OnLongClick(R.id.insert_after_button)
+    boolean onInsertAfterLongClick() {
+        if (mOnInsertAfterListener != null) {
+            mOnInsertAfterListener.onInsert(LONG_CLICK_COUNT);
+        }
+        return true;
     }
 
     public void setNewsItem(@NonNull NewsItem newsItem) {
@@ -105,5 +125,13 @@ public final class NewsItemView extends RelativeLayout {
             }
         }
         return b;
+    }
+
+    public interface OnInsertListener {
+        void onInsert(int count);
+    }
+
+    public interface OnRemoveListener {
+        void onRemove(int count);
     }
 }

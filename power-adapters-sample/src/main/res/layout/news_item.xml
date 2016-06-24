@@ -31,36 +31,32 @@
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_centerVertical="true"
-                  android:layout_alignParentRight="true">
-
-        <!-- Multiple checkbox -->
-
-        <CheckBox android:id="@+id/multiple_check_box"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginRight="8dp"
-                  android:text="5"/>
+                  android:layout_alignParentRight="true"
+                  android:gravity="center_vertical">
 
         <!-- Insert before button -->
 
         <Button android:id="@+id/insert_before_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Insert Before"/>
+                android:layout_width="30dp"
+                android:layout_height="50dp"
+                android:textSize="10sp"
+                android:text="+"/>
 
         <!-- Remove button -->
 
         <Button android:id="@+id/remove_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Remove"/>
+                android:layout_width="30dp"
+                android:layout_height="50dp"
+                android:textSize="10sp"
+                android:text="-"/>
 
         <!-- Insert after button -->
 
         <Button android:id="@+id/insert_after_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Insert After"/>
+                android:layout_width="30dp"
+                android:layout_height="50dp"
+                android:textSize="10sp"
+                android:text="+"/>
 
     </LinearLayout>
 

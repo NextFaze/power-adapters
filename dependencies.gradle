@@ -22,7 +22,4 @@ ext {
     junit = 'junit:junit:4.12'
     truth = 'com.google.truth:truth:0.28'
     lombok = 'org.projectlombok:lombok:1.16.8'
-
-    gradleRetrolambda = 'me.tatarka:gradle-retrolambda:3.2.5'
-    androidApt = 'com.neenbedankt.gradle.plugins:android-apt:1.8'
 }
