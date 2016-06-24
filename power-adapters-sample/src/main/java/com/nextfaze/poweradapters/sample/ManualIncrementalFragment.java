@@ -2,64 +2,21 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import butterknife.Bind;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
-import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
-import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
-import com.nextfaze.powerdata.Data;
-import com.nextfaze.powerdata.widget.DataLayout;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
+import static com.nextfaze.poweradapters.sample.Utils.*;
 
 public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
-    private final NewsIncrementalData mData = new NewsIncrementalData(100, 5);
+    private final NewsData mData = new NewsData(100, 5);
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
-            .bind(NewsItem.class, new NewsItemBinder() {
-                @Override
-                void onNewsItemClick(@NonNull NewsItem newsItem, @NonNull View v) {
-                    mData.remove(newsItem);
-                }
-            })
-            .build();
-
-    @NonNull
-    private final PowerAdapter mAdapter = createManualIncrementalAdapter(mData);
-
-    @NonNull
-    private PowerAdapter createManualIncrementalAdapter(@NonNull Data<?> data) {
-        PowerAdapter adapter = new DataBindingAdapter(data, mMapper);
-        // Apply a loading adapter to show a loading item as the last item, while data loads more elements.
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .build(adapter, new DataLoadingDelegate(data));
-        // "Load next" adapter lets user click the button to load next increment of results.
-        LoadNextAdapter loadNextAdapter = new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
-        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                onLoadNextClick();
-            }
-        });
-        adapter = loadNextAdapter;
-        return adapter;
-    }
-
-    @Bind(R.id.data_layout)
-    DataLayout mDataLayout;
-
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
+    private final PowerAdapter mAdapter = createNewsAdapter(mData)
+            .append(loadingIndicator(mData))
+            .append(loadNextButton(mData, v -> onLoadNextClick()));
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,9 +35,8 @@ public final class ManualIncrementalFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView.setAdapter(toRecyclerAdapter(mAdapter));
-        mDataLayout.setData(mData);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
+        setAdapter(mAdapter);
+        setData(mData);
     }
 
     @Override
@@ -96,7 +52,6 @@ public final class ManualIncrementalFragment extends BaseFragment {
     @Override
     void onInvalidateClick() {
         mData.invalidate();
-        showToast("Data invalidated; background the app or change orientation to trigger reload");
     }
 
     void onLoadNextClick() {

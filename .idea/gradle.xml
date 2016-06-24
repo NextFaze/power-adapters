@@ -10,12 +10,14 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/power-adapters" />
-            <option value="$PROJECT_DIR$/power-adapters-power-data" />
+            <option value="$PROJECT_DIR$/power-adapters-data" />
+            <option value="$PROJECT_DIR$/power-adapters-data-rx" />
             <option value="$PROJECT_DIR$/power-adapters-recyclerview-v7" />
             <option value="$PROJECT_DIR$/power-adapters-sample" />
             <option value="$PROJECT_DIR$/power-adapters-support-v4" />
           </set>
         </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

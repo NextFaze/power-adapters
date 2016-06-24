@@ -4,14 +4,15 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.view.View;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.concat;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
-public final class EmptyAdapterBuilder implements Decorator {
+/** Use {@link Condition}s instead. */
+@Deprecated
+public final class EmptyAdapterBuilder implements PowerAdapter.Transformer {
 
     @Nullable
     private Item mItem;
@@ -23,17 +24,7 @@ public final class EmptyAdapterBuilder implements Decorator {
 
     @NonNull
     public EmptyAdapterBuilder resource(@LayoutRes int resource) {
-        return view(viewFactoryForResource(resource));
-    }
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public EmptyAdapterBuilder view(@NonNull View view) {
-        return view(viewFactoryForView(view));
+        return view(asViewFactory(resource));
     }
 
     @NonNull
@@ -69,24 +60,37 @@ public final class EmptyAdapterBuilder implements Decorator {
         if (mItem == null) {
             return adapter;
         }
-        Delegate delegate = mDelegate;
-        if (delegate == null) {
-            delegate = new DefaultDelegate(adapter);
-        }
-        return concat(adapter, new EmptyAdapter(delegate, mItem.withEnabled(mEnabled)));
+        Delegate delegate = mDelegate != null ? mDelegate : new DefaultDelegate(adapter);
+        return concat(adapter, asAdapter(mItem.withEnabled(mEnabled)).showOnlyWhile(delegate.mCondition));
     }
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 
-    /** Invoked by {@link EmptyAdapter} to determine when the empty item is shown. */
+    /** Invoked to determine when the empty item is shown. */
+    @Deprecated
     public static abstract class Delegate {
 
-        @Nullable
-        private EmptyAdapter mAdapter;
+        @NonNull
+        private final Condition mCondition = new Condition() {
+            @Override
+            public boolean eval() {
+                return isEmpty();
+            }
+
+            @Override
+            protected void onFirstObserverRegistered() {
+                Delegate.this.onFirstObserverRegistered();
+            }
+
+            @Override
+            protected void onLastObserverUnregistered() {
+                Delegate.this.onLastObserverUnregistered();
+            }
+        };
 
         /**
          * Determines if the empty item should currently be shown.
@@ -113,13 +117,7 @@ public final class EmptyAdapterBuilder implements Decorator {
         /** Must be called when the value of {@link #isEmpty()} changes. */
         @UiThread
         public final void notifyEmptyChanged() {
-            if (mAdapter != null) {
-                mAdapter.updateVisible();
-            }
-        }
-
-        void setAdapter(@Nullable EmptyAdapter adapter) {
-            mAdapter = adapter;
+            mCondition.notifyChanged();
         }
     }
 

@@ -1,180 +1,67 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.TextView;
-import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.nextfaze.poweradapters.DividerAdapterBuilder;
-import com.nextfaze.poweradapters.EmptyAdapterBuilder;
-import com.nextfaze.poweradapters.FooterAdapterBuilder;
-import com.nextfaze.poweradapters.HeaderAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.LoadingAdapterBuilder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.asyncdata.DataBindingAdapter;
-import com.nextfaze.poweradapters.asyncdata.DataEmptyDelegate;
-import com.nextfaze.poweradapters.asyncdata.DataLoadingDelegate;
-import com.nextfaze.poweradapters.binding.Binder;
-import com.nextfaze.poweradapters.binding.BinderWrapper;
-import com.nextfaze.powerdata.Data;
-import com.nextfaze.powerdata.IncrementalArrayData;
-import com.nextfaze.powerdata.widget.DataLayout;
+import com.nextfaze.poweradapters.data.Data;
+import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import lombok.NonNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
-import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
+import static com.nextfaze.poweradapters.Condition.not;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.concat;
+import static com.nextfaze.poweradapters.data.DataConditions.isEmpty;
+import static com.nextfaze.poweradapters.sample.Utils.*;
 
-public class ConcatFragment extends BaseFragment {
+public final class ConcatFragment extends BaseFragment {
+
+    private static final Random RANDOM = new Random(3);
 
     private static final int ADAPTER_COUNT = 10;
 
     @NonNull
-    private final List<Pair<NewsIncrementalData, PowerAdapter>> mPairs = new ArrayList<>();
-
-    @Bind(R.id.data_layout)
-    DataLayout mDataLayout;
-
-    @Bind(R.id.recycler)
-    RecyclerView mRecyclerView;
+    private final List<Pair<NewsData, PowerAdapter>> mPairs = new ArrayList<>();
 
     public ConcatFragment() {
-        Random random = new Random(1);
         for (int i = 0; i < ADAPTER_COUNT; i++) {
-            NewsIncrementalData data = new NewsIncrementalData(random.nextInt(10), 3);
-            ColoredBinder binder = new ColoredBinder(random.nextInt());
-            mPairs.add(createPair(data, binder));
+            NewsData data = new NewsData(15, 5);
+            mPairs.add(createPair(data, new ColoredBinder(data, RANDOM.nextInt())));
         }
     }
 
     @NonNull
-    private Pair<NewsIncrementalData, PowerAdapter> createPair(@NonNull final NewsIncrementalData data,
-                                                               @NonNull Binder newsItemBinder) {
-        Binder removeItemBinder = new BinderWrapper(newsItemBinder) {
-            @Override
-            public void bindView(@NonNull final Object item, @NonNull View v, @NonNull final Holder holder) {
-                super.bindView(item, v, holder);
-                v.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        data.remove(item);
-                    }
-                });
-                v.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        showEditDialog(data, holder.getPosition());
-                        return true;
-                    }
-                });
-            }
-        };
-        PowerAdapter adapter = new DataBindingAdapter(data, singletonMapper(removeItemBinder));
+    private Pair<NewsData, PowerAdapter> createPair(@NonNull NewsData data,
+                                                    @NonNull NewsItemBinder newsItemBinder) {
+        PowerAdapter adapter = new DataBindingAdapter(data, newsItemBinder);
 
-        adapter = new DividerAdapterBuilder()
-                .innerResource(R.layout.list_divider_item_inner)
-                .leadingResource(R.layout.list_divider_item)
-                .trailingResource(R.layout.list_divider_item_trailing)
-                .emptyPolicy(DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING)
-                .build(adapter);
+        // Header
+        adapter = adapter.prepend(asAdapter(R.layout.news_header_item));
 
-        adapter = new HeaderAdapterBuilder()
-                .addResource(R.layout.news_header_item)
-                .emptyPolicy(HeaderAdapterBuilder.EmptyPolicy.SHOW)
-                .build(adapter);
-
-        adapter = new LoadingAdapterBuilder()
-                .resource(R.layout.list_loading_item)
-                .build(adapter, new DataLoadingDelegate(data));
+        // Loading indicator
+        adapter = adapter.append(loadingIndicator(data));
 
         data.setLookAheadRowCount(-1);
 
-        LoadNextAdapter loadNextAdapter =
-                new LoadNextAdapter(adapter, data, viewFactoryForResource(R.layout.list_load_next_item));
-        loadNextAdapter.setOnClickListener(new LoadNextAdapter.OnLoadNextClickListener() {
-            @Override
-            public void onClick() {
-                data.loadNext();
-            }
-        });
-        adapter = loadNextAdapter;
+        // Load next button
+        adapter = adapter.append(loadNextButton(data, v -> data.loadNext()));
 
-        adapter = new FooterAdapterBuilder()
-                .addResource(R.layout.news_footer_item)
-                .emptyPolicy(FooterAdapterBuilder.EmptyPolicy.HIDE)
-                .build(adapter);
+        // Footer
+        adapter = adapter.append(asAdapter(R.layout.news_footer_item).showOnlyWhile(not(isEmpty(data))));
 
-        adapter = new EmptyAdapterBuilder()
-                .resource(R.layout.list_empty_item)
-                .delegate(new DataEmptyDelegate(data))
-                .build(adapter);
+        // Empty message
+        adapter = adapter.append(emptyMessage(data));
 
-        return new Pair<NewsIncrementalData, PowerAdapter>(data, adapter);
-    }
-
-    private void showEditDialog(@NonNull final IncrementalArrayData<NewsItem> data, final int position) {
-        new AlertDialog.Builder(getActivity())
-                .setItems(new CharSequence[] {
-                        "Add 1 Before",
-                        "Add 1 After",
-                        "Change 1",
-                        "Add 3 Before",
-                        "Add 3 After",
-                        "Remove all"
-                }, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0:
-                                data.add(position, new NewsItem("Foobar"));
-                                break;
-
-                            case 1:
-                                data.add(position + 1, new NewsItem("Foobar"));
-                                break;
-
-                            case 2:
-                                data.set(position, new NewsItem("Changed"));
-                                break;
-
-                            case 3:
-                                data.addAll(position, Arrays.asList(
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar")
-                                ));
-                                break;
-
-                            case 4:
-                                data.addAll(position + 1, Arrays.asList(
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar"),
-                                        new NewsItem("Foobar")
-                                ));
-                                break;
-
-                            case 5:
-                                data.clear();
-                                break;
-                        }
-                    }
-                })
-                .show();
+        return new Pair<>(data, adapter);
     }
 
     @Override
@@ -185,9 +72,7 @@ public class ConcatFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        for (Pair<NewsIncrementalData, PowerAdapter> pair : mPairs) {
-            pair.first.close();
-        }
+        forEachData(data -> data.close());
         super.onDestroy();
     }
 
@@ -196,39 +81,53 @@ public class ConcatFragment extends BaseFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
         List<Data<?>> datas = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, Data<?>>() {
-                    @Override
-                    public Data<?> apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
-                        return pair.first;
-                    }
-                })
+                .transform((Function<Pair<NewsData, PowerAdapter>, Data<?>>) pair -> pair.first)
                 .toList();
         List<PowerAdapter> adapters = FluentIterable.from(mPairs)
-                .transform(new Function<Pair<NewsIncrementalData, PowerAdapter>, PowerAdapter>() {
-                    @Override
-                    public PowerAdapter apply(Pair<NewsIncrementalData, PowerAdapter> pair) {
-                        return pair.second;
-                    }
-                })
+                .transform(pair -> pair.second)
                 .toList();
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        mRecyclerView.setAdapter(toRecyclerAdapter(concat(adapters)));
+        setAdapter(concat(adapters));
         mDataLayout.setDatas(datas);
-        showCollectionView(CollectionView.RECYCLER_VIEW);
     }
 
-    static final class ColoredBinder extends NewsItemBinder {
+    @Override
+    void onReloadClick() {
+        forEachData(data -> data.reload());
+    }
+
+    @Override
+    void onRefreshClick() {
+        forEachData(data -> data.refresh());
+    }
+
+    @Override
+    void onInvalidateClick() {
+        forEachData(data -> data.invalidate());
+    }
+
+    private void forEachData(@NonNull Action<NewsData> action) {
+        for (Pair<NewsData, PowerAdapter> pair : mPairs) {
+            action.run(pair.first);
+        }
+    }
+
+    private static final class ColoredBinder extends NewsItemBinder {
 
         private final int mColor;
 
-        ColoredBinder(int color) {
+        ColoredBinder(@NonNull NewsData data, int color) {
+            super(data.asList());
             mColor = color;
         }
 
         @Override
-        protected void bind(@NonNull NewsItem newsItem, @NonNull TextView v, @NonNull Holder holder) {
-            super.bind(newsItem, v, holder);
+        public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
+            super.bindView(newsItem, v, holder);
             v.setBackgroundColor(mColor);
         }
+    }
+
+    private interface Action<T> {
+        void run(@NonNull T t);
     }
 }

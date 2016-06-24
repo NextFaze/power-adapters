@@ -3,18 +3,23 @@ package com.nextfaze.poweradapters.sample;
 import android.graphics.Typeface;
 import android.widget.TextView;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.binding.TypedBinder;
+import com.nextfaze.poweradapters.binding.AbstractBinder;
 import lombok.NonNull;
 
-final class NewsSectionBinder extends TypedBinder<NewsSection, TextView> {
+final class NewsSectionBinder extends AbstractBinder<NewsSection, TextView> {
 
     NewsSectionBinder() {
-        super(android.R.layout.simple_list_item_1, false);
+        super(android.R.layout.simple_list_item_1);
     }
 
     @Override
-    protected void bind(@NonNull NewsSection newsSection, @NonNull TextView textView, @NonNull Holder holder) {
-        textView.setTypeface(Typeface.DEFAULT_BOLD);
-        textView.setText(newsSection.getTitle());
+    public void bindView(@NonNull NewsSection newsSection, @NonNull TextView v, @NonNull Holder holder) {
+        v.setTypeface(Typeface.DEFAULT_BOLD);
+        v.setText(newsSection.getTitle());
+    }
+
+    @Override
+    public boolean isEnabled(@NonNull NewsSection newsSection, int position) {
+        return false;
     }
 }

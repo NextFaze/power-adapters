@@ -2,17 +2,19 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
-import android.view.View;
+import android.support.annotation.Nullable;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
+import static com.nextfaze.poweradapters.Condition.adapter;
+import static com.nextfaze.poweradapters.Condition.always;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
 /** Wraps an existing {@link PowerAdapter} to provide footer views below the wrapped adapter's items. */
-public final class FooterAdapterBuilder implements Decorator {
+@Deprecated
+public final class FooterAdapterBuilder implements PowerAdapter.Transformer {
 
     @NonNull
     private final ArrayList<Item> mItems = new ArrayList<>();
@@ -20,25 +22,8 @@ public final class FooterAdapterBuilder implements Decorator {
     @NonNull
     private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW;
 
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public FooterAdapterBuilder addView(@NonNull View view) {
-        return addView(view, false);
-    }
-
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public FooterAdapterBuilder addView(@NonNull View view, boolean enabled) {
-        return addView(viewFactoryForView(view), enabled);
-    }
+    @Nullable
+    private Condition mCondition;
 
     @NonNull
     public FooterAdapterBuilder addResource(@LayoutRes int resource) {
@@ -47,7 +32,7 @@ public final class FooterAdapterBuilder implements Decorator {
 
     @NonNull
     public FooterAdapterBuilder addResource(@LayoutRes int resource, boolean enabled) {
-        return addView(viewFactoryForResource(resource), enabled);
+        return addView(asViewFactory(resource), enabled);
     }
 
     @NonNull
@@ -67,44 +52,57 @@ public final class FooterAdapterBuilder implements Decorator {
         return this;
     }
 
+    @NonNull
+    public FooterAdapterBuilder condition(@Nullable Condition condition) {
+        mCondition = condition;
+        return this;
+    }
+
     @CheckResult
     @NonNull
-    public PowerAdapter build(@NonNull final PowerAdapter adapter) {
+    public PowerAdapter build(@NonNull PowerAdapter adapter) {
         if (mItems.isEmpty()) {
             return adapter;
         }
-        return concat(adapter, new HeaderFooterHelperAdapter(mItems, new HeaderFooterHelperAdapter.VisibilityPolicy() {
-            @Override
-            public boolean shouldShow() {
-                return mEmptyPolicy.shouldShow(adapter);
-            }
-        }, adapter));
+        Condition condition = mEmptyPolicy.asCondition(adapter);
+        if (mCondition != null) {
+            condition = condition.and(mCondition);
+        }
+        return adapter.append(asAdapter(mItems).showOnlyWhile(condition));
     }
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 
     /** Evaluated to determine whether to show the footers. */
+    @Deprecated
     public enum EmptyPolicy {
         /** Show the footers when the wrapped adapter is empty. */
         SHOW {
+            @NonNull
             @Override
-            boolean shouldShow(@NonNull PowerAdapter adapter) {
-                return true;
+            Condition asCondition(@NonNull PowerAdapter adapter) {
+                return always();
             }
         },
         /** Hide the footers when the wrapped adapter is empty. */
         HIDE {
             @Override
-            boolean shouldShow(@NonNull PowerAdapter adapter) {
-                return adapter.getItemCount() > 0;
+            @NonNull
+            Condition asCondition(@NonNull PowerAdapter adapter) {
+                return adapter(adapter, new Predicate<PowerAdapter>() {
+                    @Override
+                    public boolean apply(PowerAdapter adapter) {
+                        return adapter.getItemCount() > 0;
+                    }
+                });
             }
         };
 
-        /** Evaluate whether the items should show based on the wrapped adapter. */
-        abstract boolean shouldShow(@NonNull PowerAdapter adapter);
+        @NonNull
+        abstract Condition asCondition(@NonNull PowerAdapter adapter);
     }
 }

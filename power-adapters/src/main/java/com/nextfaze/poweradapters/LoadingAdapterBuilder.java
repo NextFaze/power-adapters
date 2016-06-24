@@ -4,16 +4,19 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.view.View;
 import android.widget.Adapter;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.PowerAdapters.concat;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForResource;
-import static com.nextfaze.poweradapters.ViewFactories.viewFactoryForView;
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+import static com.nextfaze.poweradapters.PowerAdapter.concat;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 
-/** Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. */
-public final class LoadingAdapterBuilder implements Decorator {
+/**
+ * Wraps an existing {@link PowerAdapter} and displays a loading indicator while loading. Use {@link Condition}s
+ * instead.
+ */
+@Deprecated
+public final class LoadingAdapterBuilder implements PowerAdapter.Transformer {
 
     @Nullable
     private Delegate mDelegate;
@@ -26,19 +29,9 @@ public final class LoadingAdapterBuilder implements Decorator {
 
     private boolean mEnabled;
 
-    /**
-     * Not safe for use in a {@code RecyclerView}.
-     * @see ViewFactories#viewFactoryForView(View)
-     */
-    @Deprecated
-    @NonNull
-    public LoadingAdapterBuilder view(@NonNull View view) {
-        return view(viewFactoryForView(view));
-    }
-
     @NonNull
     public LoadingAdapterBuilder resource(@LayoutRes int resource) {
-        return view(viewFactoryForResource(resource));
+        return view(asViewFactory(resource));
     }
 
     @NonNull
@@ -75,7 +68,8 @@ public final class LoadingAdapterBuilder implements Decorator {
         if (mDelegate == null) {
             throw new IllegalStateException("Delegate is required");
         }
-        return concat(adapter, new LoadingAdapter(mDelegate, mItem.withEnabled(mEnabled), mEmptyPolicy));
+        mDelegate.mEmptyPolicy = mEmptyPolicy;
+        return concat(adapter, asAdapter(mItem.withEnabled(mEnabled)).showOnlyWhile(mDelegate.mCondition));
     }
 
     @CheckResult
@@ -87,7 +81,7 @@ public final class LoadingAdapterBuilder implements Decorator {
 
     @NonNull
     @Override
-    public PowerAdapter decorate(@NonNull PowerAdapter adapter) {
+    public PowerAdapter transform(@NonNull PowerAdapter adapter) {
         return build(adapter);
     }
 
@@ -118,11 +112,29 @@ public final class LoadingAdapterBuilder implements Decorator {
         abstract boolean shouldShow(@NonNull Delegate delegate);
     }
 
-    /** Invoked by {@link LoadingAdapter} to determine when the loading item is shown. */
+    /** Invoked to determine when the loading item is shown. */
+    @Deprecated
     public static abstract class Delegate {
 
-        @Nullable
-        private LoadingAdapter mAdapter;
+        @NonNull
+        private final Condition mCondition = new Condition() {
+            @Override
+            public boolean eval() {
+                return isLoading() && mEmptyPolicy.shouldShow(Delegate.this);
+            }
+
+            @Override
+            protected void onFirstObserverRegistered() {
+                Delegate.this.onFirstObserverRegistered();
+            }
+
+            @Override
+            protected void onLastObserverUnregistered() {
+                Delegate.this.onLastObserverUnregistered();
+            }
+        };
+
+        EmptyPolicy mEmptyPolicy;
 
         /**
          * Returns whether the loading item should be shown or not.
@@ -158,20 +170,12 @@ public final class LoadingAdapterBuilder implements Decorator {
         /** Must be called when the value of {@link #isLoading()} changes. */
         @UiThread
         public final void notifyLoadingChanged() {
-            if (mAdapter != null) {
-                mAdapter.notifyLoadingChanged();
-            }
+            mCondition.notifyChanged();
         }
 
         /** Must be called when the value of {@link #isEmpty()} changes. */
         public final void notifyEmptyChanged() {
-            if (mAdapter != null) {
-                mAdapter.notifyEmptyChanged();
-            }
-        }
-
-        void setAdapter(@Nullable LoadingAdapter adapter) {
-            mAdapter = adapter;
+            mCondition.notifyChanged();
         }
     }
 }

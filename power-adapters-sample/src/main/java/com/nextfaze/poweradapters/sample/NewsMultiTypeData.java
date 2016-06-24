@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
-import com.nextfaze.powerdata.ArrayData;
+import com.nextfaze.poweradapters.data.ArrayData;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -16,9 +16,7 @@ final class NewsMultiTypeData extends ArrayData<Object> {
     protected List<Object> load() throws Exception {
         ArrayList<Object> data = new ArrayList<>();
         data.add(new NewsSection("Latest News"));
-        data.addAll(mNewsService.getNewsFlaky());
-        data.add(new NewsSection("Yesterdays News"));
-        data.addAll(mNewsService.getNewsFlaky());
+        data.addAll(mNewsService.getNews());
         return data;
     }
 }

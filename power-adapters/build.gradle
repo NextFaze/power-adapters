@@ -9,6 +9,9 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 dependencies {
+    testCompile rootProject.ext.robolectric
+    testCompile rootProject.ext.mockito
+    testCompile rootProject.ext.truth
     compile rootProject.ext.supportAnnotations
     provided rootProject.ext.lombok
 }

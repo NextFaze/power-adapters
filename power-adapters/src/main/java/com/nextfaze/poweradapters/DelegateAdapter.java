@@ -4,13 +4,10 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 /** Wraps another {@link PowerAdapter} optionally, delegating work to it. The wrapped adapter can be reassigned freely. */
-@Accessors(prefix = "m")
-public final class DelegateAdapter extends AbstractPowerAdapter {
+public final class DelegateAdapter extends PowerAdapter {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
@@ -40,7 +37,6 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
         }
     };
 
-    @Getter
     @Nullable
     private PowerAdapter mDelegate;
 
@@ -58,8 +54,8 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
         if (delegate != mDelegate) {
             int removeCount = mDelegate != null ? mDelegate.getItemCount() : 0;
             mDelegate = delegate;
-            updateObservers();
             int insertCount = mDelegate != null ? mDelegate.getItemCount() : 0;
+            updateObservers();
             if (removeCount > 0) {
                 notifyItemRangeRemoved(0, removeCount);
             }
@@ -67,6 +63,11 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
                 notifyItemRangeInserted(0, insertCount);
             }
         }
+    }
+
+    @Nullable
+    public PowerAdapter getDelegate() {
+        return mDelegate;
     }
 
     @Override
@@ -86,7 +87,7 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return delegateOrThrow().getItemViewType(position);
     }
 
@@ -97,7 +98,7 @@ public final class DelegateAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return delegateOrThrow().newView(parent, viewType);
     }
 

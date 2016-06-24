@@ -4,94 +4,125 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import lombok.NonNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.WeakHashMap;
 
-import static java.lang.String.format;
+import static java.util.Collections.swap;
 
-public abstract class TreeAdapter extends AbstractPowerAdapter {
+/** Allows hierarchical adapter usage. Note that behaviour of this class is undefined if no observers are registered. */
+public final class TreeAdapter extends PowerAdapter {
 
     @NonNull
     private final DataObserver mRootDataObserver = new SimpleDataObserver() {
         @Override
         public void onChanged() {
-            invalidateGroups();
+            rebuildAllEntriesAndRangeTable();
+            updateEntryAdapters();
             notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            invalidateGroups();
-            notifyItemRangeChanged(rootToOuter(positionStart), itemCount);
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
+                notifyItemChanged(rootToOuter(i));
+                Entry entry = mEntries.get(i);
+                entry.setAdapter(entry.getAdapter() != null ? getChildAdapter(i) : null);
+            }
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            invalidateGroups();
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
+                addEntry(i);
+            }
+            rebuildRangeTable();
             notifyItemRangeInserted(rootToOuter(positionStart), itemCount);
+            for (int i = positionStart; i < positionStart + itemCount; i++) {
+                mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
+            }
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            invalidateGroups();
-            notifyItemRangeRemoved(rootToOuter(positionStart), itemCount);
+            int removeCount = 0;
+            int removeStart = rootToOuter(positionStart);
+            for (int i = 0; i < itemCount; i++) {
+                removeCount += removeEntry(positionStart);
+            }
+            rebuildRangeTable();
+            notifyItemRangeRemoved(removeStart, removeCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            invalidateGroups();
-            notifyItemRangeMoved(rootToOuter(fromPosition), rootToOuter(toPosition), itemCount);
+            int moveCount = 0;
+            for (int i = 0; i < itemCount; i++) {
+                moveCount += mEntries.get(fromPosition + i).getItemCount();
+            }
+            int outerFromPosition = rootToOuter(fromPosition);
+            int outerToPosition = rootToOuter(toPosition);
+            moveEntries(fromPosition, toPosition, itemCount);
+            rebuildRangeTable();
+            notifyItemRangeMoved(outerFromPosition, outerToPosition, moveCount);
         }
     };
 
     @NonNull
-    private TreeState mState = new TreeState();
-
-    @NonNull
-    private final Transform mRootTransform = new Transform() {
-        @Override
-        public int transform(int position) {
-            return outerToRoot(position);
-        }
-    };
+    private final ChildAdapterSupplier mChildAdapterSupplier;
 
     @NonNull
     private final PowerAdapter mRootAdapter;
 
-    /** Reused to wrap an adapter and automatically offset all position calls. */
     @NonNull
-    private final OffsetAdapter mOffsetAdapter = new OffsetAdapter();
-
-    @NonNull
-    private final SparseArray<Entry> mEntries = new SparseArray<>();
+    private final SubAdapter mRootSubAdapter;
 
     @NonNull
-    private final GroupPool mGroupPool = new GroupPool();
+    private final ArrayList<Entry> mEntries = new ArrayList<>();
 
-    // TODO: Remove mappings from the following when an Entry is closed.
     @NonNull
-    private final Map<ViewType, PowerAdapter> mAdaptersByViewType = new HashMap<>();
+    private final WeakHashMap<Object, PowerAdapter> mAdaptersByViewType = new WeakHashMap<>();
 
-    /** Contains the mapping of outer positions to groups. */
     @NonNull
-    private final SparseArray<Group> mGroups = new SparseArray<>();
+    private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
+        @Override
+        public int size() {
+            return mEntries.size();
+        }
 
-    private boolean mDirty = true;
+        @Override
+        public int getRangeCount(int position) {
+            return mEntries.get(position).getItemCount();
+        }
 
-    public TreeAdapter(@NonNull PowerAdapter rootAdapter) {
+        @Override
+        public void setOffset(int position, int offset) {
+            mEntries.get(position).setOffset(offset);
+        }
+    };
+
+    @NonNull
+    private final RangeTable mRangeTable = new RangeTable();
+
+    @NonNull
+    private TreeState mState = new TreeState();
+
+    private boolean mAutoExpand;
+
+    public TreeAdapter(@NonNull PowerAdapter rootAdapter, @NonNull ChildAdapterSupplier childAdapterSupplier) {
         mRootAdapter = rootAdapter;
+        mRootSubAdapter = new SubAdapter(rootAdapter, new SubAdapter.HolderTransform() {
+            @Override
+            public int apply(int outerPosition) {
+                return outerToRoot(outerPosition);
+            }
+        });
+        mChildAdapterSupplier = childAdapterSupplier;
     }
-
-    @NonNull
-    protected abstract PowerAdapter getChildAdapter(int position);
 
     /** Returns the parcelable state of the adapter. */
     @NonNull
@@ -104,47 +135,37 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
      * PowerAdapter#hasStableIds()}
      */
     public void restoreInstanceState(@Nullable Parcelable parcelable) {
-        if (parcelable != null) {
-            mState = (TreeState) parcelable;
-            applyExpandedState();
-        }
+        mState = parcelable instanceof TreeState ? (TreeState) parcelable : new TreeState();
+        rebuildAllEntriesAndRangeTable();
+        updateEntryAdapters();
     }
 
-    private void applyExpandedState() {
-        if (mRootAdapter.hasStableIds() && !mState.isEmpty()) {
-            for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
-                long itemId = mRootAdapter.getItemId(i);
-                if (itemId != NO_ID) {
-                    setExpanded(i, mState.isExpanded(itemId));
-                }
-            }
-        }
+    public boolean isAutoExpand() {
+        return mAutoExpand;
+    }
+
+    public void setAutoExpand(boolean autoExpand) {
+        mAutoExpand = autoExpand;
     }
 
     public boolean isExpanded(int position) {
-        return mEntries.get(position) != null;
+        if (mRootAdapter.hasStableIds()) {
+            return mState.isExpanded(mRootAdapter.getItemId(position));
+        }
+        Entry entry = mEntries.get(position);
+        return entry != null && entry.getAdapter() != null;
     }
 
     public void setExpanded(int position, boolean expanded) {
-        Entry entry = mEntries.get(position);
-        long itemId = mRootAdapter.getItemId(position);
-        if (expanded) {
-            if (entry == null) {
-                entry = new Entry(getChildAdapter(position));
-                mEntries.put(position, entry);
-                mState.setExpanded(itemId, true);
-                invalidateGroups();
-                notifyItemRangeInserted(rootToOuter(position) + 1, entry.getItemCount());
-                entry.updateObserver();
-            }
-        } else {
-            if (entry != null) {
-                int preDisposeItemCount = entry.getItemCount();
-                entry.dispose();
-                mEntries.remove(position);
-                mState.setExpanded(itemId, false);
-                invalidateGroups();
-                notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
+        if (mRootAdapter.hasStableIds()) {
+            long itemId = mRootAdapter.getItemId(position);
+            mState.setExpanded(itemId, expanded);
+        }
+        if (position < mEntries.size()) {
+            Entry entry = mEntries.get(position);
+            boolean alreadyExpanded = entry.getAdapter() != null;
+            if (expanded != alreadyExpanded) {
+                entry.setAdapter(expanded ? getChildAdapter(position) : null);
             }
         }
     }
@@ -156,177 +177,75 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
     }
 
     public void setAllExpanded(boolean expanded) {
-        ArrayList<Runnable> notifications = new ArrayList<>();
-        if (!expanded) {
-            for (int i = 0; i < mEntries.size(); i++) {
-                Entry entry = mEntries.valueAt(i);
-                final int position = entry.getPosition();
-                final int preDisposeItemCount = entry.getItemCount();
-                entry.dispose();
-                notifications.add(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyItemRangeRemoved(rootToOuter(position) + 1, preDisposeItemCount);
-                    }
-                });
-            }
-            mEntries.clear();
-            mState.clear();
-        } else {
-            int rootItemCount = mRootAdapter.getItemCount();
-            for (int position = 0; position < rootItemCount; position++) {
-                Entry entry = mEntries.get(position);
-                long itemId = mRootAdapter.getItemId(position);
-                if (entry == null) {
-                    entry = new Entry(getChildAdapter(position));
-                    mEntries.put(position, entry);
-                    mState.setExpanded(itemId, true);
-                    final int itemCount = entry.getItemCount();
-                    final int finalPosition = position;
-                    notifications.add(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyItemRangeInserted(rootToOuter(finalPosition) + 1, itemCount);
-                        }
-                    });
-                }
-            }
-        }
-        updateEntryObservers();
-        invalidateGroups();
-        for (Runnable runnable : notifications) {
-            runnable.run();
+        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+            setExpanded(i, expanded);
         }
     }
 
     @NonNull
-    private OffsetAdapter adapterForPosition(int outerPosition) {
-        return groupForPosition(outerPosition).adapter(outerPosition);
+    private PowerAdapter getChildAdapter(int position) {
+        return mChildAdapterSupplier.get(position);
     }
 
-    private void invalidateGroups() {
-        mDirty = true;
-        rebuildGroupsIfNecessary();
-        applyExpandedState();
-    }
-
-    private void rebuildGroupsIfNecessary() {
-        if (mDirty) {
-            for (int i = 0; i < mGroups.size(); i++) {
-                mGroupPool.release(mGroups.valueAt(i));
-            }
-            mGroups.clear();
-            int outerStart = 0;
-            int rootStart = 0;
-            int i = 0;
-            int rootItemCount = mRootAdapter.getItemCount();
-            while (i < rootItemCount) {
-                Group group = mGroupPool.obtain();
-                group.set(i, outerStart, rootStart);
-                mGroups.put(outerStart, group);
-                Entry entry = mEntries.get(i);
-                if (entry != null) {
-                    int entryItemCount = entry.getItemCount();
-                    entry.mGroup = group;
-                    outerStart += entryItemCount;
-                    rootStart += entryItemCount;
-                }
-                outerStart++;
-                i++;
-            }
-            mDirty = false;
+    @Override
+    public int getItemCount() {
+        if (getObserverCount() <= 0) {
+            return 0;
         }
-    }
-
-    @NonNull
-    private Group groupForPosition(int outerPosition) {
-        rebuildGroupsIfNecessary();
-        int totalItemCount = getItemCount();
-        if (outerPosition >= totalItemCount) {
-            throw new ArrayIndexOutOfBoundsException(format("Index: %d, total size: %d", outerPosition, totalItemCount));
+        if (mEntries.size() == 0) {
+            return 0;
         }
-        int groupPosition = mGroups.indexOfKey(outerPosition);
-        Group group;
-        if (groupPosition >= 0) {
-            group = mGroups.valueAt(groupPosition);
-        } else {
-            group = mGroups.valueAt(-groupPosition - 2);
-        }
-        return group;
+        Entry entry = mEntries.get(mEntries.size() - 1);
+        return entry.getOffset() + entry.getItemCount();
     }
 
-    @NonNull
-    private PowerAdapter adapterForViewType(@NonNull ViewType viewType) {
-        PowerAdapter adapter = mAdaptersByViewType.get(viewType);
-        return adapter != null ? adapter : mRootAdapter;
-    }
-
-    private int rootToOuter(int rootPosition) {
-        rebuildGroupsIfNecessary();
-        if (mGroups.size() == 0) {
-            return rootPosition;
-        }
-        return mGroups.valueAt(rootPosition).getOuterStart();
-    }
-
-    private int outerToRoot(int outerPosition) {
-        return outerPosition - groupForPosition(outerPosition).getRootStart();
-    }
-
-    /**
-     * By default returns {@code false}, because we don't know all our adapters ahead of time, so can't assume they're
-     * stable.
-     */
+    /** We don't know all our adapters ahead of time, so can't assume they're stable. */
     @Override
     public boolean hasStableIds() {
         return false;
     }
 
     @Override
-    public final int getItemCount() {
-        rebuildGroupsIfNecessary();
-        if (mGroups.size() == 0) {
-            return 0;
-        }
-        Group group = mGroups.valueAt(mGroups.size() - 1);
-        return group.getOuterStart() + group.size();
+    public long getItemId(int position) {
+        return outerToAdapter(position).getItemId(position);
     }
 
     @Override
-    public final long getItemId(int position) {
-        return adapterForPosition(position).getItemId(position);
-    }
-
-    @Override
-    public final boolean isEnabled(int position) {
-        return adapterForPosition(position).isEnabled(position);
+    public boolean isEnabled(int position) {
+        return outerToAdapter(position).isEnabled(position);
     }
 
     @NonNull
     @Override
-    public final ViewType getItemViewType(int position) {
-        OffsetAdapter offsetAdapter = adapterForPosition(position);
-        ViewType viewType = offsetAdapter.getViewType(position);
-        mAdaptersByViewType.put(viewType, offsetAdapter.mAdapter);
+    public Object getItemViewType(int position) {
+        PowerAdapter adapter = outerToAdapter(position);
+        Object viewType = adapter.getItemViewType(position);
+        mAdaptersByViewType.put(viewType, adapter);
         return viewType;
     }
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return adapterForViewType(viewType).newView(parent, viewType);
     }
 
     @Override
-    public final void bindView(@NonNull View view, @NonNull Holder holder) {
-        adapterForPosition(holder.getPosition()).bindView(view, holder);
+    public void bindView(@NonNull View view, @NonNull Holder holder) {
+        outerToAdapter(holder.getPosition()).bindView(view, holder);
     }
 
     @CallSuper
     @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
+        int insertCount = mRootAdapter.getItemCount();
         mRootAdapter.registerDataObserver(mRootDataObserver);
+        rebuildAllEntriesAndRangeTable();
+        if (insertCount > 0) {
+            notifyItemRangeInserted(0, insertCount);
+        }
+        updateEntryAdapters();
         updateEntryObservers();
     }
 
@@ -338,264 +257,206 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         updateEntryObservers();
     }
 
+    private void addEntry(int position) {
+        Entry entry = new Entry();
+        mEntries.add(position, entry);
+    }
+
+    private int removeEntry(int position) {
+        Entry entry = mEntries.remove(position);
+        // Includes root item.
+        int itemCount = entry.getItemCount();
+        entry.dispose();
+        return itemCount;
+    }
+
+    private void moveEntries(int fromPosition, int toPosition, int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("count <= 0");
+        }
+        if (fromPosition < toPosition) {
+            for (int j = count - 1; j >= 0; j--) {
+                for (int i = fromPosition + j; i < toPosition + j; i++) {
+                    swap(mEntries, i, i + 1);
+                }
+            }
+        } else {
+            for (int j = count - 1; j >= 0; j--) {
+                for (int i = fromPosition + j; i > toPosition + j; i--) {
+                    swap(mEntries, i, i - 1);
+                }
+            }
+        }
+    }
+
+    private void rebuildAllEntriesAndRangeTable() {
+        mEntries.clear();
+        for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
+            mEntries.add(new Entry());
+        }
+        rebuildRangeTable();
+    }
+
+    private void rebuildRangeTable() {
+        mRangeTable.rebuild(mShadowRangeClient);
+    }
+
+    private void updateEntryAdapters() {
+        for (int i = 0; i < mEntries.size(); i++) {
+            mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
+        }
+    }
+
     private void updateEntryObservers() {
         for (int i = 0; i < mEntries.size(); i++) {
-            mEntries.valueAt(i).updateObserver();
+            mEntries.get(i).updateObserver();
         }
+    }
+
+    private boolean shouldExpand(int rootPosition) {
+        // Expand if either:
+        // - Auto expand is enabled
+        // - The saved state indicates this root position is expanded, and the root adapter has stable ids
+        return mAutoExpand || mRootAdapter.hasStableIds() &&
+                rootPosition < mRootAdapter.getItemCount() &&
+                mState.isExpanded(mRootAdapter.getItemId(rootPosition));
+    }
+
+    @NonNull
+    private PowerAdapter outerToAdapter(int outerPosition) {
+        int entryIndex = mRangeTable.findPosition(outerPosition);
+        Entry entry = mEntries.get(entryIndex);
+        if (entry.getItemCount() <= 0) {
+            throw new AssertionError();
+        }
+        if (outerPosition - entry.getOffset() == 0) {
+            mRootSubAdapter.setOffset(entry.getOffset() - entryIndex);
+            return mRootSubAdapter;
+        }
+        return entry.mAdapter;
+    }
+
+    @NonNull
+    private PowerAdapter adapterForViewType(@NonNull Object viewType) {
+        PowerAdapter adapter = mAdaptersByViewType.get(viewType);
+        return adapter != null ? adapter : mRootAdapter;
+    }
+
+    private int outerToRoot(int outerPosition) {
+        int entryIndex = mRangeTable.findPosition(outerPosition);
+        Entry entry = mEntries.get(entryIndex);
+        return outerPosition - (entry.getOffset() - entryIndex);
+    }
+
+    private int rootToOuter(int rootPosition) {
+        return mEntries.get(rootPosition).getOffset();
     }
 
     private final class Entry {
 
         @NonNull
-        private final DataObserver mDataObserver = new SimpleDataObserver() {
+        private final DataObserver mDataObserver = new DataObserver() {
             @Override
             public void onChanged() {
-                invalidateGroups();
+                mShadowItemCount = mAdapter.getItemCount();
+                rebuildRangeTable();
                 notifyDataSetChanged();
             }
 
             @Override
             public void onItemRangeChanged(int positionStart, int itemCount) {
-                invalidateGroups();
-                notifyItemRangeChanged(entryToOuter(positionStart), itemCount);
+                notifyItemRangeChanged(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
-                invalidateGroups();
-                notifyItemRangeInserted(entryToOuter(positionStart), itemCount);
+                mShadowItemCount += itemCount;
+                rebuildRangeTable();
+                notifyItemRangeInserted(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeRemoved(int positionStart, int itemCount) {
-                invalidateGroups();
-                notifyItemRangeRemoved(entryToOuter(positionStart), itemCount);
+                mShadowItemCount -= itemCount;
+                rebuildRangeTable();
+                notifyItemRangeRemoved(positionStart, itemCount);
             }
 
             @Override
             public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                invalidateGroups();
-                notifyItemRangeMoved(entryToOuter(fromPosition), entryToOuter(toPosition), itemCount);
+                notifyItemRangeMoved(fromPosition, toPosition, itemCount);
             }
         };
 
         @NonNull
-        private final Transform mTransform = new Transform() {
-            @Override
-            public int transform(int position) {
-                return outerToEntry(position);
-            }
-        };
+        private final DelegateAdapter mDelegateAdapter;
+
+        @NonNull
+        private final SubAdapter mAdapter;
+
+        private boolean mObserving;
+
+        private int mShadowItemCount;
+
+        private int mOffset;
+
+        Entry() {
+            mDelegateAdapter = new DelegateAdapter();
+            mAdapter = new SubAdapter(mDelegateAdapter);
+            updateObserver();
+        }
+
+        void setAdapter(@Nullable PowerAdapter adapter) {
+            mDelegateAdapter.setDelegate(adapter);
+        }
 
         @Nullable
-        private DataObserver mRegisteredDataObserver;
-
-        @NonNull
-        private final PowerAdapter mAdapter;
-
-        @NonNull
-        private Group mGroup;
-
-        Entry(@NonNull PowerAdapter adapter) {
-            mAdapter = adapter;
-            // Only register child observer if parent has at least 1 observer.
-//            if (getObserverCount() > 0) {
-//                registerObserversIfNecessary();
-//            }
+        PowerAdapter getAdapter() {
+            return mDelegateAdapter.getDelegate();
         }
 
-        int entryToOuter(int entryPosition) {
-            return mGroup.entryToOuter(entryPosition);
+        int getOffset() {
+            return mOffset;
         }
 
-        int outerToEntry(int outerPosition) {
-            return groupForPosition(outerPosition).outerToEntry(outerPosition);
-        }
-
-        void updateObserver() {
-            if (getObserverCount() > 0) {
-                registerObserversIfNecessary();
-            } else {
-                unregisterObserversIfNecessary();
-            }
-        }
-
-        void registerObserversIfNecessary() {
-            if (mRegisteredDataObserver == null) {
-                mRegisteredDataObserver = mDataObserver;
-                mAdapter.registerDataObserver(mDataObserver);
-            }
-        }
-
-        void unregisterObserversIfNecessary() {
-            DataObserver observer = mRegisteredDataObserver;
-            if (observer != null) {
-                mRegisteredDataObserver = null;
-                mAdapter.unregisterDataObserver(observer);
-            }
-        }
-
-        int getPosition() {
-            return mGroup.getPosition();
+        void setOffset(int offset) {
+            mOffset = offset;
+            mAdapter.setOffset(offset + 1);
         }
 
         int getItemCount() {
-            return mAdapter.getItemCount();
+            if (!mObserving) {
+                return 0;
+            }
+            return mShadowItemCount + 1;
+        }
+
+        void updateObserver() {
+            boolean observe = getObserverCount() > 0;
+            if (observe != mObserving) {
+                if (mObserving) {
+                    mAdapter.unregisterDataObserver(mDataObserver);
+                    mShadowItemCount = 0;
+                }
+                mObserving = observe;
+                if (mObserving) {
+                    mShadowItemCount = mAdapter.getItemCount();
+                    mAdapter.registerDataObserver(mDataObserver);
+                }
+            }
         }
 
         void dispose() {
-            unregisterObserversIfNecessary();
-        }
-    }
-
-    private static final class OffsetAdapter {
-
-        @NonNull
-        private final WeakHashMap<Holder, OffsetHolder> mHolders = new WeakHashMap<>();
-
-        private PowerAdapter mAdapter;
-        private Transform mTransform;
-        private int mOffset;
-
-        @NonNull
-        OffsetAdapter set(@NonNull PowerAdapter adapter, @NonNull Transform transform, int offset) {
-            mAdapter = adapter;
-            mTransform = transform;
-            mOffset = offset;
-            return this;
-        }
-
-        long getItemId(int position) {
-            return mAdapter.getItemId(position - mOffset);
-        }
-
-        boolean isEnabled(int position) {
-            return mAdapter.isEnabled(position - mOffset);
-        }
-
-        @NonNull
-        View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-            return mAdapter.newView(parent, viewType);
-        }
-
-        void bindView(@NonNull View view, @NonNull Holder holder) {
-            OffsetHolder offsetHolder = mHolders.get(holder);
-            if (offsetHolder == null) {
-                offsetHolder = new OffsetHolder(holder);
-                mHolders.put(holder, offsetHolder);
+            if (mObserving) {
+                mAdapter.unregisterDataObserver(mDataObserver);
+                mShadowItemCount = 0;
+                mObserving = false;
             }
-            offsetHolder.transform = mTransform;
-            offsetHolder.offset = mOffset;
-            mAdapter.bindView(view, offsetHolder);
-        }
-
-        @NonNull
-        ViewType getViewType(int position) {
-            return mAdapter.getItemViewType(position - mOffset);
-        }
-
-        private static final class OffsetHolder extends HolderWrapper {
-
-            Transform transform;
-            int offset;
-
-            OffsetHolder(@NonNull Holder holder) {
-                super(holder);
-            }
-
-            @Override
-            public int getPosition() {
-                return transform.transform(super.getPosition());
-            }
-        }
-    }
-
-    private interface Transform {
-        int transform(int position);
-    }
-
-    private final class GroupPool {
-
-        @NonNull
-        private final ArrayList<Group> mGroups = new ArrayList<>();
-
-        @NonNull
-        Group obtain() {
-            if (mGroups.isEmpty()) {
-                return new Group();
-            }
-            return mGroups.remove(mGroups.size() - 1);
-        }
-
-        void release(@NonNull Group group) {
-            mGroups.add(group);
-        }
-    }
-
-    private final class Group {
-
-        private int mPosition;
-        private int mOuterStart;
-        private int mRootStart;
-
-        @NonNull
-        Group set(int position, int outerStart, int rootStart) {
-            mPosition = position;
-            mOuterStart = outerStart;
-            mRootStart = rootStart;
-            return this;
-        }
-
-        int entryToOuter(int entryPosition) {
-            return getEntryStart() + entryPosition;
-        }
-
-        int outerToEntry(int outerPosition) {
-            return outerPosition - getEntryStart();
-        }
-
-        /** Index of this group within the collection. */
-        int getPosition() {
-            return mPosition;
-        }
-
-        /** Offset of this group in outer adapter coordinate space. */
-        int getOuterStart() {
-            return mOuterStart;
-        }
-
-        /** Offset of this group in the root adapter coordinate space. */
-        int getRootStart() {
-            return mRootStart;
-        }
-
-        int getEntryStart() {
-            return mOuterStart + 1;
-        }
-
-        int size() {
-            int size = 1;
-            Entry entry = mEntries.get(getPosition());
-            if (entry != null) {
-                size += entry.getItemCount();
-            }
-            return size;
-        }
-
-        @NonNull
-        OffsetAdapter adapter(int outerPosition) {
-            // Does this outer position map to the root adapter?
-            if (outerPosition - getOuterStart() == 0) {
-                return mOffsetAdapter.set(mRootAdapter, mRootTransform, getRootStart());
-            }
-            // Outer position maps to the child adapter.
-            Entry entry = mEntries.get(getPosition());
-            return mOffsetAdapter.set(entry.mAdapter, entry.mTransform, getEntryStart());
         }
 
         @Override
         public String toString() {
-            return format("%s (%s)", mPosition, size());
+            return "[offset: " + getOffset() + ", count: " + getItemCount()  + "]";
         }
     }
 
@@ -661,5 +522,10 @@ public abstract class TreeAdapter extends AbstractPowerAdapter {
         public void writeToParcel(@NonNull Parcel parcel, int flags) {
             parcel.writeSerializable(mExpanded);
         }
+    }
+
+    public interface ChildAdapterSupplier {
+        @NonNull
+        PowerAdapter get(int position);
     }
 }

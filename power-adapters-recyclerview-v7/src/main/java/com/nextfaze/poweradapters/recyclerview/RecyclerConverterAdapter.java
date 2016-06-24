@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.ViewType;
 import lombok.NonNull;
 
 import java.util.HashSet;
@@ -25,26 +24,33 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     private final DataObserver mDataSetObserver = new DataObserver() {
         @Override
         public void onChanged() {
+            mShadowItemCount = mPowerAdapter.getItemCount();
             notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
+            validateItemCount();
             notifyItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
+            mShadowItemCount += itemCount;
+            validateItemCount();
             notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
+            mShadowItemCount -= itemCount;
+            validateItemCount();
             notifyItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            validateItemCount();
             if (itemCount == 1) {
                 notifyItemMoved(fromPosition, toPosition);
             } else {
@@ -55,12 +61,15 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     };
 
     @NonNull
-    private final Map<ViewType, Integer> mViewTypeObjectToInt = new ArrayMap<>();
+    private final Map<Object, Integer> mViewTypeObjectToInt = new ArrayMap<>();
 
     @NonNull
-    private final Map<Integer, ViewType> mViewTypeIntToObject = new ArrayMap<>();
+    private final Map<Integer, Object> mViewTypeIntToObject = new ArrayMap<>();
 
     private int mNextViewTypeInt;
+
+    /** Used to track the expected number of items, based on incoming notifications. */
+    private int mShadowItemCount;
 
     RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
@@ -79,7 +88,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
 
     @Override
     public int getItemViewType(int position) {
-        ViewType viewType = mPowerAdapter.getItemViewType(position);
+        Object viewType = mPowerAdapter.getItemViewType(position);
         Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
         if (viewTypeInt == null) {
             viewTypeInt = mNextViewTypeInt++;
@@ -103,6 +112,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     public void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.registerAdapterDataObserver(observer);
         if (mAdapterDataObservers.add(observer) && mAdapterDataObservers.size() == 1) {
+            mShadowItemCount = mPowerAdapter.getItemCount();
             mPowerAdapter.registerDataObserver(mDataSetObserver);
         }
     }
@@ -112,6 +122,24 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         super.unregisterAdapterDataObserver(observer);
         if (mAdapterDataObservers.remove(observer) && mAdapterDataObservers.size() == 0) {
             mPowerAdapter.unregisterDataObserver(mDataSetObserver);
+            mShadowItemCount = 0;
+        }
+    }
+
+    int getObserverCount() {
+        return mAdapterDataObservers.size();
+    }
+
+    /**
+     * Check the item count by comparing with our shadow count. If they don't match, there's a good chance {@link
+     * RecyclerView} will crash later on. By doing it aggressively ourselves, we can catch a poorly-behaved {@link
+     * PowerAdapter} early.
+     */
+    private void validateItemCount() {
+        int itemCount = mPowerAdapter.getItemCount();
+        if (mShadowItemCount != itemCount) {
+            throw new IllegalStateException("Inconsistency detected: expected item count " +
+                    mShadowItemCount + " but it is " + itemCount);
         }
     }
 
@@ -121,7 +149,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
             @Override
             public int getPosition() {
-                return getAdapterPosition();
+                return getLayoutPosition();
             }
         };
 

@@ -10,19 +10,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.Toast;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.nextfaze.powerdata.widget.DataLayout;
+import butterknife.Unbinder;
+import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.data.Data;
+import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
 
 import static android.os.Looper.getMainLooper;
-import static android.view.View.INVISIBLE;
-import static android.view.View.VISIBLE;
+import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 abstract class BaseFragment extends Fragment {
 
@@ -32,14 +32,16 @@ abstract class BaseFragment extends Fragment {
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
 
-    @Bind(R.id.data_layout)
+    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @Bind(R.id.list)
-    ListView mListView;
-
-    @Bind(R.id.recycler)
+    @BindView(R.id.recycler)
     RecyclerView mRecyclerView;
+
+    @Nullable
+    private Data mData;
+
+    private Unbinder mUnbinder;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,16 +58,15 @@ abstract class BaseFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ButterKnife.bind(this, view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        mUnbinder = ButterKnife.bind(this, view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setAddDuration(ANIMATION_DURATION);
         animator.setRemoveDuration(ANIMATION_DURATION);
         animator.setChangeDuration(ANIMATION_DURATION);
         animator.setMoveDuration(ANIMATION_DURATION);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         mRecyclerView.setItemAnimator(animator);
         mDataLayout.setErrorFormatter(new SimpleErrorFormatter());
-        showCollectionView(CollectionView.LIST_VIEW);
     }
 
     @Override
@@ -75,67 +76,43 @@ abstract class BaseFragment extends Fragment {
         // if your adapter and/or data instance out-live the view hierarchy, which is a common occurrence.
         // Try commenting-out the following line to trigger LeakCanary for a demonstration of this scenario.
         mRecyclerView.setAdapter(null);
-        ButterKnife.unbind(this);
+        mUnbinder.unbind();
         super.onDestroyView();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.add("Reload").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onReloadClick();
-                return true;
-            }
+        menu.add("Reload").setOnMenuItemClickListener(item -> {
+            onReloadClick();
+            return true;
         });
-        menu.add("Refresh").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onRefreshClick();
-                return true;
-            }
+        menu.add("Refresh").setOnMenuItemClickListener(item -> {
+            onRefreshClick();
+            return true;
         });
-        menu.add("Invalidate").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onInvalidateClick();
-                return true;
-            }
+        menu.add("Invalidate").setOnMenuItemClickListener(item -> {
+            onInvalidateClick();
+            return true;
         });
+    }
+
+    void setAdapter(@NonNull PowerAdapter adapter) {
+        mRecyclerView.setAdapter(toRecyclerAdapter(adapter));
+    }
+
+    void setData(@NonNull Data<?> data) {
+        mData = data;
+        mDataLayout.setData(data);
     }
 
     void scrollToEnd() {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mListView.smoothScrollToPosition(mListView.getCount() - 1);
-                mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
-            }
-        }, SCROLL_TO_END_DELAY);
-    }
-
-    void showCollectionView(@NonNull CollectionView collectionView) {
-        switch (collectionView) {
-            case LIST_VIEW:
-                mListView.setVisibility(VISIBLE);
-                mRecyclerView.setVisibility(INVISIBLE);
-                break;
-
-            case RECYCLER_VIEW:
-                mListView.setVisibility(INVISIBLE);
-                mRecyclerView.setVisibility(VISIBLE);
-                break;
-        }
+        mHandler.postDelayed(() ->
+                mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1), SCROLL_TO_END_DELAY);
     }
 
     void showToast(@NonNull String msg) {
         Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @NonNull
-    SampleApplication getSampleApplication() {
-        return (SampleApplication) getActivity().getApplication();
     }
 
     void onReloadClick() {
@@ -145,9 +122,5 @@ abstract class BaseFragment extends Fragment {
     }
 
     void onInvalidateClick() {
-    }
-
-    enum CollectionView {
-        LIST_VIEW, RECYCLER_VIEW
     }
 }

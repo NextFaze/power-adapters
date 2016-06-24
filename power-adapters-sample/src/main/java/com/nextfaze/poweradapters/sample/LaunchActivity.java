@@ -3,19 +3,16 @@ package com.nextfaze.poweradapters.sample;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
-import com.nextfaze.poweradapters.binding.BindingAdapter;
-import com.nextfaze.poweradapters.binding.Mapper;
-import com.nextfaze.poweradapters.binding.PolymorphicMapperBuilder;
-import com.nextfaze.poweradapters.binding.TypedBinder;
+import com.nextfaze.poweradapters.binding.ListBindingAdapter;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
@@ -23,54 +20,33 @@ import lombok.experimental.Accessors;
 import java.util.List;
 
 import static com.nextfaze.poweradapters.PowerAdapters.toListAdapter;
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
 public final class LaunchActivity extends AppCompatActivity {
 
     @NonNull
-    private final List<? extends Sample> mSamples = ImmutableList.of(
-            new Sample("Simple", SimpleFragment.class),
+    private final List<Sample> mSamples = ImmutableList.of(
+            new Sample("Limit", LimitFragment.class),
             new Sample("Multiple Bindings", MultipleBindingsFragment.class),
             new Sample("Auto Incremental", AutoIncrementalFragment.class),
             new Sample("Manual Incremental", ManualIncrementalFragment.class),
-            new Sample("Long-Lived Data", LongLivedDataFragment.class),
             new Sample("Concatenation", ConcatFragment.class),
             new Sample("File Tree", FileTreeFragment.class)
     );
 
     @NonNull
-    private final Binder mSampleBinder = new TypedBinder<Sample, TextView>(android.R.layout.simple_list_item_1) {
+    private final Binder<Sample, TextView> mSampleBinder = new AbstractBinder<Sample, TextView>(android.R.layout.simple_list_item_1) {
         @Override
-        protected void bind(@NonNull final Sample sample, @NonNull TextView v, @NonNull Holder holder) {
+        public void bindView(@NonNull final Sample sample, @NonNull TextView v, @NonNull Holder holder) {
             v.setText(sample.getName());
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onSampleClick(sample);
-                }
-            });
+            v.setOnClickListener(v1 -> onSampleClick(sample));
         }
     };
 
     @NonNull
-    private final Mapper mMapper = new PolymorphicMapperBuilder()
-            .bind(Sample.class, mSampleBinder)
-            .build();
+    private final PowerAdapter mAdapter = new ListBindingAdapter<>(singletonMapper(mSampleBinder), mSamples);
 
-    @NonNull
-    private final PowerAdapter mAdapter = new BindingAdapter(mMapper) {
-        @Override
-        public int getItemCount() {
-            return mSamples.size();
-        }
-
-        @NonNull
-        @Override
-        protected Object getItem(int position) {
-            return mSamples.get(position);
-        }
-    };
-
-    @Bind(R.id.launch_activity_list)
+    @BindView(R.id.launch_activity_list)
     ListView mListView;
 
     @Override

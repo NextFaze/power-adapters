@@ -1,30 +1,55 @@
 package com.nextfaze.poweradapters.sample;
 
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.binding.TypedBinder;
+import com.nextfaze.poweradapters.binding.AbstractBinder;
 import lombok.NonNull;
 
-class NewsItemBinder extends TypedBinder<NewsItem, TextView> {
+import java.util.List;
 
-    NewsItemBinder() {
-        super(android.R.layout.simple_list_item_1);
+import static com.nextfaze.poweradapters.sample.Utils.showEditDialog;
+import static java.lang.Math.max;
+import static java.util.Collections.emptySet;
+
+class NewsItemBinder extends AbstractBinder<NewsItem, NewsItemView> {
+
+    @NonNull
+    private final List<Object> mList;
+
+    NewsItemBinder(@NonNull List<Object> list) {
+        super(R.layout.news_item_binder);
+        mList = list;
     }
 
     @Override
-    protected void bind(@NonNull final NewsItem newsItem, @NonNull final TextView v, @NonNull Holder holder) {
-        v.setText(newsItem.getTitle());
-        v.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onNewsItemClick(newsItem, v);
-            }
-        });
+    public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
+        v.setNewsItem(newsItem);
+        v.setTags(emptySet());
+        v.setOnClickListener(v1 -> onClick(v, holder.getPosition()));
+        v.setOnRemoveListener(count -> onRemove(holder.getPosition(), count));
+        v.setOnInsertBeforeListener(count -> onInsertBefore(holder.getPosition(), count));
+        v.setOnInsertAfterListener(count -> onInsertAfter(holder.getPosition(), count));
     }
 
-    void onNewsItemClick(@NonNull NewsItem newsItem, @NonNull View v) {
-        Toast.makeText(v.getContext(), "News item clicked: " + newsItem.getTitle(), Toast.LENGTH_SHORT).show();
+    private void onClick(@NonNull NewsItemView v, int position) {
+        showEditDialog(v.getContext(), mList, position);
+    }
+
+    private void onRemove(int position, int count) {
+        if (count == 1) {
+            mList.remove(position);
+        } else if (count > 1) {
+            int index = max(0, position - count / 2);
+            for (int i = 0; i < count && mList.size() > 0; i++) {
+                mList.remove(index);
+            }
+        }
+    }
+
+    private void onInsertBefore(int position, int count) {
+        mList.addAll(position, BlogPost.create(count));
+    }
+
+    private void onInsertAfter(int position, int count) {
+        mList.addAll(position + 1, BlogPost.create(count));
     }
 }

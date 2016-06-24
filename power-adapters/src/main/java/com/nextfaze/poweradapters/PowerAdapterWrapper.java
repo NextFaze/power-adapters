@@ -7,7 +7,7 @@ import lombok.NonNull;
 
 import java.util.WeakHashMap;
 
-public class PowerAdapterWrapper extends AbstractPowerAdapter {
+public class PowerAdapterWrapper extends PowerAdapter {
 
     @NonNull
     private final WeakHashMap<Holder, HolderWrapper> mHolders = new WeakHashMap<>();
@@ -79,7 +79,7 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
      */
     @NonNull
     @Override
-    public ViewType getItemViewType(int position) {
+    public Object getItemViewType(int position) {
         return mAdapter.getItemViewType(outerToInner(position));
     }
 
@@ -95,7 +95,7 @@ public class PowerAdapterWrapper extends AbstractPowerAdapter {
 
     @Override
     @NonNull
-    public View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
+    public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
         return mAdapter.newView(parent, viewType);
     }
 

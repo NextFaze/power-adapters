@@ -1,27 +1,24 @@
 package com.nextfaze.poweradapters.binding;
 
-import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import com.nextfaze.poweradapters.AbstractPowerAdapter;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.ViewType;
+import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
-import java.util.WeakHashMap;
-
-@Accessors(prefix = "m")
-public abstract class BindingAdapter extends AbstractPowerAdapter {
+public abstract class BindingAdapter extends PowerAdapter {
 
     @NonNull
-    private final WeakHashMap<ViewType, Binder> mBinders = new WeakHashMap<>();
+    private final BindingEngine mEngine;
 
-    @NonNull
-    private final Mapper mMapper;
-
-    public BindingAdapter(@NonNull Mapper mapper) {
-        mMapper = mapper;
+    protected BindingAdapter(@NonNull Mapper mapper) {
+        mEngine = new BindingEngine(mapper, new ItemAccessor() {
+            @NonNull
+            @Override
+            public Object get(int position) {
+                return getItem(position);
+            }
+        });
     }
 
     @NonNull
@@ -29,59 +26,33 @@ public abstract class BindingAdapter extends AbstractPowerAdapter {
 
     @NonNull
     @Override
-    public final View newView(@NonNull ViewGroup parent, @NonNull ViewType viewType) {
-        Binder binder = mBinders.get(viewType);
-        if (binder == null) {
-            // Should never happen, as callers are required to invoke getItemViewType(int) before invoking this method.
-            throw new AssertionError("No binder associated with view type");
-        }
-        return binder.newView(parent);
+    public final View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
+        return mEngine.newView(parent, viewType);
     }
 
     @Override
     public final void bindView(@NonNull View view, @NonNull Holder holder) {
-        int position = holder.getPosition();
-        Object item = getItem(position);
-        binderOrThrow(item, position).bindView(item, view, holder);
+        mEngine.bindView(view, holder);
     }
 
     @NonNull
     @Override
-    public final ViewType getItemViewType(int position) {
-        Object item = getItem(position);
-        Binder binder = binderOrThrow(item, position);
-        ViewType viewType = binder.getViewType(item, position);
-        mBinders.put(viewType, binder);
-        return viewType;
+    public final Object getItemViewType(int position) {
+        return mEngine.getItemViewType(position);
     }
 
     @Override
     public final boolean isEnabled(int position) {
-        Object item = getItem(position);
-        return binderOrThrow(item, position).isEnabled(item, position);
+        return mEngine.isEnabled(position);
     }
 
     @Override
     public final long getItemId(int position) {
-        Object item = getItem(position);
-        return binderOrThrow(item, position).getItemId(item, position);
+        return mEngine.getItemId(position);
     }
 
     @Override
-    public boolean hasStableIds() {
-        return mMapper.hasStableIds();
-    }
-
-    @NonNull
-    private Binder binderOrThrow(@NonNull Object item, int position) {
-        Binder binder = mMapper.getBinder(item, position);
-        assertBinder(binder, position, item);
-        return binder;
-    }
-
-    private void assertBinder(@Nullable Binder binder, int position, Object item) {
-        if (binder == null) {
-            throw new AssertionError("No binder for position " + position + ", item " + item);
-        }
+    public final boolean hasStableIds() {
+        return mEngine.hasStableIds();
     }
 }
