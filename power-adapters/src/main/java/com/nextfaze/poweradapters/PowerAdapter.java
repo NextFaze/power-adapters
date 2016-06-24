@@ -14,10 +14,16 @@ import java.util.Collection;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
 import static java.util.Arrays.asList;
 
+/**
+ * Base class for a composable, view-agnostic adapter.
+ * <p>
+ * A {@link PowerAdapter} is only required to publish items when at least one observer is registered. Therefore
+ * clients should always register an observer before accessing the contents of the adapter.
+ */
 @SuppressWarnings("WeakerAccess")
 public abstract class PowerAdapter {
 
-    /** An adapter with no elements. */
+    /** An adapter with no elements, which never changes. */
     public static final PowerAdapter EMPTY = new PowerAdapter() {
         @Override
         public int getItemCount() {
@@ -69,6 +75,7 @@ public abstract class PowerAdapter {
         }
     };
 
+    /** Used to indicate an item has no ID. */
     public static final int NO_ID = -1;
 
     @NonNull
@@ -114,9 +121,7 @@ public abstract class PowerAdapter {
 
     /**
      * Returns true if the item at the specified position is not a separator.
-     * (A separator is a non-selectable, non-clickable item).
-     * The result is unspecified if position is invalid. An {@link ArrayIndexOutOfBoundsException}
-     * should be thrown in that case for fast failure.
+     * (A separator is a non-selectable, non-clickable item). By default, returns true.
      * @param position Index of the item
      * @return True if the item is not a separator
      */
@@ -124,11 +129,34 @@ public abstract class PowerAdapter {
         return true;
     }
 
+    /**
+     * Create a new {@link View} of the specified view type, destined for the specified parent {@link ViewGroup}.
+     * @param parent The view group the constructed view will be added to.
+     * @param viewType The view type object.
+     * @return A new view that may be recycled for items of the same view type.
+     */
     @NonNull
     public abstract View newView(@NonNull ViewGroup parent, @NonNull Object viewType);
 
+    /**
+     * Binds the data associated with {@link Holder#getPosition()} to the specified view.
+     * Use {@link Holder#getPosition()} to access the position in the data set.
+     * @param view The view to bind.
+     * @param holder The holder object representing this binding to the view.
+     * @see Holder#getPosition()
+     */
     public abstract void bindView(@NonNull View view, @NonNull Holder holder);
 
+    /**
+     * Registers an observer with this adapter, to be notified of data set changes.
+     * <p>
+     * A {@link PowerAdapter} is only required to publish items once at least one observer is registered. Therefore
+     * clients should always register an observer before accessing the contents of the adapter.
+     * <p>
+     * Note that it is an error to register the same observer twice, and doing so may result in an
+     * {@link IllegalStateException}.
+     * @param dataObserver The observer to be registered.
+     */
     @CallSuper
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
         mDataObservable.registerObserver(dataObserver);
@@ -137,6 +165,14 @@ public abstract class PowerAdapter {
         }
     }
 
+    /**
+     * De-registers an observer from this adapter.
+     * <p>
+     * Note that it is an error to unregister the same observer twice, and doing so may result in an
+     * {@link IllegalStateException}.
+     * @param dataObserver The observer to be unregistered.
+     * @see #registerDataObserver(DataObserver)
+     */
     @CallSuper
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
         mDataObservable.unregisterObserver(dataObserver);
@@ -150,12 +186,18 @@ public abstract class PowerAdapter {
         return mDataObservable.getObserverCount();
     }
 
-    /** Called when the first observer has registered with this adapter. */
+    /**
+     * Called when the first observer has registered with this adapter.
+     * @see #registerDataObserver(DataObserver)
+     */
     @CallSuper
     protected void onFirstObserverRegistered() {
     }
 
-    /** Called when the last observer has unregistered from this adapter. */
+    /**
+     * Called when the last observer has unregistered from this adapter.
+     * @see #unregisterDataObserver(DataObserver)
+     */
     @CallSuper
     protected void onLastObserverUnregistered() {
     }
@@ -170,17 +212,6 @@ public abstract class PowerAdapter {
      * <p>
      * <p>This event does not specify what about the data set has changed, forcing
      * any observers to assume that all existing items and structure may no longer be valid.
-     * LayoutManagers will be forced to fully rebind and relayout all visible views.</p>
-     * <p>
-     * <p><code>RecyclerView</code> will attempt to synthesize visible structural change events
-     * for adapters that report that they have {@link #hasStableIds() stable IDs} when
-     * this method is used. This can help for the purposes of animation and visual
-     * object persistence but individual item views will still need to be rebound
-     * and relaid out.</p>
-     * <p>
-     * <p>If you are writing an adapter it will always be more efficient to use the more
-     * specific change events if you can. Rely on <code>notifyDataSetChanged()</code>
-     * as a last resort.</p>
      * @see #notifyItemChanged(int)
      * @see #notifyItemInserted(int)
      * @see #notifyItemRemoved(int)
@@ -270,6 +301,18 @@ public abstract class PowerAdapter {
         mDataObservable.notifyItemMoved(fromPosition, toPosition);
     }
 
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items reflected at <code>fromPosition</code>
+     * have been moved to <code>toPosition</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     * Does nothing if {@code itemCount} is zero.
+     * @param fromPosition Previous position of the items.
+     * @param toPosition New position of the items.
+     * @param itemCount The number of items moved.
+     */
     protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
         mDataObservable.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
     }
@@ -314,6 +357,12 @@ public abstract class PowerAdapter {
         return transformer.transform(this);
     }
 
+    /**
+     * Concatenates the specified adapters with this adapter, and returns the result.
+     * @param adapters The adapters to be prepended.
+     * @return The resulting composite adapter.
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull PowerAdapter... adapters) {
@@ -323,6 +372,13 @@ public abstract class PowerAdapter {
         return new ConcatAdapterBuilder().addAll(adapters).add(this).build();
     }
 
+    /**
+     * Concatenates the specified views with this adapter, and returns the result.
+     * @param views The views to be prepended.
+     * @return The resulting composite adapter.
+     * @see #prepend(PowerAdapter...)
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull ViewFactory... views) {
@@ -332,6 +388,14 @@ public abstract class PowerAdapter {
         return prepend(asAdapter(views));
     }
 
+    /**
+     * Concatenates the views represented by the specified layout resources with this adapter, and returns the result.
+     * @param layoutResources The layout resources that will be inflated and prepended to this adapter.
+     * @return The resulting composite adapter.
+     * @see ViewFactories#asViewFactory(int)
+     * @see #prepend(PowerAdapter...)
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull @LayoutRes int... layoutResources) {
@@ -341,6 +405,12 @@ public abstract class PowerAdapter {
         return prepend(asAdapter(layoutResources));
     }
 
+    /**
+     * Concatenates the specified adapters with this adapter, and returns the result.
+     * @param adapters The adapters to be appended.
+     * @return The resulting composite adapter.
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull PowerAdapter... adapters) {
@@ -350,6 +420,13 @@ public abstract class PowerAdapter {
         return new ConcatAdapterBuilder().add(this).addAll(adapters).build();
     }
 
+    /**
+     * Concatenates the specified views with this adapter, and returns the result.
+     * @param views The views to be appended.
+     * @return The resulting composite adapter.
+     * @see #prepend(PowerAdapter...)
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull ViewFactory... views) {
@@ -359,6 +436,14 @@ public abstract class PowerAdapter {
         return append(asAdapter(views));
     }
 
+    /**
+     * Concatenates the views represented by the specified layout resources with this adapter, and returns the result.
+     * @param layoutResources The layout resources that will be inflated and appended to this adapter.
+     * @return The resulting composite adapter.
+     * @see ViewFactories#asViewFactory(int)
+     * @see #prepend(PowerAdapter...)
+     * @see #concat(PowerAdapter...)
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull @LayoutRes int... layoutResources) {
@@ -368,24 +453,45 @@ public abstract class PowerAdapter {
         return append(asAdapter(layoutResources));
     }
 
+    /**
+     * Returns a new adapter that presents all items of this adapter, starting at the specified offset.
+     * @param offset The item offset.
+     * @return A new adapter.
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter offset(int offset) {
         if (offset <= 0) {
             return this;
         }
+        if (offset == Integer.MAX_VALUE) {
+            return EMPTY;
+        }
         return new OffsetAdapter(this, offset);
     }
 
+    /**
+     * Returns a new adapter that presents all items of this adapter, up until the specified limit.
+     * @param limit The item limit.
+     * @return A new adapter.
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter limit(int limit) {
         if (limit == Integer.MAX_VALUE) {
             return this;
         }
+        if (limit <= 0) {
+            return EMPTY;
+        }
         return new LimitAdapter(this, limit);
     }
 
+    /**
+     * Returns an adapter that presents the items of this adapter only while the specified condition evaluates to true.
+     * @param condition The condition dictating whether to show the items.
+     * @return A new adapter.
+     */
     @CheckResult
     @NonNull
     public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
@@ -399,6 +505,7 @@ public abstract class PowerAdapter {
         return new ConditionalAdapter(this, condition);
     }
 
+    /** Creates a composite adapter containing the items of all of the specified adapters in order. */
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull PowerAdapter... adapters) {
@@ -411,6 +518,7 @@ public abstract class PowerAdapter {
         return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
+    /** Creates a composite adapter containing the items of all of the specified adapters in order. */
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull Collection<? extends PowerAdapter> adapters) {
@@ -420,12 +528,14 @@ public abstract class PowerAdapter {
         return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
+    /** Creates a composite adapter containing the items of all of the specified adapters in order. */
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> adapters) {
         return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
+    /** Converts the specified fixed array of views to an adapter. */
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull ViewFactory... views) {
@@ -435,12 +545,14 @@ public abstract class PowerAdapter {
         return new ItemAdapter(ItemAdapter.toItems(asList(views)));
     }
 
+    /** Converts the specified fixed iterable of views to an adapter. */
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull Iterable<? extends ViewFactory> views) {
         return new ItemAdapter(ItemAdapter.toItems(views));
     }
 
+    /** Converts the specified fixed collection of views to an adapter. */
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull Collection<? extends ViewFactory> views) {
@@ -450,12 +562,14 @@ public abstract class PowerAdapter {
         return new ItemAdapter(ItemAdapter.toItems(views));
     }
 
+    /** Converts the specified fixed array of layout resources to an adapter. */
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
         return new ItemAdapter(toItems(resources));
     }
 
+    /** Represents an operation performed on a {@link PowerAdapter}. */
     public interface Transformer {
         @NonNull
         PowerAdapter transform(@NonNull PowerAdapter adapter);

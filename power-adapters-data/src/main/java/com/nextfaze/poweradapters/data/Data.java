@@ -332,6 +332,18 @@ public abstract class Data<T> implements Iterable<T> {
         mDataObservable.notifyItemMoved(fromPosition, toPosition);
     }
 
+    /**
+     * Notify any registered observers that the <code>itemCount</code> items reflected at <code>fromPosition</code>
+     * have been moved to <code>toPosition</code>.
+     * <p>
+     * <p>This is a structural change event. Representations of other existing items in the
+     * data set are still considered up to date and will not be rebound, though their
+     * positions may be altered.</p>
+     * Does nothing if {@code itemCount} is zero.
+     * @param fromPosition Previous position of the items.
+     * @param toPosition New position of the items.
+     * @param itemCount The number of items moved.
+     */
     protected final void notifyItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
         mDataObservable.notifyItemRangeMoved(fromPosition, toPosition, itemCount);
     }
