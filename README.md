@@ -212,7 +212,8 @@ Now hook up your `Data<Product>` instance with your `RecyclerView`:
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    mRecyclerView.setAdapter(new RecyclerDataAdapter(mProducts));
+    PowerAdapter adapter = new DataBindingAdapter(mProducts, mProductBinder);
+    mRecyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
 }
 
 @Override
@@ -278,13 +279,14 @@ Here's an example of how to declare a `DataLayout` in XML:
 </com.nextfaze.poweradapters.data.widget.DataLayout>
 ```
 
-Now you need to connect to your `DataLayout` and `ListView` in Java code:
+Now you need to connect to your `DataLayout` and `RecyclerView` in Java code:
 
 ```
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    mListView.setAdapter(new DataAdapter(mProducts));
+    PowerAdapter adapter = new DataBindingAdapter(mProducts, mProductBinder);
+    mListView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
     mDataLayout.setData(mProducts);
 }
 ```
@@ -295,7 +297,7 @@ An RxJava module is provided: `power-adapters-data-rx`. This is a simple adapter
 for properties of `Data`:
 
 ```
-RxData.changes(mProducts).subscribe(new Action1<InsertEvent>() {
+RxData.inserts(mProducts).subscribe(new Action1<InsertEvent>() {
     @Override
     public void call(InsertEvent event) {
         ...
@@ -305,12 +307,12 @@ RxData.changes(mProducts).subscribe(new Action1<InsertEvent>() {
 
 ### Data Views
 
-`Data` instances can be represented as a view, much like a relational database. The `Datas` utility class provides
-static factory methods for wrapping an existing `Data` object, and providing a filtered or transformed view of its contents.
+`Data` instances can be represented as a view, similar to a relational database. `Data` has fluent chaining methods for
+providing filtered, transformed, or sorted views of its contents:
 
 ```
 Data<String> names = ...
-Data<Integer> lengths = Datas.transform(names, new Function<String, Integer>() {
+Data<Integer> lengths = names.transform(new Function<String, Integer>() {
     @NonNull
     @Override
     public Integer apply(@NonNull String name) {
@@ -321,7 +323,7 @@ Data<Integer> lengths = Datas.transform(names, new Function<String, Integer>() {
 
 ```
 Data<Post> allPosts = ...
-Data<Post> todaysPosts = Datas.filter(names, new Predicate<Post>() {
+Data<Post> todaysPosts = names.filter(new Predicate<Post>() {
     @Override
     public boolean apply(@NonNull Post post) {
         return isToday(post.getDate());
