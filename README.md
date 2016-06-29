@@ -5,6 +5,7 @@
 - [Power Adapters](#power-adapters)
 - [Feature Summary](#feature-summary)
 - [Usage](#usage)
+  - [Basic](#basic)
   - [Adapter Composition](#adapter-composition)
   - [Data Type Binding](#data-type-binding)
     - [Binder](#binder)
@@ -56,6 +57,39 @@ Get it from Maven Central, using Gradle:
 
 ```groovy
 compile 'com.nextfaze.poweradapters:power-adapters:0.10.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.10.0'
+```
+
+## Basic
+
+```
+// Declare a binder for your item type
+class TweetHolder extends ViewHolder {
+
+    TextView textView;
+
+    TweetHolder(View view) {
+        super(view);
+        textView = (TextView) view.findViewById(R.id.text);
+    }
+}
+Binder<Tweet, View> tweetBinder = new ViewHolderBinder<Tweet, TweetHolder>(R.layout.tweet) {
+     @Override
+     protected TweetHolder newViewHolder(View v) {
+         return new TweetHolder(v);
+     }
+
+     @Override
+     protected void bindViewHolder(Tweet tweet, TweetHolder tweetHolder, Holder holder) {
+         tweetHolder.textView.setText(tweet.getText());
+     }
+};
+
+// Construct your "core" adapter
+ListBindingAdapter<Tweet> tweetsAdapter = new ListBindingAdapter<>(tweetBinder);
+
+// Assign to your RecyclerView
+recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 ```
 
 ## Adapter Composition
@@ -65,7 +99,7 @@ For example, say you want to present a list of tweets, with a loading indicator,
 are no tweets, you can write the following:
 
 ```
-PowerAdapter adapter = new TweetsAdapter()
+PowerAdapter adapter = tweetsAdapter
     .limit(10) // Only show up to 10 tweets
     .append(
         // Show empty item while no tweets have loaded
@@ -73,7 +107,7 @@ PowerAdapter adapter = new TweetsAdapter()
         // Show loading indicator while loading
         asAdapter(R.layout.loading_indicator).showOnlyWhile(tweetsAreLoading())
     )
-recyclerView.setAdapter(toRecyclerAdapter(adapter));
+recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
 ```
 
 This lets you write a simple `TweetAdapter` class, the only responsibility of which is to present tweets. By using
@@ -98,26 +132,24 @@ a `ViewHolderBinder`:
 
 ```
 Binder<BlogPost, View> blogPostBinder = new ViewHolderBinder<BlogPost, BlogPostHolder>(android.R.layout.simple_list_item_1) {
-    @NonNull
     @Override
-    protected BlogPostHolder newViewHolder(@NonNull View v) {
+    protected BlogPostHolder newViewHolder(View v) {
         return new BlogPostHolder(v);
     }
 
     @Override
-    protected void bindViewHolder(@NonNull BlogPost blogPost,
-                                  @NonNull BlogPostHolder blogPostHolder,
-                                  @NonNull Holder holder) {
+    protected void bindViewHolder(BlogPost blogPost,
+                                  BlogPostHolder blogPostHolder,
+                                  Holder holder) {
         blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
     }
 };
 
 class BlogPostHolder extends ViewHolder {
 
-    @NonNull
-    final TextView labelView;
+    TextView labelView;
 
-    BlogPostHolder(@NonNull View view) {
+    BlogPostHolder(View view) {
         super(view);
         labelView = (TextView) view.findViewById(android.R.id.text1);
     }
@@ -129,7 +161,7 @@ If you use custom views for each of your data models, use an `AbstractBinder`:
 ```
 Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.layout.tweet_item) {
     @Override
-    public void bindView(@NonNull Tweet tweet, @NonNull TweetView v, @NonNull Holder holder) {
+    public void bindView(Tweet tweet, TweetView v, Holder holder) {
         v.setTweet(tweet);
         v.setOnClickListener(v -> onTweetClick(tweet));
     }
@@ -190,11 +222,10 @@ The recommended usage pattern is to instantiate a `Data<T>` object in your retai
 ```
 public final class ProductListFragment extends Fragment {
 
-    private final Data<Product> mProducts = new ArrayData<>() {
-        @NonNull
+    private final Data<Product> products = new ArrayData<>() {
         @Override
         protected List<Product> load() throws Throwable {
-            return mApi.getProducts();
+            return api.getProducts();
         }
     };
 
@@ -212,8 +243,8 @@ Now hook up your `Data<Product>` instance with your `RecyclerView`:
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    PowerAdapter adapter = new DataBindingAdapter(mProducts, mProductBinder);
-    mRecyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
+    PowerAdapter adapter = new DataBindingAdapter(products, productBinder);
+    recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
 }
 
 @Override
@@ -221,7 +252,7 @@ public void onDestroyView() {
     super.onDestroyView();
     // Must nullify adapter, otherwise after a config change, RecyclerView will
     // be retained by a strong reference chain of observers.
-    mRecyclerView.setAdapter(null);
+    recyclerView.setAdapter(null);
 }
 ```
 
@@ -285,9 +316,9 @@ Now you need to connect to your `DataLayout` and `RecyclerView` in Java code:
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    PowerAdapter adapter = new DataBindingAdapter(mProducts, mProductBinder);
-    mListView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
-    mDataLayout.setData(mProducts);
+    PowerAdapter adapter = new DataBindingAdapter(products, productBinder);
+    listView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
+    dataLayout.setData(products);
 }
 ```
 
@@ -297,7 +328,7 @@ An RxJava module is provided: `power-adapters-data-rx`. This is a simple adapter
 for properties of `Data`:
 
 ```
-RxData.inserts(mProducts).subscribe(new Action1<InsertEvent>() {
+RxData.inserts(products).subscribe(new Action1<InsertEvent>() {
     @Override
     public void call(InsertEvent event) {
         ...
@@ -307,15 +338,13 @@ RxData.inserts(mProducts).subscribe(new Action1<InsertEvent>() {
 
 ### Data Views
 
-`Data` instances can be represented as a view, similar to a relational database. `Data` has fluent chaining methods for
-providing filtered, transformed, or sorted views of its contents:
+`Data` has fluent chaining methods for providing filtered, transformed, or sorted views of its contents:
 
 ```
 Data<String> names = ...
 Data<Integer> lengths = names.transform(new Function<String, Integer>() {
-    @NonNull
     @Override
-    public Integer apply(@NonNull String name) {
+    public Integer apply(String name) {
         return name.length;
     }
 });
@@ -325,7 +354,7 @@ Data<Integer> lengths = names.transform(new Function<String, Integer>() {
 Data<Post> allPosts = ...
 Data<Post> todaysPosts = names.filter(new Predicate<Post>() {
     @Override
-    public boolean apply(@NonNull Post post) {
+    public boolean apply(Post post) {
         return isToday(post.getDate());
     }
 });
