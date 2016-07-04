@@ -11,6 +11,7 @@
     - [Binder](#binder)
     - [Mapper](#mapper)
   - [Conversion](#conversion)
+  - [Nested Adapters](#nested-adapters)
   - [Asynchronous Data Loading](#asynchronous-data-loading)
     - [Basic Data Usage](#basic-data-usage)
     - [Invalidating and Reloading](#invalidating-and-reloading)
