@@ -34,15 +34,18 @@ object-oriented, reusable way of presenting collections of multiple types.
 
 This library provides the following features:
 
-* Show **headers** and **footers**
-* Show a **loading** to indicate a loading state
-* Show an **empty** item to indicate an empty underlying data set
+* Present **multiple data types** within an adapter in a **type-safe** manner
 * **Concatenate** multiple adapters together
+* Show **headers** and **footers**
+* Show a **loading indicator** to indicate a loading state
+* Show an **empty item** to indicate an empty underlying data set
 * Add **dividers** in between items of an existing adapter
 * Show an adapter or item range only when a **condition** evaluates to `true`
-* Present **multiple data types** within an adapter in a type-safe manner
 * Present **nested** adapters, a powerful substitute for `ExpandableListView` without any limitation of nesting level
 * Load from remote or slow data sources **asynchronously**
+* Backed up by **unit tests**, verifying the correct notifications are issued and state maintained
+* Minimal **dependencies**; doesn't include any unnecessary transitive dependencies
+* All adapters issue the correct insertion/removal/change notifications needed for full `RecyclerView` animation support
 
 Power adapters are compatible with the following collection view classes:
 * `android.support.v7.widget.RecyclerView`
@@ -195,6 +198,23 @@ Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke
 |`ListView`         |            `PowerAdapters.toListAdapter()`|None                                                       |
 |`RecyclerView`     |`RecyclerPowerAdapters.toRecyclerAdapter()`|`power-adapters-recyclerview-v7`                           |
 |`ViewPager`        |`SupportPowerAdapters.toPagerAdapter()`    |`power-adapters-support-v4`                                |
+
+## Nested Adapters
+
+The `TreeAdapter` class allows you to present hierarchical data structures with no intrinsic depth limit. Each layer is
+comprised of just another adapter - your children can themselves can be `TreeAdapter`s!
+
+```
+PowerAdapter rootAdapter = new FileAdapter(new File("/"));
+TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
+   @Override
+   public PowerAdapter get(int position) {
+       // Create a child adapter for this position in the root data set.
+       return createChildAdapter(position);
+   }
+});
+treeAdapter.setExpanded(15, true);
+```
 
 ## Asynchronous Data Loading
 
