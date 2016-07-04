@@ -389,7 +389,7 @@ Check the included sample project for a range of usage pattern examples.
 Building instructions:
 
 ```bash
-$ git clone <github_repo_url>
+$ git clone git@github.com:NextFaze/power-adapters.git
 $ cd power-adapters
 $ ./gradlew clean build
 
