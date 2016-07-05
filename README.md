@@ -119,6 +119,20 @@ This lets you write a simple `TweetAdapter` class, the only responsibility of wh
 easily. The use of `showOnlyWhile` applies a condition to the empty footer item, so it remains hidden unless the
 underlying list of tweets is empty.
 
+## Headers and Footers
+
+Headers and footers can be added using `prepend` and `append`:
+
+```
+// Prepend a header view.
+PowerAdapter adapter = tweetAdapter.prepend(R.layout.header);
+```
+
+```
+// Append a footer view.
+PowerAdapter adapter = tweetAdapter.append(R.layout.footer);
+```
+
 ## Data Type Binding
 
 Included in Power Adapters is the ability to bind elements in your data set to views in a reusable, readable, and
