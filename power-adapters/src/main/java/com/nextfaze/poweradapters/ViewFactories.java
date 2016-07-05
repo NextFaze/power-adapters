@@ -15,9 +15,9 @@ public final class ViewFactories {
     private ViewFactories() {
     }
 
-    @Deprecated
+    @CheckResult
     @NonNull
-    public static ViewFactory viewFactoryForResource(@LayoutRes final int layoutResource) {
+    public static ViewFactory asViewFactory(@LayoutRes final int layoutResource) {
         return new ViewFactory() {
             @NonNull
             @Override
@@ -25,11 +25,6 @@ public final class ViewFactories {
                 return layoutInflater(parent).inflate(layoutResource, parent, false);
             }
         };
-    }
-
-    @NonNull
-    public static ViewFactory asViewFactory(@LayoutRes int layoutResource) {
-        return viewFactoryForResource(layoutResource);
     }
 
     @CheckResult
@@ -47,25 +42,7 @@ public final class ViewFactories {
         };
     }
 
-    @Deprecated
-    @NonNull
-    public static ViewFactory viewFactoryForResource(@NonNull final LayoutInflater layoutInflater,
-                                                     @LayoutRes final int layoutResource) {
-        return new ViewFactory() {
-            @NonNull
-            @Override
-            public View create(@NonNull ViewGroup parent) {
-                return layoutInflater.inflate(layoutResource, parent, false);
-            }
-        };
-    }
-
-    @NonNull
-    public static ViewFactory asViewFactory(@NonNull LayoutInflater layoutInflater,
-                                            @LayoutRes int layoutResource) {
-        return viewFactoryForResource(layoutInflater, layoutResource);
-    }
-
+    @CheckResult
     @NonNull
     public static ViewFactory asViewFactory(@NonNull final LayoutInflater layoutInflater,
                                             @LayoutRes final int layoutResource,
