@@ -53,10 +53,16 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     @NonNull
     private final PowerAdapter mPowerAdapter;
 
+    private final int mViewTypeCount;
+
     private int mNextViewTypeInt;
 
-    ListAdapterConverterAdapter(@NonNull PowerAdapter powerAdapter) {
+    ListAdapterConverterAdapter(@NonNull PowerAdapter powerAdapter, int viewTypeCount) {
+        if (viewTypeCount < 1) {
+            throw new IllegalArgumentException("viewTypeCount must be at least 1");
+        }
         mPowerAdapter = powerAdapter;
+        mViewTypeCount = viewTypeCount;
     }
 
     @Override
@@ -113,8 +119,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public int getViewTypeCount() {
-        // HACK: We simply have to use a magic number here and hope we never exceed it.
-        return 100;
+        return mViewTypeCount;
     }
 
     @Override
