@@ -160,7 +160,11 @@ class BlogPostHolder extends ViewHolder {
 }
 ```
 
-If you use custom views for each of your data models, use an `AbstractBinder`:
+If you use custom views for each of your data models, use an `AbstractBinder`.
+The `AbstractBinder` constructor takes a layout resource or a `ViewFactory`.
+The view returned by the `ViewFactory` (or the root of the layout) is passed to subsequent `bindView` calls, saving you from writing a separate ViewHolder.
+
+For example:
 
 ```
 Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.layout.tweet_item) {
@@ -172,10 +176,10 @@ Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.la
 }
 ```
 
+
 ### Mapper
 
-The second class involved is the `Mapper`. It is consulted to determine which `Binder` to use for presenting a
-particular element in your data set. Typically you'll use `MapperBuilder` to declaratively assign your model classes to
+The examples above have all dealt with a single item type, and so there has only been a single `Binder`. When you want your list to contain multiple items, a `Mapper` is consulted to determine which `Binder` to use for presenting each particular item. Typically you'll use `MapperBuilder` to declaratively assign your model classes to
 binders:
 
 ```
@@ -192,7 +196,13 @@ adapter.add(new Video());
 
 ## Conversion
 
-Once you're ready to assign a `PowerAdapter` to a collection view, simply invoke one of the following conversion methods:
+PowerAdapter is designed to be used with different collection view implementations, so a final step is converting it to implement the expected adapter interface. This would usually be done as soon as the collection view is created, say in `onViewCreated`:
+
+```
+recyclerView.setAdapter(toRecyclerAdapter(powerAdapter));
+```
+
+The following conversion methods are provided:
 
 |Collection View    |Converter                                  |Extension Module                                           |
 |:------------------|------------------------------------------:|:---------------------------------------------------------:|
@@ -238,7 +248,7 @@ compile 'com.nextfaze.poweradapters:power-adapters-data:0.10.0'
 
 ### Basic Data Usage
 
-The recommended usage pattern is to instantiate a `Data<T>` object in your retained `Fragment`:
+The recommended usage pattern is to instantiate a `Data<T>` object in your retained `Fragment`. Subclassing `ArrayData` supports the simplest use case, fetching a list of things asynchronously:
 
 ```
 public final class ProductListFragment extends Fragment {
@@ -258,7 +268,7 @@ public final class ProductListFragment extends Fragment {
 }
 ```
 
-Now hook up your `Data<Product>` instance with your `RecyclerView`:
+Now hook up your `Data<Product>` instance and a `Binder` with your `RecyclerView`:
 
 ```
 @Override
@@ -288,11 +298,10 @@ items being reloaded from the source. See the `Data` javadoc for how they differ
 `DataLayout` aids in presenting the various states of a `Data` instance, by hiding and showing contents, empty, error,
 and loading child views.
 It's a `RelativeLayout` subclass, and it works by accepting a `Data` instance, then registering to receive change
-notifications. If the contents is empty, your marked empty view will be shown instead of the list view. If an error occurs,
-the error view will be shown until a reload is triggered. `DataLayout` has several extension points to customize this behaviour
-to suite the needs of your application.
+notifications. If the contents are empty, your marked empty view will be shown instead of the list view. If an error occurs,
+the error view will be shown until a reload is triggered. `DataLayout` has several extension points to customize this behaviour to suite the needs of your application.
 
-Here's an example of how to declare a `DataLayout` in XML:
+Here's an example of how to declare a `DataLayout` in XML. Notice the `layout_component` attributes:
 
 ```xml
 <com.nextfaze.poweradapters.data.widget.DataLayout
@@ -331,7 +340,7 @@ Here's an example of how to declare a `DataLayout` in XML:
 </com.nextfaze.poweradapters.data.widget.DataLayout>
 ```
 
-Now you need to connect to your `DataLayout` and `RecyclerView` in Java code:
+The `DataLayout` observes state changes of the `Data` to know when to update the view visibility. Connecting to your `DataLayout` and `RecyclerView` in Java code:
 
 ```
 @Override
