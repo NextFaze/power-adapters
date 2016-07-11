@@ -66,7 +66,7 @@ compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.10.0'
 
 ## Basic
 
-```
+```java
 // Declare a binder for your item type
 class TweetHolder extends ViewHolder {
 
@@ -102,7 +102,7 @@ Power Adapters can be composed by using the fluent chaining methods.
 For example, say you want to present a list of tweets, with a loading indicator, but show an empty message when there
 are no tweets, you can write the following:
 
-```
+```java
 PowerAdapter adapter = tweetsAdapter
     .limit(10) // Only show up to 10 tweets
     .append(
@@ -123,12 +123,12 @@ underlying list of tweets is empty.
 
 Headers and footers can be added using `prepend` and `append`:
 
-```
+```java
 // Prepend a header view.
 PowerAdapter adapter = tweetAdapter.prepend(R.layout.header);
 ```
 
-```
+```java
 // Append a footer view.
 PowerAdapter adapter = tweetAdapter.append(R.layout.footer);
 ```
@@ -148,7 +148,7 @@ The primary class needed to achieve this is a `Binder`. The responsibilities of 
 Multiple types of commonly required binders are supplied. If you prefer the widely used view holder pattern, use
 a `ViewHolderBinder`:
 
-```
+```java
 Binder<BlogPost, View> blogPostBinder = new ViewHolderBinder<BlogPost, BlogPostHolder>(android.R.layout.simple_list_item_1) {
     @Override
     protected BlogPostHolder newViewHolder(View v) {
@@ -180,7 +180,7 @@ The view returned by the `ViewFactory` (or the root of the layout) is passed to 
 
 For example:
 
-```
+```java
 Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.layout.tweet_item) {
     @Override
     public void bindView(Tweet tweet, TweetView v, Holder holder) {
@@ -196,7 +196,7 @@ Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.la
 The examples above have all dealt with a single item type, and so there has only been a single `Binder`. When you want your list to contain multiple items, a `Mapper` is consulted to determine which `Binder` to use for presenting each particular item. Typically you'll use `MapperBuilder` to declaratively assign your model classes to
 binders:
 
-```
+```java
 Mapper mapper = new MapperBuilder()
     .bind(Tweet.class, new TweetBinder())
     .bind(Ad.class, new AdBinder())
@@ -212,7 +212,7 @@ adapter.add(new Video());
 
 PowerAdapter is designed to be used with different collection view implementations, so a final step is converting it to implement the expected adapter interface. This would usually be done as soon as the collection view is created, say in `onViewCreated`:
 
-```
+```java
 recyclerView.setAdapter(toRecyclerAdapter(powerAdapter));
 ```
 
@@ -229,7 +229,7 @@ The following conversion methods are provided:
 The `TreeAdapter` class allows you to present hierarchical data structures with no intrinsic depth limit. Each layer is
 comprised of just another adapter - your children can themselves can be `TreeAdapter`s!
 
-```
+```java
 PowerAdapter rootAdapter = new FileAdapter(new File("/"));
 TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
    @Override
@@ -264,7 +264,7 @@ compile 'com.nextfaze.poweradapters:power-adapters-data:0.10.0'
 
 The recommended usage pattern is to instantiate a `Data<T>` object in your retained `Fragment`. Subclassing `ArrayData` supports the simplest use case, fetching a list of things asynchronously:
 
-```
+```java
 public final class ProductListFragment extends Fragment {
 
     private final Data<Product> products = new ArrayData<>() {
@@ -284,7 +284,7 @@ public final class ProductListFragment extends Fragment {
 
 Now hook up your `Data<Product>` instance and a `Binder` with your `RecyclerView`:
 
-```
+```java
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
@@ -356,7 +356,7 @@ Here's an example of how to declare a `DataLayout` in XML. Notice the `layout_co
 
 The `DataLayout` observes state changes of the `Data` to know when to update the view visibility. Connecting to your `DataLayout` and `RecyclerView` in Java code:
 
-```
+```java
 @Override
 public void onViewCreated(View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
@@ -371,7 +371,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 An RxJava module is provided: `power-adapters-data-rx`. This is a simple adapter library that provides `Observable`s
 for properties of `Data`:
 
-```
+```java
 RxData.inserts(products).subscribe(new Action1<InsertEvent>() {
     @Override
     public void call(InsertEvent event) {
@@ -384,7 +384,7 @@ RxData.inserts(products).subscribe(new Action1<InsertEvent>() {
 
 `Data` has fluent chaining methods for providing filtered, transformed, or sorted views of its contents:
 
-```
+```java
 Data<String> names = ...
 Data<Integer> lengths = names.transform(new Function<String, Integer>() {
     @Override
@@ -394,7 +394,7 @@ Data<Integer> lengths = names.transform(new Function<String, Integer>() {
 });
 ```
 
-```
+```java
 Data<Post> allPosts = ...
 Data<Post> todaysPosts = names.filter(new Predicate<Post>() {
     @Override
