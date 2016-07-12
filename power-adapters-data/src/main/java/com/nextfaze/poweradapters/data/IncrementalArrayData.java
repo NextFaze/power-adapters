@@ -126,7 +126,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements Closeab
         return mLookAheadRowCount;
     }
 
-    /** Set the number of rows to "look ahead" before loading automatically. */
+    /** Set the number of rows to "look ahead" before loading automatically. A negative value disables look ahead. */
     @UiThread
     public final void setLookAheadRowCount(int lookAheadRowCount) {
         mLookAheadRowCount = lookAheadRowCount;
