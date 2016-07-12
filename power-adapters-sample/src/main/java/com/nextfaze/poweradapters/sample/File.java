@@ -12,11 +12,12 @@ final class File {
 
     private static final int MAX_FILE_COUNT = 20;
 
-    @NonNull
-    private final Random mRandom;
+    private final int mRandomSeed;
 
     @NonNull
     private final String mName;
+
+    private final long mSize;
 
     private final int mFileCount;
 
@@ -24,24 +25,30 @@ final class File {
 
     @NonNull
     static File rootDir() {
-        return new File(new Random(1), "/", 5, true);
+        return new File(1, "/", 5, 0, true);
     }
 
     @NonNull
     static File createDir(@NonNull String name, int fileCount) {
-        return new File(new Random(name.hashCode()), name, fileCount, true);
+        return new File(name.hashCode(), name, fileCount, 0, true);
     }
 
     @NonNull
     static File createFile(@NonNull String name) {
-        return new File(new Random(name.hashCode()), name, 0, false);
+        int seed = name.hashCode();
+        return new File(seed, name, 0, new Random(seed).nextInt(10), false);
     }
 
-    private File(@NonNull Random random, @NonNull String name, int fileCount, boolean dir) {
-        mRandom = random;
+    private File(int randomSeed, @NonNull String name, int fileCount, long size, boolean dir) {
+        mRandomSeed = randomSeed;
         mName = name;
         mFileCount = fileCount;
+        mSize = size;
         mDir = dir;
+    }
+
+    int getCount() {
+        return mFileCount;
     }
 
     @NonNull
@@ -56,11 +63,12 @@ final class File {
             throw new RuntimeException(e);
         }
         ArrayList<File> files = new ArrayList<>();
+        Random random = new Random(mRandomSeed);
         for (int i = 0; i < mFileCount; i++) {
-            if (shouldBeDir(mRandom)) {
-                files.add(createDir("Dir #" + randomName(mRandom), randomFileCount(mRandom)));
+            if (shouldBeDir(random)) {
+                files.add(createDir(randomName(random), randomFileCount(random)));
             } else {
-                files.add(createFile("File #" + randomName(mRandom)));
+                files.add(createFile(randomName(random)));
             }
         }
         return files;
@@ -73,6 +81,10 @@ final class File {
     @NonNull
     String getName() {
         return mName;
+    }
+
+    long getSize() {
+        return mSize;
     }
 
     private static boolean shouldBeDir(@NonNull Random random) {

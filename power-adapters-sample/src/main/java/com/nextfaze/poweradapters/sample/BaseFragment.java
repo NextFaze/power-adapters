@@ -38,9 +38,6 @@ abstract class BaseFragment extends Fragment {
     @BindView(R.id.recycler)
     RecyclerView mRecyclerView;
 
-    @Nullable
-    private Data mData;
-
     private Unbinder mUnbinder;
 
     @Override
@@ -102,8 +99,11 @@ abstract class BaseFragment extends Fragment {
     }
 
     void setData(@NonNull Data<?> data) {
-        mData = data;
         mDataLayout.setData(data);
+    }
+
+    void setDatas(@NonNull Data<?>... datas) {
+        mDataLayout.setDatas(datas);
     }
 
     void scrollToEnd() {

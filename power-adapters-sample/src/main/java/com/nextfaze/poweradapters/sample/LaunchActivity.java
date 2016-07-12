@@ -1,7 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -13,9 +12,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ListBindingAdapter;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.util.List;
 
@@ -26,6 +23,7 @@ public final class LaunchActivity extends AppCompatActivity {
 
     @NonNull
     private final List<Sample> mSamples = ImmutableList.of(
+            new Sample("Showcase", ShowcaseFragment.class),
             new Sample("Limit", LimitFragment.class),
             new Sample("Multiple Bindings", MultipleBindingsFragment.class),
             new Sample("Auto Incremental", AutoIncrementalFragment.class),
@@ -69,22 +67,6 @@ public final class LaunchActivity extends AppCompatActivity {
     }
 
     private void onSampleClick(@NonNull Sample sample) {
-        SampleActivity.start(this, sample.getFragmentClass());
-    }
-
-    @Getter
-    @Accessors(prefix = "m")
-    private final static class Sample {
-
-        @NonNull
-        private final String mName;
-
-        @NonNull
-        private final Class<? extends Fragment> mFragmentClass;
-
-        Sample(@NonNull String name, @NonNull Class<? extends Fragment> fragmentClass) {
-            mName = name;
-            mFragmentClass = fragmentClass;
-        }
+        SampleActivity.start(this, sample);
     }
 }

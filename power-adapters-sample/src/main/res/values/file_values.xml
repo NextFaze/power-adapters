@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="file_view_padding_increment">24dp</dimen>
+
+</resources>

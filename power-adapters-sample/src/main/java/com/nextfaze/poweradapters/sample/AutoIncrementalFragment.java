@@ -7,7 +7,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.sample.Utils.createNewsAdapter;
-import static com.nextfaze.poweradapters.sample.Utils.loadingIndicator;
+import static com.nextfaze.poweradapters.sample.Utils.loadingIndicatorWhileNonEmpty;
 
 public final class AutoIncrementalFragment extends BaseFragment {
 
@@ -15,7 +15,7 @@ public final class AutoIncrementalFragment extends BaseFragment {
     private final NewsData mData = new NewsData(50, 10);
 
     @NonNull
-    private final PowerAdapter mAdapter = createNewsAdapter(mData).append(loadingIndicator(mData));
+    private final PowerAdapter mAdapter = createNewsAdapter(mData).append(loadingIndicatorWhileNonEmpty(mData));
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

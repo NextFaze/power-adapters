@@ -11,6 +11,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
+import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import lombok.NonNull;
 
 import java.util.List;
@@ -36,8 +37,22 @@ final class Utils {
     }
 
     @NonNull
-    static PowerAdapter loadingIndicator(@NonNull Data<?> data) {
+    static PowerAdapter loadingIndicatorWhileNonEmpty(@NonNull Data<?> data) {
         return asAdapter(R.layout.list_loading_item).showOnlyWhile(data(data, d -> d.isLoading() && !d.isEmpty()));
+    }
+
+    @NonNull
+    static PowerAdapter loadingIndicator(@NonNull Data<?> data) {
+        return asAdapter(R.layout.list_loading_item).showOnlyWhile(data(data, d -> d.isLoading()));
+    }
+
+    @NonNull
+    static PowerAdapter loadNextButton(@NonNull Data<?> data) {
+        return loadNextButton(data, v -> {
+            if (data instanceof IncrementalArrayData) {
+                ((IncrementalArrayData<?>) data).loadNext();
+            }
+        });
     }
 
     @NonNull

@@ -10,6 +10,8 @@ ext {
     supportAppCompat = 'com.android.support:appcompat-v7:24.0.0'
     supportV4 = 'com.android.support:support-v4:24.0.0'
     supportDesign = 'com.android.support:design:24.0.0'
+    supportCardview = 'com.android.support:cardview-v7:24.0.0'
+    supportVectorDrawable = 'com.android.support:support-vector-drawable:24.0.0'
 
     supportTestRunner = 'com.android.support.test:runner:0.4.1'
     supportTestRules = 'com.android.support.test:rules:0.4.1'

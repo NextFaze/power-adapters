@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/list_item_height"
+        android:background="?attr/selectableItemBackground">
+
+    <android.support.constraint.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="36dp"
+            app:layout_constraintGuide_Percent="50"/>
+
+    <!-- Icon -->
+
+    <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            app:srcCompat="@drawable/file_icon_dir"
+            app:layout_constraintCenterY_toCenterY="@id/constraint_layout"
+            app:layout_constraintLeft_toLeftOf="@+id/constraint_layout"
+            app:layout_constraintTop_toTopOf="@+id/constraint_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/constraint_layout"/>
+
+    <!-- Peek -->
+
+    <ImageView
+            android:id="@+id/peek_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="16dp"
+            app:srcCompat="@drawable/file_peek"
+            app:layout_constraintCenterY_toCenterY="@id/constraint_layout"
+            app:layout_constraintTop_toTopOf="@+id/constraint_layout"
+            app:layout_constraintRight_toRightOf="@+id/constraint_layout"
+            app:layout_constraintBottom_toBottomOf="@+id/constraint_layout"/>
+
+    <!-- Title -->
+
+    <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            app:layout_constraintLeft_toRightOf="@+id/icon"
+            app:layout_constraintRight_toLeftOf="@+id/peek_button"
+            app:layout_constraintBottom_toTopOf="@+id/guideline"/>
+
+    <!-- Subtitle -->
+
+    <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintLeft_toRightOf="@+id/icon"
+            app:layout_constraintTop_toTopOf="@+id/guideline"
+            app:layout_constraintRight_toLeftOf="@+id/peek_button"/>
+
+</android.support.constraint.ConstraintLayout>

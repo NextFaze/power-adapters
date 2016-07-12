@@ -3,10 +3,12 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.nextfaze.poweradapters.sample">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
             android:allowBackup="true"
             android:label="Power Adapters Sample"
-            android:theme="@style/Theme.AppCompat"
+            android:theme="@style/AppTheme"
             android:name=".SampleApplication"
             tools:ignore="MissingApplicationIcon">
 

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <com.nextfaze.poweradapters.data.widget.DataLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/data_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:background="#FF696969"
         tools:ignore="HardcodedText">
 
     <!-- Content -->
@@ -17,8 +17,8 @@
             android:layout_height="match_parent"
             app:layout_component="content"
             android:clipToPadding="false"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"/>
 
     <!-- Empty -->
 
@@ -27,7 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="List is empty!"
+            android:text="No files"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             app:layout_component="empty"/>
 
     <!-- Loading -->
@@ -48,8 +49,7 @@
             android:layout_margin="16dp"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:textColor="#ffff0000"
-            android:textStyle="italic"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             app:layout_component="error"/>
 
 </com.nextfaze.poweradapters.data.widget.DataLayout>
