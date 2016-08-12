@@ -140,6 +140,30 @@ public class PowerAdapterWrapper extends PowerAdapter {
 
     @CallSuper
     @Override
+    public void onContainerAttachedToWindow(@NonNull Container container) {
+        mAdapter.onContainerAttachedToWindow(container);
+    }
+
+    @CallSuper
+    @Override
+    public void onContainerDetachedFromWindow(@NonNull Container container) {
+        mAdapter.onContainerDetachedFromWindow(container);
+    }
+
+    @CallSuper
+    @Override
+    public void onAttachedToContainer(@NonNull Container container) {
+        mAdapter.onAttachedToContainer(container);
+    }
+
+    @CallSuper
+    @Override
+    public void onDetachedFromContainer(@NonNull Container container) {
+        mAdapter.onDetachedFromContainer(container);
+    }
+
+    @CallSuper
+    @Override
     protected void onFirstObserverRegistered() {
         super.onFirstObserverRegistered();
         mAdapter.registerDataObserver(mDataSetObserver);

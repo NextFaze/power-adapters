@@ -147,6 +147,18 @@ public abstract class PowerAdapter {
      */
     public abstract void bindView(@NonNull View view, @NonNull Holder holder);
 
+    public void onContainerAttachedToWindow(@NonNull Container container) {
+    }
+
+    public void onContainerDetachedFromWindow(@NonNull Container container) {
+    }
+
+    public void onAttachedToContainer(@NonNull Container container) {
+    }
+
+    public void onDetachedFromContainer(@NonNull Container container) {
+    }
+
     /**
      * Registers an observer with this adapter, to be notified of data set changes.
      * <p>
