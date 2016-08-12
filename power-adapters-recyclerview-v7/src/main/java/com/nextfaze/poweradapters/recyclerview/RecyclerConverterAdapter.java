@@ -2,10 +2,14 @@ package com.nextfaze.poweradapters.recyclerview;
 
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.HashSet;
@@ -15,13 +19,19 @@ import java.util.Set;
 public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.ViewHolder> {
 
     @NonNull
-    private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
+    private final WeakMap<RecyclerView, RecyclerViewContainer> mContainers = new WeakMap<>();
+
+    @NonNull
+    private final Set<AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
+
+    @NonNull
+    private final Set<RecyclerView> mAttachedRecyclerViews = new HashSet<>();
 
     @NonNull
     private final PowerAdapter mPowerAdapter;
 
     @NonNull
-    private final DataObserver mDataSetObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChanged() {
             mShadowItemCount = mPowerAdapter.getItemCount();
@@ -71,6 +81,8 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     /** Used to track the expected number of items, based on incoming notifications. */
     private int mShadowItemCount;
 
+    private boolean mObserving;
+
     public RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
         super.setHasStableIds(mPowerAdapter.hasStableIds());
@@ -116,23 +128,58 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     @Override
     public final void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.registerAdapterDataObserver(observer);
-        if (mAdapterDataObservers.add(observer) && mAdapterDataObservers.size() == 1) {
-            mShadowItemCount = mPowerAdapter.getItemCount();
-            mPowerAdapter.registerDataObserver(mDataSetObserver);
-        }
+        mAdapterDataObservers.add(observer);
+        updateObserver();
     }
 
     @Override
     public final void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.unregisterAdapterDataObserver(observer);
-        if (mAdapterDataObservers.remove(observer) && mAdapterDataObservers.size() == 0) {
-            mPowerAdapter.unregisterDataObserver(mDataSetObserver);
-            mShadowItemCount = 0;
-        }
+        mAdapterDataObservers.remove(observer);
+        updateObserver();
     }
 
-    int getObserverCount() {
-        return mAdapterDataObservers.size();
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        RecyclerViewContainer container = new RecyclerViewContainer(recyclerView);
+        mContainers.put(recyclerView, container);
+        container.onAdapterAttached();
+        mPowerAdapter.onAttachedToContainer(container);
+        updateObserver();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        mAttachedRecyclerViews.remove(recyclerView);
+        RecyclerViewContainer container = mContainers.get(recyclerView);
+        if (container != null) {
+            mPowerAdapter.onDetachedFromContainer(container);
+            container.onAdapterDetached();
+        }
+        if (container == null) {
+            // Should never happen, unless external caller invokes
+            // onDetachedFromRecyclerView without a prior onAttachedToRecyclerView.
+            throw new AssertionError();
+        }
+        updateObserver();
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
+
+    private void updateObserver() {
+        boolean observe = !mAdapterDataObservers.isEmpty() && !mAttachedRecyclerViews.isEmpty();
+        if (observe != mObserving) {
+            if (mObserving) {
+                mPowerAdapter.unregisterDataObserver(mDataObserver);
+                mShadowItemCount = 0;
+            }
+            mObserving = observe;
+            if (mObserving) {
+                mShadowItemCount = mPowerAdapter.getItemCount();
+                notifyDataSetChanged();
+                mPowerAdapter.registerDataObserver(mDataObserver);
+            }
+        }
     }
 
     /**
@@ -160,6 +207,48 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
         ViewHolder(View itemView) {
             super(itemView);
+        }
+    }
+
+    final class RecyclerViewContainer implements Container {
+
+        @NonNull
+        private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                updatePresenceInSet();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                updatePresenceInSet();
+            }
+        };
+
+        @NonNull
+        private final RecyclerView mRecyclerView;
+
+        RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
+            mRecyclerView = recyclerView;
+        }
+
+        void onAdapterAttached() {
+            mRecyclerView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
+            updatePresenceInSet();
+        }
+
+        void onAdapterDetached() {
+            mRecyclerView.removeOnAttachStateChangeListener(mOnAttachStateChangeListener);
+            updatePresenceInSet();
+        }
+
+        private void updatePresenceInSet() {
+            if (mRecyclerView.isAttachedToWindow()) {
+                mAttachedRecyclerViews.add(mRecyclerView);
+            } else {
+                mAttachedRecyclerViews.remove(mRecyclerView);
+            }
+            updateObserver();
         }
     }
 }
