@@ -20,13 +20,14 @@ import static java.nio.charset.Charset.defaultCharset;
 class CatData extends IncrementalArrayData<Cat> {
 
     private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults(CharMatcher.anyOf("\""));
+
     @NonNull
     private final Context mContext;
 
     private volatile int mOffset;
 
     CatData(@NonNull Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         setLookAheadRowCount(-1);
     }
 
