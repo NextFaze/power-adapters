@@ -182,6 +182,14 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         }
     }
 
+    private void notifyContainerAttachedToWindow(@NonNull Container container) {
+        mPowerAdapter.onContainerAttachedToWindow(container);
+    }
+
+    private void notifyContainerDetachedFromWindow(@NonNull Container container) {
+        mPowerAdapter.onContainerDetachedFromWindow(container);
+    }
+
     /**
      * Check the item count by comparing with our shadow count. If they don't match, there's a good chance {@link
      * RecyclerView} will crash later on. By doing it aggressively ourselves, we can catch a poorly-behaved {@link
@@ -216,11 +224,13 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
+                notifyContainerAttachedToWindow(RecyclerViewContainer.this);
                 updatePresenceInSet();
             }
 
             @Override
             public void onViewDetachedFromWindow(View view) {
+                notifyContainerDetachedFromWindow(RecyclerViewContainer.this);
                 updatePresenceInSet();
             }
         };
@@ -235,11 +245,17 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         void onAdapterAttached() {
             mRecyclerView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
             updatePresenceInSet();
+            if (mRecyclerView.isAttachedToWindow()) {
+                notifyContainerAttachedToWindow(this);
+            }
         }
 
         void onAdapterDetached() {
             mRecyclerView.removeOnAttachStateChangeListener(mOnAttachStateChangeListener);
             updatePresenceInSet();
+            if (mRecyclerView.isAttachedToWindow()) {
+                notifyContainerDetachedFromWindow(this);
+            }
         }
 
         private void updatePresenceInSet() {
