@@ -15,6 +15,8 @@ import static com.nextfaze.poweradapters.data.rx.ThreadUtils.assertUiThread;
 
 public final class RxData {
 
+    // TODO: Refactor to support back pressure.
+
     private RxData() {
     }
 
@@ -165,6 +167,7 @@ public final class RxData {
                         }
                     }
                 };
+                data.registerLoadingObserver(loadingObserver);
                 subscriber.add(new MainThreadSubscription() {
                     @Override
                     protected void onUnsubscribe() {
@@ -190,6 +193,7 @@ public final class RxData {
                         }
                     }
                 };
+                data.registerAvailableObserver(availableObserver);
                 subscriber.add(new MainThreadSubscription() {
                     @Override
                     protected void onUnsubscribe() {
