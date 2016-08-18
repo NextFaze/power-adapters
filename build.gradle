@@ -1,13 +1,13 @@
 subprojects {
     buildscript {
         repositories {
-            mavenCentral()
+            jcenter()
         }
     }
 
     repositories {
         mavenLocal()
-        mavenCentral()
+        jcenter()
     }
 
     group = GROUP
