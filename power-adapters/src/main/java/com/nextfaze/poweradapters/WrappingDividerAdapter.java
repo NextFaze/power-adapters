@@ -110,7 +110,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         int position = holder.getPosition();
         int innerItemCount = super.getItemCount();
         if (innerItemCount == 0 && (isLeadingVisible(innerItemCount) || isTrailingVisible(innerItemCount))) {
@@ -119,7 +119,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         ViewGroup viewGroup = (ViewGroup) view;
         DividerViewHolder dividerViewHolder = mViewMetadata.get(viewGroup);
         dividerViewHolder.updateDividers(position);
-        super.bindView(dividerViewHolder.mChildView, holder);
+        super.bindView(container, dividerViewHolder.mChildView, holder);
     }
 
     @Override

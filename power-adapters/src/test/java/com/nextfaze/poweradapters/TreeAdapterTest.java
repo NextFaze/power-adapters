@@ -49,6 +49,9 @@ public final class TreeAdapterTest {
     private ViewGroup mParent;
     private View mItemView;
 
+    @Mock
+    private Container mContainer;
+
     @Before
     public void setUp() throws Exception {
         mRootAdapter = spy(new FakeAdapter(3));
@@ -327,8 +330,8 @@ public final class TreeAdapterTest {
 
     @Test
     public void rootBindViewDelegated() {
-        mTreeAdapter.bindView(mItemView, holder(8));
-        verify(mRootAdapter).bindView(eq(mItemView), argThat(holderWithPosition(2)));
+        mTreeAdapter.bindView(mContainer, mItemView, holder(8));
+        verify(mRootAdapter).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(2)));
     }
 
     @Test
@@ -373,9 +376,9 @@ public final class TreeAdapterTest {
 
     @NonNull
     private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
-        mTreeAdapter.bindView(mItemView, topLevelHolder);
+        mTreeAdapter.bindView(mContainer, mItemView, topLevelHolder);
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
-        verify(adapter).bindView(eq(mItemView), captor.capture());
+        verify(adapter).bindView(eq(mContainer), eq(mItemView), captor.capture());
         return captor.getValue();
     }
 
@@ -594,10 +597,10 @@ public final class TreeAdapterTest {
 
     @Test
     public void childBindViewDelegated() {
-        mTreeAdapter.bindView(mItemView, holder(10));
+        mTreeAdapter.bindView(mContainer, mItemView, holder(10));
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
-        verify(mChildAdapters.get(2)).bindView(eq(mItemView), argThat(holderWithPosition(1)));
+        verify(mChildAdapters.get(2)).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(1)));
     }
 
     @Test

@@ -10,6 +10,9 @@ class SubAdapter extends PowerAdapterWrapper {
     @NonNull
     private final WeakHashMap<Holder, HolderWrapperImpl> mHolders = new WeakHashMap<>();
 
+    @NonNull
+    private final WeakHashMap<Container, ContainerWrapperImpl> mContainers = new WeakHashMap<>();
+
     private int mOffset;
 
     @NonNull
@@ -49,13 +52,18 @@ class SubAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         HolderWrapperImpl holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapperImpl(holder);
             mHolders.put(holder, holderWrapper);
         }
-        getAdapter().bindView(view, holderWrapper);
+        ContainerWrapperImpl containerWrapper = mContainers.get(container);
+        if (containerWrapper == null) {
+            containerWrapper = new ContainerWrapperImpl(container);
+            mContainers.put(container, containerWrapper);
+        }
+        getAdapter().bindView(containerWrapper, view, holderWrapper);
     }
 
     private final class HolderWrapperImpl extends HolderWrapper {
@@ -67,6 +75,18 @@ class SubAdapter extends PowerAdapterWrapper {
         @Override
         public int getPosition() {
             return mHolderTransform.apply(super.getPosition());
+        }
+    }
+
+    private final class ContainerWrapperImpl extends ContainerWrapper {
+
+        ContainerWrapperImpl(@NonNull Container container) {
+            super(container);
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            super.scrollToPosition(innerToOuter(position));
         }
     }
 

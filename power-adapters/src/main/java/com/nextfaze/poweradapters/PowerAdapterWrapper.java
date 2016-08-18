@@ -13,6 +13,9 @@ public class PowerAdapterWrapper extends PowerAdapter {
     private final WeakHashMap<Holder, HolderWrapper> mHolders = new WeakHashMap<>();
 
     @NonNull
+    private final WeakHashMap<Container, ContainerWrapper> mContainers = new WeakHashMap<>();
+
+    @NonNull
     private final PowerAdapter mAdapter;
 
     @NonNull
@@ -100,7 +103,7 @@ public class PowerAdapterWrapper extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         HolderWrapper holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapper(holder) {
@@ -111,13 +114,23 @@ public class PowerAdapterWrapper extends PowerAdapter {
             };
             mHolders.put(holder, holderWrapper);
         }
-        mAdapter.bindView(view, holderWrapper);
+        ContainerWrapper containerWrapper = mContainers.get(container);
+        if (containerWrapper == null) {
+            containerWrapper = new ContainerWrapper(container) {
+                @Override
+                public void scrollToPosition(int position) {
+                    super.scrollToPosition(innerToOuter(position));
+                }
+            };
+            mContainers.put(container, containerWrapper);
+        }
+        mAdapter.bindView(containerWrapper, view, holderWrapper);
     }
 
     /**
      * Converts a {@code position} in this adapter's coordinate space to the coordinate space of the wrapped adapter.
      * By default, simply returns returns the position value unchanged. Must be overridden by subclasses that augment
-     * the items in this adapter, in order for the {@link #bindView(View, Holder)} {@link Holder} position to be
+     * the items in this adapter, in order for the {@link #bindView(Container, View, Holder)} {@link Holder} position to be
      * correct. This method is also called when forwarding calls that accept a {@code position} parameter.
      * @param outerPosition The {@code position} in this adapter's coordinate space.
      * @return The {@code position} converted into the coordinate space of the wrapped adapter.

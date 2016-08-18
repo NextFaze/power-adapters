@@ -19,7 +19,10 @@ import java.util.Set;
 public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.ViewHolder> {
 
     @NonNull
-    private final WeakMap<RecyclerView, RecyclerViewContainer> mContainers = new WeakMap<>();
+    private final WeakMap<RecyclerView, RecyclerViewContainer> mRecyclerViewToContainer = new WeakMap<>();
+
+    @NonNull
+    private final WeakMap<View, RecyclerViewContainer> mItemViewToContainer = new WeakMap<>();
 
     @NonNull
     private final Set<AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
@@ -116,13 +119,20 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     }
 
     @Override
-    public final ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
-        return new ViewHolder(mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType)));
+    public Holder onCreateViewHolder(ViewGroup parent, int itemViewType) {
+        View itemView = mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType));
+        mItemViewToContainer.put(itemView, getContainer((RecyclerView) parent));
+        return new Holder(itemView);
     }
 
     @Override
-    public final void onBindViewHolder(ViewHolder holder, int position) {
-        mPowerAdapter.bindView(holder.itemView, holder.holder);
+    public void onBindViewHolder(Holder holder, int position) {
+        RecyclerViewContainer container = mItemViewToContainer.get(holder.itemView);
+        if (container == null) {
+            // Should never happen, unless adapter contract was broken.
+            throw new AssertionError();
+        }
+        mPowerAdapter.bindView(container, holder.itemView, holder.holder);
     }
 
     @Override
@@ -142,8 +152,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        RecyclerViewContainer container = new RecyclerViewContainer(recyclerView);
-        mContainers.put(recyclerView, container);
+        RecyclerViewContainer container = getContainer(recyclerView);
         container.onAdapterAttached();
         mPowerAdapter.onAttachedToContainer(container);
         updateObserver();
@@ -152,16 +161,9 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         mAttachedRecyclerViews.remove(recyclerView);
-        RecyclerViewContainer container = mContainers.get(recyclerView);
-        if (container != null) {
-            mPowerAdapter.onDetachedFromContainer(container);
-            container.onAdapterDetached();
-        }
-        if (container == null) {
-            // Should never happen, unless external caller invokes
-            // onDetachedFromRecyclerView without a prior onAttachedToRecyclerView.
-            throw new AssertionError();
-        }
+        RecyclerViewContainer container = getContainerOrThrow(recyclerView);
+        mPowerAdapter.onDetachedFromContainer(container);
+        container.onAdapterDetached();
         updateObserver();
         super.onDetachedFromRecyclerView(recyclerView);
     }
@@ -188,6 +190,27 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
     private void notifyContainerDetachedFromWindow(@NonNull Container container) {
         mPowerAdapter.onContainerDetachedFromWindow(container);
+    }
+
+    @NonNull
+    private RecyclerViewContainer getContainer(@NonNull RecyclerView recyclerView) {
+        RecyclerViewContainer container = mRecyclerViewToContainer.get(recyclerView);
+        if (container == null) {
+            container = new RecyclerViewContainer(recyclerView);
+            mRecyclerViewToContainer.put(recyclerView, container);
+        }
+        return container;
+    }
+
+    @NonNull
+    private RecyclerViewContainer getContainerOrThrow(@NonNull RecyclerView recyclerView) {
+        RecyclerViewContainer container = mRecyclerViewToContainer.get(recyclerView);
+        if (container == null) {
+            // Should never happen, unless external caller invokes
+            // onDetachedFromRecyclerView without a prior onAttachedToRecyclerView.
+            throw new AssertionError();
+        }
+        return container;
     }
 
     /**
@@ -218,7 +241,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         }
     }
 
-    final class RecyclerViewContainer implements Container {
+    private final class RecyclerViewContainer implements Container {
 
         @NonNull
         private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
@@ -240,6 +263,21 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
         RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
             mRecyclerView = recyclerView;
+        }
+
+        @Override
+        public void scrollToStart() {
+            mRecyclerView.smoothScrollToPosition(0);
+        }
+
+        @Override
+        public void scrollToEnd() {
+            mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            mRecyclerView.smoothScrollToPosition(position);
         }
 
         void onAdapterAttached() {

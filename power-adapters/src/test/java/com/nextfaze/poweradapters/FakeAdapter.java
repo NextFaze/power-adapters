@@ -43,7 +43,7 @@ public class FakeAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
     }
 
     @Override

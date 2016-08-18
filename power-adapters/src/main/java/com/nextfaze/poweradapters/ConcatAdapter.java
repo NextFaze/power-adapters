@@ -107,8 +107,8 @@ final class ConcatAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
-        outerToAdapter(holder.getPosition()).bindView(view, holder);
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+        outerToAdapter(holder.getPosition()).bindView(container, view, holder);
     }
 
     @CallSuper

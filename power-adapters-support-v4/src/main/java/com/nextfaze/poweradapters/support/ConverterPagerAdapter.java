@@ -4,12 +4,15 @@ import android.database.DataSetObserver;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.view.FixedPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.SimpleDataObserver;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.ArrayDeque;
@@ -21,6 +24,9 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 public class ConverterPagerAdapter extends FixedPagerAdapter {
+
+    @NonNull
+    private final WeakMap<ViewGroup, ViewPagerContainer> mParentViewToContainer = new WeakMap<>();
 
     @NonNull
     private final Recycler mRecycler = new Recycler();
@@ -80,11 +86,16 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
     }
 
     @Override
-    public final Object instantiateItem(ViewGroup container, int position) {
+    public final Object instantiateItem(ViewGroup parent, int position) {
+        ViewPagerContainer container = mParentViewToContainer.get(parent);
+        if (container == null) {
+            container = new ViewPagerContainer((ViewPager) parent);
+            mParentViewToContainer.put(parent, container);
+        }
         Object viewType = mAdapter.getItemViewType(position);
         View v = mRecycler.get(viewType);
         if (v == null) {
-            v = mAdapter.newView(container, viewType);
+            v = mAdapter.newView(parent, viewType);
         }
         HolderImpl holder = mHolders.get(v);
         if (holder == null) {
@@ -92,9 +103,9 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
             mHolders.put(v, holder);
         }
         holder.position = position;
-        mAdapter.bindView(v, holder);
+        mAdapter.bindView(container, v, holder);
         mViewTypes.put(v, viewType);
-        container.addView(v);
+        parent.addView(v);
         return v;
     }
 
@@ -142,6 +153,31 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
                 return null;
             }
             return views.poll();
+        }
+    }
+
+    private final class ViewPagerContainer implements Container {
+
+        @NonNull
+        private final ViewPager mViewPager;
+
+        ViewPagerContainer(@NonNull ViewPager viewPager) {
+            mViewPager = viewPager;
+        }
+
+        @Override
+        public void scrollToStart() {
+            mViewPager.setCurrentItem(0, true);
+        }
+
+        @Override
+        public void scrollToEnd() {
+            mViewPager.setCurrentItem(getCount() - 1, true);
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            mViewPager.setCurrentItem(position, true);
         }
     }
 }

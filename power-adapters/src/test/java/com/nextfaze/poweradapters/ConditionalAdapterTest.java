@@ -38,6 +38,9 @@ public final class ConditionalAdapterTest {
     private android.view.ViewGroup mParent;
     private View mItemView;
 
+    @Mock
+    private Container mContainer;
+
     @Before
     public void setUp() throws Exception {
         mParent = new FrameLayout(RuntimeEnvironment.application);
@@ -145,14 +148,14 @@ public final class ConditionalAdapterTest {
     @Test
     public void parentDelegatesBindViewToChildWhileConditionIsTrue() {
         setCondition(always());
-        mConditionalAdapter.bindView(mItemView, holder(2));
-        verify(mFakeAdapter).bindView(eq(mItemView), argThat(holderWithPosition(2)));
+        mConditionalAdapter.bindView(mContainer, mItemView, holder(2));
+        verify(mFakeAdapter).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(2)));
     }
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromBindViewWhileConditionIsFalse() {
         setCondition(Condition.never());
-        mConditionalAdapter.bindView(mItemView, holder(5));
+        mConditionalAdapter.bindView(mContainer, mItemView, holder(5));
     }
 
     @Test(expected = Throwable.class)

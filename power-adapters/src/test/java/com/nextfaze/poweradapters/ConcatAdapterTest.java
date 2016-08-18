@@ -42,6 +42,9 @@ public final class ConcatAdapterTest {
     private ViewGroup mParent;
     private View mItemView;
 
+    @Mock
+    private Container mContainer;
+
     @Before
     public void setUp() throws Exception {
         mChildAdapters = newArrayList(
@@ -110,10 +113,10 @@ public final class ConcatAdapterTest {
 
     @Test
     public void childBindViewDelegated() {
-        mConcatAdapter.bindView(mItemView, holder(8));
+        mConcatAdapter.bindView(mContainer, mItemView, holder(8));
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
-        verify(mChildAdapters.get(2)).bindView(eq(mItemView), argThat(holderWithPosition(1)));
+        verify(mChildAdapters.get(2)).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(1)));
     }
 
     @Test
@@ -158,9 +161,9 @@ public final class ConcatAdapterTest {
 
     @NonNull
     private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
-        mConcatAdapter.bindView(mItemView, topLevelHolder);
+        mConcatAdapter.bindView(mContainer, mItemView, topLevelHolder);
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
-        verify(adapter).bindView(eq(mItemView), captor.capture());
+        verify(adapter).bindView(eq(mContainer), eq(mItemView), captor.capture());
         return captor.getValue();
     }
 

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.Condition;
+import com.nextfaze.poweradapters.Container;
+import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
@@ -58,13 +60,29 @@ final class Utils {
     @NonNull
     static PowerAdapter loadNextButton(@NonNull Data<?> data,
                                        @NonNull View.OnClickListener onClickListener) {
-        ViewFactory loadNextButton = parent -> {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_load_next_item, parent, false);
-            v.setOnClickListener(onClickListener);
-            return v;
+        // TODO: This is too hacky. Would ideally be able to access Container from within a ViewFactory.
+        PowerAdapter adapter = new PowerAdapter() {
+            @Override
+            public int getItemCount() {
+                return 1;
+            }
+
+            @NonNull
+            @Override
+            public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
+                return LayoutInflater.from(parent.getContext()).inflate(R.layout.list_load_next_item, parent, false);
+            }
+
+            @Override
+            public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+                view.setOnClickListener(v -> {
+                    onClickListener.onClick(v);
+                    container.scrollToPosition(holder.getPosition());
+                });
+            }
         };
         Condition dataHasMoreAvailable = data(data, d -> !d.isLoading() && !d.isEmpty() && d.available() > 0);
-        return asAdapter(loadNextButton).showOnlyWhile(dataHasMoreAvailable);
+        return adapter.showOnlyWhile(dataHasMoreAvailable);
     }
 
     static void showEditDialog(@NonNull Context context, @NonNull List<? super Object> data, int position) {

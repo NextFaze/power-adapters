@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.binding;
 
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
@@ -27,7 +28,7 @@ public interface Binder<T, V extends View> {
      * @param v The destination view.
      * @param holder A "holder" object which can be queried to determine the position of the item in the data set.
      * @see Holder
-     * @see PowerAdapter#bindView(View, Holder)
+     * @see PowerAdapter#bindView(Container, View, Holder)
      */
     void bindView(@NonNull T t, @NonNull V v, @NonNull Holder holder);
 
