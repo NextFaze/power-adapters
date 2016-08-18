@@ -15,7 +15,7 @@
             android:orientation="horizontal"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="36dp"
-            app:layout_constraintGuide_Percent="50"/>
+            app:layout_constraintGuide_percent="0.5"/>
 
     <!-- Icon -->
 
