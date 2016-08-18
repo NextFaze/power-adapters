@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.VisibleForTesting;
 import com.nextfaze.poweradapters.internal.NotificationType;
 import com.nextfaze.poweradapters.internal.NotifyingArrayList;
 import lombok.NonNull;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
+@VisibleForTesting
 public class FakeData<T> extends Data<T> {
 
     @NonNull
