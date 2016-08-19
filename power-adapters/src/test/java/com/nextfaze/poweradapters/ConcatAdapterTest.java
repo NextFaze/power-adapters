@@ -116,7 +116,7 @@ public final class ConcatAdapterTest {
         mConcatAdapter.bindView(mContainer, mItemView, holder(8));
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
-        verify(mChildAdapters.get(2)).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(1)));
+        verify(mChildAdapters.get(2)).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(1)));
     }
 
     @Test
@@ -163,7 +163,7 @@ public final class ConcatAdapterTest {
     private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
         mConcatAdapter.bindView(mContainer, mItemView, topLevelHolder);
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
-        verify(adapter).bindView(eq(mContainer), eq(mItemView), captor.capture());
+        verify(adapter).bindView(any(Container.class), eq(mItemView), captor.capture());
         return captor.getValue();
     }
 
