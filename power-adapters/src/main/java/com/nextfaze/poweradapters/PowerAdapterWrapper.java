@@ -121,6 +121,11 @@ public class PowerAdapterWrapper extends PowerAdapter {
                 public void scrollToPosition(int position) {
                     super.scrollToPosition(innerToOuter(position));
                 }
+
+                @Override
+                public int getItemCount() {
+                    return PowerAdapterWrapper.this.getItemCount();
+                }
             };
             mContainers.put(container, containerWrapper);
         }

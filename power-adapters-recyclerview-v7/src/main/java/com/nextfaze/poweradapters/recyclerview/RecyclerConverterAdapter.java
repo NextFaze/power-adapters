@@ -280,6 +280,23 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
             mRecyclerView.smoothScrollToPosition(position);
         }
 
+        @Override
+        public int getItemCount() {
+            return mPowerAdapter.getItemCount();
+        }
+
+        @NonNull
+        @Override
+        public ViewGroup getViewGroup() {
+            return mRecyclerView;
+        }
+
+        @NonNull
+        @Override
+        public Container getRootContainer() {
+            return this;
+        }
+
         void onAdapterAttached() {
             mRecyclerView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
             updatePresenceInSet();

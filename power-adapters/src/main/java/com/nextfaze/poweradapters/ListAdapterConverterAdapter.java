@@ -168,7 +168,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
         }
     }
 
-    private static final class ContainerImpl implements Container {
+    private final class ContainerImpl implements Container {
 
         @NonNull
         private final ViewGroup mParentView;
@@ -196,6 +196,23 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
             if (mParentView instanceof AbsListView) {
                 ((AbsListView) mParentView).smoothScrollToPosition(position);
             }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mPowerAdapter.getItemCount();
+        }
+
+        @NonNull
+        @Override
+        public ViewGroup getViewGroup() {
+            return mParentView;
+        }
+
+        @NonNull
+        @Override
+        public Container getRootContainer() {
+            return this;
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import android.view.ViewGroup;
 import lombok.NonNull;
 
 public class ContainerWrapper implements Container {
@@ -24,5 +25,22 @@ public class ContainerWrapper implements Container {
     @Override
     public void scrollToPosition(int position) {
         mContainer.scrollToPosition(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mContainer.getItemCount();
+    }
+
+    @NonNull
+    @Override
+    public ViewGroup getViewGroup() {
+        return mContainer.getViewGroup();
+    }
+
+    @NonNull
+    @Override
+    public Container getRootContainer() {
+        return mContainer.getRootContainer();
     }
 }

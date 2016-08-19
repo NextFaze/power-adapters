@@ -179,5 +179,22 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
         public void scrollToPosition(int position) {
             mViewPager.setCurrentItem(position, true);
         }
+
+        @Override
+        public int getItemCount() {
+            return mAdapter.getItemCount();
+        }
+
+        @NonNull
+        @Override
+        public ViewGroup getViewGroup() {
+            return mViewPager;
+        }
+
+        @NonNull
+        @Override
+        public Container getRootContainer() {
+            return this;
+        }
     }
 }
