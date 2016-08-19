@@ -154,7 +154,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         super.onAttachedToRecyclerView(recyclerView);
         RecyclerViewContainer container = getContainer(recyclerView);
         container.onAdapterAttached();
-        mPowerAdapter.onAttachedToContainer(container);
         updateObserver();
     }
 
@@ -162,7 +161,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         mAttachedRecyclerViews.remove(recyclerView);
         RecyclerViewContainer container = getContainerOrThrow(recyclerView);
-        mPowerAdapter.onDetachedFromContainer(container);
         container.onAdapterDetached();
         updateObserver();
         super.onDetachedFromRecyclerView(recyclerView);
@@ -182,14 +180,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
                 mPowerAdapter.registerDataObserver(mDataObserver);
             }
         }
-    }
-
-    private void notifyContainerAttachedToWindow(@NonNull Container container) {
-        mPowerAdapter.onContainerAttachedToWindow(container);
-    }
-
-    private void notifyContainerDetachedFromWindow(@NonNull Container container) {
-        mPowerAdapter.onContainerDetachedFromWindow(container);
     }
 
     @NonNull
@@ -247,13 +237,11 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View view) {
-                notifyContainerAttachedToWindow(RecyclerViewContainer.this);
                 updatePresenceInSet();
             }
 
             @Override
             public void onViewDetachedFromWindow(View view) {
-                notifyContainerDetachedFromWindow(RecyclerViewContainer.this);
                 updatePresenceInSet();
             }
         };
@@ -300,17 +288,11 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         void onAdapterAttached() {
             mRecyclerView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
             updatePresenceInSet();
-            if (mRecyclerView.isAttachedToWindow()) {
-                notifyContainerAttachedToWindow(this);
-            }
         }
 
         void onAdapterDetached() {
             mRecyclerView.removeOnAttachStateChangeListener(mOnAttachStateChangeListener);
             updatePresenceInSet();
-            if (mRecyclerView.isAttachedToWindow()) {
-                notifyContainerDetachedFromWindow(this);
-            }
         }
 
         private void updatePresenceInSet() {
