@@ -12,10 +12,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.collect.ImmutableList;
-import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
-import com.nextfaze.poweradapters.binding.ViewHolderBinder;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
 import lombok.NonNull;
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 import static android.support.v7.widget.LinearLayoutManager.HORIZONTAL;
+import static com.nextfaze.poweradapters.binding.ViewHolderBinder.create;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
 public final class FilePeekView extends RelativeLayout {
@@ -35,21 +34,10 @@ public final class FilePeekView extends RelativeLayout {
     );
 
     @NonNull
-    private final Binder<File, View> mBinder = new ViewHolderBinder<File, ItemViewHolder>(R.layout.file_peek_view_item) {
-        @NonNull
-        @Override
-        protected ItemViewHolder newViewHolder(@NonNull View v) {
-            return new ItemViewHolder(v);
-        }
-
-        @Override
-        protected void bindViewHolder(@NonNull File file,
-                                      @NonNull ItemViewHolder itemViewHolder,
-                                      @NonNull Holder holder) {
-            itemViewHolder.imageView.setImageResource(randomIconResource(file));
-            itemViewHolder.titleView.setText(file.getName());
-        }
-    };
+    private final Binder<File, View> mBinder = create(R.layout.file_peek_view_item, ItemViewHolder::new, (container, file, itemViewHolder, holder) -> {
+        itemViewHolder.imageView.setImageResource(randomIconResource(file));
+        itemViewHolder.titleView.setText(file.getName());
+    });
 
     @BindView(R.id.data_layout)
     DataLayout mDataLayout;

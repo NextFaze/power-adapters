@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.binding;
 
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 
@@ -38,10 +39,10 @@ final class BindingEngine {
         return binder.newView(parent);
     }
 
-    void bindView(@NonNull View view, @NonNull Holder holder) {
+    void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         int position = holder.getPosition();
         Object item = getItem(position);
-        binderOrThrow(item, position).bindView(item, view, holder);
+        binderOrThrow(item, position).bindView(container, item, view, holder);
     }
 
     @NonNull

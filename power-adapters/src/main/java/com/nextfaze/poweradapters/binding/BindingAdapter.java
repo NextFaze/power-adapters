@@ -33,7 +33,7 @@ public abstract class BindingAdapter extends PowerAdapter {
 
     @Override
     public final void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
-        mEngine.bindView(view, holder);
+        mEngine.bindView(container, view, holder);
     }
 
     @NonNull
