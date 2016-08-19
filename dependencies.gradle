@@ -1,5 +1,5 @@
 ext {
-    androidPlugin = 'com.android.tools.build:gradle:2.2.0-beta1'
+    androidPlugin = 'com.android.tools.build:gradle:2.2.0-beta2'
     androidMavenGradlePlugin = 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
     minSdkVersion = 11
     compileSdkVersion = 24
