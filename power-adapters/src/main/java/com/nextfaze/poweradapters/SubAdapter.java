@@ -88,6 +88,11 @@ class SubAdapter extends PowerAdapterWrapper {
         public void scrollToPosition(int position) {
             super.scrollToPosition(innerToOuter(position));
         }
+
+        @Override
+        public int getItemCount() {
+            return getAdapter().getItemCount();
+        }
     }
 
     interface HolderTransform {

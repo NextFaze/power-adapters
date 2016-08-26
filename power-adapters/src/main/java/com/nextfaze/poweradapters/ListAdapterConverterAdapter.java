@@ -168,27 +168,13 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
         }
     }
 
-    private final class ContainerImpl implements Container {
+    private final class ContainerImpl extends Container {
 
         @NonNull
         private final ViewGroup mParentView;
 
         ContainerImpl(@NonNull ViewGroup parentView) {
             mParentView = parentView;
-        }
-
-        @Override
-        public void scrollToStart() {
-            if (mParentView instanceof AbsListView) {
-                ((AbsListView) mParentView).smoothScrollToPosition(0);
-            }
-        }
-
-        @Override
-        public void scrollToEnd() {
-            if (mParentView instanceof AbsListView) {
-                ((AbsListView) mParentView).smoothScrollToPosition(((AbsListView) mParentView).getCount() - 1);
-            }
         }
 
         @Override
