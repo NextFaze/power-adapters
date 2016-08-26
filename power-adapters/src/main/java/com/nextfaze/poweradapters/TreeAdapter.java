@@ -115,10 +115,15 @@ public final class TreeAdapter extends PowerAdapter {
 
     public TreeAdapter(@NonNull PowerAdapter rootAdapter, @NonNull ChildAdapterSupplier childAdapterSupplier) {
         mRootAdapter = rootAdapter;
-        mRootSubAdapter = new SubAdapter(rootAdapter, new SubAdapter.HolderTransform() {
+        mRootSubAdapter = new SubAdapter(rootAdapter, new SubAdapter.Transform() {
             @Override
-            public int apply(int outerPosition) {
-                return outerToRoot(outerPosition);
+            public int apply(int position) {
+                return rootToOuter(position);
+            }
+        }, new SubAdapter.Transform() {
+            @Override
+            public int apply(int position) {
+                return outerToRoot(position);
             }
         });
         mChildAdapterSupplier = childAdapterSupplier;

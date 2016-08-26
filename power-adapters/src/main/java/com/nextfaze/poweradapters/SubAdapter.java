@@ -13,24 +13,36 @@ class SubAdapter extends PowerAdapterWrapper {
     @NonNull
     private final WeakHashMap<Container, ContainerWrapperImpl> mContainers = new WeakHashMap<>();
 
-    private int mOffset;
+    int mOffset;
 
     @NonNull
-    private final HolderTransform mHolderTransform;
+    final Transform mInnerToOuterTransform;
+
+    @NonNull
+    final Transform mOuterToInnerTransform;
 
     SubAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
-        mHolderTransform = new HolderTransform() {
+        mInnerToOuterTransform = new Transform() {
             @Override
-            public int apply(int outerPosition) {
-                return outerToInner(outerPosition);
+            public int apply(int position) {
+                return innerToOuter(position);
+            }
+        };
+        mOuterToInnerTransform = new Transform() {
+            @Override
+            public int apply(int position) {
+                return outerToInner(position);
             }
         };
     }
 
-    SubAdapter(@NonNull PowerAdapter adapter, @NonNull HolderTransform holderTransform) {
+    SubAdapter(@NonNull PowerAdapter adapter,
+               @NonNull Transform innerToOuterTransform,
+               @NonNull Transform outerToInnerTransform) {
         super(adapter);
-        mHolderTransform = holderTransform;
+        mInnerToOuterTransform = innerToOuterTransform;
+        mOuterToInnerTransform = outerToInnerTransform;
     }
 
     int getOffset() {
@@ -74,7 +86,7 @@ class SubAdapter extends PowerAdapterWrapper {
 
         @Override
         public int getPosition() {
-            return mHolderTransform.apply(super.getPosition());
+            return mOuterToInnerTransform.apply(super.getPosition());
         }
     }
 
@@ -86,7 +98,7 @@ class SubAdapter extends PowerAdapterWrapper {
 
         @Override
         public void scrollToPosition(int position) {
-            super.scrollToPosition(innerToOuter(position));
+            super.scrollToPosition(mInnerToOuterTransform.apply(position));
         }
 
         @Override
@@ -95,7 +107,7 @@ class SubAdapter extends PowerAdapterWrapper {
         }
     }
 
-    interface HolderTransform {
-        int apply(int outerPosition);
+    interface Transform {
+        int apply(int position);
     }
 }
