@@ -47,6 +47,7 @@ public final class TreeAdapterTest {
     private ChildAdapterSupplier mChildAdapterSupplier;
     private TreeAdapter mTreeAdapter;
     private ViewGroup mParent;
+    private ViewGroup mContainerViewGroup;
     private View mItemView;
 
     @Mock
@@ -72,6 +73,7 @@ public final class TreeAdapterTest {
         mTreeAdapter.registerDataObserver(new VerifyingAdapterObserver(mTreeAdapter));
         mTreeAdapter.setAllExpanded(true);
         mParent = new FrameLayout(RuntimeEnvironment.application);
+        mContainerViewGroup = new FrameLayout(RuntimeEnvironment.application);
         mItemView = new View(RuntimeEnvironment.application);
     }
 
@@ -379,6 +381,59 @@ public final class TreeAdapterTest {
         mTreeAdapter.bindView(mContainer, mItemView, topLevelHolder);
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
         verify(adapter).bindView(any(Container.class), eq(mItemView), captor.capture());
+        return captor.getValue();
+    }
+
+    @Test
+    public void rootBindViewContainerItemCountMatchesRootAdapterItemCount() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(mRootAdapter, rootContainer);
+        assertThat(innerContainer.getItemCount()).isEqualTo(mRootAdapter.getItemCount());
+    }
+
+    @Test
+    public void rootBindViewContainerScrollToStartScrollsToRootAdapterStart() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(mRootAdapter, rootContainer);
+        innerContainer.scrollToStart();
+        verify(rootContainer).scrollToPosition(0);
+    }
+
+    @Test
+    public void rootBindViewContainerScrollToEndScrollsToRootAdapterEnd() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(mRootAdapter, rootContainer);
+        innerContainer.scrollToEnd();
+        verify(rootContainer).scrollToPosition(mRootAdapter.getItemCount() - 1);
+    }
+
+    @Test
+    public void rootBindViewContainerRootContainerIsActuallyRootContainer() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        when(rootContainer.getRootContainer()).thenReturn(rootContainer);
+        Container innerContainer = bindViewAndReturnInnerContainer(mRootAdapter, rootContainer);
+        assertThat(innerContainer.getRootContainer()).isEqualTo(rootContainer);
+    }
+
+    @Test
+    public void rootBindViewContainerViewGroupIsRootContainerViewGroup() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        when(rootContainer.getViewGroup()).thenReturn(mContainerViewGroup);
+        Container innerContainer = bindViewAndReturnInnerContainer(mRootAdapter, rootContainer);
+        assertThat(innerContainer.getViewGroup()).isEqualTo(mContainerViewGroup);
+    }
+
+    @NonNull
+    private Container bindViewAndReturnInnerContainer(@NonNull PowerAdapter adapter,
+                                                      @NonNull Container rootContainer) {
+        mTreeAdapter.bindView(rootContainer, mItemView, holder(0));
+        ArgumentCaptor<Container> captor = ArgumentCaptor.forClass(Container.class);
+        verify(adapter).bindView(captor.capture(), eq(mItemView), any(Holder.class));
         return captor.getValue();
     }
 
