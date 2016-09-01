@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
@@ -26,7 +27,8 @@
               android:padding="3dp"
               android:includeFontPadding="false"
               android:textSize="14sp"
-              android:textColor="#4d4d4d"/>
+              android:textColor="#4d4d4d"
+              tools:ignore="RelativeOverlap"/>
 
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
