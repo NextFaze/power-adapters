@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.Holder> {
+public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.ViewHolder> {
 
     @NonNull
     private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
@@ -71,23 +71,28 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     /** Used to track the expected number of items, based on incoming notifications. */
     private int mShadowItemCount;
 
-    RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
+    public RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
-        setHasStableIds(mPowerAdapter.hasStableIds());
+        super.setHasStableIds(mPowerAdapter.hasStableIds());
     }
 
     @Override
-    public int getItemCount() {
+    public final void setHasStableIds(boolean hasStableIds) {
+        throw new UnsupportedOperationException("setHasStableIds() is controlled by the wrapped PowerAdapter");
+    }
+
+    @Override
+    public final int getItemCount() {
         return mPowerAdapter.getItemCount();
     }
 
     @Override
-    public long getItemId(int position) {
+    public final long getItemId(int position) {
         return mPowerAdapter.getItemId(position);
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public final int getItemViewType(int position) {
         Object viewType = mPowerAdapter.getItemViewType(position);
         Integer viewTypeInt = mViewTypeObjectToInt.get(viewType);
         if (viewTypeInt == null) {
@@ -99,17 +104,17 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     }
 
     @Override
-    public Holder onCreateViewHolder(ViewGroup parent, int itemViewType) {
-        return new Holder(mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType)));
+    public final ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
+        return new ViewHolder(mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType)));
     }
 
     @Override
-    public void onBindViewHolder(Holder holder, int position) {
+    public final void onBindViewHolder(ViewHolder holder, int position) {
         mPowerAdapter.bindView(holder.itemView, holder.holder);
     }
 
     @Override
-    public void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
+    public final void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.registerAdapterDataObserver(observer);
         if (mAdapterDataObservers.add(observer) && mAdapterDataObservers.size() == 1) {
             mShadowItemCount = mPowerAdapter.getItemCount();
@@ -118,7 +123,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
     }
 
     @Override
-    public void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
+    public final void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.unregisterAdapterDataObserver(observer);
         if (mAdapterDataObservers.remove(observer) && mAdapterDataObservers.size() == 0) {
             mPowerAdapter.unregisterDataObserver(mDataSetObserver);
@@ -143,7 +148,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
         }
     }
 
-    static final class Holder extends RecyclerView.ViewHolder {
+    public static final class ViewHolder extends RecyclerView.ViewHolder {
 
         @NonNull
         private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
@@ -153,7 +158,7 @@ final class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConver
             }
         };
 
-        Holder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
         }
     }
