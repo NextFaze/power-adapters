@@ -172,7 +172,8 @@ public final class FilterData<T> extends DataWrapper<T> {
     }
 
     private void removeIndexRange(final int innerPositionStart, final int itemCount) {
-        for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + itemCount; innerPosition++) {
+        for (int innerPosition = innerPositionStart + itemCount - 1;
+             innerPosition >= innerPositionStart; innerPosition--) {
             int i = mIndex.binarySearch(innerPosition);
             if (i >= 0) {
                 mIndex.remove(i);

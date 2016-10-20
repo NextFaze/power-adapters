@@ -165,6 +165,17 @@ public final class FilterDataTest {
     }
 
     @Test
+    public void removeAll() {
+        DataObserver observer = registerMockObserver();
+        mData.clear();
+        assertContains();
+        verify(observer).onItemRangeRemoved(0, 1);
+        verify(observer).onItemRangeRemoved(1, 1);
+        verify(observer).onItemRangeRemoved(2, 1);
+        verifyNoMoreInteractions(observer);
+    }
+
+    @Test
     public void moveForwardsSingle() {
         DataObserver observer = registerMockObserver();
         mData.move(0, 5, 1);
