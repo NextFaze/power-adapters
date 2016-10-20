@@ -30,7 +30,7 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
-        disable 'DefaultLocale', 'RtlHardcoded', 'HardcodedText', 'GoogleAppIndexingWarning'
+        disable 'DefaultLocale', 'RtlHardcoded', 'HardcodedText', 'GoogleAppIndexingWarning', 'MissingConstraints'
     }
 }
 
