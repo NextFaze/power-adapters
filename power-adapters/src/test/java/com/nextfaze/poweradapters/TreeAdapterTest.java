@@ -410,6 +410,15 @@ public final class TreeAdapterTest {
     }
 
     @Test
+    public void rootBindViewContainerScrollToPosition() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(0, mRootAdapter, rootContainer);
+        innerContainer.scrollToPosition(1);
+        verify(rootContainer).scrollToPosition(4);
+    }
+
+    @Test
     public void rootBindViewContainerRootContainerIsActuallyRootContainer() {
         mTreeAdapter.setAllExpanded(true);
         Container rootContainer = mock(Container.class);
@@ -453,7 +462,16 @@ public final class TreeAdapterTest {
     }
 
     @Test
-    public void childBindViewContainerChildContainerIsActuallyRootContainer() {
+    public void childBindViewContainerScrollToPosition() {
+        mTreeAdapter.setAllExpanded(true);
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(9, mChildAdapters.get(2), rootContainer);
+        innerContainer.scrollToPosition(1);
+        verify(rootContainer).scrollToPosition(10);
+    }
+
+    @Test
+    public void childBindViewContainerChildRootContainerIsActuallyRootContainer() {
         mTreeAdapter.setAllExpanded(true);
         Container rootContainer = mock(Container.class);
         when(rootContainer.getRootContainer()).thenReturn(rootContainer);
@@ -471,10 +489,10 @@ public final class TreeAdapterTest {
     }
 
     @NonNull
-    private Container bindViewAndReturnInnerContainer(int treePosition,
+    private Container bindViewAndReturnInnerContainer(int treeAdapterPosition,
                                                       @NonNull PowerAdapter adapter,
                                                       @NonNull Container rootContainer) {
-        mTreeAdapter.bindView(rootContainer, mItemView, holder(treePosition));
+        mTreeAdapter.bindView(rootContainer, mItemView, holder(treeAdapterPosition));
         ArgumentCaptor<Container> captor = ArgumentCaptor.forClass(Container.class);
         verify(adapter).bindView(captor.capture(), eq(mItemView), any(Holder.class));
         return captor.getValue();
