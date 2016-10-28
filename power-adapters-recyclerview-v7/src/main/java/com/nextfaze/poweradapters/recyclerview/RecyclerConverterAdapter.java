@@ -13,6 +13,7 @@ import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -119,20 +120,25 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     }
 
     @Override
-    public Holder onCreateViewHolder(ViewGroup parent, int itemViewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
         View itemView = mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType));
         mItemViewToContainer.put(itemView, getContainer((RecyclerView) parent));
-        return new Holder(itemView);
+        return new ViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(Holder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         RecyclerViewContainer container = mItemViewToContainer.get(holder.itemView);
         if (container == null) {
             // Should never happen, unless adapter contract was broken.
             throw new AssertionError();
         }
         mPowerAdapter.bindView(container, holder.itemView, holder.holder);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        onBindViewHolder(holder, position);
     }
 
     @Override
@@ -231,7 +237,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         }
     }
 
-    private final class RecyclerViewContainer implements Container {
+    private final class RecyclerViewContainer extends Container {
 
         @NonNull
         private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
@@ -251,16 +257,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
         RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
             mRecyclerView = recyclerView;
-        }
-
-        @Override
-        public void scrollToStart() {
-            mRecyclerView.smoothScrollToPosition(0);
-        }
-
-        @Override
-        public void scrollToEnd() {
-            mRecyclerView.smoothScrollToPosition(mRecyclerView.getAdapter().getItemCount() - 1);
         }
 
         @Override

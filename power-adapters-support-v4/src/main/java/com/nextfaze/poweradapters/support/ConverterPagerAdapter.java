@@ -156,23 +156,13 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
         }
     }
 
-    private final class ViewPagerContainer implements Container {
+    private final class ViewPagerContainer extends Container {
 
         @NonNull
         private final ViewPager mViewPager;
 
         ViewPagerContainer(@NonNull ViewPager viewPager) {
             mViewPager = viewPager;
-        }
-
-        @Override
-        public void scrollToStart() {
-            mViewPager.setCurrentItem(0, true);
-        }
-
-        @Override
-        public void scrollToEnd() {
-            mViewPager.setCurrentItem(getCount() - 1, true);
         }
 
         @Override
