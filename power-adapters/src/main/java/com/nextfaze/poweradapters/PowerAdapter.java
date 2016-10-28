@@ -58,7 +58,7 @@ public abstract class PowerAdapter {
         }
 
         @Override
-        public void bindView(@NonNull View view, @NonNull Holder holder) {
+        public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
             throw new UnsupportedOperationException();
         }
 
@@ -141,11 +141,13 @@ public abstract class PowerAdapter {
     /**
      * Binds the data associated with {@link Holder#getPosition()} to the specified view.
      * Use {@link Holder#getPosition()} to access the position in the data set.
+     * @param container The {@link Container} that owns the view to be bound.
      * @param view The view to bind.
      * @param holder The holder object representing this binding to the view.
      * @see Holder#getPosition()
+     * @see Container
      */
-    public abstract void bindView(@NonNull View view, @NonNull Holder holder);
+    public abstract void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder);
 
     /**
      * Registers an observer with this adapter, to be notified of data set changes.

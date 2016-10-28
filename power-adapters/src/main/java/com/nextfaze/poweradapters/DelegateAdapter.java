@@ -103,8 +103,8 @@ public final class DelegateAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View v, @NonNull Holder holder) {
-        delegateOrThrow().bindView(v, holder);
+    public void bindView(@NonNull Container container, @NonNull View v, @NonNull Holder holder) {
+        delegateOrThrow().bindView(container, v, holder);
     }
 
     @CallSuper

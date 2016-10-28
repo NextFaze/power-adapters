@@ -4,7 +4,9 @@ import android.database.DataSetObserver;
 import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.HashMap;
@@ -16,6 +18,9 @@ import java.util.WeakHashMap;
 import static android.os.Looper.getMainLooper;
 
 final class ListAdapterConverterAdapter extends BaseAdapter {
+
+    @NonNull
+    private final WeakMap<ViewGroup, ContainerImpl> mParentViewToContainer = new WeakMap<>();
 
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
@@ -88,6 +93,11 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        ContainerImpl container = mParentViewToContainer.get(parent);
+        if (container == null) {
+            container = new ContainerImpl(parent);
+            mParentViewToContainer.put(parent, container);
+        }
         if (convertView == null) {
             convertView = mPowerAdapter.newView(parent, mPowerAdapter.getItemViewType(position));
         }
@@ -97,7 +107,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
             mHolders.put(convertView, holder);
         }
         holder.position = position;
-        mPowerAdapter.bindView(convertView, holder);
+        mPowerAdapter.bindView(container, convertView, holder);
         return convertView;
     }
 
@@ -155,6 +165,40 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
         @Override
         public int getPosition() {
             return position;
+        }
+    }
+
+    private final class ContainerImpl extends Container {
+
+        @NonNull
+        private final ViewGroup mParentView;
+
+        ContainerImpl(@NonNull ViewGroup parentView) {
+            mParentView = parentView;
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            if (mParentView instanceof AbsListView) {
+                ((AbsListView) mParentView).smoothScrollToPosition(position);
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return mPowerAdapter.getItemCount();
+        }
+
+        @NonNull
+        @Override
+        public ViewGroup getViewGroup() {
+            return mParentView;
+        }
+
+        @NonNull
+        @Override
+        public Container getRootContainer() {
+            return this;
         }
     }
 }

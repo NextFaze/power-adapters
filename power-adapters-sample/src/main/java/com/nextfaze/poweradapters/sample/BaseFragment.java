@@ -68,11 +68,6 @@ abstract class BaseFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        // IMPORTANT: RecyclerView requires we nullify the adapter once we're done with the view hierarchy.
-        // Unlike ListView, it will NOT unregister its observers when detached from window. This causes leaks
-        // if your adapter and/or data instance out-live the view hierarchy, which is a common occurrence.
-        // Try commenting-out the following line to trigger LeakCanary for a demonstration of this scenario.
-        mRecyclerView.setAdapter(null);
         mUnbinder.unbind();
         super.onDestroyView();
     }

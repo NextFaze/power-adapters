@@ -25,7 +25,7 @@ final class File {
 
     @NonNull
     static File rootDir() {
-        return new File(1, "/", 5, 0, true);
+        return new File(1, "/", 25, 0, true);
     }
 
     @NonNull

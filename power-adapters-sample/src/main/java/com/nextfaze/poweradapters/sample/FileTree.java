@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.Condition;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
@@ -44,11 +45,19 @@ final class FileTree {
         // Binder for a file/directory item.
         Binder<File, FileView> binder = new AbstractBinder<File, FileView>(R.layout.file_tree_file_item) {
             @Override
-            public void bindView(@NonNull File file, @NonNull FileView v, @NonNull Holder holder) {
+            public void bindView(@NonNull Container container,
+                                 @NonNull File file,
+                                 @NonNull FileView v,
+                                 @NonNull Holder holder) {
                 v.setFile(file);
                 v.setDepth(depth);
                 v.setClickable(file.isDirectory());
-                v.setOnClickListener(file.isDirectory() ? v1 -> tree.toggle(file, Flag.EXPANDED) : null);
+                v.setOnClickListener(v1 -> {
+                    if (file.isDirectory()) {
+                        tree.toggle(file, Flag.EXPANDED);
+                    }
+                    container.scrollToPosition(holder.getPosition());
+                });
                 v.setOnPeekListener(file.isDirectory() ? () -> tree.togglePeek(file) : null);
             }
 

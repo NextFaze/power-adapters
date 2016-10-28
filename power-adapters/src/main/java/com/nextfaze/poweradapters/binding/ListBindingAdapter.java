@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.binding;
 
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ListAdapter;
 import lombok.NonNull;
@@ -52,8 +53,8 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
     }
 
     @Override
-    public final void bindView(@NonNull View view, @NonNull Holder holder) {
-        mEngine.bindView(view, holder);
+    public final void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+        mEngine.bindView(container, view, holder);
     }
 
     @NonNull

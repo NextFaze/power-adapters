@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.AbstractBinder;
 import lombok.NonNull;
@@ -21,16 +22,20 @@ class NewsItemBinder extends AbstractBinder<NewsItem, NewsItemView> {
     }
 
     @Override
-    public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container,
+                         @NonNull NewsItem newsItem,
+                         @NonNull NewsItemView v,
+                         @NonNull Holder holder) {
         v.setNewsItem(newsItem);
         v.setTags(emptySet());
-        v.setOnClickListener(v1 -> onClick(v, holder.getPosition()));
+        v.setOnClickListener(v1 -> onClick(container, v, holder.getPosition()));
         v.setOnRemoveListener(count -> onRemove(holder.getPosition(), count));
         v.setOnInsertBeforeListener(count -> onInsertBefore(holder.getPosition(), count));
         v.setOnInsertAfterListener(count -> onInsertAfter(holder.getPosition(), count));
     }
 
-    private void onClick(@NonNull NewsItemView v, int position) {
+    private void onClick(@NonNull Container container, @NonNull NewsItemView v, int position) {
+        container.scrollToPosition(position);
         showEditDialog(v.getContext(), mList, position);
     }
 

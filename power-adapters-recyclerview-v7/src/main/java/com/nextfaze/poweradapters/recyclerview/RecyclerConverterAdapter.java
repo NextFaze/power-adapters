@@ -2,26 +2,40 @@ package com.nextfaze.poweradapters.recyclerview;
 
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.ViewHolder> {
 
     @NonNull
-    private final Set<RecyclerView.AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
+    private final WeakMap<RecyclerView, RecyclerViewContainer> mRecyclerViewToContainer = new WeakMap<>();
+
+    @NonNull
+    private final WeakMap<View, RecyclerViewContainer> mItemViewToContainer = new WeakMap<>();
+
+    @NonNull
+    private final Set<AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
+
+    @NonNull
+    private final Set<RecyclerView> mAttachedRecyclerViews = new HashSet<>();
 
     @NonNull
     private final PowerAdapter mPowerAdapter;
 
     @NonNull
-    private final DataObserver mDataSetObserver = new DataObserver() {
+    private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChanged() {
             mShadowItemCount = mPowerAdapter.getItemCount();
@@ -71,6 +85,8 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     /** Used to track the expected number of items, based on incoming notifications. */
     private int mShadowItemCount;
 
+    private boolean mObserving;
+
     public RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
         mPowerAdapter = powerAdapter;
         super.setHasStableIds(mPowerAdapter.hasStableIds());
@@ -104,35 +120,93 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     }
 
     @Override
-    public final ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
-        return new ViewHolder(mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType)));
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
+        View itemView = mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType));
+        mItemViewToContainer.put(itemView, getContainer((RecyclerView) parent));
+        return new ViewHolder(itemView);
     }
 
     @Override
-    public final void onBindViewHolder(ViewHolder holder, int position) {
-        mPowerAdapter.bindView(holder.itemView, holder.holder);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        RecyclerViewContainer container = mItemViewToContainer.get(holder.itemView);
+        if (container == null) {
+            // Should never happen, unless adapter contract was broken.
+            throw new AssertionError();
+        }
+        mPowerAdapter.bindView(container, holder.itemView, holder.holder);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        onBindViewHolder(holder, position);
     }
 
     @Override
     public final void registerAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.registerAdapterDataObserver(observer);
-        if (mAdapterDataObservers.add(observer) && mAdapterDataObservers.size() == 1) {
-            mShadowItemCount = mPowerAdapter.getItemCount();
-            mPowerAdapter.registerDataObserver(mDataSetObserver);
-        }
+        mAdapterDataObservers.add(observer);
+        updateObserver();
     }
 
     @Override
     public final void unregisterAdapterDataObserver(RecyclerView.AdapterDataObserver observer) {
         super.unregisterAdapterDataObserver(observer);
-        if (mAdapterDataObservers.remove(observer) && mAdapterDataObservers.size() == 0) {
-            mPowerAdapter.unregisterDataObserver(mDataSetObserver);
-            mShadowItemCount = 0;
+        mAdapterDataObservers.remove(observer);
+        updateObserver();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        RecyclerViewContainer container = getContainer(recyclerView);
+        container.onAdapterAttached();
+        updateObserver();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        mAttachedRecyclerViews.remove(recyclerView);
+        RecyclerViewContainer container = getContainerOrThrow(recyclerView);
+        container.onAdapterDetached();
+        updateObserver();
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
+
+    private void updateObserver() {
+        boolean observe = !mAdapterDataObservers.isEmpty() && !mAttachedRecyclerViews.isEmpty();
+        if (observe != mObserving) {
+            if (mObserving) {
+                mPowerAdapter.unregisterDataObserver(mDataObserver);
+                mShadowItemCount = 0;
+            }
+            mObserving = observe;
+            if (mObserving) {
+                mShadowItemCount = mPowerAdapter.getItemCount();
+                notifyDataSetChanged();
+                mPowerAdapter.registerDataObserver(mDataObserver);
+            }
         }
     }
 
-    int getObserverCount() {
-        return mAdapterDataObservers.size();
+    @NonNull
+    private RecyclerViewContainer getContainer(@NonNull RecyclerView recyclerView) {
+        RecyclerViewContainer container = mRecyclerViewToContainer.get(recyclerView);
+        if (container == null) {
+            container = new RecyclerViewContainer(recyclerView);
+            mRecyclerViewToContainer.put(recyclerView, container);
+        }
+        return container;
+    }
+
+    @NonNull
+    private RecyclerViewContainer getContainerOrThrow(@NonNull RecyclerView recyclerView) {
+        RecyclerViewContainer container = mRecyclerViewToContainer.get(recyclerView);
+        if (container == null) {
+            // Should never happen, unless external caller invokes
+            // onDetachedFromRecyclerView without a prior onAttachedToRecyclerView.
+            throw new AssertionError();
+        }
+        return container;
     }
 
     /**
@@ -160,6 +234,70 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
         ViewHolder(View itemView) {
             super(itemView);
+        }
+    }
+
+    private final class RecyclerViewContainer extends Container {
+
+        @NonNull
+        private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                updatePresenceInSet();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                updatePresenceInSet();
+            }
+        };
+
+        @NonNull
+        private final RecyclerView mRecyclerView;
+
+        RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
+            mRecyclerView = recyclerView;
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            mRecyclerView.smoothScrollToPosition(position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mPowerAdapter.getItemCount();
+        }
+
+        @NonNull
+        @Override
+        public ViewGroup getViewGroup() {
+            return mRecyclerView;
+        }
+
+        @NonNull
+        @Override
+        public Container getRootContainer() {
+            return this;
+        }
+
+        void onAdapterAttached() {
+            mRecyclerView.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
+            updatePresenceInSet();
+        }
+
+        void onAdapterDetached() {
+            mRecyclerView.removeOnAttachStateChangeListener(mOnAttachStateChangeListener);
+            updatePresenceInSet();
+        }
+
+        private void updatePresenceInSet() {
+            if (mRecyclerView.isAttachedToWindow()) {
+                mAttachedRecyclerViews.add(mRecyclerView);
+            } else {
+                mAttachedRecyclerViews.remove(mRecyclerView);
+            }
+            updateObserver();
         }
     }
 }

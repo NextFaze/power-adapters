@@ -10,24 +10,39 @@ class SubAdapter extends PowerAdapterWrapper {
     @NonNull
     private final WeakHashMap<Holder, HolderWrapperImpl> mHolders = new WeakHashMap<>();
 
-    private int mOffset;
+    @NonNull
+    private final WeakHashMap<Container, ContainerWrapperImpl> mContainers = new WeakHashMap<>();
+
+    int mOffset;
 
     @NonNull
-    private final HolderTransform mHolderTransform;
+    final Transform mInnerToOuterTransform;
+
+    @NonNull
+    final Transform mOuterToInnerTransform;
 
     SubAdapter(@NonNull PowerAdapter adapter) {
         super(adapter);
-        mHolderTransform = new HolderTransform() {
+        mInnerToOuterTransform = new Transform() {
             @Override
-            public int apply(int outerPosition) {
-                return outerToInner(outerPosition);
+            public int apply(int position) {
+                return innerToOuter(position);
+            }
+        };
+        mOuterToInnerTransform = new Transform() {
+            @Override
+            public int apply(int position) {
+                return outerToInner(position);
             }
         };
     }
 
-    SubAdapter(@NonNull PowerAdapter adapter, @NonNull HolderTransform holderTransform) {
+    SubAdapter(@NonNull PowerAdapter adapter,
+               @NonNull Transform innerToOuterTransform,
+               @NonNull Transform outerToInnerTransform) {
         super(adapter);
-        mHolderTransform = holderTransform;
+        mInnerToOuterTransform = innerToOuterTransform;
+        mOuterToInnerTransform = outerToInnerTransform;
     }
 
     int getOffset() {
@@ -49,13 +64,18 @@ class SubAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull View view, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         HolderWrapperImpl holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapperImpl(holder);
             mHolders.put(holder, holderWrapper);
         }
-        getAdapter().bindView(view, holderWrapper);
+        ContainerWrapperImpl containerWrapper = mContainers.get(container);
+        if (containerWrapper == null) {
+            containerWrapper = new ContainerWrapperImpl(container);
+            mContainers.put(container, containerWrapper);
+        }
+        getAdapter().bindView(containerWrapper, view, holderWrapper);
     }
 
     private final class HolderWrapperImpl extends HolderWrapper {
@@ -66,11 +86,28 @@ class SubAdapter extends PowerAdapterWrapper {
 
         @Override
         public int getPosition() {
-            return mHolderTransform.apply(super.getPosition());
+            return mOuterToInnerTransform.apply(super.getPosition());
         }
     }
 
-    interface HolderTransform {
-        int apply(int outerPosition);
+    private final class ContainerWrapperImpl extends ContainerWrapper {
+
+        ContainerWrapperImpl(@NonNull Container container) {
+            super(container);
+        }
+
+        @Override
+        public void scrollToPosition(int position) {
+            super.scrollToPosition(mInnerToOuterTransform.apply(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return getAdapter().getItemCount();
+        }
+    }
+
+    interface Transform {
+        int apply(int position);
     }
 }

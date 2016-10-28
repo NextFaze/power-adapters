@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.TextView;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DividerAdapterBuilder;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -30,8 +31,8 @@ public final class MultipleBindingsFragment extends BaseFragment {
     @NonNull
     private final Binder<NewsItem, NewsItemView> mPoliticsNewsItemBinder = new BinderWrapper<NewsItem, NewsItemView>(new NewsItemBinder(mData.asList())) {
         @Override
-        public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
-            super.bindView(newsItem, v, holder);
+        public void bindView(@NonNull Container container, @NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
+            super.bindView(container, newsItem, v, holder);
             v.setTags(singleton("Boring!"));
         }
     };
@@ -45,7 +46,8 @@ public final class MultipleBindingsFragment extends BaseFragment {
         }
 
         @Override
-        protected void bindViewHolder(@NonNull BlogPost blogPost,
+        protected void bindViewHolder(@NonNull Container container,
+                                      @NonNull BlogPost blogPost,
                                       @NonNull BlogPostHolder blogPostHolder,
                                       @NonNull Holder holder) {
             blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());

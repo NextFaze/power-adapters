@@ -3,12 +3,13 @@ package com.nextfaze.poweradapters.binding;
 import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
-public abstract class BinderWrapper<T, V extends View> implements Binder<T, V> {
+public abstract class BinderWrapper<T, V extends View> extends Binder<T, V> {
 
     @NonNull
     private final Binder<? super T, ? super V> mBinder;
@@ -39,8 +40,8 @@ public abstract class BinderWrapper<T, V extends View> implements Binder<T, V> {
     }
 
     @Override
-    public void bindView(@NonNull T t, @NonNull V v, @NonNull Holder holder) {
-        mBinder.bindView(t, v, holder);
+    public void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder) {
+        mBinder.bindView(container, t, v, holder);
     }
 
     @Override

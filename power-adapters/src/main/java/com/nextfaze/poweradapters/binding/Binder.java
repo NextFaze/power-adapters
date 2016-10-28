@@ -1,46 +1,92 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.LayoutRes;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.ViewFactory;
 import lombok.NonNull;
 
-/**
- * Binds an object to a {@link View} in a {@link PowerAdapter}.
- */
-public interface Binder<T, V extends View> {
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+
+/** Binds an object to a {@link View} in a {@link PowerAdapter}. */
+public abstract class Binder<T, V extends View> {
+
+    @NonNull
+    public static <T, V extends View> Binder<T, V> create(@LayoutRes int layoutResource,
+                                                          @NonNull BindViewFunction<T, V> bindFunction) {
+        return create(asViewFactory(layoutResource), bindFunction);
+    }
+
+    @NonNull
+    public static <T, V extends View> Binder<T, V> create(@NonNull final ViewFactory viewFactory,
+                                                          @NonNull final BindViewFunction<T, V> function) {
+        return new Binder<T, V>() {
+            @NonNull
+            @Override
+            public View newView(@NonNull ViewGroup parent) {
+                return viewFactory.create(parent);
+            }
+
+            @Override
+            public void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder) {
+                function.bindView(container, t, v, holder);
+            }
+        };
+    }
+
     /**
      * Creates a {@link View} to be bound later by this binder instance. The view will be reused.
      * @param parent The destination parent view group of the view.
      * @return A new view capable of presenting the object that this binder expects later in its {@link
-     * #bindView(Object, View, Holder)} method.
+     * #bindView(Container, T, View, Holder)} method.
      * @see PowerAdapter#newView(ViewGroup, Object)
      */
     @NonNull
-    View newView(@NonNull ViewGroup parent);
+    public abstract View newView(@NonNull ViewGroup parent);
 
     /**
      * Bind the specified object to the specified {@link View}. The {@code View} is guaranteed to have been
      * instantiated by {@link #newView(ViewGroup)}.
+     * @param container The {@link Container} that owns the view to be bound.
      * @param t The item object to be bound.
      * @param v The destination view.
      * @param holder A "holder" object which can be queried to determine the position of the item in the data set.
      * @see Holder
-     * @see PowerAdapter#bindView(View, Holder)
+     * @see PowerAdapter#bindView(Container, View, Holder)
      */
-    void bindView(@NonNull T t, @NonNull V v, @NonNull Holder holder);
+    public abstract void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder);
 
     /** @see PowerAdapter#isEnabled(int) */
-    boolean isEnabled(@NonNull T t, int position);
+    public boolean isEnabled(@NonNull T t, int position) {
+        return true;
+    }
 
     /** @see PowerAdapter#getItemId(int) */
-    long getItemId(@NonNull T t, int position);
+    public long getItemId(@NonNull T t, int position) {
+        return PowerAdapter.NO_ID;
+    }
 
-    /** @see PowerAdapter#getItemViewType(int) */
+    /**
+     * By default, returns {@code this}, implying this binder supports a single view type.
+     * @param t The item object for which to return the view type.
+     * @param position The position of the item object in the data set.
+     * @return An object that is unique for this type of view for the lifetime of the owning adapter. By default, {@code
+     * this}.
+     * @see PowerAdapter#getItemViewType(int)
+     */
     @NonNull
-    Object getViewType(@NonNull T t, int position);
+    public Object getViewType(@NonNull T t, int position) {
+        return this;
+    }
 
-    /** @see PowerAdapter#hasStableIds() */
-    boolean hasStableIds();
+    /**
+     * By default, returns {@code this}, implying this binder supports a single view type.
+     * @see PowerAdapter#hasStableIds()
+     */
+    public boolean hasStableIds() {
+        return false;
+    }
 }

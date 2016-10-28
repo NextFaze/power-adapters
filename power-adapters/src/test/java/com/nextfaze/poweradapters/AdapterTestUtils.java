@@ -23,6 +23,6 @@ final class AdapterTestUtils {
     }
 
     static void verifyBindViewNeverCalled(@NonNull PowerAdapter adapter) {
-        verify(adapter, never()).bindView(any(View.class), any(Holder.class));
+        verify(adapter, never()).bindView(any(Container.class), any(View.class), any(Holder.class));
     }
 }

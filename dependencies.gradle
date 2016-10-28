@@ -1,9 +1,9 @@
 ext {
     androidPlugin = 'com.android.tools.build:gradle:2.2.2'
     androidMavenGradlePlugin = 'com.github.dcendents:android-maven-gradle-plugin:1.5'
-    minSdkVersion = 11
+    minSdkVersion = 12
     compileSdkVersion = 24
-    buildToolsVersion = '24.0.1'
+    buildToolsVersion = '25.0.0'
 
     supportAnnotations = 'com.android.support:support-annotations:24.0.0'
     supportRecyclerView = 'com.android.support:recyclerview-v7:24.0.0'

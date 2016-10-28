@@ -41,6 +41,10 @@ public final class ConcatAdapterTest {
     private PowerAdapter mConcatAdapter;
     private ViewGroup mParent;
     private View mItemView;
+    private ViewGroup mContainerViewGroup;
+
+    @Mock
+    private Container mContainer;
 
     @Before
     public void setUp() throws Exception {
@@ -57,6 +61,7 @@ public final class ConcatAdapterTest {
             verify(adapter).onFirstObserverRegistered();
         }
         mParent = new FrameLayout(RuntimeEnvironment.application);
+        mContainerViewGroup = new FrameLayout(RuntimeEnvironment.application);
         mItemView = new View(RuntimeEnvironment.application);
     }
 
@@ -110,10 +115,10 @@ public final class ConcatAdapterTest {
 
     @Test
     public void childBindViewDelegated() {
-        mConcatAdapter.bindView(mItemView, holder(8));
+        mConcatAdapter.bindView(mContainer, mItemView, holder(8));
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
-        verify(mChildAdapters.get(2)).bindView(eq(mItemView), argThat(holderWithPosition(1)));
+        verify(mChildAdapters.get(2)).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(1)));
     }
 
     @Test
@@ -158,9 +163,9 @@ public final class ConcatAdapterTest {
 
     @NonNull
     private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
-        mConcatAdapter.bindView(mItemView, topLevelHolder);
+        mConcatAdapter.bindView(mContainer, mItemView, topLevelHolder);
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
-        verify(adapter).bindView(eq(mItemView), captor.capture());
+        verify(adapter).bindView(any(Container.class), eq(mItemView), captor.capture());
         return captor.getValue();
     }
 
@@ -289,6 +294,62 @@ public final class ConcatAdapterTest {
         PowerAdapter concatAdapter = concat(adapter, PowerAdapter.EMPTY);
         concatAdapter.registerDataObserver(new VerifyingAdapterObserver(concatAdapter));
         adapter.clear();
+    }
+
+    @Test
+    public void childBindViewContainerItemCountMatchesChildAdapterItemCount() {
+        Container innerContainer = bindViewAndReturnInnerContainer(5, mChildAdapters.get(1), mock(Container.class));
+        assertThat(innerContainer.getItemCount()).isEqualTo(mChildAdapters.get(1).getItemCount());
+    }
+
+    @Test
+    public void childBindViewContainerScrollToStartScrollsToChildAdapterStart() {
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(4, mChildAdapters.get(1), rootContainer);
+        innerContainer.scrollToStart();
+        verify(rootContainer).scrollToPosition(3);
+    }
+
+    @Test
+    public void childBindViewContainerScrollToEndScrollsToChildAdapterEnd() {
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(9, mChildAdapters.get(2), rootContainer);
+        innerContainer.scrollToEnd();
+        verify(rootContainer).scrollToPosition(11);
+    }
+
+    @Test
+    public void childBindViewContainerScrollToPosition() {
+        Container rootContainer = mock(Container.class);
+        Container innerContainer = bindViewAndReturnInnerContainer(9, mChildAdapters.get(2), rootContainer);
+        innerContainer.scrollToPosition(1);
+        verify(rootContainer).scrollToPosition(8);
+    }
+
+    @Test
+    public void childBindViewContainerChildRootContainerIsActuallyRootContainer() {
+        Container rootContainer = mock(Container.class);
+        when(rootContainer.getRootContainer()).thenReturn(rootContainer);
+        Container innerContainer = bindViewAndReturnInnerContainer(5, mChildAdapters.get(1), rootContainer);
+        assertThat(innerContainer.getRootContainer()).isEqualTo(rootContainer);
+    }
+
+    @Test
+    public void childBindViewContainerViewGroupIsChildContainerViewGroup() {
+        Container rootContainer = mock(Container.class);
+        when(rootContainer.getViewGroup()).thenReturn(mContainerViewGroup);
+        Container innerContainer = bindViewAndReturnInnerContainer(7, mChildAdapters.get(2), rootContainer);
+        assertThat(innerContainer.getViewGroup()).isEqualTo(mContainerViewGroup);
+    }
+
+    @NonNull
+    private Container bindViewAndReturnInnerContainer(int concatAdapterPosition,
+                                                      @NonNull PowerAdapter adapter,
+                                                      @NonNull Container rootContainer) {
+        mConcatAdapter.bindView(rootContainer, mItemView, holder(concatAdapterPosition));
+        ArgumentCaptor<Container> captor = ArgumentCaptor.forClass(Container.class);
+        verify(adapter).bindView(captor.capture(), eq(mItemView), any(Holder.class));
+        return captor.getValue();
     }
 
     @NonNull

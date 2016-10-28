@@ -99,8 +99,8 @@ final class ConditionalAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull View v, @NonNull Holder holder) {
-        adapter().bindView(v, holder);
+    public void bindView(@NonNull Container container, @NonNull View v, @NonNull Holder holder) {
+        adapter().bindView(container, v, holder);
     }
 
     @CallSuper
