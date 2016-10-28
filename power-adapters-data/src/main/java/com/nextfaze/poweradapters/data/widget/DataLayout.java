@@ -240,32 +240,34 @@ public class DataLayout extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mInflated = true;
+        if (!mInflated) {
+            mInflated = true;
 
-        // Assign components based on deprecated view ID attributes first.
-        mContentView = findViewById(mContentViewId);
-        mEmptyView = findViewById(mEmptyViewId);
-        mLoadingView = findViewById(mLoadingViewId);
-        mErrorView = findViewById(mErrorViewId);
+            // Assign components based on deprecated view ID attributes first.
+            mContentView = findViewById(mContentViewId);
+            mEmptyView = findViewById(mEmptyViewId);
+            mLoadingView = findViewById(mLoadingViewId);
+            mErrorView = findViewById(mErrorViewId);
 
-        // Now use the layout params and possibly override.
-        detectAndAssignComponents();
+            // Now use the layout params and possibly override.
+            detectAndAssignComponents();
 
-        // All components are initially invisible.
-        if (mContentView != null) {
-            hideComponent(mContentView);
-        }
-        if (mEmptyView != null) {
-            hideComponent(mEmptyView);
-        }
-        if (mLoadingView != null) {
-            hideComponent(mLoadingView);
-        }
-        if (mErrorView != null) {
-            hideComponent(mErrorView);
-        }
+            // All components are initially invisible.
+            if (mContentView != null) {
+                hideComponent(mContentView);
+            }
+            if (mEmptyView != null) {
+                hideComponent(mEmptyView);
+            }
+            if (mLoadingView != null) {
+                hideComponent(mLoadingView);
+            }
+            if (mErrorView != null) {
+                hideComponent(mErrorView);
+            }
 
-        updateViews();
+            updateViews();
+        }
     }
 
     @Override
