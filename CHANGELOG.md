@@ -14,7 +14,7 @@ _2016-10-31_
 * Add `PowerAdapters.toSpinnerAdapter` method, for converting a `PowerAdapter` to `android.widget.SpinnerAdapter`
   (see javadoc for restrictions, however.)
 * Make `RecyclerConverterAdapter` public, and available for extension, since this is sometimes needed to interact with
-  other `RecyclerVew` libraries.
+  other `RecyclerView` libraries.
 * `RecyclerConverterAdapter` now avoids some kinds of memory leaks by unregistering from the wrapped `PowerAdapter`
   while the `RecyclerView` is detached from the window. This means you no longer need to nullify the `RecyclerView`
   adapter manually to prevent leaks.
