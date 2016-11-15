@@ -10,5 +10,9 @@
         </shape>
     </item>
     <item android:drawable="@drawable/file_icon_symbol_file"
-          android:gravity="center"/>
+          android:gravity="center"
+          android:top="4dp"
+          android:bottom="4dp"
+          android:right="4dp"
+          android:left="4dp"/>
 </layer-list>
