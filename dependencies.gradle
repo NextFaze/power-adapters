@@ -4,14 +4,15 @@ ext {
     minSdkVersion = 12
     compileSdkVersion = 24
     buildToolsVersion = '25.0.0'
+    supportVersion = '25.0.1'
 
-    supportAnnotations = 'com.android.support:support-annotations:24.0.0'
-    supportRecyclerView = 'com.android.support:recyclerview-v7:24.0.0'
-    supportAppCompat = 'com.android.support:appcompat-v7:24.0.0'
-    supportV4 = 'com.android.support:support-v4:24.0.0'
-    supportDesign = 'com.android.support:design:24.0.0'
-    supportCardview = 'com.android.support:cardview-v7:24.0.0'
-    supportVectorDrawable = 'com.android.support:support-vector-drawable:24.0.0'
+    supportAnnotations = "com.android.support:support-annotations:$supportVersion"
+    supportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"
+    supportAppCompat = "com.android.support:appcompat-v7:$supportVersion"
+    supportV4 = "com.android.support:support-v4:$supportVersion"
+    supportDesign = "com.android.support:design:$supportVersion"
+    supportCardview = "com.android.support:cardview-v7:$supportVersion"
+    supportVectorDrawable = "com.android.support:support-vector-drawable:$supportVersion"
 
     supportTestRunner = 'com.android.support.test:runner:0.4.1'
     supportTestRules = 'com.android.support.test:rules:0.4.1'
