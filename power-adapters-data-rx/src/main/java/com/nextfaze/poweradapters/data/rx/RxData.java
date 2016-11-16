@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data.rx;
 
 import android.support.annotation.CheckResult;
+import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.AvailableObserver;
@@ -10,6 +11,7 @@ import com.nextfaze.poweradapters.data.LoadingObserver;
 import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.MainThreadSubscription;
 
 import static com.nextfaze.poweradapters.data.rx.ThreadUtils.assertUiThread;
 
@@ -229,9 +231,21 @@ public final class RxData {
         });
     }
 
+    /**
+     * Creates a {@link Condition} that derives is value from the latest value emitted by the specified {@link
+     * Observable}. Errors sent by the observable are ignored, but it's recommended not to supply an observable that
+     * is capable of errors or completion.
+     */
+    @CheckResult
+    @NonNull
+    public static Condition observableCondition(@NonNull Observable<Boolean> observable) {
+        return new ObservableCondition(observable);
+    }
+
     private static class Observer extends SimpleDataObserver {
         @Override
         public void onChanged() {
         }
     }
+
 }

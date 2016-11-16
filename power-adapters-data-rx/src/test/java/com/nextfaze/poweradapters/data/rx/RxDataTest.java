@@ -1,5 +1,7 @@
 package com.nextfaze.poweradapters.data.rx;
 
+import com.nextfaze.poweradapters.Condition;
+import com.nextfaze.poweradapters.Observer;
 import com.nextfaze.poweradapters.data.FakeData;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,7 +10,11 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import rx.Observable;
 import rx.observers.TestSubscriber;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -53,5 +59,28 @@ public final class RxDataTest {
         RxData.available(data).subscribe(subscriber);
         subscriber.unsubscribe();
         subscriber.assertUnsubscribed();
+    }
+
+    @Test
+    public void observableConditionFirstValueIsObserved() {
+        Condition condition = RxData.observableCondition(Observable.just(true));
+        condition.registerObserver(mock(Observer.class));
+        assertThat(condition.eval()).isTrue();
+    }
+
+    @Test
+    public void observableConditionSubsequentValuesAreObserved() {
+        Condition condition = RxData.observableCondition(Observable.just(false, true));
+        condition.registerObserver(mock(Observer.class));
+        assertThat(condition.eval()).isTrue();
+    }
+
+    @Test
+    public void observableConditionValuesAreDispatched() {
+        Condition condition = RxData.observableCondition(Observable.just(false, true, false, false));
+        Observer observer = mock(Observer.class);
+        condition.registerObserver(observer);
+        verify(observer, times(3)).onChanged();
+        verifyNoMoreInteractions(observer);
     }
 }
