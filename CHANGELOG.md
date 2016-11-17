@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.12.0
+
+_2016-11-16_
+
+* Fix incorrect return type of `BindViewFunction`
+
 ## Version 0.11.0
 
 _2016-10-31_
