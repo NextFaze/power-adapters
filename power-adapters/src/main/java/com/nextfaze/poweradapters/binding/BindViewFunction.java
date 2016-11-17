@@ -6,6 +6,5 @@ import com.nextfaze.poweradapters.Holder;
 import lombok.NonNull;
 
 public interface BindViewFunction<T, V extends View> {
-    @NonNull
-    View bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder);
+    void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder);
 }
