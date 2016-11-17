@@ -62,8 +62,8 @@ Power adapters are compatible with the following collection view classes:
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters:0.11.0'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.11.0'
+compile 'com.nextfaze.poweradapters:power-adapters:0.12.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.12.0'
 ```
 
 ## Basic
@@ -259,7 +259,7 @@ change. This way you don't need to reload or parcel/unparcel all of your list re
 object comprises much of the repetitive asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-data:0.11.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data:0.12.0'
 ```
 
 ### Basic Data Usage
