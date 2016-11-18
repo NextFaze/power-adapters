@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static android.support.v7.util.DiffUtil.calculateDiff;
+import static com.nextfaze.poweradapters.data.rx.RxData.mainThreadObservable;
 import static java.lang.Math.min;
 import static rx.Observable.fromCallable;
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
 import static rx.schedulers.Schedulers.computation;
 
 @SuppressWarnings("WeakerAccess")
@@ -42,6 +42,9 @@ final class ObservableData<T> extends Data<T> {
 
     @Nullable
     final Observable<? extends Collection<? extends T>> mAppendsObservable;
+
+    @NonNull
+    final Observable<Integer> mAvailableObservable;
 
     @Nullable
     final EqualityFunction<? super T> mIdentityEqualityFunction;
@@ -83,16 +86,19 @@ final class ObservableData<T> extends Data<T> {
 
     int mAvailable = Integer.MAX_VALUE;
 
-    ObservableData(@Nullable Observable<? extends Collection<? extends T>> contents,
-                   @Nullable Observable<? extends Collection<? extends T>> prepends,
-                   @Nullable Observable<? extends Collection<? extends T>> appends,
-                   @NonNull Observable<Boolean> loading,
+    ObservableData(@Nullable Observable<? extends Collection<? extends T>> contentsObservable,
+                   @Nullable Observable<? extends Collection<? extends T>> prependsObservable,
+                   @Nullable Observable<? extends Collection<? extends T>> appendsObservable,
+                   @NonNull Observable<Integer> availableObservable,
+                   @NonNull Observable<Boolean> loadingObservable,
                    @Nullable EqualityFunction<? super T> identityEqualityFunction,
-                   @Nullable EqualityFunction<? super T> contentEqualityFunction, boolean detectMoves) {
-        mContentsObservable = contents;
-        mPrependsObservable = prepends;
-        mAppendsObservable = appends;
-        mLoadingObservable = loading;
+                   @Nullable EqualityFunction<? super T> contentEqualityFunction,
+                   boolean detectMoves) {
+        mContentsObservable = contentsObservable;
+        mPrependsObservable = prependsObservable;
+        mAppendsObservable = appendsObservable;
+        mAvailableObservable = availableObservable;
+        mLoadingObservable = loadingObservable;
         mIdentityEqualityFunction = identityEqualityFunction;
         mContentEqualityFunction = contentEqualityFunction;
         mDetectMoves = detectMoves;
@@ -121,15 +127,10 @@ final class ObservableData<T> extends Data<T> {
             Action1<Throwable> onError = new Action1<Throwable>() {
                 @Override
                 public void call(Throwable error) {
-                    onObservableError(error);
+                    notifyError(error);
                 }
             };
-            Action0 onCompleted = new Action0() {
-                @Override
-                public void call() {
-                    onObservableComplete();
-                }
-            };
+            Action0 onCompleted = Actions.empty();
 
             // Loading must be subscribed to first
             mSubscriptions.add(mLoadingObservable.subscribe(new Action1<Boolean>() {
@@ -139,6 +140,14 @@ final class ObservableData<T> extends Data<T> {
                     setLoading(l != null && l);
                 }
             }, onError));
+
+            // Available
+            mSubscriptions.add(mAvailableObservable.subscribe(new Action1<Integer>() {
+                @Override
+                public void call(Integer available) {
+                    setAvailable(available);
+                }
+            }));
 
             // Content
             if (mContentsObservable != null) {
@@ -176,14 +185,6 @@ final class ObservableData<T> extends Data<T> {
         mSubscriptions.clear();
     }
 
-    void onObservableError(@NonNull Throwable error) {
-        notifyError(error);
-    }
-
-    void onObservableComplete() {
-        setAvailable(0);
-    }
-
     @NonNull
     Observable<?> prepend(@NonNull final Collection<? extends T> list) {
         return mainThreadObservable(new Callable<Void>() {
@@ -191,7 +192,6 @@ final class ObservableData<T> extends Data<T> {
             public Void call() throws Exception {
                 mData.addAll(0, list);
                 notifyItemRangeInserted(0, list.size());
-                setAvailable(0);
                 return null;
             }
         });
@@ -205,7 +205,6 @@ final class ObservableData<T> extends Data<T> {
                 int oldSize = mData.size();
                 mData.addAll(list);
                 notifyItemRangeInserted(oldSize, list.size());
-                setAvailable(0);
                 return null;
             }
         });
@@ -244,6 +243,8 @@ final class ObservableData<T> extends Data<T> {
         return overwriteUsingDiffUtil(new ArrayList<>(collection), mIdentityEqualityFunction,
                 mContentEqualityFunction);
     }
+
+    // TODO: Fix race condition between async diff util overwrites and the others.
 
     @NonNull
     Observable<?> overwriteUsingDiffUtil(@NonNull final List<? extends T> list,
@@ -287,7 +288,6 @@ final class ObservableData<T> extends Data<T> {
                         mData.clear();
                         mData.addAll(list);
                         result.dispatchUpdatesTo(mListUpdateCallback);
-                        setAvailable(0);
                         return null;
                     }
                 });
@@ -367,10 +367,5 @@ final class ObservableData<T> extends Data<T> {
     public void reload() {
         clear();
         refresh();
-    }
-
-    @NonNull
-    static <T> Observable<T> mainThreadObservable(@NonNull Callable<T> callable) {
-        return fromCallable(callable).subscribeOn(mainThread());
     }
 }

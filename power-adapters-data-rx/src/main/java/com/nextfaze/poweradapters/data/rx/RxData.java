@@ -13,7 +13,11 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 
+import java.util.concurrent.Callable;
+
 import static com.nextfaze.poweradapters.data.rx.ThreadUtils.assertUiThread;
+import static rx.Observable.fromCallable;
+import static rx.android.schedulers.AndroidSchedulers.mainThread;
 
 public final class RxData {
 
@@ -242,10 +246,14 @@ public final class RxData {
         return new ObservableCondition(observable);
     }
 
+    @NonNull
+    static <T> Observable<T> mainThreadObservable(@NonNull Callable<T> callable) {
+        return fromCallable(callable).subscribeOn(mainThread());
+    }
+
     private static class Observer extends SimpleDataObserver {
         @Override
         public void onChanged() {
         }
     }
-
 }

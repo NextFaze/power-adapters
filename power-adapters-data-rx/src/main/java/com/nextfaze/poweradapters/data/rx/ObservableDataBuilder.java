@@ -23,6 +23,9 @@ public final class ObservableDataBuilder<T> {
     private Observable<? extends Collection<? extends T>> mAppends;
 
     @Nullable
+    private Observable<Integer> mAvailable;
+
+    @Nullable
     private EqualityFunction<? super T> mIdentityEqualityFunction;
 
     @Nullable
@@ -63,9 +66,28 @@ public final class ObservableDataBuilder<T> {
     }
 
     /**
-     * Sets the observable that will control the loading state of the resulting data. If not specified, the resulting
-     * data considers itself in a loading state in between subscription to {@code contents}, and the first emission of
-     * {@link #contents(Observable)}.
+     * The {@link Data#available()} property will match the emissions of this observable.
+     * <p>
+     * If not specified, the resulting data will assume there are no more elements available after the first emission
+     * of any of the content observables.
+     * @see #contents(Observable)
+     * @see #prepends(Observable)
+     * @see #appends(Observable)
+     */
+    @NonNull
+    public ObservableDataBuilder<T> available(@Nullable Observable<Integer> available) {
+        mAvailable = available;
+        return this;
+    }
+
+    /**
+     * The {@link Data#isLoading()} property will match the emissions of this observable.
+     * <p>
+     * If not specified, the resulting data considers itself in a loading state until the first emission of any of the
+     * content observables.
+     * @see #contents(Observable)
+     * @see #prepends(Observable)
+     * @see #appends(Observable)
      */
     @NonNull
     public ObservableDataBuilder<T> loading(@Nullable Observable<Boolean> loading) {
@@ -73,18 +95,33 @@ public final class ObservableDataBuilder<T> {
         return this;
     }
 
+    /**
+     * Defines the function for evaluating whether two objects have the same identity, for the purpose of determining
+     * notifications.
+     */
     @NonNull
     public ObservableDataBuilder<T> identityEquality(@Nullable EqualityFunction<? super T> identityEqualityFunction) {
         mIdentityEqualityFunction = identityEqualityFunction;
         return this;
     }
 
+    /**
+     * Defines the function for evaluating whether two objects have the same contents, for the purpose of determining
+     * notifications.
+     * <p>
+     * By default, content equality is evaluated using {@link Object#equals(Object)}.
+     */
     @NonNull
     public ObservableDataBuilder<T> contentEquality(@Nullable EqualityFunction<? super T> contentEqualityFunction) {
         mContentEqualityFunction = contentEqualityFunction;
         return this;
     }
 
+    /**
+     * Sets whether the content diff engine should also detect item moves, as well as other changes.
+     * <p>
+     * This is {@code true} by default.
+     */
     @NonNull
     public ObservableDataBuilder<T> detectMoves(boolean detectMoves) {
         mDetectMoves = detectMoves;
@@ -93,27 +130,32 @@ public final class ObservableDataBuilder<T> {
 
     @NonNull
     public Data<T> build() {
-        if (mLoading == null) {
-            PublishSubject<Boolean> loadingSubject = PublishSubject.create();
-            return new ObservableData<>(
-                    considerAsLoadingUntilFirstEmission(mContents, loadingSubject),
-                    considerAsLoadingUntilFirstEmission(mPrepends, loadingSubject),
-                    considerAsLoadingUntilFirstEmission(mAppends, loadingSubject),
-                    loadingSubject,
-                    mIdentityEqualityFunction,
-                    mContentEqualityFunction,
-                    mDetectMoves
-            );
+        Observable<? extends Collection<? extends T>> contents = mContents;
+        Observable<? extends Collection<? extends T>> prepends = mPrepends;
+        Observable<? extends Collection<? extends T>> appends = mAppends;
+        Observable<Integer> available = mAvailable;
+        Observable<Boolean> loading = mLoading;
+        if (available == null) {
+            // If no available observable specified, assume no more available upon first emission of any content
+            // observable.
+            PublishSubject<Integer> availableSubject = PublishSubject.create();
+            contents = changeToZeroAvailableUponFirstEmission(mContents, availableSubject);
+            prepends = changeToZeroAvailableUponFirstEmission(mPrepends, availableSubject);
+            appends = changeToZeroAvailableUponFirstEmission(mAppends, availableSubject);
+            available = availableSubject;
+
         }
-        return new ObservableData<>(
-                mContents,
-                mPrepends,
-                mAppends,
-                mLoading,
-                mIdentityEqualityFunction,
-                mContentEqualityFunction,
-                mDetectMoves
-        );
+        if (loading == null) {
+            // If no loading observable specified, assume loading has completed upon first emission of any content
+            // observable.
+            PublishSubject<Boolean> loadingSubject = PublishSubject.create();
+            contents = considerAsLoadingUntilFirstEmission(mContents, loadingSubject);
+            prepends = considerAsLoadingUntilFirstEmission(mPrepends, loadingSubject);
+            appends = considerAsLoadingUntilFirstEmission(mAppends, loadingSubject);
+            loading = loadingSubject;
+        }
+        return new ObservableData<>(contents, prepends, appends, available, loading, mIdentityEqualityFunction,
+                mContentEqualityFunction, mDetectMoves);
     }
 
     @Nullable
@@ -139,6 +181,33 @@ public final class ObservableDataBuilder<T> {
                     @Override
                     public void call() {
                         observer.onNext(false);
+                    }
+                });
+    }
+
+    @Nullable
+    private <E> Observable<E> changeToZeroAvailableUponFirstEmission(@Nullable Observable<E> observable,
+                                                                     @NonNull final Observer<Integer> observer) {
+        if (observable == null) {
+            return null;
+        }
+        return observable
+                .doOnSubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        observer.onNext(Integer.MAX_VALUE);
+                    }
+                })
+                .doOnNext(new Action1<E>() {
+                    @Override
+                    public void call(E e) {
+                        observer.onNext(0);
+                    }
+                })
+                .doOnTerminate(new Action0() {
+                    @Override
+                    public void call() {
+                        observer.onNext(0);
                     }
                 });
     }
