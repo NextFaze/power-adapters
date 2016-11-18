@@ -16,6 +16,7 @@ dependencies {
     compile project(':power-adapters')
     compile project(':power-adapters-data')
     compile rootProject.ext.supportAnnotations
+    compile rootProject.ext.supportRecyclerView
     provided rootProject.ext.lombok
 }
 
