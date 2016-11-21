@@ -4,7 +4,7 @@ ext {
     minSdkVersion = 12
     compileSdkVersion = 25
     buildToolsVersion = '25.0.0'
-    supportVersion = '25.0.1'
+    supportVersion = '24.2.1'
 
     supportAnnotations = "com.android.support:support-annotations:$supportVersion"
     supportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"

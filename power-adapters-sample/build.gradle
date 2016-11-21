@@ -37,6 +37,7 @@ android {
 dependencies {
     compile project(':power-adapters-recyclerview-v7')
     compile project(':power-adapters-data')
+    compile project(':power-adapters-data-rx')
     compile project(':power-adapters')
     compile rootProject.ext.supportRecyclerView
     compile rootProject.ext.supportAppCompat
