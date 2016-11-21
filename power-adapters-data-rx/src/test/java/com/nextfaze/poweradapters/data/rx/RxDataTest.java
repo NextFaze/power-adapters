@@ -77,7 +77,7 @@ public final class RxDataTest {
 
     @Test
     public void observableConditionValuesAreDispatched() {
-        Condition condition = RxData.observableCondition(Observable.just(false, true, false, false));
+        Condition condition = RxData.observableCondition(Observable.just(true, false, true, true));
         Observer observer = mock(Observer.class);
         condition.registerObserver(observer);
         verify(observer, times(3)).onChanged();
