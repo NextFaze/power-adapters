@@ -12,7 +12,6 @@ import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.Data;
-import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import lombok.NonNull;
 
@@ -26,11 +25,6 @@ import static com.nextfaze.poweradapters.data.DataConditions.*;
 final class Utils {
 
     private Utils() {
-    }
-
-    @NonNull
-    static PowerAdapter createNewsAdapter(@NonNull NewsData data) {
-        return new DataBindingAdapter<>(data, new NewsItemBinder(data.asList()));
     }
 
     @NonNull

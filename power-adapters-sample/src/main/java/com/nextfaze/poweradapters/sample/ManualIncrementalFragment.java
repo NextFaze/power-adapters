@@ -6,7 +6,9 @@ import android.view.View;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.sample.Utils.*;
+import static com.nextfaze.poweradapters.sample.News.createNewsAdapter;
+import static com.nextfaze.poweradapters.sample.Utils.loadNextButton;
+import static com.nextfaze.poweradapters.sample.Utils.loadingIndicatorWhileNonEmpty;
 
 public final class ManualIncrementalFragment extends BaseFragment {
 

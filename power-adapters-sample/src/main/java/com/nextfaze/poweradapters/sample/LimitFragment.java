@@ -6,7 +6,7 @@ import android.view.View;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
-import static com.nextfaze.poweradapters.sample.Utils.createNewsAdapter;
+import static com.nextfaze.poweradapters.sample.News.createNewsAdapter;
 
 public final class LimitFragment extends BaseFragment {
 

@@ -1,24 +1,32 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.view.View;
+import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.binding.AbstractBinder;
+import com.nextfaze.poweradapters.binding.Binder;
 import lombok.NonNull;
 
 import java.util.List;
 
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.sample.Utils.showEditDialog;
 import static java.lang.Math.max;
 import static java.util.Collections.emptySet;
 
-class NewsItemBinder extends AbstractBinder<NewsItem, NewsItemView> {
+class NewsItemBinder extends Binder<NewsItem, NewsItemView> {
 
     @NonNull
     private final List<Object> mList;
 
     NewsItemBinder(@NonNull List<Object> list) {
-        super(R.layout.news_item_binder);
         mList = list;
+    }
+
+    @NonNull
+    @Override
+    public View newView(@NonNull ViewGroup parent) {
+        return asViewFactory(R.layout.news_item_binder).create(parent);
     }
 
     @Override
