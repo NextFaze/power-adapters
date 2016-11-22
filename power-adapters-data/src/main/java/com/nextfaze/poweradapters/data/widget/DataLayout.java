@@ -371,9 +371,7 @@ public class DataLayout extends RelativeLayout {
         setDatas(data != null ? singleton(data) : Collections.<Data<?>>emptyList());
     }
 
-    /**
-     * @see #setDatas(Iterable)
-     */
+    /** @see #setDatas(Iterable) */
     public final void setDatas(@NonNull Data<?>... datas) {
         setDatas(asList(datas));
     }
@@ -396,6 +394,20 @@ public class DataLayout extends RelativeLayout {
     @NonNull
     public final List<Data<?>> getDatas() {
         return new ArrayList<>(mDatas);
+    }
+
+    /** Adds a {@link Data} to be observed by this layout. */
+    public final void addData(@NonNull Data<?> data) {
+        mDatas.add(data);
+        mDataWatcher.setDatas(mDatas);
+        updateViews();
+    }
+
+    /** Removes a {@link Data} so that it will no longer be observed by this layout. */
+    public final void removeData(@NonNull Data<?> data) {
+        mDatas.remove(data);
+        mDataWatcher.setDatas(mDatas);
+        updateViews();
     }
 
     /** Set the error formatter used to present {@link Throwable} objects in the error child view. */
