@@ -7,6 +7,7 @@ import android.view.View;
 import butterknife.ButterKnife;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.Data;
@@ -121,8 +122,11 @@ public final class ConcatFragment extends BaseFragment {
         }
 
         @Override
-        public void bindView(@NonNull NewsItem newsItem, @NonNull NewsItemView v, @NonNull Holder holder) {
-            super.bindView(newsItem, v, holder);
+        public void bindView(@NonNull Container container,
+                             @NonNull NewsItem newsItem,
+                             @NonNull NewsItemView v,
+                             @NonNull Holder holder) {
+            super.bindView(container, newsItem, v, holder);
             v.setBackgroundColor(mColor);
         }
     }
