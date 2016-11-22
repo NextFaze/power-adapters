@@ -8,24 +8,24 @@ import lombok.NonNull;
 
 import java.util.WeakHashMap;
 
-final class BindingEngine {
+final class BindingEngine<T> {
 
     @NonNull
-    private final WeakHashMap<Object, Binder<?, ?>> mBinders = new WeakHashMap<>();
+    private final WeakHashMap<Object, Binder<? super T, ?>> mBinders = new WeakHashMap<>();
 
     @NonNull
     private final Mapper mMapper;
 
     @NonNull
-    private final ItemAccessor mItemAccessor;
+    private final ItemAccessor<T> mItemAccessor;
 
-    BindingEngine(@NonNull Mapper mapper, @NonNull ItemAccessor itemAccessor) {
+    BindingEngine(@NonNull Mapper mapper, @NonNull ItemAccessor<T> itemAccessor) {
         mMapper = mapper;
         mItemAccessor = itemAccessor;
     }
 
     @NonNull
-    private Object getItem(int position) {
+    private T getItem(int position) {
         return mItemAccessor.get(position);
     }
 
@@ -41,26 +41,26 @@ final class BindingEngine {
 
     void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
         int position = holder.getPosition();
-        Object item = getItem(position);
+        T item = getItem(position);
         binderOrThrow(item, position).bindView(container, item, view, holder);
     }
 
     @NonNull
     Object getItemViewType(int position) {
-        Object item = getItem(position);
-        Binder<Object, ?> binder = binderOrThrow(item, position);
+        T item = getItem(position);
+        Binder<? super T, ?> binder = binderOrThrow(item, position);
         Object viewType = binder.getViewType(item, position);
         mBinders.put(viewType, binder);
         return viewType;
     }
 
     boolean isEnabled(int position) {
-        Object item = getItem(position);
+        T item = getItem(position);
         return binderOrThrow(item, position).isEnabled(item, position);
     }
 
     long getItemId(int position) {
-        Object item = getItem(position);
+        T item = getItem(position);
         return binderOrThrow(item, position).getItemId(item, position);
     }
 
@@ -70,8 +70,8 @@ final class BindingEngine {
 
     @SuppressWarnings("unchecked")
     @NonNull
-    private Binder<Object, View> binderOrThrow(@NonNull Object item, int position) {
-        Binder<Object, View> binder = (Binder<Object, View>) mMapper.getBinder(item, position);
+    private Binder<? super T, View> binderOrThrow(@NonNull Object item, int position) {
+        Binder<T, View> binder = (Binder<T, View>) mMapper.getBinder(item, position);
         if (binder == null) {
             throw new AssertionError("No binder for item " + item + " at position " + position);
         }

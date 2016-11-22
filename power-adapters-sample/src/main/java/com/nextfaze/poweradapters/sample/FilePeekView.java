@@ -62,7 +62,7 @@ public final class FilePeekView extends RelativeLayout {
 
     public void setFile(@NonNull File file) {
         DirectoryData data = new DirectoryData(file);
-        mRecyclerView.setAdapter(toRecyclerAdapter(new DataBindingAdapter(data, mBinder)));
+        mRecyclerView.setAdapter(toRecyclerAdapter(new DataBindingAdapter<>(data, mBinder)));
         mDataLayout.setData(data);
     }
 

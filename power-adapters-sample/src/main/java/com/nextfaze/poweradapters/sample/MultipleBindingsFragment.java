@@ -67,7 +67,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
-        return new DataBindingAdapter(data, mMapper)
+        return new DataBindingAdapter<>(data, mMapper)
                 .prepend(asAdapter(R.layout.news_header_item).showOnlyWhile(data(data, d -> !d.isEmpty())))
                 .compose(new DividerAdapterBuilder()
                         .innerResource(R.layout.list_divider_item)

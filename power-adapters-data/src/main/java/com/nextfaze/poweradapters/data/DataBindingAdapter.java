@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
-public final class DataBindingAdapter extends BindingAdapter {
+public final class DataBindingAdapter<T> extends BindingAdapter {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
@@ -39,20 +39,20 @@ public final class DataBindingAdapter extends BindingAdapter {
     };
 
     @NonNull
-    private final Data<?> mData;
+    private final Data<? extends T> mData;
 
-    public DataBindingAdapter(@NonNull Data<?> data, @NonNull Binder<?, ?> binder) {
+    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Binder<? extends T, ?> binder) {
         this(data, singletonMapper(binder));
     }
 
-    public DataBindingAdapter(@NonNull Data<?> data, @NonNull Mapper mapper) {
+    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Mapper mapper) {
         super(mapper);
         mData = data;
     }
 
     @NonNull
     @Override
-    protected Object getItem(int position) {
+    protected T getItem(int position) {
         return mData.get(position, Data.FLAG_PRESENTATION);
     }
 

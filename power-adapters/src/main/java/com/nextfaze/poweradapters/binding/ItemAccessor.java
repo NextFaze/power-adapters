@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters.binding;
 
 import lombok.NonNull;
 
-interface ItemAccessor {
+interface ItemAccessor<T> {
     @NonNull
-    Object get(int position);
+    T get(int position);
 }

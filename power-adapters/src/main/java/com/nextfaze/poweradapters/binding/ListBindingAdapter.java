@@ -19,9 +19,9 @@ import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 public final class ListBindingAdapter<E> extends ListAdapter<E> {
 
     @NonNull
-    private final BindingEngine mEngine;
+    private final BindingEngine<E> mEngine;
 
-    public ListBindingAdapter(@NonNull Binder<?, ?> binder) {
+    public ListBindingAdapter(@NonNull Binder<? extends E, ?> binder) {
         this(singletonMapper(binder));
     }
 
@@ -30,20 +30,20 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
         this(mapper, Collections.<E>emptyList());
     }
 
-    public ListBindingAdapter(@NonNull Binder<?, ?> binder, @NonNull List<? extends E> list) {
+    public ListBindingAdapter(@NonNull Binder<? extends E, ?> binder, @NonNull List<? extends E> list) {
         this(singletonMapper(binder), list);
     }
 
     public ListBindingAdapter(@NonNull Mapper mapper, @NonNull List<? extends E> list) {
         super(list);
-        ItemAccessor itemAccessor = new ItemAccessor() {
+        ItemAccessor<E> itemAccessor = new ItemAccessor<E>() {
             @NonNull
             @Override
-            public Object get(int position) {
+            public E get(int position) {
                 return ListBindingAdapter.this.get(position);
             }
         };
-        mEngine = new BindingEngine(mapper, itemAccessor);
+        mEngine = new BindingEngine<>(mapper, itemAccessor);
     }
 
     @NonNull

@@ -7,23 +7,23 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import lombok.NonNull;
 
-public abstract class BindingAdapter extends PowerAdapter {
+public abstract class BindingAdapter<T> extends PowerAdapter {
 
     @NonNull
-    private final BindingEngine mEngine;
+    private final BindingEngine<T> mEngine;
 
     protected BindingAdapter(@NonNull Mapper mapper) {
-        mEngine = new BindingEngine(mapper, new ItemAccessor() {
+        mEngine = new BindingEngine<>(mapper, new ItemAccessor<T>() {
             @NonNull
             @Override
-            public Object get(int position) {
+            public T get(int position) {
                 return getItem(position);
             }
         });
     }
 
     @NonNull
-    protected abstract Object getItem(int position);
+    protected abstract T getItem(int position);
 
     @NonNull
     @Override
