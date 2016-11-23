@@ -11,6 +11,8 @@ import rx.subjects.PublishSubject;
 
 import java.util.Collection;
 
+import static rx.Observable.empty;
+
 public final class ObservableDataBuilder<T> {
 
     @Nullable
@@ -26,6 +28,12 @@ public final class ObservableDataBuilder<T> {
     private Observable<Integer> mAvailable;
 
     @Nullable
+    private Observable<Boolean> mLoading;
+
+    @Nullable
+    private Observable<Throwable> mErrors;
+
+    @Nullable
     private EqualityFunction<? super T> mIdentityEqualityFunction;
 
     @Nullable
@@ -37,9 +45,6 @@ public final class ObservableDataBuilder<T> {
     };
 
     private boolean mDetectMoves = true;
-
-    @Nullable
-    private Observable<Boolean> mLoading;
 
     public ObservableDataBuilder() {
     }
@@ -95,6 +100,12 @@ public final class ObservableDataBuilder<T> {
         return this;
     }
 
+    @NonNull
+    public ObservableDataBuilder<T> errors(@Nullable Observable<Throwable> errors) {
+        mErrors = errors;
+        return this;
+    }
+
     /**
      * Defines the function for evaluating whether two objects have the same identity, for the purpose of determining
      * notifications.
@@ -135,6 +146,7 @@ public final class ObservableDataBuilder<T> {
         Observable<? extends Collection<? extends T>> appends = mAppends;
         Observable<Integer> available = mAvailable;
         Observable<Boolean> loading = mLoading;
+        Observable<Throwable> errors = mErrors;
         if (available == null) {
             // If no available observable specified, assume no more available upon first emission of any content
             // observable.
@@ -154,7 +166,10 @@ public final class ObservableDataBuilder<T> {
             appends = considerAsLoadingUntilFirstEmission(mAppends, loadingSubject);
             loading = loadingSubject;
         }
-        return new ObservableData<>(contents, prepends, appends, available, loading, mIdentityEqualityFunction,
+        if (errors == null) {
+            errors = empty();
+        }
+        return new ObservableData<>(contents, prepends, appends, available, loading, errors, mIdentityEqualityFunction,
                 mContentEqualityFunction, mDetectMoves);
     }
 

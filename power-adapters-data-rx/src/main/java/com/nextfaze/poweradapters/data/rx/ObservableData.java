@@ -56,6 +56,9 @@ final class ObservableData<T> extends Data<T> {
     final Observable<Boolean> mLoadingObservable;
 
     @NonNull
+    final Observable<Throwable> mErrorObservable;
+
+    @NonNull
     final ListUpdateCallback mListUpdateCallback = new ListUpdateCallback() {
         @Override
         public void onInserted(int position, int count) {
@@ -91,6 +94,7 @@ final class ObservableData<T> extends Data<T> {
                    @Nullable Observable<? extends Collection<? extends T>> appendsObservable,
                    @NonNull Observable<Integer> availableObservable,
                    @NonNull Observable<Boolean> loadingObservable,
+                   @NonNull Observable<Throwable> errorObservable,
                    @Nullable EqualityFunction<? super T> identityEqualityFunction,
                    @Nullable EqualityFunction<? super T> contentEqualityFunction,
                    boolean detectMoves) {
@@ -99,6 +103,7 @@ final class ObservableData<T> extends Data<T> {
         mAppendsObservable = appendsObservable;
         mAvailableObservable = availableObservable;
         mLoadingObservable = loadingObservable;
+        mErrorObservable = errorObservable;
         mIdentityEqualityFunction = identityEqualityFunction;
         mContentEqualityFunction = contentEqualityFunction;
         mDetectMoves = detectMoves;
@@ -139,13 +144,21 @@ final class ObservableData<T> extends Data<T> {
                     // Treat null as false
                     setLoading(l != null && l);
                 }
-            }, onError));
+            }, onError, onCompleted));
 
             // Available
             mSubscriptions.add(mAvailableObservable.subscribe(new Action1<Integer>() {
                 @Override
                 public void call(Integer available) {
                     setAvailable(available);
+                }
+            }, onError, onCompleted));
+
+            // Errors
+            mSubscriptions.add(mErrorObservable.subscribe(new Action1<Throwable>() {
+                @Override
+                public void call(Throwable e) {
+                    notifyError(e);
                 }
             }));
 
