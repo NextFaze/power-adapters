@@ -35,7 +35,7 @@ public final class ArrayDataTest {
                 return ref.get();
             }
         };
-        TestObserver<String> testObserver = new TestObserver<>(data, true);
+        TestObserver<String> testObserver = new TestObserver<>(data);
         data.registerDataObserver(testObserver);
 
         testObserver.awaitContent(initialContents);

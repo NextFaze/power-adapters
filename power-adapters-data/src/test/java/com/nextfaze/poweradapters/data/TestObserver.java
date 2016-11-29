@@ -43,21 +43,9 @@ final class TestObserver<T> implements DataObserver, LoadingObserver, AvailableO
     @NonNull
     private final Condition mCondition = mLock.newCondition();
 
-    private final boolean mVerifyEagerly;
-
-    @NonNull
-    static DataObserver eagerVerifyingObserver(@NonNull Data<?> data) {
-        return new TestObserver<>(data);
-    }
-
     TestObserver(@NonNull Data<T> data) {
-        this(data, false);
-    }
-
-    TestObserver(@NonNull Data<T> data, boolean verifyEagerly) {
         mData = data;
         mShadowSize = mData.size();
-        mVerifyEagerly = verifyEagerly;
     }
 
     @Override
@@ -68,35 +56,23 @@ final class TestObserver<T> implements DataObserver, LoadingObserver, AvailableO
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount) {
-        if (mVerifyEagerly) {
-            assertNotificationsConsistent();
-        }
         addChangeEvent();
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount) {
         mShadowSize += itemCount;
-        if (mVerifyEagerly) {
-            assertNotificationsConsistent();
-        }
         addChangeEvent();
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount) {
         mShadowSize -= itemCount;
-        if (mVerifyEagerly) {
-            assertNotificationsConsistent();
-        }
         addChangeEvent();
     }
 
     @Override
     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-        if (mVerifyEagerly) {
-            assertNotificationsConsistent();
-        }
         addChangeEvent();
     }
 
