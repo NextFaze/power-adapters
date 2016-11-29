@@ -24,7 +24,7 @@ abstract class Task<T> {
     }
 
     @NonNull
-    private static Executor sExecutor = AsyncTask.THREAD_POOL_EXECUTOR;
+    static Executor sExecutor = AsyncTask.THREAD_POOL_EXECUTOR;
 
     @NonNull
     private final Handler mHandler = new Handler(getMainLooper());
