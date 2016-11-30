@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+## Version 0.12.1
+
+_2016_11_30_
+
+* Fix bug where `ArrayData` and `IncrementalArrayData` emitted notifications that were not consistent with their 
+  reported `size`
+
 ## Version 0.12.0
 
 _2016-11-16_

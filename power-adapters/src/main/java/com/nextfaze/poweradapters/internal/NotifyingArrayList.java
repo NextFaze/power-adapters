@@ -5,6 +5,7 @@ import lombok.NonNull;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static java.lang.Math.min;
 import static java.util.Collections.swap;
@@ -111,25 +112,28 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
         }
     }
 
-    public void replaceAll(@NonNull Collection<? extends E> collection) {
+    public void replaceAll(@NonNull List<? extends E> collection) {
         int oldSize = mArray.size();
-        int newSize = collection.size();
-        int deltaSize = newSize - oldSize;
+
+        // Add all non-null elements
         mArray.clear();
         for (E e : collection) {
             if (e != null) {
                 mArray.add(e);
             }
         }
-        int changed = min(oldSize, newSize);
-        if (changed > 0) {
-            mNotificationType.notifyItemRangeChanged(mDataObservable, 0, changed);
-        }
+
+        // Issue removal/insertion notifications. These must happen first, otherwise downstream item count
+        // verification will complain that our size has changed without a corresponding structural notification.
+        int deltaSize = mArray.size() - oldSize;
         if (deltaSize < 0) {
             mNotificationType.notifyItemRangeRemoved(mDataObservable, oldSize + deltaSize, -deltaSize);
         } else if (deltaSize > 0) {
             mNotificationType.notifyItemRangeInserted(mDataObservable, oldSize, deltaSize);
         }
+
+        // Finally, issue a change notification for the range of elements not accounted for above.
+        mNotificationType.notifyItemRangeChanged(mDataObservable, 0, min(oldSize, mArray.size()));
     }
 
     public void setAll(int index, @NonNull Collection<? extends E> collection) {
