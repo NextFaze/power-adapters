@@ -234,14 +234,14 @@ final class ObservableData<T> extends Data<T> {
                 existing.addAll(collection);
                 final int newSize = collection.size();
                 final int deltaSize = newSize - oldSize;
-                final int changed = min(oldSize, newSize);
-                if (changed > 0) {
-                    notifyItemRangeChanged(0, changed);
-                }
                 if (deltaSize < 0) {
                     notifyItemRangeRemoved(oldSize + deltaSize, -deltaSize);
                 } else if (deltaSize > 0) {
                     notifyItemRangeInserted(oldSize, deltaSize);
+                }
+                final int changed = min(oldSize, newSize);
+                if (changed > 0) {
+                    notifyItemRangeChanged(0, changed);
                 }
                 return null;
             }
