@@ -234,11 +234,16 @@ final class ObservableData<T> extends Data<T> {
                 existing.addAll(collection);
                 final int newSize = collection.size();
                 final int deltaSize = newSize - oldSize;
+
+                // Issue removal/insertion notifications. These must happen first, otherwise downstream item count
+                // verification will complain that our size has changed without a corresponding structural notification.
                 if (deltaSize < 0) {
                     notifyItemRangeRemoved(oldSize + deltaSize, -deltaSize);
                 } else if (deltaSize > 0) {
                     notifyItemRangeInserted(oldSize, deltaSize);
                 }
+
+                // Finally, issue a change notification for the range of elements not accounted for above.
                 final int changed = min(oldSize, newSize);
                 if (changed > 0) {
                     notifyItemRangeChanged(0, changed);
