@@ -8,16 +8,15 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.sample.News.createNewsAdapter;
 import static com.nextfaze.poweradapters.sample.Utils.loadNextButton;
-import static com.nextfaze.poweradapters.sample.Utils.loadingIndicatorWhileNonEmpty;
 
 public final class ManualIncrementalFragment extends BaseFragment {
 
     @NonNull
-    private final NewsData mData = new NewsData(100, 5);
+    private final NewsData mData = new NewsData(100, 20);
 
     @NonNull
     private final PowerAdapter mAdapter = createNewsAdapter(mData)
-            .append(loadingIndicatorWhileNonEmpty(mData))
+//            .append(loadingIndicatorWhileNonEmpty(mData))
             .append(loadNextButton(mData, v -> onLoadNextClick()));
 
     @Override

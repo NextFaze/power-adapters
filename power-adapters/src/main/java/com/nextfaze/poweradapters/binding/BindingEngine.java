@@ -4,14 +4,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.util.WeakHashMap;
 
 final class BindingEngine<T> {
 
     @NonNull
-    private final WeakHashMap<Object, Binder<? super T, ?>> mBinders = new WeakHashMap<>();
+    private final WeakMap<Object, Binder<? super T, ?>> mBinders = new WeakMap<>();
 
     @NonNull
     private final Mapper mMapper;

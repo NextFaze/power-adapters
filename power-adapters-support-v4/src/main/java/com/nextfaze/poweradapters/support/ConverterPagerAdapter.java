@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 public class ConverterPagerAdapter extends FixedPagerAdapter {
 
@@ -40,10 +39,10 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
     };
 
     @NonNull
-    private final WeakHashMap<View, Object> mViewTypes = new WeakHashMap<>();
+    private final WeakMap<View, Object> mViewTypes = new WeakMap<>();
 
     @NonNull
-    private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
+    private final WeakMap<View, HolderImpl> mHolders = new WeakMap<>();
 
     /** Keep track of observers registered, so we know when to register our own. */
     @NonNull

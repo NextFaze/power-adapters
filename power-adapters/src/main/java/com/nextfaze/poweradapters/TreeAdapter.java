@@ -6,11 +6,11 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.WeakHashMap;
 
 import static java.util.Collections.swap;
 
@@ -85,7 +85,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final ArrayList<Entry> mEntries = new ArrayList<>();
 
     @NonNull
-    private final WeakHashMap<Object, PowerAdapter> mAdaptersByViewType = new WeakHashMap<>();
+    private final WeakMap<Object, PowerAdapter> mAdaptersByViewType = new WeakMap<>();
 
     @NonNull
     private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {

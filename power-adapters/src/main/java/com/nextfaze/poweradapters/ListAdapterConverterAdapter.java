@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import static android.os.Looper.getMainLooper;
 
@@ -26,7 +25,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
-    private final WeakHashMap<View, HolderImpl> mHolders = new WeakHashMap<>();
+    private final WeakMap<View, HolderImpl> mHolders = new WeakMap<>();
 
     @NonNull
     private final Map<Object, Integer> mViewTypeObjectToInt = new HashMap<>();

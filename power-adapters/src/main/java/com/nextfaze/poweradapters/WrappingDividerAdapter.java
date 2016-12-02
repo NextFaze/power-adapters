@@ -3,9 +3,8 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.util.WeakHashMap;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -15,10 +14,10 @@ import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final WeakHashMap<Object, ViewTypeWrapper> mViewTypes = new WeakHashMap<>();
+    private final WeakMap<Object, ViewTypeWrapper> mViewTypes = new WeakMap<>();
 
     @NonNull
-    private final WeakHashMap<ViewGroup, DividerViewHolder> mViewMetadata = new WeakHashMap<>();
+    private final WeakMap<ViewGroup, DividerViewHolder> mViewMetadata = new WeakMap<>();
 
     @NonNull
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;

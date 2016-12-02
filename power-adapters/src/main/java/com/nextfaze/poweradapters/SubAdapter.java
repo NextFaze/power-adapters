@@ -1,17 +1,16 @@
 package com.nextfaze.poweradapters;
 
 import android.view.View;
+import com.nextfaze.poweradapters.internal.WeakMap;
 import lombok.NonNull;
-
-import java.util.WeakHashMap;
 
 class SubAdapter extends PowerAdapterWrapper {
 
     @NonNull
-    private final WeakHashMap<Holder, HolderWrapperImpl> mHolders = new WeakHashMap<>();
+    private final WeakMap<Holder, HolderWrapperImpl> mHolders = new WeakMap<>();
 
     @NonNull
-    private final WeakHashMap<Container, ContainerWrapperImpl> mContainers = new WeakHashMap<>();
+    private final WeakMap<Container, ContainerWrapperImpl> mContainers = new WeakMap<>();
 
     int mOffset;
 
