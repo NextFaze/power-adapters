@@ -38,33 +38,26 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     private final DataObserver mDataObserver = new DataObserver() {
         @Override
         public void onChanged() {
-            mShadowItemCount = mPowerAdapter.getItemCount();
             notifyDataSetChanged();
         }
 
         @Override
         public void onItemRangeChanged(int positionStart, int itemCount) {
-            validateItemCount();
             notifyItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            mShadowItemCount += itemCount;
-            validateItemCount();
             notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            mShadowItemCount -= itemCount;
-            validateItemCount();
             notifyItemRangeRemoved(positionStart, itemCount);
         }
 
         @Override
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-            validateItemCount();
             if (itemCount == 1) {
                 notifyItemMoved(fromPosition, toPosition);
             } else {
@@ -81,9 +74,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     private final Map<Integer, Object> mViewTypeIntToObject = new ArrayMap<>();
 
     private int mNextViewTypeInt;
-
-    /** Used to track the expected number of items, based on incoming notifications. */
-    private int mShadowItemCount;
 
     private boolean mObserving;
 
@@ -177,11 +167,9 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         if (observe != mObserving) {
             if (mObserving) {
                 mPowerAdapter.unregisterDataObserver(mDataObserver);
-                mShadowItemCount = 0;
             }
             mObserving = observe;
             if (mObserving) {
-                mShadowItemCount = mPowerAdapter.getItemCount();
                 notifyDataSetChanged();
                 mPowerAdapter.registerDataObserver(mDataObserver);
             }
@@ -207,19 +195,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
             throw new AssertionError();
         }
         return container;
-    }
-
-    /**
-     * Check the item count by comparing with our shadow count. If they don't match, there's a good chance {@link
-     * RecyclerView} will crash later on. By doing it aggressively ourselves, we can catch a poorly-behaved {@link
-     * PowerAdapter} early.
-     */
-    private void validateItemCount() {
-        int itemCount = mPowerAdapter.getItemCount();
-        if (mShadowItemCount != itemCount) {
-            throw new IllegalStateException("Inconsistency detected: expected item count " +
-                    mShadowItemCount + " but it is " + itemCount);
-        }
     }
 
     public static final class ViewHolder extends RecyclerView.ViewHolder {
