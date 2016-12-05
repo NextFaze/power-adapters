@@ -1,8 +1,9 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import lombok.NonNull;
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +35,14 @@ public final class WrappingDividerAdapterTest {
     private FakeAdapter mFakeAdapter;
     private PowerAdapter mDividerAdapter;
 
-    @Before
-    public void setUp() throws Exception {
+    @Nullable
+    private VerifyingAdapterObserver mVerifyingObserver;
+
+    @After
+    public void tearDown() throws Exception {
+        if (mVerifyingObserver != null) {
+            mVerifyingObserver.assertItemCountConsistent();
+        }
     }
 
     private void configure(int count) {
@@ -49,7 +56,8 @@ public final class WrappingDividerAdapterTest {
                 .outerResource(RESOURCE)
                 .emptyPolicy(emptyPolicy)
                 .build(mFakeAdapter);
-        mDividerAdapter.registerDataObserver(new VerifyingAdapterObserver(mDividerAdapter));
+        mVerifyingObserver = new VerifyingAdapterObserver(mDividerAdapter);
+        mDividerAdapter.registerDataObserver(mVerifyingObserver);
         mDividerAdapter.registerDataObserver(mObserver);
     }
 
@@ -242,7 +250,9 @@ public final class WrappingDividerAdapterTest {
                 .outerResource(RESOURCE)
                 .emptyPolicy(SHOW_LEADING)
                 .build(adapter);
-        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(dividerAdapter);
+        dividerAdapter.registerDataObserver(verifyingObserver);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -253,7 +263,9 @@ public final class WrappingDividerAdapterTest {
                 .outerResource(RESOURCE)
                 .emptyPolicy(SHOW_TRAILING)
                 .build(adapter);
-        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(dividerAdapter);
+        dividerAdapter.registerDataObserver(verifyingObserver);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -264,7 +276,9 @@ public final class WrappingDividerAdapterTest {
                 .outerResource(RESOURCE)
                 .emptyPolicy(SHOW_LEADING_AND_TRAILING)
                 .build(adapter);
-        dividerAdapter.registerDataObserver(new VerifyingAdapterObserver(dividerAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(dividerAdapter);
+        dividerAdapter.registerDataObserver(verifyingObserver);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     // TODO: Check the above again with certain dividers absent, eg. leading + trailing, but no inner.

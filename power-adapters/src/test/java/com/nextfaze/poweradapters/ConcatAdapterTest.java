@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
 import lombok.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +47,8 @@ public final class ConcatAdapterTest {
     @Mock
     private Container mContainer;
 
+    private VerifyingAdapterObserver mVerifyingObserver;
+
     @Before
     public void setUp() throws Exception {
         mChildAdapters = newArrayList(
@@ -55,7 +58,8 @@ public final class ConcatAdapterTest {
         );
         mConcatAdapter = new ConcatAdapterBuilder().addAll(mChildAdapters).build();
         mConcatAdapter.registerDataObserver(mObserver);
-        mConcatAdapter.registerDataObserver(new VerifyingAdapterObserver(mConcatAdapter));
+        mVerifyingObserver = new VerifyingAdapterObserver(mConcatAdapter);
+        mConcatAdapter.registerDataObserver(mVerifyingObserver);
         for (PowerAdapter adapter : mChildAdapters) {
             verify(adapter).registerDataObserver(any(DataObserver.class));
             verify(adapter).onFirstObserverRegistered();
@@ -63,6 +67,11 @@ public final class ConcatAdapterTest {
         mParent = new FrameLayout(RuntimeEnvironment.application);
         mContainerViewGroup = new FrameLayout(RuntimeEnvironment.application);
         mItemView = new View(RuntimeEnvironment.application);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -263,7 +272,8 @@ public final class ConcatAdapterTest {
         PowerAdapter concatAdapter = concat(fakeAdapter, fakeAdapter);
         DataObserver observer = mock(DataObserver.class);
         concatAdapter.registerDataObserver(observer);
-        concatAdapter.registerDataObserver(new VerifyingAdapterObserver(concatAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(concatAdapter);
+        concatAdapter.registerDataObserver(verifyingObserver);
         fakeAdapter.insert(0, 1);
         verifySubAdapterAllGetCalls()
                 .checkRange(fakeAdapter, 0, 4)
@@ -273,6 +283,7 @@ public final class ConcatAdapterTest {
         verify(observer).onItemRangeInserted(3, 1); // TODO: Could be (0, 1), (4, 1) also.
         verify(observer).onItemRangeInserted(0, 1);
         verifyNoMoreInteractions(observer);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -285,15 +296,19 @@ public final class ConcatAdapterTest {
             }
         }));
         PowerAdapter concatAdapter = concat(dependentAdapter, adapter);
-        concatAdapter.registerDataObserver(new VerifyingAdapterObserver(concatAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(concatAdapter);
+        concatAdapter.registerDataObserver(verifyingObserver);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test
     public void itemCount() {
         FakeAdapter adapter = new FakeAdapter(3);
         PowerAdapter concatAdapter = concat(adapter, PowerAdapter.EMPTY);
-        concatAdapter.registerDataObserver(new VerifyingAdapterObserver(concatAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(concatAdapter);
+        concatAdapter.registerDataObserver(verifyingObserver);
         adapter.clear();
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test

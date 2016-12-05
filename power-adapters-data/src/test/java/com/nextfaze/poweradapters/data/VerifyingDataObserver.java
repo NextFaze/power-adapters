@@ -26,27 +26,23 @@ final class VerifyingDataObserver implements DataObserver {
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount) {
-        validate();
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount) {
         mShadowSize += itemCount;
-        validate();
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount) {
         mShadowSize -= itemCount;
-        validate();
     }
 
     @Override
     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-        validate();
     }
 
-    private void validate() {
+    void assertSizeConsistent() {
         int actualSize = mAdapter.size();
         if (mShadowSize != actualSize) {
             throw new IllegalStateException("Inconsistency detected: expected size " +

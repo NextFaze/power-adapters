@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import com.google.common.collect.Ordering;
 import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,13 +31,20 @@ public final class SortDataTest {
     private FakeData<Integer> mFakeData;
 
     private SortData<Integer> mSortData;
+    private VerifyingDataObserver mVerifyingObserver;
 
     @Before
     public void setUp() throws Exception {
         mFakeData = new FakeData<>();
         mFakeData.insert(0, 0, 10, 5, 15, 25, 20);
         mSortData = new SortData<>(mFakeData, Ordering.natural());
-        mSortData.registerDataObserver(new VerifyingDataObserver(mSortData));
+        mVerifyingObserver = new VerifyingDataObserver(mSortData);
+        mSortData.registerDataObserver(mVerifyingObserver);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertSizeConsistent();
     }
 
     @Test

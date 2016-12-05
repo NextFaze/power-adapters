@@ -25,27 +25,24 @@ final class VerifyingAdapterObserver implements DataObserver {
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount) {
-        validate();
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount) {
         mShadowItemCount += itemCount;
-        validate();
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount) {
         mShadowItemCount -= itemCount;
-        validate();
     }
 
     @Override
     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-        validate();
+        assertItemCountConsistent();
     }
 
-    private void validate() {
+    void assertItemCountConsistent() {
         int actualItemCount = mAdapter.getItemCount();
         if (mShadowItemCount != actualItemCount) {
             throw new IllegalStateException("Inconsistency detected: expected item count " +

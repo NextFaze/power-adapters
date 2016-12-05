@@ -4,6 +4,7 @@ import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import lombok.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,6 +44,7 @@ public final class FilterDataTest {
 
     @Mock
     private ErrorObserver mFilterErrorObserver;
+    private VerifyingDataObserver mVerifyingObserver;
 
     @Before
     public void setUp() throws Exception {
@@ -50,10 +52,16 @@ public final class FilterDataTest {
         mData.insert(0, "bear", "cat", "foo", "bar", "baz", "fish");
         mFilterData = new FilterData<>(mData, contains("b"));
         mFilterData.registerDataObserver(mFilterDataObserver);
-        mFilterData.registerDataObserver(new VerifyingDataObserver(mFilterData));
+        mVerifyingObserver = new VerifyingDataObserver(mFilterData);
+        mFilterData.registerDataObserver(mVerifyingObserver);
         mFilterData.registerLoadingObserver(mFilterLoadingObserver);
         mFilterData.registerAvailableObserver(mFilterAvailableObserver);
         mFilterData.registerErrorObserver(mFilterErrorObserver);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertSizeConsistent();
     }
 
     @Test

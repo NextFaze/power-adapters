@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -26,17 +27,24 @@ public final class LimitAdapterTest {
 
     private FakeAdapter mFakeAdapter;
     private LimitAdapter mLimitAdapter;
+    private VerifyingAdapterObserver mVerifyingObserver;
 
     @Before
     public void setUp() throws Exception {
         configure(5, 10);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertItemCountConsistent();
+    }
+
     private void configure(int limit, int count) {
         mFakeAdapter = spy(new FakeAdapter(count));
         mLimitAdapter = new LimitAdapter(mFakeAdapter, limit);
         mLimitAdapter.registerDataObserver(mObserver);
-        mLimitAdapter.registerDataObserver(new VerifyingAdapterObserver(mLimitAdapter));
+        mVerifyingObserver = new VerifyingAdapterObserver(mLimitAdapter);
+        mLimitAdapter.registerDataObserver(mVerifyingObserver);
         verify(mFakeAdapter).onFirstObserverRegistered();
     }
 

@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
-public class OffsetAdapterTest {
+public final class OffsetAdapterTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
@@ -25,17 +26,24 @@ public class OffsetAdapterTest {
 
     private FakeAdapter mFakeAdapter;
     private OffsetAdapter mOffsetAdapter;
+    private VerifyingAdapterObserver mVerifyingObserver;
 
     @Before
     public void setUp() throws Exception {
         configure(5, 10);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertItemCountConsistent();
+    }
+
     private void configure(int offset, int count) {
         mFakeAdapter = spy(new FakeAdapter(count));
         mOffsetAdapter = new OffsetAdapter(mFakeAdapter, offset);
         mOffsetAdapter.registerDataObserver(mObserver);
-        mOffsetAdapter.registerDataObserver(new VerifyingAdapterObserver(mOffsetAdapter));
+        mVerifyingObserver = new VerifyingAdapterObserver(mOffsetAdapter);
+        mOffsetAdapter.registerDataObserver(mVerifyingObserver);
         verify(mFakeAdapter).onFirstObserverRegistered();
     }
 

@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.TreeAdapter.ChildAdapterSupplier;
 import lombok.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -53,6 +54,8 @@ public final class TreeAdapterTest {
     @Mock
     private Container mContainer;
 
+    private VerifyingAdapterObserver mVerifyingObserver;
+
     @Before
     public void setUp() throws Exception {
         mRootAdapter = spy(new FakeAdapter(3));
@@ -70,11 +73,17 @@ public final class TreeAdapterTest {
         });
         mTreeAdapter = new TreeAdapter(mRootAdapter, mChildAdapterSupplier);
         mTreeAdapter.registerDataObserver(mObserver);
-        mTreeAdapter.registerDataObserver(new VerifyingAdapterObserver(mTreeAdapter));
+        mVerifyingObserver = new VerifyingAdapterObserver(mTreeAdapter);
+        mTreeAdapter.registerDataObserver(mVerifyingObserver);
         mTreeAdapter.setAllExpanded(true);
         mParent = new FrameLayout(RuntimeEnvironment.application);
         mContainerViewGroup = new FrameLayout(RuntimeEnvironment.application);
         mItemView = new View(RuntimeEnvironment.application);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mVerifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -120,8 +129,10 @@ public final class TreeAdapterTest {
             }
         });
         treeAdapter.setExpanded(0, true);
-        treeAdapter.registerDataObserver(new VerifyingAdapterObserver(treeAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(treeAdapter);
+        treeAdapter.registerDataObserver(verifyingObserver);
         assertThat(treeAdapter.getItemCount()).isEqualTo(11);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Test
@@ -656,9 +667,11 @@ public final class TreeAdapterTest {
                 return childAdapter;
             }
         });
-        treeAdapter.registerDataObserver(new VerifyingAdapterObserver(treeAdapter));
+        VerifyingAdapterObserver verifyingObserver = new VerifyingAdapterObserver(treeAdapter);
+        treeAdapter.registerDataObserver(verifyingObserver);
         rootAdapter.clear();
         assertThat(treeAdapter.getItemCount()).isEqualTo(0);
+        verifyingObserver.assertItemCountConsistent();
     }
 
     @Ignore
