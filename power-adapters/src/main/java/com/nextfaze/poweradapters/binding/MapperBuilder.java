@@ -10,17 +10,19 @@ import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.nextfaze.poweradapters.binding.BinderWrapper.overrideLayout;
 
 /**
  * Fluent-style builder that may be used to construct a type-safe, complex {@link Mapper}. This mapper evaluates a list
- * of rules for each class in an item's class hierarchy, and returns the {@link Binder} when a rule passes.
+ * of rules from first to last, and returns the {@link Binder} when both:
+ * <ul>
+ * <li>the item class is assignable to the rule class</li>
+ * <li>the predicate, if present, evaluates to {@code true}</li>
+ * </ul>
  */
 public final class MapperBuilder {
 
@@ -32,7 +34,7 @@ public final class MapperBuilder {
     };
 
     @NonNull
-    private final Map<Class<?>, List<Rule<?>>> mRules = new HashMap<>();
+    private final List<Rule<?>> mRules = new ArrayList<>();
 
     @Nullable
     private Boolean mStableIds;
@@ -57,12 +59,7 @@ public final class MapperBuilder {
                                   @LayoutRes int overrideItemLayoutResource,
                                   @NonNull Binder<? super T, ? extends View> binder,
                                   @NonNull Predicate<? super T> predicate) {
-        List<Rule<?>> rules = mRules.get(itemClass);
-        if (rules == null) {
-            rules = new ArrayList<>();
-        }
-        mRules.put(itemClass, rules);
-        rules.add(new Rule<>(predicate, overrideLayout(binder, overrideItemLayoutResource)));
+        mRules.add(new Rule<>(itemClass, predicate, overrideLayout(binder, overrideItemLayoutResource)));
         return this;
     }
 
@@ -117,7 +114,8 @@ public final class MapperBuilder {
 
     /**
      * Allows overriding whether or not the resulting {@link Mapper} will report as having stable IDs.
-     * @param stableIds {@code true} forcefully enables stable IDs, {@code false} forcefully disables them, {@code null}
+     * @param stableIds {@code true} forcefully enables stable IDs, {@code false} forcefully disables them, {@code
+     * null}
      * falls back to the default behaviour of {@link AbstractMapper#hasStableIds()}.
      * @return This builder, to allow chaining.
      * @see Mapper#hasStableIds()
@@ -132,13 +130,13 @@ public final class MapperBuilder {
 
     @NonNull
     public Mapper build() {
-        return new RuleMapper(new HashMap<>(mRules), mStableIds);
+        return new RuleMapper(new ArrayList<>(mRules), mStableIds);
     }
 
     private static final class RuleMapper extends AbstractMapper {
 
         @NonNull
-        private final Map<Class<?>, List<Rule<?>>> mRules;
+        private final List<Rule<?>> mRules;
 
         @NonNull
         private final Set<Binder<?, ?>> mAllBinders = new HashSet<>();
@@ -146,34 +144,23 @@ public final class MapperBuilder {
         @Nullable
         private final Boolean mStableIds;
 
-        RuleMapper(@NonNull Map<Class<?>, List<Rule<?>>> rules, @Nullable Boolean stableIds) {
+        RuleMapper(@NonNull List<Rule<?>> rules, @Nullable Boolean stableIds) {
             mRules = rules;
             mStableIds = stableIds;
-            for (List<Rule<?>> list : rules.values()) {
-                for (Rule rule : list) {
-                    mAllBinders.add(rule.binder);
-                }
+            for (Rule<?> rule : rules) {
+                mAllBinders.add(rule.binder);
             }
         }
 
         @Nullable
         @Override
         public Binder<?, ?> getBinder(@NonNull Object item, int position) {
-            // Apply rules in order for most specific type first,
-            // before moving up class hierarchy and applying those rules.
-            Class<?> itemClass = item.getClass();
-            while (itemClass != null) {
-                List<Rule<?>> rules = mRules.get(itemClass);
-                if (rules != null) {
-                    for (int i = 0; i < rules.size(); i++) {
-                        //noinspection unchecked
-                        Rule<Object> rule = (Rule<Object>) rules.get(i);
-                        if (rule.predicate.apply(item)) {
-                            return rule.binder;
-                        }
-                    }
+            for (int i = 0; i < mRules.size(); i++) {
+                //noinspection unchecked
+                Rule<Object> rule = (Rule<Object>) mRules.get(i);
+                if (rule.matches(item)) {
+                    return rule.binder;
                 }
-                itemClass = itemClass.getSuperclass();
             }
             return null;
         }
@@ -196,14 +183,24 @@ public final class MapperBuilder {
     private static final class Rule<T> {
 
         @NonNull
+        final Class<? extends T> itemClass;
+
+        @NonNull
         final Predicate<? super T> predicate;
 
         @NonNull
         final Binder<? super T, ?> binder;
 
-        Rule(@NonNull Predicate<? super T> predicate, @NonNull Binder<? super T, ?> binder) {
+        Rule(@NonNull Class<? extends T> itemClass,
+             @NonNull Predicate<? super T> predicate,
+             @NonNull Binder<? super T, ?> binder) {
+            this.itemClass = itemClass;
             this.predicate = predicate;
             this.binder = binder;
+        }
+
+        boolean matches(@NonNull T item) {
+            return itemClass.isAssignableFrom(item.getClass()) && predicate.apply(item);
         }
     }
 }
