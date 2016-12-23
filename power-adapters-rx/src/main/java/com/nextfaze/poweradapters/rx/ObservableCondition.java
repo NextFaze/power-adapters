@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters.data.rx;
+package com.nextfaze.poweradapters.rx;
 
 import android.os.Handler;
 import android.support.annotation.Nullable;

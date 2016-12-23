@@ -13,6 +13,10 @@ import static com.nextfaze.poweradapters.rx.internal.ThreadUtils.assertUiThread;
 
 public final class RxPowerAdapter {
 
+    private RxPowerAdapter() {
+        throw new AssertionError();
+    }
+
     @CheckResult
     @NonNull
     public static Observable<Integer> itemCount(@NonNull final PowerAdapter adapter) {
