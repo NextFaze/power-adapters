@@ -7,6 +7,7 @@
  5. `git tag -a X.Y.Z -m "Version X.Y.Z"` (where X.Y.Z is the new version)
  6. `./gradlew clean build`
  6. `./gradlew power-adapters:uploadArchives`
+ 6. `./gradlew power-adapters-rx:uploadArchives`
  6. `./gradlew power-adapters-data:uploadArchives`
  6. `./gradlew power-adapters-data-rx:uploadArchives`
  6. `./gradlew power-adapters-recyclerview-v7:uploadArchives`
