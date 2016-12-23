@@ -13,8 +13,8 @@ dependencies {
     testCompile rootProject.ext.mockito
     testCompile rootProject.ext.truth
     compile rootProject.ext.rxAndroid
-    compile project(':power-adapters')
     compile project(':power-adapters-data')
+    compile project(':power-adapters-rx')
     compile rootProject.ext.supportAnnotations
     compile rootProject.ext.supportRecyclerView
     provided rootProject.ext.lombok

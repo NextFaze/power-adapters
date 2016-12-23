@@ -1,12 +1,12 @@
-package com.nextfaze.poweradapters.data.rx;
+package com.nextfaze.poweradapters.rx;
 
-public final class ChangeEvent {
+public final class InsertEvent {
 
     private final int mPosition;
 
     private final int mCount;
 
-    ChangeEvent(int position, int count) {
+    public InsertEvent(int position, int count) {
         mPosition = position;
         mCount = count;
     }
@@ -27,7 +27,7 @@ public final class ChangeEvent {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChangeEvent changeEvent = (ChangeEvent) o;
+        InsertEvent changeEvent = (InsertEvent) o;
         return mPosition == changeEvent.mPosition && mCount == changeEvent.mCount;
     }
 

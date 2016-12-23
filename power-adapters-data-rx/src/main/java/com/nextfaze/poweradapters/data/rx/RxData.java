@@ -8,14 +8,19 @@ import com.nextfaze.poweradapters.data.AvailableObserver;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.ErrorObserver;
 import com.nextfaze.poweradapters.data.LoadingObserver;
+import com.nextfaze.poweradapters.rx.ChangeEvent;
+import com.nextfaze.poweradapters.rx.InsertEvent;
+import com.nextfaze.poweradapters.rx.MoveEvent;
+import com.nextfaze.poweradapters.rx.RemoveEvent;
 import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
+import rx.functions.Func1;
 
 import java.util.concurrent.Callable;
 
-import static com.nextfaze.poweradapters.data.rx.ThreadUtils.assertUiThread;
+import static com.nextfaze.poweradapters.rx.internal.ThreadUtils.assertUiThread;
 import static rx.Observable.fromCallable;
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
 
@@ -24,6 +29,17 @@ public final class RxData {
     // TODO: Refactor to support back pressure.
 
     private RxData() {
+    }
+
+    @CheckResult
+    @NonNull
+    public static Observable<Integer> size(@NonNull Data<?> data) {
+        return elements(data).map(new Func1<Data<?>, Integer>() {
+            @Override
+            public Integer call(Data<?> d) {
+                return d.size();
+            }
+        }).distinctUntilChanged();
     }
 
     @CheckResult
@@ -251,7 +267,7 @@ public final class RxData {
         return fromCallable(callable).subscribeOn(mainThread());
     }
 
-    private static class Observer extends SimpleDataObserver {
+    static class Observer extends SimpleDataObserver {
         @Override
         public void onChanged() {
         }
