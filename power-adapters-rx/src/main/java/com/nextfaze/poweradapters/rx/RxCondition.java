@@ -2,13 +2,45 @@ package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.CheckResult;
 import com.nextfaze.poweradapters.Condition;
+import com.nextfaze.poweradapters.Observer;
 import lombok.NonNull;
 import rx.Observable;
+import rx.Subscriber;
+import rx.android.MainThreadSubscription;
+
+import static com.nextfaze.poweradapters.rx.internal.ThreadUtils.assertUiThread;
 
 public final class RxCondition {
 
     private RxCondition() {
         throw new AssertionError();
+    }
+
+    @CheckResult
+    @NonNull
+    public static Observable<Boolean> value(@NonNull final Condition condition) {
+        return Observable.create(new Observable.OnSubscribe<Boolean>() {
+            @Override
+            public void call(final Subscriber<? super Boolean> subscriber) {
+                assertUiThread();
+                subscriber.onNext(condition.eval());
+                final Observer dataObserver = new Observer() {
+                    @Override
+                    public void onChanged() {
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(condition.eval());
+                        }
+                    }
+                };
+                condition.registerObserver(dataObserver);
+                subscriber.add(new MainThreadSubscription() {
+                    @Override
+                    protected void onUnsubscribe() {
+                        condition.unregisterObserver(dataObserver);
+                    }
+                });
+            }
+        }).distinctUntilChanged();
     }
 
     /**
