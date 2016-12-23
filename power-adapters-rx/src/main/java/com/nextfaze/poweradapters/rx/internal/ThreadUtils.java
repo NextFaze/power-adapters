@@ -1,14 +1,15 @@
-package com.nextfaze.poweradapters.data.rx;
+package com.nextfaze.poweradapters.rx.internal;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
 
-final class ThreadUtils {
+public final class ThreadUtils {
 
     private ThreadUtils() {
+        throw new AssertionError();
     }
 
-    static void assertUiThread() {
+    public static void assertUiThread() {
         if (myLooper() != getMainLooper()) {
             throw new IllegalStateException("Must be called from UI thread. Current thread: " + Thread.currentThread());
         }
