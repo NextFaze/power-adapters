@@ -8,7 +8,7 @@ import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
-public final class DataBindingAdapter<T> extends BindingAdapter {
+public final class DataBindingAdapter<T> extends BindingAdapter<T> {
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {

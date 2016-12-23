@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.data.rx;
 
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.data.Data;
+import com.nextfaze.poweradapters.rx.EqualityFunction;
 import lombok.NonNull;
 import rx.Observable;
 import rx.Observer;
@@ -49,21 +50,21 @@ public final class ObservableDataBuilder<T> {
     public ObservableDataBuilder() {
     }
 
-    /** Each emission of this observables overwrites the elements of the data. */
+    /** Each emission of this observable overwrites the elements of the data. */
     @NonNull
     public ObservableDataBuilder<T> contents(@Nullable Observable<? extends Collection<? extends T>> contents) {
         mContents = contents;
         return this;
     }
 
-    /** Each emission of this observables prepends to the elements of the data. */
+    /** Each emission of this observable prepends to the elements of the data. */
     @NonNull
     public ObservableDataBuilder<T> prepends(@Nullable Observable<? extends Collection<? extends T>> prepends) {
         mPrepends = prepends;
         return this;
     }
 
-    /** Each emission of this observables appends to the elements of the data. */
+    /** Each emission of this observable appends to the elements of the data. */
     @NonNull
     public ObservableDataBuilder<T> appends(@Nullable Observable<? extends Collection<? extends T>> appends) {
         mAppends = appends;
@@ -225,9 +226,5 @@ public final class ObservableDataBuilder<T> {
                         observer.onNext(0);
                     }
                 });
-    }
-
-    public interface EqualityFunction<T> {
-        boolean equal(@NonNull T a, @NonNull T b);
     }
 }

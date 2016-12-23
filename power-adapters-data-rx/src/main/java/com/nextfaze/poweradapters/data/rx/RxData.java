@@ -17,11 +17,7 @@ import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 import rx.functions.Func1;
 
-import java.util.concurrent.Callable;
-
-import static com.nextfaze.poweradapters.rx.internal.ThreadUtils.assertUiThread;
-import static rx.Observable.fromCallable;
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
+import static com.nextfaze.poweradapters.rx.internal.Utils.assertUiThread;
 
 public final class RxData {
 
@@ -248,11 +244,6 @@ public final class RxData {
                 });
             }
         });
-    }
-
-    @NonNull
-    static <T> Observable<T> mainThreadObservable(@NonNull Callable<T> callable) {
-        return fromCallable(callable).subscribeOn(mainThread());
     }
 
     static class Observer extends SimpleDataObserver {

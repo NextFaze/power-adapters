@@ -2,10 +2,9 @@ package com.nextfaze.poweradapters.data.rx;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
 import com.nextfaze.poweradapters.data.Data;
-import com.nextfaze.poweradapters.data.rx.ObservableDataBuilder.EqualityFunction;
+import com.nextfaze.poweradapters.rx.EqualityFunction;
+import com.nextfaze.poweradapters.rx.internal.DiffList;
 import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Action0;
@@ -14,22 +13,13 @@ import rx.functions.Actions;
 import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import static android.support.v7.util.DiffUtil.calculateDiff;
-import static com.nextfaze.poweradapters.data.rx.RxData.mainThreadObservable;
-import static java.lang.Math.min;
-import static rx.Observable.fromCallable;
-import static rx.schedulers.Schedulers.computation;
 
 @SuppressWarnings("WeakerAccess")
 final class ObservableData<T> extends Data<T> {
 
     @NonNull
-    final ArrayList<T> mData = new ArrayList<>();
+    final DiffList<T> mList;
 
     @NonNull
     final CompositeSubscription mSubscriptions = new CompositeSubscription();
@@ -46,42 +36,11 @@ final class ObservableData<T> extends Data<T> {
     @NonNull
     final Observable<Integer> mAvailableObservable;
 
-    @Nullable
-    final EqualityFunction<? super T> mIdentityEqualityFunction;
-
-    @Nullable
-    final EqualityFunction<? super T> mContentEqualityFunction;
-
     @NonNull
     final Observable<Boolean> mLoadingObservable;
 
     @NonNull
     final Observable<Throwable> mErrorObservable;
-
-    @NonNull
-    final ListUpdateCallback mListUpdateCallback = new ListUpdateCallback() {
-        @Override
-        public void onInserted(int position, int count) {
-            notifyItemRangeInserted(position, count);
-        }
-
-        @Override
-        public void onRemoved(int position, int count) {
-            notifyItemRangeRemoved(position, count);
-        }
-
-        @Override
-        public void onMoved(int fromPosition, int toPosition) {
-            notifyItemMoved(fromPosition, toPosition);
-        }
-
-        @Override
-        public void onChanged(int position, int count, Object payload) {
-            notifyItemRangeChanged(position, count);
-        }
-    };
-
-    final boolean mDetectMoves;
 
     private boolean mClear;
 
@@ -104,9 +63,7 @@ final class ObservableData<T> extends Data<T> {
         mAvailableObservable = availableObservable;
         mLoadingObservable = loadingObservable;
         mErrorObservable = errorObservable;
-        mIdentityEqualityFunction = identityEqualityFunction;
-        mContentEqualityFunction = contentEqualityFunction;
-        mDetectMoves = detectMoves;
+        mList = new DiffList<>(mDataObservable, identityEqualityFunction, contentEqualityFunction, detectMoves);
     }
 
     @CallSuper
@@ -167,7 +124,7 @@ final class ObservableData<T> extends Data<T> {
                 mSubscriptions.add(mContentsObservable.switchMap(new Func1<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> call(Collection<? extends T> contents) {
-                        return overwrite(contents);
+                        return mList.overwrite(contents);
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -177,7 +134,7 @@ final class ObservableData<T> extends Data<T> {
                 mSubscriptions.add(mPrependsObservable.switchMap(new Func1<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> call(Collection<? extends T> contents) {
-                        return prepend(contents);
+                        return mList.prepend(contents);
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -187,7 +144,7 @@ final class ObservableData<T> extends Data<T> {
                 mSubscriptions.add(mAppendsObservable.switchMap(new Func1<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> call(Collection<? extends T> contents) {
-                        return append(contents);
+                        return mList.append(contents);
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -198,129 +155,9 @@ final class ObservableData<T> extends Data<T> {
         mSubscriptions.clear();
     }
 
-    @NonNull
-    Observable<?> prepend(@NonNull final Collection<? extends T> list) {
-        return mainThreadObservable(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                mData.addAll(0, list);
-                notifyItemRangeInserted(0, list.size());
-                return null;
-            }
-        });
-    }
-
-    @NonNull
-    Observable<?> append(@NonNull final Collection<? extends T> list) {
-        return mainThreadObservable(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                int oldSize = mData.size();
-                mData.addAll(list);
-                notifyItemRangeInserted(oldSize, list.size());
-                return null;
-            }
-        });
-    }
-
-    @NonNull
-    Observable<?> overwriteBasic(@NonNull final Collection<? extends T> collection) {
-        return mainThreadObservable(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                final List<T> existing = mData;
-                final int oldSize = existing.size();
-                existing.clear();
-                existing.addAll(collection);
-                final int newSize = collection.size();
-                final int deltaSize = newSize - oldSize;
-
-                // Issue removal/insertion notifications. These must happen first, otherwise downstream item count
-                // verification will complain that our size has changed without a corresponding structural notification.
-                if (deltaSize < 0) {
-                    notifyItemRangeRemoved(oldSize + deltaSize, -deltaSize);
-                } else if (deltaSize > 0) {
-                    notifyItemRangeInserted(oldSize, deltaSize);
-                }
-
-                // Finally, issue a change notification for the range of elements not accounted for above.
-                final int changed = min(oldSize, newSize);
-                if (changed > 0) {
-                    notifyItemRangeChanged(0, changed);
-                }
-                return null;
-            }
-        });
-    }
-
-    @NonNull
-    Observable<?> overwrite(@NonNull Collection<? extends T> collection) {
-        if (mIdentityEqualityFunction == null || mContentEqualityFunction == null) {
-            return overwriteBasic(collection);
-        }
-        return overwriteUsingDiffUtil(new ArrayList<>(collection), mIdentityEqualityFunction,
-                mContentEqualityFunction);
-    }
-
-    // TODO: Fix race condition between async diff util overwrites and the others.
-
-    @NonNull
-    Observable<?> overwriteUsingDiffUtil(@NonNull final List<? extends T> list,
-                                         @NonNull final EqualityFunction<? super T> identityEqualityFunction,
-                                         @NonNull final EqualityFunction<? super T> contentEqualityFunction) {
-        final List<T> existing = new ArrayList<>(mData);
-        return fromCallable(new Callable<DiffUtil.DiffResult>() {
-            @Override
-            public DiffUtil.DiffResult call() throws Exception {
-                DiffUtil.Callback callback = new DiffUtil.Callback() {
-                    @Override
-                    public int getOldListSize() {
-                        return existing.size();
-                    }
-
-                    @Override
-                    public int getNewListSize() {
-                        return list.size();
-                    }
-
-                    @Override
-                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return identityEqualityFunction
-                                .equal(existing.get(oldItemPosition), list.get(newItemPosition));
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return contentEqualityFunction
-                                .equal(existing.get(oldItemPosition), list.get(newItemPosition));
-                    }
-                };
-                return calculateDiff(callback, mDetectMoves);
-            }
-        }).subscribeOn(computation()).flatMap(new Func1<DiffUtil.DiffResult, Observable<?>>() {
-            @Override
-            public Observable<?> call(final DiffUtil.DiffResult result) {
-                return mainThreadObservable(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        mData.clear();
-                        mData.addAll(list);
-                        result.dispatchUpdatesTo(mListUpdateCallback);
-                        return null;
-                    }
-                });
-            }
-        });
-    }
-
     void clear() {
-        mData.clear();
-        int size = mData.size();
-        if (size > 0) {
-            mData.clear();
-            setAvailable(Integer.MAX_VALUE);
-            notifyItemRangeRemoved(0, size);
-        }
+        mList.clear();
+        setAvailable(Integer.MAX_VALUE);
         mClear = false;
     }
 
@@ -351,12 +188,12 @@ final class ObservableData<T> extends Data<T> {
     @NonNull
     @Override
     public T get(int position, int flags) {
-        return mData.get(position);
+        return mList.get(position);
     }
 
     @Override
     public int size() {
-        return mData.size();
+        return mList.size();
     }
 
     @Override

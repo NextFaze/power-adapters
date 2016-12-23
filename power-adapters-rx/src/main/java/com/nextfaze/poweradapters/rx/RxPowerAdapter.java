@@ -9,7 +9,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 
-import static com.nextfaze.poweradapters.rx.internal.ThreadUtils.assertUiThread;
+import static com.nextfaze.poweradapters.rx.internal.Utils.assertUiThread;
 
 public final class RxPowerAdapter {
 
