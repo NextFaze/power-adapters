@@ -52,3 +52,6 @@ dependencies {
     provided rootProject.ext.lombok
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha6'
 }
+
+println "Environmental variables:"
+System.getenv().each { k, v -> println "${k}: ${v}" }
