@@ -1,9 +1,14 @@
 package com.nextfaze.poweradapters.rx.internal;
 
+import android.support.annotation.RestrictTo;
 import android.support.v7.util.ListUpdateCallback;
 import com.nextfaze.poweradapters.internal.DataObservable;
 import lombok.NonNull;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 public final class DataObservableListUpdateCallback implements ListUpdateCallback {
 
     @NonNull

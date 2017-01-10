@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.rx.internal;
 
+import android.support.annotation.RestrictTo;
 import lombok.NonNull;
 import rx.Observable;
 
@@ -7,9 +8,12 @@ import java.util.concurrent.Callable;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static rx.Observable.fromCallable;
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
 
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 public final class Utils {
 
     private Utils() {

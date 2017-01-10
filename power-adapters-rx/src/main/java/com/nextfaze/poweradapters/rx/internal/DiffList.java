@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.rx.internal;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
 import com.nextfaze.poweradapters.internal.DataObservable;
@@ -14,12 +15,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static android.support.v7.util.DiffUtil.calculateDiff;
 import static com.nextfaze.poweradapters.rx.internal.Utils.mainThreadObservable;
 import static java.lang.Math.min;
 import static rx.Observable.fromCallable;
 import static rx.schedulers.Schedulers.computation;
 
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 @SuppressWarnings("WeakerAccess")
 public final class DiffList<T> {
 

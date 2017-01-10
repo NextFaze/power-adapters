@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.RestrictTo;
 import lombok.NonNull;
 
 import java.util.AbstractList;
@@ -7,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static java.lang.Math.min;
 import static java.util.Collections.swap;
 
-/** @hide Not intended for public use. */
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 public final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @NonNull

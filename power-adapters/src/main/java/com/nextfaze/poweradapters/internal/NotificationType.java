@@ -1,8 +1,12 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.RestrictTo;
 import lombok.NonNull;
 
-/** @hide Not for public use. */
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 public enum NotificationType {
     /** Only use {@link DataObservable#notifyDataSetChanged()}. */
     COARSE {

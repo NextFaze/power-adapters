@@ -1,11 +1,15 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.RestrictTo;
 import com.nextfaze.poweradapters.DataObserver;
 import lombok.NonNull;
 
 import java.util.ArrayList;
 
-/** @hide Not intended for public use. */
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
+/** For internal use only. */
+@RestrictTo(LIBRARY_GROUP)
 public final class DataObservable {
 
     @NonNull

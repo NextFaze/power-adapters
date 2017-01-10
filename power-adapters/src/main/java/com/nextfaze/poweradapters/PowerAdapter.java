@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.RestrictTo;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.internal.DataObservable;
@@ -11,6 +12,7 @@ import lombok.NonNull;
 
 import java.util.Collection;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
 import static java.util.Arrays.asList;
 
@@ -202,6 +204,13 @@ public abstract class PowerAdapter {
      */
     @CallSuper
     protected void onLastObserverUnregistered() {
+    }
+
+    /** For internal use only. */
+    @RestrictTo(LIBRARY_GROUP)
+    @NonNull
+    protected final DataObservable getDataObservable() {
+        return mDataObservable;
     }
 
     /**

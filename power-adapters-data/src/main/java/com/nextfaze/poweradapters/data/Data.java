@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.data;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
+import android.support.annotation.RestrictTo;
 import android.support.annotation.UiThread;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
@@ -14,6 +15,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
 
 /**
@@ -231,6 +233,13 @@ public abstract class Data<T> implements Iterable<T> {
     /** Returns the number of registered error observers. */
     protected final int getErrorObserverCount() {
         return mErrorObservable.getObserverCount();
+    }
+
+    /** For internal use only. */
+    @RestrictTo(LIBRARY_GROUP)
+    @NonNull
+    protected final DataObservable getDataObservable() {
+        return mDataObservable;
     }
 
     /**
