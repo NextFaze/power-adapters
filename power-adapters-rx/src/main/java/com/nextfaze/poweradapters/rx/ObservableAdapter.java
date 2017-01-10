@@ -48,7 +48,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
         mContentsObservable = contentsObservable;
         mPrependsObservable = prependsObservable;
         mAppendsObservable = appendsObservable;
-        mList = new DiffList<>(mDataObservable, identityEqualityFunction, contentEqualityFunction, detectMoves);
+        mList = new DiffList<>(getDataObservable(), identityEqualityFunction, contentEqualityFunction, detectMoves);
     }
 
     @Override

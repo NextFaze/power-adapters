@@ -63,7 +63,7 @@ final class ObservableData<T> extends Data<T> {
         mAvailableObservable = availableObservable;
         mLoadingObservable = loadingObservable;
         mErrorObservable = errorObservable;
-        mList = new DiffList<>(mDataObservable, identityEqualityFunction, contentEqualityFunction, detectMoves);
+        mList = new DiffList<>(getDataObservable(), identityEqualityFunction, contentEqualityFunction, detectMoves);
     }
 
     @CallSuper
