@@ -2,11 +2,14 @@ package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.PowerAdapter;
+import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.Mapper;
 import lombok.NonNull;
 import rx.Observable;
 
 import java.util.Collection;
+
+import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 
 public final class ObservableAdapterBuilder<T> {
 
@@ -34,6 +37,10 @@ public final class ObservableAdapterBuilder<T> {
     };
 
     private boolean mDetectMoves = true;
+
+    public ObservableAdapterBuilder(@NonNull Binder<? extends T, ?> binder) {
+        this(singletonMapper(binder));
+    }
 
     public ObservableAdapterBuilder(@NonNull Mapper mapper) {
         mMapper = mapper;
