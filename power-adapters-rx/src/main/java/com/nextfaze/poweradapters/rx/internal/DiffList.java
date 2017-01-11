@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
-import static android.support.v7.util.DiffUtil.calculateDiff;
 import static com.nextfaze.poweradapters.rx.internal.Utils.mainThreadObservable;
 import static java.lang.Math.min;
 import static rx.Observable.fromCallable;
@@ -103,8 +102,12 @@ public final class DiffList<T> {
         if (mIdentityEqualityFunction == null || mContentEqualityFunction == null) {
             return overwriteBasic(collection);
         }
-        return overwriteUsingDiffUtil(new ArrayList<>(collection), mIdentityEqualityFunction,
-                mContentEqualityFunction);
+        if (collection instanceof List) {
+            //noinspection unchecked
+            return overwriteUsingDiffUtil((List<? extends T>) collection,
+                    mIdentityEqualityFunction, mContentEqualityFunction);
+        }
+        return overwriteUsingDiffUtil(new ArrayList<>(collection), mIdentityEqualityFunction, mContentEqualityFunction);
     }
 
     @NonNull
@@ -140,52 +143,87 @@ public final class DiffList<T> {
     // TODO: Fix race condition between async diff util overwrites and the others.
 
     @NonNull
-    Observable<?> overwriteUsingDiffUtil(@NonNull final List<? extends T> list,
+    Observable<?> overwriteUsingDiffUtil(@NonNull final List<? extends T> newContents,
                                          @NonNull final EqualityFunction<? super T> identityEqualityFunction,
                                          @NonNull final EqualityFunction<? super T> contentEqualityFunction) {
-        final List<T> existing = new ArrayList<>(mData);
-        return fromCallable(new Callable<DiffUtil.DiffResult>() {
+        return copyContents().switchMap(new Func1<List<? extends T>, Observable<?>>() {
             @Override
-            public DiffUtil.DiffResult call() throws Exception {
-                DiffUtil.Callback callback = new DiffUtil.Callback() {
-                    @Override
-                    public int getOldListSize() {
-                        return existing.size();
-                    }
-
-                    @Override
-                    public int getNewListSize() {
-                        return list.size();
-                    }
-
-                    @Override
-                    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                        return identityEqualityFunction
-                                .equal(existing.get(oldItemPosition), list.get(newItemPosition));
-                    }
-
-                    @Override
-                    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                        return contentEqualityFunction
-                                .equal(existing.get(oldItemPosition), list.get(newItemPosition));
-                    }
-                };
-                return calculateDiff(callback, mDetectMoves);
-            }
-        }).subscribeOn(computation()).flatMap(new Func1<DiffUtil.DiffResult, Observable<?>>() {
-            @Override
-            public Observable<?> call(final DiffUtil.DiffResult result) {
-                return mainThreadObservable(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        mData.clear();
-                        mData.addAll(list);
-                        result.dispatchUpdatesTo(mListUpdateCallback);
-                        return null;
-                    }
-                });
+            public Observable<?> call(@NonNull final List<? extends T> existingContentsCopy) {
+                return calculateDiff(existingContentsCopy, newContents, identityEqualityFunction, contentEqualityFunction)
+                        .switchMap(new Func1<DiffUtil.DiffResult, Observable<?>>() {
+                            @Override
+                            public Observable<?> call(final DiffUtil.DiffResult diffResult) {
+                                return applyNewContentsAndDispatchDiffNotifications(newContents, diffResult);
+                            }
+                        });
             }
         });
     }
 
+    @NonNull
+    Observable<List<? extends T>> copyContents() {
+        return mainThreadObservable(new Callable<List<? extends T>>() {
+            @Override
+            public List<? extends T> call() throws Exception {
+                return new ArrayList<>(mData);
+            }
+        });
+    }
+
+    @NonNull
+    Observable<DiffUtil.DiffResult> calculateDiff(@NonNull final List<? extends T> oldContents,
+                                                  @NonNull final List<? extends T> newContents,
+                                                  @NonNull final EqualityFunction<? super T> identityEqualityFunction,
+                                                  @NonNull final EqualityFunction<? super T> contentEqualityFunction) {
+        return fromCallable(new Callable<DiffUtil.DiffResult>() {
+            @Override
+            public DiffUtil.DiffResult call() throws Exception {
+                return diff(oldContents, newContents, identityEqualityFunction, contentEqualityFunction);
+            }
+        }).subscribeOn(computation());
+    }
+
+    @NonNull
+    Observable<Void> applyNewContentsAndDispatchDiffNotifications(@NonNull final List<? extends T> newContents,
+                                                                  @NonNull final DiffUtil.DiffResult diffResult) {
+        return mainThreadObservable(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                mData.clear();
+                mData.addAll(newContents);
+                diffResult.dispatchUpdatesTo(mListUpdateCallback);
+                return null;
+            }
+        });
+    }
+
+    @NonNull
+    DiffUtil.DiffResult diff(@NonNull final List<? extends T> oldList,
+                             @NonNull final List<? extends T> newList,
+                             @NonNull final EqualityFunction<? super T> identityEqualityFunction,
+                             @NonNull final EqualityFunction<? super T> contentEqualityFunction) {
+        return DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return identityEqualityFunction
+                        .equal(oldList.get(oldItemPosition), newList.get(newItemPosition));
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                return contentEqualityFunction
+                        .equal(oldList.get(oldItemPosition), newList.get(newItemPosition));
+            }
+        }, mDetectMoves);
+    }
 }
