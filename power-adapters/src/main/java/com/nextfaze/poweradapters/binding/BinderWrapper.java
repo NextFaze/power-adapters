@@ -15,8 +15,8 @@ public abstract class BinderWrapper<T, V extends View> extends Binder<T, V> {
     private final Binder<? super T, ? super V> mBinder;
 
     @NonNull
-    static <T, V extends View> Binder<? super T, ? extends V> overrideLayout(@NonNull Binder<? super T, V> binder,
-                                                                             @LayoutRes final int layoutResource) {
+    static <T, V extends View> Binder<T, V> overrideLayout(@NonNull Binder<T, V> binder,
+                                                           @LayoutRes final int layoutResource) {
         if (layoutResource <= 0) {
             return binder;
         }

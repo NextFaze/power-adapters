@@ -79,7 +79,7 @@ final class Utils {
         return adapter.showOnlyWhile(dataHasMoreAvailable);
     }
 
-    static void showEditDialog(@NonNull Context context, @NonNull List<? super Object> data, int position) {
+    static void showEditDialog(@NonNull Context context, @NonNull List<? super NewsItem> data, int position) {
         List<Item> items = ImmutableList.of(
                 new Item("Change", v -> data.set(position, NewsItem.create("Changed"))),
                 new Item("Clear", v -> data.clear())

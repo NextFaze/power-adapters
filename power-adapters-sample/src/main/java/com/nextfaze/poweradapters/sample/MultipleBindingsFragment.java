@@ -55,7 +55,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
     };
 
     @NonNull
-    private final Mapper mMapper = new MapperBuilder()
+    private final Mapper<Object> mMapper = new MapperBuilder<>()
             .bind(NewsSection.class, new NewsSectionBinder())
             .bind(NewsItem.class, mPoliticsNewsItemBinder, newsItem -> newsItem.getType() == POLITICS)
             .bind(NewsItem.class, new NewsItemBinder(mData.asList()))
@@ -67,7 +67,7 @@ public final class MultipleBindingsFragment extends BaseFragment {
 
     @NonNull
     private PowerAdapter createSimpleAdapter(@NonNull Data<?> data) {
-        return new DataBindingAdapter<>(data, mMapper)
+        return new DataBindingAdapter<>(mMapper, data)
                 .prepend(asAdapter(R.layout.news_header_item).showOnlyWhile(data(data, d -> !d.isEmpty())))
                 .compose(new DividerAdapterBuilder()
                         .innerResource(R.layout.list_divider_item)

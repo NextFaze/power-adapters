@@ -29,7 +29,7 @@ final class Cats {
 
     @NonNull
     static PowerAdapter createAdapter(@NonNull Data<? extends Cat> data) {
-        return new DataBindingAdapter<>(data, sCatBinder)
+        return new DataBindingAdapter<>(sCatBinder, data)
                 .append(loadingIndicator(data), loadNextButton(data));
     }
 }

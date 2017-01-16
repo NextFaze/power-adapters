@@ -12,7 +12,7 @@ public abstract class BindingAdapter<T> extends PowerAdapter {
     @NonNull
     private final BindingEngine<T> mEngine;
 
-    protected BindingAdapter(@NonNull Mapper mapper) {
+    protected BindingAdapter(@NonNull Mapper<? super T> mapper) {
         mEngine = new BindingEngine<>(mapper, new ItemAccessor<T>() {
             @NonNull
             @Override

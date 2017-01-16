@@ -21,29 +21,28 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
     @NonNull
     private final BindingEngine<E> mEngine;
 
-    public ListBindingAdapter(@NonNull Binder<? extends E, ?> binder) {
+    public ListBindingAdapter(@NonNull Binder<? super E, ?> binder) {
         this(singletonMapper(binder));
     }
 
     @SuppressWarnings("WeakerAccess")
-    public ListBindingAdapter(@NonNull Mapper mapper) {
+    public ListBindingAdapter(@NonNull Mapper<? super E> mapper) {
         this(mapper, Collections.<E>emptyList());
     }
 
-    public ListBindingAdapter(@NonNull Binder<? extends E, ?> binder, @NonNull List<? extends E> list) {
+    public ListBindingAdapter(@NonNull Binder<? super E, ?> binder, @NonNull List<? extends E> list) {
         this(singletonMapper(binder), list);
     }
 
-    public ListBindingAdapter(@NonNull Mapper mapper, @NonNull List<? extends E> list) {
+    public ListBindingAdapter(@NonNull Mapper<? super E> mapper, @NonNull List<? extends E> list) {
         super(list);
-        ItemAccessor<E> itemAccessor = new ItemAccessor<E>() {
+        mEngine = new BindingEngine<>(mapper, new ItemAccessor<E>() {
             @NonNull
             @Override
             public E get(int position) {
                 return ListBindingAdapter.this.get(position);
             }
-        };
-        mEngine = new BindingEngine<>(mapper, itemAccessor);
+        });
     }
 
     @NonNull

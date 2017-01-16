@@ -1,9 +1,11 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.Nullable;
+import android.view.View;
 import lombok.NonNull;
 
 import java.util.Collection;
+import java.util.Set;
 
 import static java.util.Collections.singleton;
 
@@ -14,29 +16,34 @@ public final class Mappers {
 
     /** Creates a {@link Mapper} that only ever uses the single supplied {@link Binder}. */
     @NonNull
-    public static Mapper singletonMapper(@NonNull Binder<?, ?> binder) {
-        return new SingletonMapper(binder);
+    public static <T> Mapper<T> singletonMapper(@NonNull Binder<T, ?> binder) {
+        //noinspection unchecked
+        return new SingletonMapper<>((Binder<T, View>) binder);
     }
 
-    private static class SingletonMapper extends AbstractMapper {
+    private static final class SingletonMapper<T> extends AbstractMapper<T> {
 
         @NonNull
-        private final Binder<?, ?> mBinder;
+        private final Binder<T, View> mBinder;
 
-        SingletonMapper(@NonNull Binder<?, ?> binder) {
+        @NonNull
+        private final Set<Binder<T, View>> mAllBinders;
+
+        SingletonMapper(@NonNull Binder<T, View> binder) {
             mBinder = binder;
+            mAllBinders = singleton(mBinder);
         }
 
         @Nullable
         @Override
-        public Binder<?, ?> getBinder(@NonNull Object item, int position) {
+        public Binder<T, View> getBinder(@NonNull T item, int position) {
             return mBinder;
         }
 
         @NonNull
         @Override
-        public Collection<? extends Binder<?, ?>> getAllBinders() {
-            return singleton(mBinder);
+        public Collection<? extends Binder<T, ?>> getAllBinders() {
+            return mAllBinders;
         }
     }
 }

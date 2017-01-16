@@ -43,7 +43,7 @@ public final class ConcatFragment extends BaseFragment {
     @NonNull
     private Pair<NewsData, PowerAdapter> createPair(@NonNull NewsData data,
                                                     @NonNull NewsItemBinder newsItemBinder) {
-        PowerAdapter adapter = new DataBindingAdapter<>(data, newsItemBinder);
+        PowerAdapter adapter = new DataBindingAdapter<>(newsItemBinder, data);
 
         // Header
         adapter = adapter.prepend(asAdapter(R.layout.news_header_item));

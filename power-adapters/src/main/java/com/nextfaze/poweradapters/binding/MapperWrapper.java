@@ -1,16 +1,17 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.Nullable;
+import android.view.View;
 import lombok.NonNull;
 
 import java.util.Collection;
 
-public class MapperWrapper implements Mapper {
+public class MapperWrapper<T> implements Mapper<T> {
 
     @NonNull
-    private final Mapper mMapper;
+    private final Mapper<T> mMapper;
 
-    public MapperWrapper(@NonNull Mapper mapper) {
+    public MapperWrapper(@NonNull Mapper<T> mapper) {
         mMapper = mapper;
     }
 
@@ -21,13 +22,13 @@ public class MapperWrapper implements Mapper {
 
     @Nullable
     @Override
-    public Binder<?, ?> getBinder(@NonNull Object item, int position) {
+    public Binder<T, View> getBinder(@NonNull T item, int position) {
         return mMapper.getBinder(item, position);
     }
 
     @NonNull
     @Override
-    public Collection<? extends Binder<?, ?>> getAllBinders() {
+    public Collection<? extends Binder<T, ?>> getAllBinders() {
         return mMapper.getAllBinders();
     }
 

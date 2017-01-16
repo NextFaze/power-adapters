@@ -25,7 +25,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
     final CompositeSubscription mSubscriptions = new CompositeSubscription();
 
     @NonNull
-    final Mapper mMapper;
+    final Mapper<? super T> mMapper;
 
     @Nullable
     final Observable<? extends Collection<? extends T>> mContentsObservable;
@@ -36,7 +36,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
     @Nullable
     final Observable<? extends Collection<? extends T>> mAppendsObservable;
 
-    ObservableAdapter(@NonNull Mapper mapper,
+    ObservableAdapter(@NonNull Mapper<? super T> mapper,
                       @Nullable Observable<? extends Collection<? extends T>> contentsObservable,
                       @Nullable Observable<? extends Collection<? extends T>> prependsObservable,
                       @Nullable Observable<? extends Collection<? extends T>> appendsObservable,

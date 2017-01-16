@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.Nullable;
+import android.view.View;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.Mapper;
@@ -14,7 +15,7 @@ import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 public final class ObservableAdapterBuilder<T> {
 
     @NonNull
-    private final Mapper mMapper;
+    private final Mapper<? super T> mMapper;
 
     @Nullable
     private Observable<? extends Collection<? extends T>> mContents;
@@ -38,11 +39,11 @@ public final class ObservableAdapterBuilder<T> {
 
     private boolean mDetectMoves = true;
 
-    public ObservableAdapterBuilder(@NonNull Binder<? extends T, ?> binder) {
+    public ObservableAdapterBuilder(@NonNull Binder<? super T, ? extends View> binder) {
         this(singletonMapper(binder));
     }
 
-    public ObservableAdapterBuilder(@NonNull Mapper mapper) {
+    public ObservableAdapterBuilder(@NonNull Mapper<? super T> mapper) {
         mMapper = mapper;
     }
 

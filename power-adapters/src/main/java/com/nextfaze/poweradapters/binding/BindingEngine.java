@@ -10,15 +10,15 @@ import lombok.NonNull;
 final class BindingEngine<T> {
 
     @NonNull
-    private final WeakMap<Object, Binder<? super T, ?>> mBinders = new WeakMap<>();
+    private final WeakMap<Object, Binder<?, ?>> mViewTypeToBinder = new WeakMap<>();
 
     @NonNull
-    private final Mapper mMapper;
+    private final Mapper<? super T> mMapper;
 
     @NonNull
-    private final ItemAccessor<T> mItemAccessor;
+    private final ItemAccessor<? extends T> mItemAccessor;
 
-    BindingEngine(@NonNull Mapper mapper, @NonNull ItemAccessor<T> itemAccessor) {
+    BindingEngine(@NonNull Mapper<? super T> mapper, @NonNull ItemAccessor<? extends T> itemAccessor) {
         mMapper = mapper;
         mItemAccessor = itemAccessor;
     }
@@ -30,7 +30,7 @@ final class BindingEngine<T> {
 
     @NonNull
     View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
-        Binder<?, ?> binder = mBinders.get(viewType);
+        Binder<?, ?> binder = mViewTypeToBinder.get(viewType);
         if (binder == null) {
             // Should never happen, as callers are expected to invoke getItemViewType(int) before invoking this method.
             throw new AssertionError("No binder associated with view type");
@@ -49,7 +49,7 @@ final class BindingEngine<T> {
         T item = getItem(position);
         Binder<? super T, ?> binder = binderOrThrow(item, position);
         Object viewType = binder.getViewType(item, position);
-        mBinders.put(viewType, binder);
+        mViewTypeToBinder.put(viewType, binder);
         return viewType;
     }
 
@@ -67,10 +67,9 @@ final class BindingEngine<T> {
         return mMapper.hasStableIds();
     }
 
-    @SuppressWarnings("unchecked")
     @NonNull
-    private Binder<? super T, View> binderOrThrow(@NonNull Object item, int position) {
-        Binder<T, View> binder = (Binder<T, View>) mMapper.getBinder(item, position);
+    private Binder<? super T, View> binderOrThrow(@NonNull T item, int position) {
+        Binder<? super T, View> binder = mMapper.getBinder(item, position);
         if (binder == null) {
             throw new AssertionError("No binder for item " + item + " at position " + position);
         }

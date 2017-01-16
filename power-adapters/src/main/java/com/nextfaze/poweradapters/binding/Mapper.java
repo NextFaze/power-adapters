@@ -7,8 +7,11 @@ import lombok.NonNull;
 
 import java.util.Collection;
 
-/** Used to determine which {@link Binder} should be used to bind an item to a {@link View} in a {@link PowerAdapter}. */
-public interface Mapper {
+/**
+ * Used to determine which {@link Binder} should be used to bind an item to a {@link View} in a {@link PowerAdapter}.
+ * @param <T> The type of items for which this {@code Mapper} can supply binders.
+ */
+public interface Mapper<T> {
     /**
      * Given a position and item object, returns a binder that should be used to bind it to a {@link View}.
      * @param item The data object to be bound, never {@code null}.
@@ -17,11 +20,11 @@ public interface Mapper {
      * support the object.
      */
     @Nullable
-    Binder<?, ?> getBinder(@NonNull Object item, int position);
+    Binder<T, View> getBinder(@NonNull T item, int position);
 
-    /** Return a collection containing all of the possible binders this mapper could respond with. */
+    /** Return an immutable collection of the possible binders this mapper could respond with. */
     @NonNull
-    Collection<? extends Binder<?, ?>> getAllBinders();
+    Collection<? extends Binder<T, ?>> getAllBinders();
 
     /**
      * Returns whether the IDs supplied by all binders are considered stable.

@@ -3,7 +3,7 @@ package com.nextfaze.poweradapters.binding;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class AbstractMapper implements Mapper {
+public abstract class AbstractMapper<T> implements Mapper<T> {
 
     /**
      * By default, if only a single {@link Binder} is present, returns {@link Binder#hasStableIds()}, otherwise returns

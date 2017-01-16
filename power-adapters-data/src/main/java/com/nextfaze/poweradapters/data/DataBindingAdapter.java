@@ -41,13 +41,25 @@ public final class DataBindingAdapter<T> extends BindingAdapter<T> {
     @NonNull
     private final Data<? extends T> mData;
 
-    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Binder<? extends T, ?> binder) {
-        this(data, singletonMapper(binder));
+    public DataBindingAdapter(@NonNull Binder<? super T, ?> binder, @NonNull Data<? extends T> data) {
+        this(singletonMapper(binder), data);
     }
 
-    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Mapper mapper) {
+    public DataBindingAdapter(@NonNull Mapper<? super T> mapper, @NonNull Data<? extends T> data) {
         super(mapper);
         mData = data;
+    }
+
+    /** @deprecated Use {@link DataBindingAdapter#DataBindingAdapter(Binder, Data)} instead. */
+    @Deprecated
+    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Binder<? super T, ?> binder) {
+        this(singletonMapper(binder), data);
+    }
+
+    /** @deprecated Use {@link DataBindingAdapter#DataBindingAdapter(Mapper, Data)} instead. */
+    @Deprecated
+    public DataBindingAdapter(@NonNull Data<? extends T> data, @NonNull Mapper<? super T> mapper) {
+        this(mapper, data);
     }
 
     @NonNull

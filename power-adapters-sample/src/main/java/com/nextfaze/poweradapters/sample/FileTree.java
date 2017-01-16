@@ -68,7 +68,7 @@ final class FileTree {
             }
         };
 
-        PowerAdapter adapter = new DataBindingAdapter<>(data, binder)
+        PowerAdapter adapter = new DataBindingAdapter<>(binder, data)
                 .compose(nest(position -> {
                     File f = data.get(position);
                     PowerAdapter childAdapter = createPeekAdapter(f, tree);

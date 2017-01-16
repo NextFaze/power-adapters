@@ -17,9 +17,9 @@ import static java.util.Collections.emptySet;
 class NewsItemBinder extends Binder<NewsItem, NewsItemView> {
 
     @NonNull
-    private final List<Object> mList;
+    private final List<? super NewsItem> mList;
 
-    NewsItemBinder(@NonNull List<Object> list) {
+    NewsItemBinder(@NonNull List<? super NewsItem> list) {
         mList = list;
     }
 

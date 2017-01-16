@@ -4,7 +4,7 @@ import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
 import lombok.NonNull;
 
-final class NewsData extends IncrementalArrayData<Object> {
+final class NewsData extends IncrementalArrayData<NewsItem> {
 
     @NonNull
     private final NewsService mNewsService = new NewsService();

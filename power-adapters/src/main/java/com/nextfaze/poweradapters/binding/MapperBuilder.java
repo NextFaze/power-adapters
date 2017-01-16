@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.nextfaze.poweradapters.binding.BinderWrapper.overrideLayout;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * Fluent-style builder that may be used to construct a type-safe, complex {@link Mapper}. This mapper evaluates a list
@@ -24,7 +25,7 @@ import static com.nextfaze.poweradapters.binding.BinderWrapper.overrideLayout;
  * <li>the predicate, if present, evaluates to {@code true}</li>
  * </ul>
  */
-public final class MapperBuilder {
+public final class MapperBuilder<T> {
 
     private static final Predicate<Object> ALWAYS = new Predicate<Object>() {
         @Override
@@ -34,7 +35,7 @@ public final class MapperBuilder {
     };
 
     @NonNull
-    private final List<Rule<?>> mRules = new ArrayList<>();
+    private final List<Rule> mRules = new ArrayList<>();
 
     @Nullable
     private Boolean mStableIds;
@@ -51,15 +52,15 @@ public final class MapperBuilder {
      * @param binder The binder to be used to bind the specified item type.
      * @param predicate A predicate that will be evaluated for each item instance to determine if the specified binder
      * is suitable.
-     * @param <T> The type of item object.
      * @return This builder, to allow chaining.
      */
     @NonNull
-    public <T> MapperBuilder bind(@NonNull Class<? extends T> itemClass,
-                                  @LayoutRes int overrideItemLayoutResource,
-                                  @NonNull Binder<? super T, ? extends View> binder,
-                                  @NonNull Predicate<? super T> predicate) {
-        mRules.add(new Rule<>(itemClass, predicate, overrideLayout(binder, overrideItemLayoutResource)));
+    public <E extends T> MapperBuilder<T> bind(@NonNull Class<E> itemClass,
+                                               @LayoutRes int overrideItemLayoutResource,
+                                               @NonNull Binder<? super E, ?> binder,
+                                               @NonNull Predicate<? super E> predicate) {
+        //noinspection unchecked
+        mRules.add(new Rule(itemClass, (Predicate<Object>) predicate, overrideLayout(binder, overrideItemLayoutResource)));
         return this;
     }
 
@@ -70,13 +71,13 @@ public final class MapperBuilder {
      * @param overrideItemLayoutResource The layout resource that will be inflated instead of the view provided by
      * {@link Binder#newView(ViewGroup)}. May be {@code 0}, in which case this parameter does nothing.
      * @param binder The binder to be used to bind the specified item type.
-     * @param <T> The type of item object.
      * @return This builder, to allow chaining.
      */
     @NonNull
-    public <T> MapperBuilder bind(@NonNull Class<? extends T> itemClass,
-                                  @LayoutRes int overrideItemLayoutResource,
-                                  @NonNull Binder<? super T, ? extends View> binder) {
+    public <E extends T> MapperBuilder<T> bind(@NonNull Class<E> itemClass,
+                                               @LayoutRes int overrideItemLayoutResource,
+                                               @NonNull Binder<? super E, ?> binder) {
+        //noinspection unchecked
         return bind(itemClass, overrideItemLayoutResource, binder, ALWAYS);
     }
 
@@ -89,13 +90,12 @@ public final class MapperBuilder {
      * @param binder The binder to be used to bind the specified item type.
      * @param predicate A predicate that will be evaluated for each item instance to determine if the specified binder
      * is suitable.
-     * @param <T> The type of item object.
      * @return This builder, to allow chaining.
      */
     @NonNull
-    public <T> MapperBuilder bind(@NonNull Class<? extends T> itemClass,
-                                  @NonNull Binder<? super T, ? extends View> binder,
-                                  @NonNull Predicate<? super T> predicate) {
+    public <E extends T> MapperBuilder<T> bind(@NonNull Class<E> itemClass,
+                                               @NonNull Binder<? super E, ?> binder,
+                                               @NonNull Predicate<? super E> predicate) {
         return bind(itemClass, 0, binder, predicate);
     }
 
@@ -103,63 +103,65 @@ public final class MapperBuilder {
      * Map an item type to the specified binder.
      * @param itemClass The type of item accepted by the specified binder.
      * @param binder The binder to be used to bind the specified item type.
-     * @param <T> The type of item object.
      * @return This builder, to allow chaining.
      */
     @NonNull
-    public <T> MapperBuilder bind(@NonNull Class<? extends T> itemClass,
-                                  @NonNull Binder<? super T, ? extends View> binder) {
+    public <E extends T> MapperBuilder<T> bind(@NonNull Class<E> itemClass,
+                                               @NonNull Binder<? super E, ?> binder) {
+        //noinspection unchecked
         return bind(itemClass, 0, binder, ALWAYS);
     }
 
     /**
      * Allows overriding whether or not the resulting {@link Mapper} will report as having stable IDs.
      * @param stableIds {@code true} forcefully enables stable IDs, {@code false} forcefully disables them, {@code
-     * null}
-     * falls back to the default behaviour of {@link AbstractMapper#hasStableIds()}.
+     * null} falls back to the default behaviour of {@link AbstractMapper#hasStableIds()}.
      * @return This builder, to allow chaining.
      * @see Mapper#hasStableIds()
      * @see AbstractMapper#hasStableIds()
      * @see PowerAdapter#hasStableIds()
      */
     @NonNull
-    public MapperBuilder stableIds(@Nullable Boolean stableIds) {
+    public MapperBuilder<T> stableIds(@Nullable Boolean stableIds) {
         mStableIds = stableIds;
         return this;
     }
 
     @NonNull
-    public Mapper build() {
-        return new RuleMapper(new ArrayList<>(mRules), mStableIds);
+    public Mapper<T> build() {
+        return new RuleMapper<>(new ArrayList<>(mRules), mStableIds);
     }
 
-    private static final class RuleMapper extends AbstractMapper {
+    private static final class RuleMapper<E> extends AbstractMapper<E> {
 
         @NonNull
-        private final List<Rule<?>> mRules;
+        private final List<Rule> mRules;
 
         @NonNull
-        private final Set<Binder<?, ?>> mAllBinders = new HashSet<>();
+        private final Set<Binder<E, View>> mAllBinders;
 
         @Nullable
         private final Boolean mStableIds;
 
-        RuleMapper(@NonNull List<Rule<?>> rules, @Nullable Boolean stableIds) {
+        RuleMapper(@NonNull List<Rule> rules, @Nullable Boolean stableIds) {
             mRules = rules;
             mStableIds = stableIds;
-            for (Rule<?> rule : rules) {
-                mAllBinders.add(rule.binder);
+            Set<Binder<E, View>> allBinders = new HashSet<>();
+            for (Rule rule : rules) {
+                //noinspection unchecked
+                allBinders.add((Binder<E, View>) rule.binder);
             }
+            mAllBinders = unmodifiableSet(allBinders);
         }
 
         @Nullable
         @Override
-        public Binder<?, ?> getBinder(@NonNull Object item, int position) {
+        public Binder<E, View> getBinder(@NonNull E item, int position) {
             for (int i = 0; i < mRules.size(); i++) {
-                //noinspection unchecked
-                Rule<Object> rule = (Rule<Object>) mRules.get(i);
+                Rule rule = mRules.get(i);
                 if (rule.matches(item)) {
-                    return rule.binder;
+                    //noinspection unchecked
+                    return (Binder<E, View>) rule.binder;
                 }
             }
             return null;
@@ -167,7 +169,7 @@ public final class MapperBuilder {
 
         @NonNull
         @Override
-        public Collection<? extends Binder<?, ?>> getAllBinders() {
+        public Collection<? extends Binder<E, View>> getAllBinders() {
             return mAllBinders;
         }
 
@@ -180,26 +182,26 @@ public final class MapperBuilder {
         }
     }
 
-    private static final class Rule<T> {
+    private static final class Rule {
 
         @NonNull
-        final Class<? extends T> itemClass;
+        final Class<?> itemClass;
 
         @NonNull
-        final Predicate<? super T> predicate;
+        final Predicate<Object> predicate;
 
         @NonNull
-        final Binder<? super T, ?> binder;
+        final Binder<?, ?> binder;
 
-        Rule(@NonNull Class<? extends T> itemClass,
-             @NonNull Predicate<? super T> predicate,
-             @NonNull Binder<? super T, ?> binder) {
+        Rule(@NonNull Class<?> itemClass,
+             @NonNull Predicate<Object> predicate,
+             @NonNull Binder<?, ?> binder) {
             this.itemClass = itemClass;
             this.predicate = predicate;
             this.binder = binder;
         }
 
-        boolean matches(@NonNull T item) {
+        boolean matches(@NonNull Object item) {
             return itemClass.isAssignableFrom(item.getClass()) && predicate.apply(item);
         }
     }
