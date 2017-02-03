@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.Binder;
-import lombok.NonNull;
 
 import java.util.List;
 

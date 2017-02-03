@@ -1,10 +1,12 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.SimpleDataObserver;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class DataCondition<T> extends Condition {
 
@@ -47,8 +49,8 @@ final class DataCondition<T> extends Condition {
     private final Predicate<? super Data<? extends T>> mPredicate;
 
     DataCondition(@NonNull Data<? extends T> data, @NonNull Predicate<? super Data<? extends T>> predicate) {
-        mPredicate = predicate;
-        mData = data;
+        mPredicate = checkNotNull(predicate, "predicate");
+        mData = checkNotNull(data, "data");
     }
 
     @Override

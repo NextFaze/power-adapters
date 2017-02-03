@@ -1,11 +1,12 @@
 package com.nextfaze.poweradapters.rx.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.support.v7.util.ListUpdateCallback;
 import com.nextfaze.poweradapters.internal.DataObservable;
-import lombok.NonNull;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** For internal use only. */
 @RestrictTo(LIBRARY_GROUP)
@@ -15,7 +16,7 @@ public final class DataObservableListUpdateCallback implements ListUpdateCallbac
     private final DataObservable mDataObservable;
 
     public DataObservableListUpdateCallback(@NonNull DataObservable dataObservable) {
-        mDataObservable = dataObservable;
+        mDataObservable = checkNotNull(dataObservable, "dataObservable");
     }
 
     @Override

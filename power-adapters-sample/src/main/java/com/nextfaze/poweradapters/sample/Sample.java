@@ -2,9 +2,9 @@ package com.nextfaze.poweradapters.sample;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 @Getter

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.NonNull;
 import android.view.View;
-import lombok.NonNull;
 
 public interface ViewHolderFactory<H extends ViewHolder> {
     @NonNull

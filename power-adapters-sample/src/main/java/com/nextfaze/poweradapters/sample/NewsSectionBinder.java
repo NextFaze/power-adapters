@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.widget.TextView;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.AbstractBinder;
-import lombok.NonNull;
 
 final class NewsSectionBinder extends AbstractBinder<NewsSection, TextView> {
 

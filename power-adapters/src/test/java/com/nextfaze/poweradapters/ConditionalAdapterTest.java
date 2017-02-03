@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.FrameLayout;
-import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

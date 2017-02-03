@@ -1,13 +1,14 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public abstract class BinderWrapper<T, V extends View> extends Binder<T, V> {
 
@@ -30,7 +31,7 @@ public abstract class BinderWrapper<T, V extends View> extends Binder<T, V> {
     }
 
     protected BinderWrapper(@NonNull Binder<? super T, ? super V> binder) {
-        mBinder = binder;
+        mBinder = checkNotNull(binder, "binder");
     }
 
     @Override

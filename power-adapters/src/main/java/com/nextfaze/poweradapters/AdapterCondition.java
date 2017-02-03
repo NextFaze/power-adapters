@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 final class AdapterCondition extends Condition {
 

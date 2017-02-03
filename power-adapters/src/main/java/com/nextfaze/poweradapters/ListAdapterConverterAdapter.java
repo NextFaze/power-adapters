@@ -2,12 +2,12 @@ package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.HashSet;

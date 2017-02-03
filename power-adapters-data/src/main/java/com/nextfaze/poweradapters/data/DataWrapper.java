@@ -1,7 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public abstract class DataWrapper<T> extends Data<T> {
 
@@ -66,7 +68,7 @@ public abstract class DataWrapper<T> extends Data<T> {
     private boolean mObservingAvailable;
 
     public DataWrapper(@NonNull Data<?> data) {
-        mData = data;
+        mData = checkNotNull(data, "data");
     }
 
     @NonNull

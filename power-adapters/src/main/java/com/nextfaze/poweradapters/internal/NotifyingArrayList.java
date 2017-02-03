@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import lombok.NonNull;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -9,10 +9,11 @@ import java.util.Collection;
 import java.util.List;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.lang.Math.min;
 import static java.util.Collections.swap;
 
-/** For internal use only. */
+/** For internal use only. Does not support {@code null} elements. */
 @RestrictTo(LIBRARY_GROUP)
 public final class NotifyingArrayList<E> extends AbstractList<E> {
 
@@ -26,7 +27,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     private NotificationType mNotificationType = NotificationType.FINE;
 
     public NotifyingArrayList(@NonNull DataObservable dataObservable) {
-        mDataObservable = dataObservable;
+        mDataObservable = checkNotNull(dataObservable, "dataObservable");
     }
 
     @Override
@@ -41,14 +42,14 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @Override
     public E set(int index, @NonNull E object) {
-        E e = mArray.set(index, object);
+        E e = mArray.set(index, checkNotNull(object, "object"));
         mNotificationType.notifyItemChanged(mDataObservable, index);
         return e;
     }
 
     @Override
     public boolean add(@NonNull E e) {
-        if (mArray.add(e)) {
+        if (mArray.add(checkNotNull(e, "e"))) {
             mNotificationType.notifyItemInserted(mDataObservable, mArray.size() - 1);
             return true;
         }
@@ -57,12 +58,13 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @Override
     public void add(int index, @NonNull E object) {
-        mArray.add(index, object);
+        mArray.add(index, checkNotNull(object, "object"));
         mNotificationType.notifyItemInserted(mDataObservable, index);
     }
 
     @Override
     public boolean addAll(@NonNull Collection<? extends E> collection) {
+        checkNotNull(collection, "collection");
         int oldSize = mArray.size();
         mArray.addAll(collection);
         int newSize = mArray.size();
@@ -76,6 +78,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
 
     @Override
     public boolean addAll(int index, @NonNull Collection<? extends E> collection) {
+        checkNotNull(collection, "collection");
         int oldSize = mArray.size();
         mArray.addAll(index, collection);
         int newSize = mArray.size();
@@ -97,7 +100,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public boolean remove(@NonNull Object obj) {
-        int index = mArray.indexOf(obj);
+        int index = mArray.indexOf(checkNotNull(obj, "obj"));
         if (index != -1) {
             mArray.remove(index);
             mNotificationType.notifyItemRemoved(mDataObservable, index);
@@ -116,6 +119,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     }
 
     public void replaceAll(@NonNull List<? extends E> collection) {
+        checkNotNull(collection, "collection");
         int oldSize = mArray.size();
 
         // Add all non-null elements
@@ -140,6 +144,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     }
 
     public void setAll(int index, @NonNull Collection<? extends E> collection) {
+        checkNotNull(collection, "collection");
         int i = 0;
         for (E e : collection) {
             mArray.set(index + i, e);
@@ -189,6 +194,6 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     }
 
     public void setNotificationType(@NonNull NotificationType notificationType) {
-        mNotificationType = notificationType;
+        mNotificationType = checkNotNull(notificationType, "notificationType");
     }
 }

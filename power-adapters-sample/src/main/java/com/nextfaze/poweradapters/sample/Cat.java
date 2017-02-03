@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.net.Uri;
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 final class Cat {
 

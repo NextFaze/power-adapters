@@ -4,16 +4,17 @@ import android.annotation.SuppressLint;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.internal.DataObservable;
-import lombok.NonNull;
 
 import java.util.Collection;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 
 /**
@@ -163,6 +164,7 @@ public abstract class PowerAdapter {
      */
     @CallSuper
     public void registerDataObserver(@NonNull DataObserver dataObserver) {
+        checkNotNull(dataObserver, "dataObserver");
         mDataObservable.registerObserver(dataObserver);
         if (mDataObservable.getObserverCount() == 1) {
             onFirstObserverRegistered();
@@ -179,6 +181,7 @@ public abstract class PowerAdapter {
      */
     @CallSuper
     public void unregisterDataObserver(@NonNull DataObserver dataObserver) {
+        checkNotNull(dataObserver, "dataObserver");
         mDataObservable.unregisterObserver(dataObserver);
         if (mDataObservable.getObserverCount() == 0) {
             onLastObserverUnregistered();
@@ -365,7 +368,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter compose(@NonNull Transformer transformer) {
-        return transformer.transform(this);
+        return checkNotNull(transformer, "transformer").transform(this);
     }
 
     /**
@@ -377,6 +380,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull PowerAdapter... adapters) {
+        checkNotNull(adapters, "adapters");
         if (adapters.length == 0) {
             return this;
         }
@@ -393,6 +397,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull ViewFactory... views) {
+        checkNotNull(views, "views");
         if (views.length == 0) {
             return this;
         }
@@ -410,6 +415,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter prepend(@NonNull @LayoutRes int... layoutResources) {
+        checkNotNull(layoutResources, "layoutResources");
         if (layoutResources.length == 0) {
             return this;
         }
@@ -425,6 +431,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull PowerAdapter... adapters) {
+        checkNotNull(adapters, "adapters");
         if (adapters.length == 0) {
             return this;
         }
@@ -441,6 +448,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull ViewFactory... views) {
+        checkNotNull(views, "views");
         if (views.length == 0) {
             return this;
         }
@@ -458,6 +466,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter append(@NonNull @LayoutRes int... layoutResources) {
+        checkNotNull(layoutResources, "layoutResources");
         if (layoutResources.length == 0) {
             return this;
         }
@@ -506,6 +515,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public final PowerAdapter showOnlyWhile(@NonNull Condition condition) {
+        checkNotNull(condition, "condition");
         if (condition instanceof ConstantCondition) {
             if (condition.eval()) {
                 return this;
@@ -520,6 +530,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull PowerAdapter... adapters) {
+        checkNotNull(adapters, "adapters");
         if (adapters.length == 0) {
             return EMPTY;
         }
@@ -533,6 +544,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull Collection<? extends PowerAdapter> adapters) {
+        checkNotNull(adapters, "adapters");
         if (adapters.isEmpty()) {
             return EMPTY;
         }
@@ -543,6 +555,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter concat(@NonNull Iterable<? extends PowerAdapter> adapters) {
+        checkNotNull(adapters, "adapters");
         return new ConcatAdapterBuilder().addAll(adapters).build();
     }
 
@@ -550,6 +563,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull ViewFactory... views) {
+        checkNotNull(views, "views");
         if (views.length == 0) {
             return EMPTY;
         }
@@ -560,6 +574,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull Iterable<? extends ViewFactory> views) {
+        checkNotNull(views, "views");
         return new ItemAdapter(ItemAdapter.toItems(views));
     }
 
@@ -567,6 +582,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull Collection<? extends ViewFactory> views) {
+        checkNotNull(views, "views");
         if (views.isEmpty()) {
             return EMPTY;
         }
@@ -577,7 +593,7 @@ public abstract class PowerAdapter {
     @CheckResult
     @NonNull
     public static PowerAdapter asAdapter(@NonNull @LayoutRes int... resources) {
-        return new ItemAdapter(toItems(resources));
+        return new ItemAdapter(toItems(checkNotNull(resources, "resources")));
     }
 
     /** Represents an operation performed on a {@link PowerAdapter}. */

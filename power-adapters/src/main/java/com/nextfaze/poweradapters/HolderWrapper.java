@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public class HolderWrapper implements Holder {
 
@@ -8,7 +10,7 @@ public class HolderWrapper implements Holder {
     private final Holder mHolder;
 
     public HolderWrapper(@NonNull Holder holder) {
-        mHolder = holder;
+        mHolder = checkNotNull(holder, "holder");
     }
 
     @NonNull

@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
 
 final class BindingEngine<T> {
 

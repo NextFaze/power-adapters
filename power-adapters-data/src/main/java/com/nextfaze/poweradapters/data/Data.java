@@ -3,12 +3,12 @@ package com.nextfaze.poweradapters.data;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.UiThread;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.internal.DataObservable;
-import lombok.NonNull;
 
 import java.util.AbstractList;
 import java.util.Comparator;
@@ -17,6 +17,7 @@ import java.util.List;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /**
  * Provides access to a (possibly asynchronously loaded) list of elements.
@@ -412,6 +413,8 @@ public abstract class Data<T> implements Iterable<T> {
 
     /** Dispatch an error notification on the UI thread. */
     protected final void notifyError(@NonNull final Throwable e) {
+        //noinspection ThrowableResultOfMethodCallIgnored
+        checkNotNull(e, "e");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -422,6 +425,7 @@ public abstract class Data<T> implements Iterable<T> {
 
     /** Runs a task on the UI thread. If caller thread is the UI thread, the task is executed immediately. */
     protected final void runOnUiThread(@NonNull Runnable runnable) {
+        checkNotNull(runnable, "runnable");
         if (Looper.myLooper() == Looper.getMainLooper()) {
             runnable.run();
         } else {
@@ -433,6 +437,7 @@ public abstract class Data<T> implements Iterable<T> {
     @CheckResult
     @NonNull
     public final <O> Data<O> compose(@NonNull Transformer<? super T, ? extends O> transformer) {
+        checkNotNull(transformer, "transformer");
         return ((Transformer<T, O>) transformer).transform(this);
     }
 

@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 import java.util.Iterator;
 

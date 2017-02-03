@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
-import lombok.NonNull;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;

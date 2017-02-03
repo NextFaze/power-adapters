@@ -1,7 +1,9 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.ViewGroup;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public class ContainerWrapper extends Container {
 
@@ -9,7 +11,7 @@ public class ContainerWrapper extends Container {
     private final Container mContainer;
 
     public ContainerWrapper(@NonNull Container container) {
-        mContainer = container;
+        mContainer = checkNotNull(container, "container");
     }
 
     @Override

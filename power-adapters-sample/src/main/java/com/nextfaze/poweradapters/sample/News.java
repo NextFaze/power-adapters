@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import lombok.NonNull;
 
 public final class News {
     @NonNull

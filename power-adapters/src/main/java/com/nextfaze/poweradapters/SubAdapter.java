@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
 
 class SubAdapter extends PowerAdapterWrapper {
 

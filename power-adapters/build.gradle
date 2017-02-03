@@ -13,7 +13,6 @@ dependencies {
     testCompile rootProject.ext.mockito
     testCompile rootProject.ext.truth
     compile rootProject.ext.supportAnnotations
-    provided rootProject.ext.lombok
 }
 
 android {

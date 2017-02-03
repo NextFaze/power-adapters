@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.rx.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import lombok.NonNull;
 import rx.Observable;
 
 import java.util.concurrent.Callable;

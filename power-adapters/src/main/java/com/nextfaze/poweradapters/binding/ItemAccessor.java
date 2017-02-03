@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.binding;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 interface ItemAccessor<T> {
     @NonNull

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
-import lombok.NonNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

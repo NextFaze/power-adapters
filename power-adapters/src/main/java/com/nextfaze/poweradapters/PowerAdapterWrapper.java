@@ -1,10 +1,12 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public class PowerAdapterWrapper extends PowerAdapter {
 
@@ -46,7 +48,7 @@ public class PowerAdapterWrapper extends PowerAdapter {
     };
 
     public PowerAdapterWrapper(@NonNull PowerAdapter adapter) {
-        mAdapter = adapter;
+        mAdapter = checkNotNull(adapter, "adapter");
     }
 
     @NonNull

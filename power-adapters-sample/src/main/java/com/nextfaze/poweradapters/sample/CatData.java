@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
-import lombok.NonNull;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 import android.os.Handler;
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

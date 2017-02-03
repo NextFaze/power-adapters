@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,6 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
-import lombok.NonNull;
 
 import java.util.List;
 

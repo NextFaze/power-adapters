@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 /**
  * Used to ensure that notifications emitted by the specified {@link PowerAdapter} are consistent with its {@link

@@ -1,10 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Predicate;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /** Provides a filtered view of the wrapped data. */
@@ -32,8 +33,8 @@ public final class FilterData<T> extends DataWrapper<T> {
 
     public FilterData(@NonNull Data<? extends T> data, @NonNull Predicate<? super T> predicate) {
         super(data);
-        mData = data;
-        mPredicate = predicate;
+        mData = checkNotNull(data, "data");
+        mPredicate = checkNotNull(predicate, "predicate");
     }
 
     @NonNull

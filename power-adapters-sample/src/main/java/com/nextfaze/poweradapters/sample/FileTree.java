@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Container;
@@ -11,7 +12,6 @@ import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ListBindingAdapter;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import lombok.NonNull;
 
 import java.util.EnumSet;
 import java.util.HashMap;

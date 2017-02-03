@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.data.rx;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.rx.EqualityFunction;
-import lombok.NonNull;
 import rx.Observable;
 import rx.Observer;
 import rx.functions.Action0;

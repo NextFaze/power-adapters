@@ -1,15 +1,16 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 @SuppressWarnings("deprecation")
 public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Binder<T, View> {
@@ -31,7 +32,9 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Binder<T
     public static <T, H extends ViewHolder> ViewHolderBinder<T, H> create(@NonNull ViewFactory viewFactory,
                                                                           @NonNull final ViewHolderFactory<H> viewHolderFactory,
                                                                           @NonNull final BindViewHolderFunction<T, H> bindFunction) {
-        return new ViewHolderBinder<T, H>(viewFactory) {
+        checkNotNull(viewHolderFactory, "viewHolderFactory");
+        checkNotNull(bindFunction, "bindFunction");
+        return new ViewHolderBinder<T, H>(checkNotNull(viewFactory, "viewFactory")) {
             @NonNull
             @Override
             protected H newViewHolder(@NonNull View v) {
@@ -53,7 +56,7 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Binder<T
     }
 
     public ViewHolderBinder(@NonNull ViewFactory viewFactory) {
-        mViewFactory = viewFactory;
+        mViewFactory = checkNotNull(viewFactory, "viewFactory");
     }
 
     @NonNull

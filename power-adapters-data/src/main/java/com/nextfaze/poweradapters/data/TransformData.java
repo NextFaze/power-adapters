@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class TransformData<F, T> extends DataWrapper<T> {
 
@@ -12,8 +14,8 @@ final class TransformData<F, T> extends DataWrapper<T> {
 
     TransformData(@NonNull Data<? extends F> data, @NonNull Function<? super F, ? extends T> function) {
         super(data);
-        mData = data;
-        mFunction = function;
+        mData = checkNotNull(data, "data");
+        mFunction = checkNotNull(function, "function");
     }
 
     @NonNull

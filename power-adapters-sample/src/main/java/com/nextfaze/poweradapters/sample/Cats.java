@@ -1,13 +1,13 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.sample.Utils.loadNextButton;
 import static com.nextfaze.poweradapters.sample.Utils.loadingIndicator;

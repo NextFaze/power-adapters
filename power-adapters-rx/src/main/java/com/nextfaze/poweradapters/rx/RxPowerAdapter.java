@@ -1,14 +1,15 @@
 package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.SimpleDataObserver;
-import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static com.nextfaze.poweradapters.rx.internal.Utils.assertUiThread;
 
 public final class RxPowerAdapter {
@@ -20,6 +21,7 @@ public final class RxPowerAdapter {
     @CheckResult
     @NonNull
     public static Observable<Integer> itemCount(@NonNull final PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -47,6 +49,7 @@ public final class RxPowerAdapter {
     @CheckResult
     @NonNull
     public static Observable<ChangeEvent> changes(@NonNull final PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         return Observable.create(new Observable.OnSubscribe<ChangeEvent>() {
             @Override
             public void call(final Subscriber<? super ChangeEvent> subscriber) {
@@ -73,6 +76,7 @@ public final class RxPowerAdapter {
     @CheckResult
     @NonNull
     public static Observable<InsertEvent> inserts(@NonNull final PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         return Observable.create(new Observable.OnSubscribe<InsertEvent>() {
             @Override
             public void call(final Subscriber<? super InsertEvent> subscriber) {
@@ -99,6 +103,7 @@ public final class RxPowerAdapter {
     @CheckResult
     @NonNull
     public static Observable<RemoveEvent> removes(@NonNull final PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         return Observable.create(new Observable.OnSubscribe<RemoveEvent>() {
             @Override
             public void call(final Subscriber<? super RemoveEvent> subscriber) {
@@ -125,6 +130,7 @@ public final class RxPowerAdapter {
     @CheckResult
     @NonNull
     public static Observable<MoveEvent> moves(@NonNull final PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         return Observable.create(new Observable.OnSubscribe<MoveEvent>() {
             @Override
             public void call(final Subscriber<? super MoveEvent> subscriber) {

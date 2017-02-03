@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

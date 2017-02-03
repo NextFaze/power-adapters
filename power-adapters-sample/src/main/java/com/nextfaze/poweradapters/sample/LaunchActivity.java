@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -12,7 +13,6 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ListBindingAdapter;
-import lombok.NonNull;
 
 import java.util.List;
 

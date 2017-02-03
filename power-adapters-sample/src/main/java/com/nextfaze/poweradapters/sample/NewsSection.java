@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 import lombok.experimental.Accessors;
 
 @Accessors(prefix = "m")

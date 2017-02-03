@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.Predicate;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.nextfaze.poweradapters.binding.BinderWrapper.overrideLayout;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.util.Collections.unmodifiableSet;
 
 /**
@@ -60,7 +61,10 @@ public final class MapperBuilder<T> {
                                                @NonNull Binder<? super E, ?> binder,
                                                @NonNull Predicate<? super E> predicate) {
         //noinspection unchecked
-        mRules.add(new Rule(itemClass, (Predicate<Object>) predicate, overrideLayout(binder, overrideItemLayoutResource)));
+        mRules.add(new Rule(checkNotNull(itemClass, "itemClass"),
+                (Predicate<Object>) checkNotNull(predicate, "predicate"),
+                overrideLayout(checkNotNull(binder, "binder"), checkNotNull(overrideItemLayoutResource,
+                        "overrideItemLayoutResource"))));
         return this;
     }
 

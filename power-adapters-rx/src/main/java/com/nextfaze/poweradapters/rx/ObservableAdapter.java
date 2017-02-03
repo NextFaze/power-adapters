@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.rx.internal.DiffList;
-import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;

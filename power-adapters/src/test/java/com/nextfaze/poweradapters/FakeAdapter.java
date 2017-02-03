@@ -1,9 +1,11 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.internal.NotificationType;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 @SuppressWarnings("WeakerAccess")
 public class FakeAdapter extends PowerAdapter {
@@ -92,7 +94,7 @@ public class FakeAdapter extends PowerAdapter {
     }
 
     public void setNotificationType(@NonNull NotificationType notificationType) {
-        mNotificationType = notificationType;
+        mNotificationType = checkNotNull(notificationType, "notificationType");
     }
 
     private void assertWithinRange(int position) {

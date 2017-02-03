@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import com.nextfaze.poweradapters.internal.NotifyingArrayList;
-import lombok.NonNull;
 
 import java.io.Closeable;
 import java.io.InterruptedIOException;
@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
@@ -61,7 +62,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements Closeab
 
     @SuppressWarnings("WeakerAccess")
     protected IncrementalArrayData(@NonNull ThreadFactory threadFactory) {
-        mThreadFactory = threadFactory;
+        mThreadFactory = checkNotNull(threadFactory, "threadFactory");
     }
 
     @CallSuper

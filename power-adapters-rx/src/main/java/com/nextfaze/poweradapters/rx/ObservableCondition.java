@@ -1,15 +1,16 @@
 package com.nextfaze.poweradapters.rx;
 
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.nextfaze.poweradapters.Condition;
-import lombok.NonNull;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 
 import static android.os.Looper.getMainLooper;
 import static android.os.Looper.myLooper;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class ObservableCondition extends Condition {
 
@@ -31,7 +32,7 @@ final class ObservableCondition extends Condition {
     private Subscription mSubscription;
 
     ObservableCondition(@NonNull Observable<Boolean> observable) {
-        mObservable = observable;
+        mObservable = checkNotNull(observable, "observable");
     }
 
     @Override

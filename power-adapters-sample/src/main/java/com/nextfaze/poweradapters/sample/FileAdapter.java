@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
-import lombok.NonNull;
 
 import java.io.File;
 import java.util.List;

@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data.rx;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.AvailableObserver;
@@ -11,12 +12,12 @@ import com.nextfaze.poweradapters.rx.ChangeEvent;
 import com.nextfaze.poweradapters.rx.InsertEvent;
 import com.nextfaze.poweradapters.rx.MoveEvent;
 import com.nextfaze.poweradapters.rx.RemoveEvent;
-import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 import rx.functions.Func1;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static com.nextfaze.poweradapters.rx.internal.Utils.assertUiThread;
 
 public final class RxData {
@@ -40,6 +41,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static <T> Observable<Data<T>> elements(@NonNull final Data<T> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<Data<T>>() {
             @Override
             public void call(final Subscriber<? super Data<T>> subscriber) {
@@ -67,6 +69,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<ChangeEvent> changes(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<ChangeEvent>() {
             @Override
             public void call(final Subscriber<? super ChangeEvent> subscriber) {
@@ -93,6 +96,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<InsertEvent> inserts(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<InsertEvent>() {
             @Override
             public void call(final Subscriber<? super InsertEvent> subscriber) {
@@ -119,6 +123,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<RemoveEvent> removes(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<RemoveEvent>() {
             @Override
             public void call(final Subscriber<? super RemoveEvent> subscriber) {
@@ -145,6 +150,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<MoveEvent> moves(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<MoveEvent>() {
             @Override
             public void call(final Subscriber<? super MoveEvent> subscriber) {
@@ -171,6 +177,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<Boolean> loading(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
@@ -198,6 +205,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<Integer> available(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
@@ -224,6 +232,7 @@ public final class RxData {
     @CheckResult
     @NonNull
     public static Observable<Throwable> errors(@NonNull final Data<?> data) {
+        checkNotNull(data, "data");
         return Observable.create(new Observable.OnSubscribe<Throwable>() {
             @Override
             public void call(final Subscriber<? super Throwable> subscriber) {

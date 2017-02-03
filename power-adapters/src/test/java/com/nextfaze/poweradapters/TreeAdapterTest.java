@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters;
 
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.TreeAdapter.ChildAdapterSupplier;
-import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

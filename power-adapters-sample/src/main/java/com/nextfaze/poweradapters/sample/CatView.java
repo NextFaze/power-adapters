@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -8,7 +9,6 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.squareup.picasso.Picasso;
-import lombok.NonNull;
 
 public final class CatView extends CardView {
 

@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.rx;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 public interface EqualityFunction<T> {
     boolean equal(@NonNull T a, @NonNull T b);

@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.data.internal;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.ErrorObserver;
 import com.nextfaze.poweradapters.data.LoadingObserver;
-import lombok.NonNull;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 
 /**
@@ -60,7 +61,7 @@ public abstract class DataWatcher {
      * @see #setDatas(Iterable)
      */
     public final void setDatas(@NonNull Data<?>... datas) {
-        setDatas(asList(datas));
+        setDatas(asList(checkNotNull(datas, "datas")));
     }
 
     /**
@@ -69,6 +70,7 @@ public abstract class DataWatcher {
      * @see #setEnabled(boolean)
      */
     public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
+        checkNotNull(datas, "datas");
         mDatas.clear();
 
         for (Data<?> data : datas) {

@@ -1,12 +1,14 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public final class PowerAdapters {
 
@@ -24,6 +26,7 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static ListAdapter toListAdapter(@NonNull PowerAdapter powerAdapter) {
+        checkNotNull(powerAdapter, "powerAdapter");
         ListAdapterConverterAdapter converterAdapter = sListConverterAdapters.get(powerAdapter);
         if (converterAdapter == null) {
             // HACK: We simply have to use a magic number here and hope we never exceed it.
@@ -52,6 +55,6 @@ public final class PowerAdapters {
     public static SpinnerAdapter toSpinnerAdapter(@NonNull PowerAdapter powerAdapter) {
         // SpinnerAdapter adds additional constraints to the ListAdapter contract: getViewTypeCount must return 1.
         // See android.widget.Spinner.setAdapter()
-        return new ListAdapterConverterAdapter(powerAdapter, 1);
+        return new ListAdapterConverterAdapter(checkNotNull(powerAdapter, "powerAdapter"), 1);
     }
 }

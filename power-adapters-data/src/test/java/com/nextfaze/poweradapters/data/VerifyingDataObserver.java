@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
-import lombok.NonNull;
 
 /**
  * Used to ensure that notifications emitted by the specified {@link Data} are consistent with its {@link

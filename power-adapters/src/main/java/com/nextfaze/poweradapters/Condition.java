@@ -1,9 +1,11 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
-import lombok.NonNull;
 
 import java.util.ArrayList;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public abstract class Condition {
 
@@ -38,6 +40,7 @@ public abstract class Condition {
     }
 
     public void registerObserver(@NonNull Observer observer) {
+        checkNotNull(observer, "observer");
         if (mObservers.contains(observer)) {
             throw new IllegalStateException("Observer is already registered.");
         }
@@ -48,6 +51,7 @@ public abstract class Condition {
     }
 
     public void unregisterObserver(@NonNull Observer observer) {
+        checkNotNull(observer, "observer");
         int index = mObservers.indexOf(observer);
         if (index == -1) {
             throw new IllegalStateException("Observer was not registered.");
@@ -60,17 +64,17 @@ public abstract class Condition {
 
     @NonNull
     public Condition and(@NonNull Condition condition) {
-        return and(this, condition);
+        return and(this, checkNotNull(condition, "condition"));
     }
 
     @NonNull
     public Condition or(@NonNull Condition condition) {
-        return or(this, condition);
+        return or(this, checkNotNull(condition, "condition"));
     }
 
     @NonNull
     public Condition xor(@NonNull Condition condition) {
-        return xor(this, condition);
+        return xor(this, checkNotNull(condition, "condition"));
     }
 
     @NonNull
@@ -100,6 +104,8 @@ public abstract class Condition {
 
     @NonNull
     public static Condition and(@NonNull final Condition a, @NonNull final Condition b) {
+        checkNotNull(a, "a");
+        checkNotNull(b, "b");
         if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
             return isTrue(a.eval() && b.eval());
         }
@@ -113,6 +119,8 @@ public abstract class Condition {
 
     @NonNull
     public static Condition or(@NonNull final Condition a, @NonNull final Condition b) {
+        checkNotNull(a, "a");
+        checkNotNull(b, "b");
         if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
             return isTrue(a.eval() || b.eval());
         }
@@ -126,6 +134,8 @@ public abstract class Condition {
 
     @NonNull
     public static Condition xor(@NonNull final Condition a, @NonNull final Condition b) {
+        checkNotNull(a, "a");
+        checkNotNull(b, "b");
         if (a instanceof ConstantCondition && b instanceof ConstantCondition) {
             return isTrue((a.eval() || b.eval()) && !(a.eval() && b.eval()));
         }
@@ -139,6 +149,7 @@ public abstract class Condition {
 
     @NonNull
     public static Condition not(@NonNull final Condition condition) {
+        checkNotNull(condition, "condition");
         if (condition instanceof ConstantCondition) {
             return isTrue(!condition.eval());
         }
@@ -153,6 +164,6 @@ public abstract class Condition {
     @NonNull
     public static Condition adapter(@NonNull PowerAdapter adapter,
                                     @NonNull Predicate<PowerAdapter> predicate) {
-        return new AdapterCondition(adapter, predicate);
+        return new AdapterCondition(checkNotNull(adapter, "adapter"), checkNotNull(predicate, "predicate"));
     }
 }

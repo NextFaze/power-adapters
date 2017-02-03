@@ -1,12 +1,13 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import com.nextfaze.poweradapters.DataObserver;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** For internal use only. */
 @RestrictTo(LIBRARY_GROUP)
@@ -16,6 +17,7 @@ public final class DataObservable {
     private final ArrayList<DataObserver> mObservers = new ArrayList<>();
 
     public void registerObserver(@NonNull DataObserver observer) {
+        checkNotNull(observer, "observer");
         if (mObservers.contains(observer)) {
             throw new IllegalStateException("Observer is already registered.");
         }
@@ -23,6 +25,7 @@ public final class DataObservable {
     }
 
     public void unregisterObserver(@NonNull DataObserver observer) {
+        checkNotNull(observer, "observer");
         int index = mObservers.indexOf(observer);
         if (index == -1) {
             throw new IllegalStateException("Observer was not registered.");

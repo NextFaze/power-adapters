@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.recyclerview;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
@@ -10,12 +11,13 @@ import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
-import lombok.NonNull;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConverterAdapter.ViewHolder> {
 
@@ -78,7 +80,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     private boolean mObserving;
 
     public RecyclerConverterAdapter(@NonNull PowerAdapter powerAdapter) {
-        mPowerAdapter = powerAdapter;
+        mPowerAdapter = checkNotNull(powerAdapter, "powerAdapter");
         super.setHasStableIds(mPowerAdapter.hasStableIds());
     }
 

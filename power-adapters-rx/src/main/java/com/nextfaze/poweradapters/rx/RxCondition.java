@@ -1,13 +1,14 @@
 package com.nextfaze.poweradapters.rx;
 
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Observer;
-import lombok.NonNull;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.MainThreadSubscription;
 
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static com.nextfaze.poweradapters.rx.internal.Utils.assertUiThread;
 
 public final class RxCondition {
@@ -19,6 +20,7 @@ public final class RxCondition {
     @CheckResult
     @NonNull
     public static Observable<Boolean> value(@NonNull final Condition condition) {
+        checkNotNull(condition, "condition");
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {

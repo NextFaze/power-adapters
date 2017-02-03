@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -10,7 +11,6 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import lombok.NonNull;
 
 import static java.lang.Math.max;
 

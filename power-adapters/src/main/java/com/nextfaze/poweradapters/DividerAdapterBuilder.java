@@ -2,11 +2,12 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** Inserts {@link View}-based dividers between items. */
 public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
@@ -29,14 +30,14 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
      */
     @NonNull
     public DividerAdapterBuilder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
-        mEmptyPolicy = emptyPolicy;
+        mEmptyPolicy = checkNotNull(emptyPolicy, "emptyPolicy");
         return this;
     }
 
     /** Sets the divider that appears before the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder leadingView(@NonNull ViewFactory viewFactory) {
-        mLeadingItem = new Item(viewFactory, false);
+        mLeadingItem = new Item(checkNotNull(viewFactory, "viewFactory"), false);
         return this;
     }
 
@@ -49,7 +50,7 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
     /** Sets the divider that appears after the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder trailingView(@NonNull ViewFactory viewFactory) {
-        mTrailingItem = new Item(viewFactory, false);
+        mTrailingItem = new Item(checkNotNull(viewFactory, "viewFactory"), false);
         return this;
     }
 
@@ -62,7 +63,7 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
     /** Sets the divider that appears between all of the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder innerView(@NonNull ViewFactory viewFactory) {
-        mInnerItem = new Item(viewFactory, false);
+        mInnerItem = new Item(checkNotNull(viewFactory, "viewFactory"), false);
         return this;
     }
 
@@ -87,6 +88,7 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
     /** Sets the divider that appears before, after, and between the wrapped adapters items. */
     @NonNull
     public DividerAdapterBuilder view(@NonNull ViewFactory viewFactory) {
+        checkNotNull(viewFactory, "viewFactory");
         return outerView(viewFactory).innerView(viewFactory);
     }
 
@@ -99,6 +101,7 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
     @CheckResult
     @NonNull
     public PowerAdapter build(@NonNull PowerAdapter adapter) {
+        checkNotNull(adapter, "adapter");
         if (mLeadingItem == null && mTrailingItem == null && mInnerItem == null) {
             return adapter;
         }

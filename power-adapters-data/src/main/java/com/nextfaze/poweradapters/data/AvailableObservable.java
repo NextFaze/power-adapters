@@ -1,8 +1,10 @@
 package com.nextfaze.poweradapters.data;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class AvailableObservable {
 
@@ -10,6 +12,7 @@ final class AvailableObservable {
     private final ArrayList<AvailableObserver> mObservers = new ArrayList<>();
 
     void registerObserver(@NonNull AvailableObserver observer) {
+        checkNotNull(observer, "observer");
         if (mObservers.contains(observer)) {
             throw new IllegalStateException("Observer is already registered.");
         }
@@ -17,6 +20,7 @@ final class AvailableObservable {
     }
 
     void unregisterObserver(@NonNull AvailableObserver observer) {
+        checkNotNull(observer, "observer");
         int index = mObservers.indexOf(observer);
         if (index == -1) {
             throw new IllegalStateException("Observer was not registered.");

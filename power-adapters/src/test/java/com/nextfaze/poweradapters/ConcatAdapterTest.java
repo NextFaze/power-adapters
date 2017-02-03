@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.google.common.collect.ImmutableList;
-import lombok.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

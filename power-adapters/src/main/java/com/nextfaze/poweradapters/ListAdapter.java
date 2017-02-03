@@ -1,12 +1,14 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.internal.NotifyingArrayList;
-import lombok.NonNull;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /**
  * A mutable adapter that automatically generates notifications when its contents changes.
@@ -22,7 +24,7 @@ public abstract class ListAdapter<E> extends PowerAdapter implements List<E> {
     }
 
     public ListAdapter(@NonNull Collection<? extends E> list) {
-        mData.addAll(list);
+        mData.addAll(checkNotNull(list, "list"));
     }
 
     @Override
@@ -32,22 +34,22 @@ public abstract class ListAdapter<E> extends PowerAdapter implements List<E> {
 
     @Override
     public void add(int location, @NonNull E object) {
-        mData.add(location, object);
+        mData.add(location, checkNotNull(object, "object"));
     }
 
     @Override
     public boolean add(@NonNull E object) {
-        return mData.add(object);
+        return mData.add(checkNotNull(object, "object"));
     }
 
     @Override
     public boolean addAll(int location, @NonNull Collection<? extends E> collection) {
-        return mData.addAll(location, collection);
+        return mData.addAll(location, checkNotNull(collection, "collection"));
     }
 
     @Override
     public boolean addAll(@NonNull Collection<? extends E> collection) {
-        return mData.addAll(collection);
+        return mData.addAll(checkNotNull(collection, "collection"));
     }
 
     @Override
@@ -62,7 +64,7 @@ public abstract class ListAdapter<E> extends PowerAdapter implements List<E> {
 
     @Override
     public boolean containsAll(@NonNull Collection<?> collection) {
-        return mData.containsAll(collection);
+        return mData.containsAll(checkNotNull(collection, "collection"));
     }
 
     @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")

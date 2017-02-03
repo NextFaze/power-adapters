@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.data.widget;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import lombok.NonNull;
 
 /** Converts a {@link Throwable} into a {@link CharSequence} for presentation in a {@link DataLayout}. */
 public interface ErrorFormatter {

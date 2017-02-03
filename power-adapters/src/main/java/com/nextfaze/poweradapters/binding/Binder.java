@@ -1,15 +1,16 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** Binds an object to a {@link View} in a {@link PowerAdapter}. */
 public abstract class Binder<T, V extends View> {
@@ -23,6 +24,8 @@ public abstract class Binder<T, V extends View> {
     @NonNull
     public static <T, V extends View> Binder<T, V> create(@NonNull final ViewFactory viewFactory,
                                                           @NonNull final BindViewFunction<T, V> function) {
+        checkNotNull(viewFactory, "viewFactory");
+        checkNotNull(function, "function");
         return new Binder<T, V>() {
             @NonNull
             @Override

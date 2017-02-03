@@ -1,9 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class SortData<T> extends DataWrapper<T> {
 
@@ -18,8 +20,8 @@ final class SortData<T> extends DataWrapper<T> {
 
     SortData(@NonNull Data<? extends T> data, @NonNull Comparator<? super T> comparator) {
         super(data);
-        mData = data;
-        mComparator = comparator;
+        mData = checkNotNull(data, "data");
+        mComparator = checkNotNull(comparator, "comparator");
     }
 
     @Override

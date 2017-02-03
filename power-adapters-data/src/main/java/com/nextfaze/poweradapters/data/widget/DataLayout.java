@@ -13,6 +13,7 @@ import android.os.Parcelable;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -25,7 +26,6 @@ import android.widget.TextView;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.R;
 import com.nextfaze.poweradapters.data.internal.DataWatcher;
-import lombok.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,6 +36,7 @@ import java.util.WeakHashMap;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.SystemClock.elapsedRealtime;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Arrays.asList;
@@ -373,7 +374,7 @@ public class DataLayout extends RelativeLayout {
 
     /** @see #setDatas(Iterable) */
     public final void setDatas(@NonNull Data<?>... datas) {
-        setDatas(asList(datas));
+        setDatas(asList(checkNotNull(datas, "datas")));
     }
 
     /**
@@ -382,6 +383,7 @@ public class DataLayout extends RelativeLayout {
      * @param datas The data instances to observe, which may be empty to cease observing anything.
      */
     public final void setDatas(@NonNull Iterable<? extends Data<?>> datas) {
+        checkNotNull(datas, "datas");
         mDataWatcher.setDatas(datas);
         mDatas.clear();
         for (Data<?> data : datas) {
@@ -398,6 +400,7 @@ public class DataLayout extends RelativeLayout {
 
     /** Adds a {@link Data} to be observed by this layout. */
     public final void addData(@NonNull Data<?> data) {
+        checkNotNull(data, "data");
         mDatas.add(data);
         mDataWatcher.setDatas(mDatas);
         updateViews();
@@ -405,6 +408,7 @@ public class DataLayout extends RelativeLayout {
 
     /** Removes a {@link Data} so that it will no longer be observed by this layout. */
     public final void removeData(@NonNull Data<?> data) {
+        checkNotNull(data, "data");
         mDatas.remove(data);
         mDataWatcher.setDatas(mDatas);
         updateViews();
@@ -432,6 +436,7 @@ public class DataLayout extends RelativeLayout {
 
     /** Set the policy used to determine the visibility of each child component view. */
     public final void setVisibilityPolicy(@NonNull VisibilityPolicy visibilityPolicy) {
+        checkNotNull(visibilityPolicy, "visibilityPolicy");
         if (visibilityPolicy != mVisibilityPolicy) {
             mVisibilityPolicy = visibilityPolicy;
             updateViews();
@@ -444,6 +449,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     public final void setVisibilityPredicate(@NonNull VisibilityPredicate visibilityPredicate) {
+        checkNotNull(visibilityPredicate, "visibilityPredicate");
         if (visibilityPredicate != mVisibilityPredicate) {
             mVisibilityPredicate = visibilityPredicate;
             updateVisible();
@@ -533,6 +539,7 @@ public class DataLayout extends RelativeLayout {
 
     @Component
     public final int getComponent(@NonNull View v) {
+        checkNotNull(v, "v");
         if (v == mContentView) {
             return CONTENT;
         } else if (v == mEmptyView) {

@@ -3,10 +3,10 @@ package com.nextfaze.poweradapters.sample;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import lombok.NonNull;
 
 public final class SampleActivity extends AppCompatActivity {
 

@@ -1,16 +1,17 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ListAdapter;
-import lombok.NonNull;
 
 import java.util.Collections;
 import java.util.List;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /**
  * A mutable binding adapter that automatically generates notifications when its contents changes.
@@ -22,7 +23,7 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
     private final BindingEngine<E> mEngine;
 
     public ListBindingAdapter(@NonNull Binder<? super E, ?> binder) {
-        this(singletonMapper(binder));
+        this(singletonMapper(checkNotNull(binder, "binder")));
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -36,7 +37,7 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
 
     public ListBindingAdapter(@NonNull Mapper<? super E> mapper, @NonNull List<? extends E> list) {
         super(list);
-        mEngine = new BindingEngine<>(mapper, new ItemAccessor<E>() {
+        mEngine = new BindingEngine<>(checkNotNull(mapper, "mapper"), new ItemAccessor<E>() {
             @NonNull
             @Override
             public E get(int position) {

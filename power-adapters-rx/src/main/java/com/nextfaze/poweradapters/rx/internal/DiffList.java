@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.rx.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
 import com.nextfaze.poweradapters.internal.DataObservable;
 import com.nextfaze.poweradapters.rx.EqualityFunction;
-import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static com.nextfaze.poweradapters.rx.internal.Utils.mainThreadObservable;
 import static java.lang.Math.min;
 import static rx.Observable.fromCallable;
@@ -74,6 +75,7 @@ public final class DiffList<T> {
 
     @NonNull
     public Observable<?> prepend(@NonNull final Collection<? extends T> list) {
+        checkNotNull(list, "list");
         return mainThreadObservable(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -86,6 +88,7 @@ public final class DiffList<T> {
 
     @NonNull
     public Observable<?> append(@NonNull final Collection<? extends T> list) {
+        checkNotNull(list, "list");
         return mainThreadObservable(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -99,6 +102,7 @@ public final class DiffList<T> {
 
     @NonNull
     public Observable<?> overwrite(@NonNull Collection<? extends T> collection) {
+        checkNotNull(collection, "collection");
         if (mIdentityEqualityFunction == null || mContentEqualityFunction == null) {
             return overwriteBasic(collection);
         }

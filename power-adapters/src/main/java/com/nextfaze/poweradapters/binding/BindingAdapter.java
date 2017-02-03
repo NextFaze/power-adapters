@@ -1,11 +1,13 @@
 package com.nextfaze.poweradapters.binding;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import lombok.NonNull;
+
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public abstract class BindingAdapter<T> extends PowerAdapter {
 
@@ -13,7 +15,7 @@ public abstract class BindingAdapter<T> extends PowerAdapter {
     private final BindingEngine<T> mEngine;
 
     protected BindingAdapter(@NonNull Mapper<? super T> mapper) {
-        mEngine = new BindingEngine<>(mapper, new ItemAccessor<T>() {
+        mEngine = new BindingEngine<>(checkNotNull(mapper, "mapper"), new ItemAccessor<T>() {
             @NonNull
             @Override
             public T get(int position) {

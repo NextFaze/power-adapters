@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.sample;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.data.ArrayData;
-import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;

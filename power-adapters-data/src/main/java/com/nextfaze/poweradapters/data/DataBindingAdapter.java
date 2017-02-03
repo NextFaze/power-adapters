@@ -1,12 +1,13 @@
 package com.nextfaze.poweradapters.data;
 
+import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public final class DataBindingAdapter<T> extends BindingAdapter<T> {
 
@@ -47,7 +48,7 @@ public final class DataBindingAdapter<T> extends BindingAdapter<T> {
 
     public DataBindingAdapter(@NonNull Mapper<? super T> mapper, @NonNull Data<? extends T> data) {
         super(mapper);
-        mData = data;
+        mData = checkNotNull(data, "data");
     }
 
     /** @deprecated Use {@link DataBindingAdapter#DataBindingAdapter(Binder, Data)} instead. */

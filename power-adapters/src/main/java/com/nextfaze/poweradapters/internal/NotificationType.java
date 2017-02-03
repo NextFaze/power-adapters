@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.internal;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
-import lombok.NonNull;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 

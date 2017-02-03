@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

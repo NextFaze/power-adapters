@@ -2,6 +2,7 @@ package com.nextfaze.poweradapters.sample;
 
 import android.content.Context;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -16,7 +17,6 @@ import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ViewHolder;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
 import com.nextfaze.poweradapters.data.widget.DataLayout;
-import lombok.NonNull;
 
 import java.util.List;
 import java.util.Random;

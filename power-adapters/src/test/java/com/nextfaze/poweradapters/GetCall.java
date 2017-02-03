@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import lombok.NonNull;
+import android.support.annotation.NonNull;
 
 enum GetCall {
     ITEM_ID {

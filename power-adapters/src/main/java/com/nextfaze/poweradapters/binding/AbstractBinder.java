@@ -1,14 +1,15 @@
 package com.nextfaze.poweradapters.binding;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
-import lombok.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** Use {@link Binder} and its factory methods instead. */
 @Deprecated
@@ -24,7 +25,7 @@ public abstract class AbstractBinder<T, V extends View> extends Binder<T, V> {
     }
 
     protected AbstractBinder(@NonNull ViewFactory viewFactory) {
-        mViewFactory = viewFactory;
+        mViewFactory = checkNotNull(viewFactory, "viewFactory");
     }
 
     @Override
