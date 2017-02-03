@@ -66,7 +66,7 @@ public final class LaunchActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
-    private void onSampleClick(@NonNull Sample sample) {
+    void onSampleClick(@NonNull Sample sample) {
         SampleActivity.start(this, sample);
     }
 }

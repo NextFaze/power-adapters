@@ -51,8 +51,8 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements Closeab
     /** Indicates the last attempt to load a page failed. */
     private volatile boolean mError;
 
-    private boolean mLoading;
-    private int mAvailable = Integer.MAX_VALUE;
+    boolean mLoading;
+    int mAvailable = Integer.MAX_VALUE;
     private boolean mDirty = true;
     private boolean mClear;
 
@@ -213,7 +213,7 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements Closeab
         }
     }
 
-    private void runLoadLoop() {
+    void runLoadLoop() {
         try {
             loadLoop();
         } catch (InterruptedException e) {
@@ -282,17 +282,17 @@ public abstract class IncrementalArrayData<T> extends Data<T> implements Closeab
         }
     }
 
-    private void overwriteResult(@NonNull List<? extends T> result) {
+    void overwriteResult(@NonNull List<? extends T> result) {
         mClear = false;
         onClear();
         mData.replaceAll(result);
     }
 
-    private void appendResult(@NonNull List<? extends T> result) {
+    void appendResult(@NonNull List<? extends T> result) {
         mData.addAll(result);
     }
 
-    private void setLoading(final boolean loading) {
+    void setLoading(final boolean loading) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

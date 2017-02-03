@@ -19,7 +19,7 @@ abstract class Task<T> {
 
     private static final String TAG = Task.class.getSimpleName();
 
-    private interface Action {
+    interface Action {
         void run() throws Throwable;
     }
 
@@ -59,12 +59,12 @@ abstract class Task<T> {
     });
 
     @Nullable
-    private volatile Thread mExecutingThread;
+    volatile Thread mExecutingThread;
 
     private boolean mCanceled;
     private volatile boolean mExecuted;
 
-    private void doPreExecute() throws Throwable {
+    void doPreExecute() throws Throwable {
         post(new Action() {
             @Override
             public void run() throws Throwable {
@@ -73,7 +73,7 @@ abstract class Task<T> {
         });
     }
 
-    private T doCall() throws Throwable {
+    T doCall() throws Throwable {
         try {
             return Task.this.call();
         } catch (InterruptedException | InterruptedIOException e) {
@@ -85,7 +85,7 @@ abstract class Task<T> {
         }
     }
 
-    private void doSuccess(final T result) {
+    void doSuccess(final T result) {
         try {
             post(new Action() {
                 @Override
@@ -104,7 +104,7 @@ abstract class Task<T> {
         }
     }
 
-    private void doFailure(final Throwable e) {
+    void doFailure(final Throwable e) {
         try {
             post(new Action() {
                 @Override

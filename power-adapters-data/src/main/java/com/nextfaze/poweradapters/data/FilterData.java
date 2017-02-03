@@ -200,6 +200,9 @@ public final class FilterData<T> extends DataWrapper<T> {
         @NonNull
         private final ArrayList<Integer> mArray = new ArrayList<>();
 
+        Index() {
+        }
+
         void clear() {
             mArray.clear();
         }

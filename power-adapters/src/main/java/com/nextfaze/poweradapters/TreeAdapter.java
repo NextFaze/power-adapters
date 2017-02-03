@@ -83,7 +83,7 @@ public final class TreeAdapter extends PowerAdapter {
     private final SubAdapter mRootSubAdapter;
 
     @NonNull
-    private final ArrayList<Entry> mEntries = new ArrayList<>();
+    final ArrayList<Entry> mEntries = new ArrayList<>();
 
     @NonNull
     private final WeakMap<Object, PowerAdapter> mAdaptersByViewType = new WeakMap<>();
@@ -191,7 +191,7 @@ public final class TreeAdapter extends PowerAdapter {
     }
 
     @NonNull
-    private PowerAdapter getChildAdapter(int position) {
+    PowerAdapter getChildAdapter(int position) {
         return mChildAdapterSupplier.get(position);
     }
 
@@ -265,12 +265,12 @@ public final class TreeAdapter extends PowerAdapter {
         updateEntryObservers();
     }
 
-    private void addEntry(int position) {
+    void addEntry(int position) {
         Entry entry = new Entry();
         mEntries.add(position, entry);
     }
 
-    private int removeEntry(int position) {
+    int removeEntry(int position) {
         Entry entry = mEntries.remove(position);
         // Includes root item.
         int itemCount = entry.getItemCount();
@@ -278,7 +278,7 @@ public final class TreeAdapter extends PowerAdapter {
         return itemCount;
     }
 
-    private void moveEntries(int fromPosition, int toPosition, int count) {
+    void moveEntries(int fromPosition, int toPosition, int count) {
         if (count <= 0) {
             throw new IllegalArgumentException("count <= 0");
         }
@@ -297,7 +297,7 @@ public final class TreeAdapter extends PowerAdapter {
         }
     }
 
-    private void rebuildAllEntriesAndRangeTable() {
+    void rebuildAllEntriesAndRangeTable() {
         mEntries.clear();
         for (int i = 0; i < mRootAdapter.getItemCount(); i++) {
             mEntries.add(new Entry());
@@ -305,11 +305,11 @@ public final class TreeAdapter extends PowerAdapter {
         rebuildRangeTable();
     }
 
-    private void rebuildRangeTable() {
+    void rebuildRangeTable() {
         mRangeTable.rebuild(mShadowRangeClient);
     }
 
-    private void updateEntryAdapters() {
+    void updateEntryAdapters() {
         for (int i = 0; i < mEntries.size(); i++) {
             mEntries.get(i).setAdapter(shouldExpand(i) ? getChildAdapter(i) : null);
         }
@@ -321,7 +321,7 @@ public final class TreeAdapter extends PowerAdapter {
         }
     }
 
-    private boolean shouldExpand(int rootPosition) {
+    boolean shouldExpand(int rootPosition) {
         // Expand if either:
         // - Auto expand is enabled
         // - The saved state indicates this root position is expanded, and the root adapter has stable ids
@@ -350,13 +350,13 @@ public final class TreeAdapter extends PowerAdapter {
         return adapter != null ? adapter : mRootAdapter;
     }
 
-    private int outerToRoot(int outerPosition) {
+    int outerToRoot(int outerPosition) {
         int entryIndex = mRangeTable.findPosition(outerPosition);
         Entry entry = mEntries.get(entryIndex);
         return outerPosition - (entry.getOffset() - entryIndex);
     }
 
-    private int rootToOuter(int rootPosition) {
+    int rootToOuter(int rootPosition) {
         return mEntries.get(rootPosition).getOffset();
     }
 
@@ -400,11 +400,11 @@ public final class TreeAdapter extends PowerAdapter {
         private final DelegateAdapter mDelegateAdapter;
 
         @NonNull
-        private final SubAdapter mAdapter;
+        final SubAdapter mAdapter;
 
         private boolean mObserving;
 
-        private int mShadowItemCount;
+        int mShadowItemCount;
 
         private int mOffset;
 

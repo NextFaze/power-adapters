@@ -23,13 +23,13 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
 
     @Nullable
-    private final Item mLeadingItem;
+    final Item mLeadingItem;
 
     @Nullable
-    private final Item mTrailingItem;
+    final Item mTrailingItem;
 
     @Nullable
-    private final Item mInnerItem;
+    final Item mInnerItem;
 
     private int mItemCount;
 
@@ -53,7 +53,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         return getItemCount(super.getItemCount());
     }
 
-    private int getItemCount(final int innerItemCount) {
+    int getItemCount(final int innerItemCount) {
         int itemCount = innerItemCount;
         if (itemCount == 0) {
             if (isLeadingVisible(innerItemCount)) {
@@ -149,15 +149,15 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         return super.getItemId(position);
     }
 
-    private boolean isLeadingVisible(int innerItemCount) {
+    boolean isLeadingVisible(int innerItemCount) {
         return mLeadingItem != null && mEmptyPolicy.shouldShowLeading(innerItemCount);
     }
 
-    private boolean isTrailingVisible(int innerItemCount) {
+    boolean isTrailingVisible(int innerItemCount) {
         return mTrailingItem != null && mEmptyPolicy.shouldShowTrailing(innerItemCount);
     }
 
-    private boolean isInnerVisible(int innerItemCount) {
+    boolean isInnerVisible(int innerItemCount) {
         int itemCount = getItemCount(innerItemCount);
         // Inner dividers only present if there's at least 2 items.
         return itemCount > 1 && mInnerItem != null && mEmptyPolicy.shouldShowInner(itemCount);
@@ -283,12 +283,15 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     private static final class ViewTypeWrapper {
         @NonNull
         Object viewType;
+
+        ViewTypeWrapper() {
+        }
     }
 
     private final class DividerViewHolder {
 
         @NonNull
-        private final View mChildView;
+        final View mChildView;
 
         @Nullable
         private final View mLeadingView;

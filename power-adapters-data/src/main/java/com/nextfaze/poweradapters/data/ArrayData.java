@@ -142,25 +142,33 @@ public abstract class ArrayData<T> extends Data<T> implements Closeable {
 
                 @Override
                 protected void onSuccess(@NonNull List<? extends T> data) throws Throwable {
-                    onClear();
-                    mDirty = false;
-                    mClear = false;
-                    mData.replaceAll(data);
-                    setAvailable(0);
-                    mTask = null;
-                    loadDataIfAppropriate();
-                    updateLoading();
+                    onLoadSuccess(data);
                 }
 
                 @Override
                 protected void onFailure(@NonNull Throwable e) throws Throwable {
-                    mTask = null;
-                    updateLoading();
-                    notifyError(e);
+                    onLoadFailure(e);
                 }
             };
             mTask.execute();
         }
+    }
+
+    void onLoadSuccess(@NonNull List<? extends T> data) {
+        onClear();
+        mDirty = false;
+        mClear = false;
+        mData.replaceAll(data);
+        setAvailable(0);
+        mTask = null;
+        loadDataIfAppropriate();
+        updateLoading();
+    }
+
+    void onLoadFailure(@NonNull Throwable e) {
+        mTask = null;
+        updateLoading();
+        notifyError(e);
     }
 
     private void cancelTask() {

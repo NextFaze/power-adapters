@@ -141,7 +141,7 @@ final class ConditionalAdapter extends PowerAdapter {
         mCondition.unregisterObserver(mObserver);
     }
 
-    private void updateVisible() {
+    void updateVisible() {
         boolean visible = mCondition.eval();
         if (visible != mVisible) {
             int removeCount = mVisible ? mAdapter.getItemCount() : 0;

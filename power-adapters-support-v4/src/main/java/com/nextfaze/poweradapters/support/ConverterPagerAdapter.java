@@ -127,6 +127,9 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
 
         int position;
 
+        HolderImpl() {
+        }
+
         @Override
         public int getPosition() {
             return position;
@@ -137,6 +140,9 @@ public class ConverterPagerAdapter extends FixedPagerAdapter {
 
         @NonNull
         private final Map<Object, Deque<View>> mViews = new HashMap<>();
+
+        Recycler() {
+        }
 
         void put(@NonNull Object itemViewType, @NonNull View v) {
             Deque<View> views = mViews.get(itemViewType);

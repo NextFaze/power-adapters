@@ -26,8 +26,8 @@ import static java.util.Collections.singletonList;
 
 final class FileTree {
 
-    private static final Object VIEW_TYPE_FILE = new Object();
-    private static final Object VIEW_TYPE_PEEK = new Object();
+    static final Object VIEW_TYPE_FILE = new Object();
+    static final Object VIEW_TYPE_PEEK = new Object();
 
     @NonNull
     static PowerAdapter createAdapter(@Nullable Data<File> overrideData, @NonNull File file) {
@@ -112,13 +112,13 @@ final class FileTree {
     }
 
     /** Contains tree metadata, which controls expansion/peeking. */
-    private static final class Tree {
+    static final class Tree {
 
         @NonNull
-        private final Map<File, EnumSet<Flag>> mFlags = new HashMap<>();
+        final Map<File, EnumSet<Flag>> mFlags = new HashMap<>();
 
         @NonNull
-        private final Set<FlagCondition> mConditions = new CopyOnWriteArraySet<>();
+        final Set<FlagCondition> mConditions = new CopyOnWriteArraySet<>();
 
         void togglePeek(@NonNull File file) {
             for (Map.Entry<File, EnumSet<Flag>> entry : mFlags.entrySet()) {
@@ -175,7 +175,7 @@ final class FileTree {
             };
         }
 
-        private abstract class FlagCondition extends Condition {
+        abstract class FlagCondition extends Condition {
             @Override
             protected void onFirstObserverRegistered() {
                 mConditions.add(this);

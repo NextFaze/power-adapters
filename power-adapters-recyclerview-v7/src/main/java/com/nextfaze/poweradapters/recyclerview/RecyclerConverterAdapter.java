@@ -31,10 +31,10 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     private final Set<AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
 
     @NonNull
-    private final Set<RecyclerView> mAttachedRecyclerViews = new HashSet<>();
+    final Set<RecyclerView> mAttachedRecyclerViews = new HashSet<>();
 
     @NonNull
-    private final PowerAdapter mPowerAdapter;
+    final PowerAdapter mPowerAdapter;
 
     @NonNull
     private final DataObserver mDataObserver = new DataObserver() {
@@ -164,7 +164,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
-    private void updateObserver() {
+    void updateObserver() {
         boolean observe = !mAdapterDataObservers.isEmpty() && !mAttachedRecyclerViews.isEmpty();
         if (observe != mObserving) {
             if (mObserving) {
@@ -202,7 +202,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     public static final class ViewHolder extends RecyclerView.ViewHolder {
 
         @NonNull
-        private final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
+        final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
             @Override
             public int getPosition() {
                 return getLayoutPosition();
@@ -268,7 +268,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
             updatePresenceInSet();
         }
 
-        private void updatePresenceInSet() {
+        void updatePresenceInSet() {
             if (mRecyclerView.isAttachedToWindow()) {
                 mAttachedRecyclerViews.add(mRecyclerView);
             } else {

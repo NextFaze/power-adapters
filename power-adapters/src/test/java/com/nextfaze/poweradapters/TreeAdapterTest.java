@@ -43,13 +43,13 @@ public final class TreeAdapterTest {
     @Mock
     private DataObserver mObserver;
 
-    private FakeAdapter mRootAdapter;
-    private List<FakeAdapter> mChildAdapters;
-    private ChildAdapterSupplier mChildAdapterSupplier;
-    private TreeAdapter mTreeAdapter;
-    private ViewGroup mParent;
-    private ViewGroup mContainerViewGroup;
-    private View mItemView;
+    FakeAdapter mRootAdapter;
+    List<FakeAdapter> mChildAdapters;
+    ChildAdapterSupplier mChildAdapterSupplier;
+    TreeAdapter mTreeAdapter;
+    ViewGroup mParent;
+    ViewGroup mContainerViewGroup;
+    View mItemView;
 
     @Mock
     private Container mContainer;

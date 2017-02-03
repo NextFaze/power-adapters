@@ -140,7 +140,7 @@ public abstract class DataWatcher {
         }
     }
 
-    private void dispatchDataChange() {
+    void dispatchDataChange() {
         try {
             onDataChange();
         } catch (Throwable e) {
@@ -148,7 +148,7 @@ public abstract class DataWatcher {
         }
     }
 
-    private void dispatchDataLoadingChange() {
+    void dispatchDataLoadingChange() {
         try {
             onDataLoadingChange();
         } catch (Throwable e) {
@@ -156,7 +156,7 @@ public abstract class DataWatcher {
         }
     }
 
-    private void dispatchDataError(@NonNull Throwable e) {
+    void dispatchDataError(@NonNull Throwable e) {
         try {
             onDataError(e);
         } catch (Throwable t) {

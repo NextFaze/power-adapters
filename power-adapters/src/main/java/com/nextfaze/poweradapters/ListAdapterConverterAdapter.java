@@ -23,7 +23,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final WeakMap<ViewGroup, ContainerImpl> mParentViewToContainer = new WeakMap<>();
 
     @NonNull
-    private final Handler mHandler = new Handler(getMainLooper());
+    final Handler mHandler = new Handler(getMainLooper());
 
     @NonNull
     private final WeakMap<View, HolderImpl> mHolders = new WeakMap<>();
@@ -35,7 +35,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private final Set<DataSetObserver> mDataSetObservers = new HashSet<>();
 
     @NonNull
-    private final Runnable mNotifyDataSetChangedRunnable = new Runnable() {
+    final Runnable mNotifyDataSetChangedRunnable = new Runnable() {
         @Override
         public void run() {
             notifyDataSetChanged();
@@ -56,7 +56,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     };
 
     @NonNull
-    private final PowerAdapter mPowerAdapter;
+    final PowerAdapter mPowerAdapter;
 
     private final int mViewTypeCount;
 
@@ -161,6 +161,9 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
     private static final class HolderImpl implements Holder {
 
         int position;
+
+        HolderImpl() {
+        }
 
         @Override
         public int getPosition() {

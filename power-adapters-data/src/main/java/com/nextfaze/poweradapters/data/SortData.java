@@ -129,6 +129,9 @@ final class SortData<T> extends DataWrapper<T> {
         @NonNull
         private final ArrayList<Integer> mInnerPositions = new ArrayList<>();
 
+        Index() {
+        }
+
         int size() {
             return mInnerPositions.size();
         }

@@ -21,7 +21,7 @@ final class AdapterVerifier {
 
     /** Set of get calls to be verified as passing the correct position arg. */
     @NonNull
-    private final Set<GetCall> mGetCalls = new HashSet<>();
+    final Set<GetCall> mGetCalls = new HashSet<>();
 
     /** List of verifications to be performed in order. */
     @NonNull

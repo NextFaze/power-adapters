@@ -159,7 +159,7 @@ public class DataLayout extends RelativeLayout {
 
     /** The current error message, if any. */
     @Nullable
-    private CharSequence mErrorMessage;
+    CharSequence mErrorMessage;
 
     /** Formats error messages to be displayed in the error view. */
     @Nullable
@@ -188,7 +188,7 @@ public class DataLayout extends RelativeLayout {
     @Nullable
     private View mVisibleView;
 
-    private int mComponentVisibilityWhenHidden = INVISIBLE;
+    int mComponentVisibilityWhenHidden = INVISIBLE;
 
     /** Indicates this view is attached to the window. */
     private boolean mAttachedToWindow;
@@ -688,7 +688,7 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    private void updateVisible() {
+    void updateVisible() {
         boolean visible = mVisibilityPredicate.isVisible(this);
         mDataWatcher.setEnabled(visible);
         if (visible != mVisible) {
@@ -749,7 +749,7 @@ public class DataLayout extends RelativeLayout {
         }
     }
 
-    private void updateViews() {
+    void updateViews() {
         changeView(viewToBeShown(), shouldAnimate());
     }
 
@@ -785,7 +785,7 @@ public class DataLayout extends RelativeLayout {
     }
 
     @SuppressWarnings("SimplifiableIfStatement")
-    private boolean shouldShow(@NonNull View v) {
+    boolean shouldShow(@NonNull View v) {
         if (v == mLoadingView) {
             return isLoading() && isEmpty();
         }
@@ -801,13 +801,13 @@ public class DataLayout extends RelativeLayout {
         return false;
     }
 
-    private void updateErrorView() {
+    void updateErrorView() {
         applyErrorMessage(mErrorMessage);
         dispatchError(mErrorMessage);
     }
 
     @Nullable
-    private CharSequence formatErrorMessage(@NonNull Throwable e) {
+    CharSequence formatErrorMessage(@NonNull Throwable e) {
         if (mErrorFormatter == null) {
             return null;
         }

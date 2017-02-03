@@ -12,7 +12,7 @@ import java.util.Map;
 final class ConcatAdapter extends PowerAdapter {
 
     @NonNull
-    private final Entry[] mEntries;
+    final Entry[] mEntries;
 
     @NonNull
     private final Map<Object, PowerAdapter> mAdaptersByViewType = new HashMap<>();
@@ -36,7 +36,7 @@ final class ConcatAdapter extends PowerAdapter {
     };
 
     @NonNull
-    private final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
+    final RangeTable.RangeClient mShadowRangeClient = new RangeTable.RangeClient() {
         @Override
         public int size() {
             return mEntries.length;
@@ -54,11 +54,11 @@ final class ConcatAdapter extends PowerAdapter {
     };
 
     @NonNull
-    private final RangeTable mRangeTable = new RangeTable();
+    final RangeTable mRangeTable = new RangeTable();
 
     private final boolean mStableIds;
 
-    private int mItemCount;
+    int mItemCount;
 
     ConcatAdapter(@NonNull List<? extends PowerAdapter> adapters) {
         mEntries = new Entry[adapters.size()];
@@ -186,11 +186,11 @@ final class ConcatAdapter extends PowerAdapter {
         };
 
         @NonNull
-        private final SubAdapter mAdapter;
+        final SubAdapter mAdapter;
 
-        private boolean mObserving;
+        boolean mObserving;
 
-        private int mShadowItemCount;
+        int mShadowItemCount;
 
         Entry(@NonNull PowerAdapter adapter) {
             mAdapter = new SubAdapter(adapter);
