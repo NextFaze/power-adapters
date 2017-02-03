@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="power-adapter-tests" type="AndroidJUnit" factoryName="Android JUnit">
+  <configuration default="false" name="power-adapter-rx-tests" type="AndroidJUnit" factoryName="Android JUnit">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <module name="power-adapters" />
+    <module name="power-adapters-rx" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" />
-    <option name="PACKAGE_NAME" value="com.nextfaze.poweradapters" />
+    <option name="PACKAGE_NAME" value="com.nextfaze.poweradapters.rx" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />
@@ -24,4 +23,3 @@
     <method />
   </configuration>
 </component>
-

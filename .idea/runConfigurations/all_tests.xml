@@ -1,7 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="all-tests" type="CompoundRunConfigurationType" factoryName="Compound Run Configuration">
-    <toRun type="JUnit" name="power-adapter-data-tests" />
-    <toRun type="JUnit" name="power-adapter-tests" />
+    <toRun type="AndroidJUnit" name="power-adapter-data-rx-tests" />
+    <toRun type="AndroidJUnit" name="power-adapter-data-tests" />
+    <toRun type="AndroidJUnit" name="power-adapter-rx-tests" />
+    <toRun type="AndroidJUnit" name="power-adapter-tests" />
     <method />
   </configuration>
 </component>
