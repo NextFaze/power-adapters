@@ -16,7 +16,7 @@ public class MapperWrapper<T> implements Mapper<T> {
     }
 
     @NonNull
-    public final Mapper getMapper() {
+    public final Mapper<T> getMapper() {
         return mMapper;
     }
 
