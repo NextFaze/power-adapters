@@ -12,7 +12,6 @@ dependencies {
     compile project(':power-adapters')
     compile rootProject.ext.supportCoreUi
     compile rootProject.ext.supportAnnotations
-    provided rootProject.ext.lombok
 }
 
 android {

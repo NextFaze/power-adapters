@@ -17,7 +17,6 @@ dependencies {
     compile project(':power-adapters-rx')
     compile rootProject.ext.supportAnnotations
     compile rootProject.ext.supportRecyclerView
-    provided rootProject.ext.lombok
 }
 
 android {
