@@ -6,13 +6,10 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
-import com.nextfaze.poweradapters.internal.WeakMap;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 public final class PowerAdapters {
-
-    private static final WeakMap<PowerAdapter, ListAdapterConverterAdapter> sListConverterAdapters = new WeakMap<>();
 
     private PowerAdapters() {
     }
@@ -26,18 +23,12 @@ public final class PowerAdapters {
     @CheckResult
     @NonNull
     public static ListAdapter toListAdapter(@NonNull PowerAdapter powerAdapter) {
-        checkNotNull(powerAdapter, "powerAdapter");
-        ListAdapterConverterAdapter converterAdapter = sListConverterAdapters.get(powerAdapter);
-        if (converterAdapter == null) {
-            // HACK: We simply have to use a magic number here and hope we never exceed it.
-            // ListAdapter interface gives us no other choice, since it requires knowledge of all possible view types
-            // in advance, and a PowerAdapter cannot provide this.
-            // In practise, this means wastefully creating X ArrayLists in AbsListView, which isn't much compared to
-            // the memory overhead of a single View.
-            converterAdapter = new ListAdapterConverterAdapter(powerAdapter, 50);
-            sListConverterAdapters.put(powerAdapter, converterAdapter);
-        }
-        return converterAdapter;
+        // HACK: We simply have to use a magic number here and hope we never exceed it.
+        // ListAdapter interface gives us no other choice, since it requires knowledge of all possible view types
+        // in advance, and a PowerAdapter cannot provide this.
+        // In practise, this means wastefully creating X ArrayLists in AbsListView, which isn't much compared to
+        // the memory overhead of a single View.
+        return new ListAdapterConverterAdapter(checkNotNull(powerAdapter, "powerAdapter"), 50);
     }
 
     /**

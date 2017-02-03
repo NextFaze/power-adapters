@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static android.os.Looper.getMainLooper;
+import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class ListAdapterConverterAdapter extends BaseAdapter {
 
@@ -65,7 +66,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
         if (viewTypeCount < 1) {
             throw new IllegalArgumentException("viewTypeCount must be at least 1");
         }
-        mPowerAdapter = powerAdapter;
+        mPowerAdapter = checkNotNull(powerAdapter, "powerAdapter");
         mViewTypeCount = viewTypeCount;
     }
 
