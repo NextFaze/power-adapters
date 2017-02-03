@@ -54,11 +54,11 @@ public final class MapperBuilderTest {
     @Mock
     private Binder<C, TextView> mBinder6;
 
-    private Mapper mMapper;
+    private Mapper<A> mMapper;
 
     @Before
     public void setUp() throws Exception {
-        mMapper = new MapperBuilder()
+        mMapper = new MapperBuilder<A>()
                 .bind(C.class, mBinder5)
                 .bind(A.class, mBinder1, new Predicate<A>() {
                     @Override
@@ -82,15 +82,24 @@ public final class MapperBuilderTest {
 
     @Test
     public void nonBoundItemResolvesToNull() {
-        assertThat(mMapper.getBinder(new E(), 0)).isNull();
+        Mapper<A> mapper = new MapperBuilder<A>()
+                .bind(C.class, mBinder5)
+                .bind(A.class, mBinder1, new Predicate<A>() {
+                    @Override
+                    public boolean apply(A a) {
+                        return a.get() == 2;
+                    }
+                })
+                .build();
+        assertThat(mapper.getBinder(new D(3), 0)).isNull();
     }
 
     @Test
     public void absentPredicateEquivalentToAlwaysTrue() {
-        Mapper mapper1 = new MapperBuilder()
+        Mapper<B> mapper1 = new MapperBuilder<B>()
                 .bind(B.class, mBinder3)
                 .build();
-        Mapper mapper2 = new MapperBuilder()
+        Mapper<B> mapper2 = new MapperBuilder<B>()
                 .bind(B.class, mBinder3, ALWAYS)
                 .build();
         assertThat(mapper1.getBinder(new D(3), 0)).isEqualTo(mBinder3);
@@ -99,32 +108,40 @@ public final class MapperBuilderTest {
 
     @Test
     public void alwaysFalsePredicateNeverPasses() {
-        Mapper mapper = new MapperBuilder()
+        Mapper<? super C> mapper = new MapperBuilder<C>()
                 .bind(C.class, mBinder5, NEVER)
                 .build();
-        assertThat(mapper.getBinder(new D(7), 0)).isNull();
+        assertThat(mapper.getBinder(new C(7), 0)).isNull();
     }
 
-    interface A {
-        int get();
-    }
+    class A {
 
-    interface B extends A {
-    }
-
-    interface C extends A {
-    }
-
-    class D implements B {
         final int value;
 
-        D(int value) {
+        A(int value) {
             this.value = value;
         }
 
-        @Override
-        public int get() {
+        int get() {
             return value;
+        }
+    }
+
+    class B extends A {
+        B(int value) {
+            super(value);
+        }
+    }
+
+    class C extends A {
+        C(int value) {
+            super(value);
+        }
+    }
+
+    class D extends B {
+        D(int value) {
+            super(value);
         }
     }
 
