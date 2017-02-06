@@ -6,6 +6,10 @@ ext {
     buildToolsVersion = '25.0.1'
     supportVersion = '25.1.1'
 
+    kotlinVersion = "1.0.4"
+    kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+    kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+
     supportAnnotations = "com.android.support:support-annotations:$supportVersion"
     supportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"
     supportAppCompat = "com.android.support:appcompat-v7:$supportVersion"
