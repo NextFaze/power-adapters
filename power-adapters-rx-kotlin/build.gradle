@@ -14,7 +14,7 @@ dependencies {
     testCompile rootProject.ext.robolectric
     testCompile rootProject.ext.mockito
     testCompile rootProject.ext.truth
-    compile project(':power-adapters')
+    compile project(':power-adapters-rx')
     compile rootProject.ext.kotlinStdlib
 }
 
