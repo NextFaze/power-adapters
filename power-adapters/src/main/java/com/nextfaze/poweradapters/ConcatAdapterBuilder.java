@@ -1,14 +1,29 @@
 package com.nextfaze.poweradapters;
 
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
+
 final class ConcatAdapterBuilder {
 
     @NonNull
     private final ArrayList<PowerAdapter> mAdapters = new ArrayList<>();
+
+    @NonNull
+    ConcatAdapterBuilder add(@LayoutRes int layoutResource) {
+        mAdapters.add(asAdapter(layoutResource));
+        return this;
+    }
+
+    @NonNull
+    ConcatAdapterBuilder add(@NonNull ViewFactory viewFactory) {
+        mAdapters.add(asAdapter(viewFactory));
+        return this;
+    }
 
     @NonNull
     ConcatAdapterBuilder add(@NonNull PowerAdapter adapter) {
