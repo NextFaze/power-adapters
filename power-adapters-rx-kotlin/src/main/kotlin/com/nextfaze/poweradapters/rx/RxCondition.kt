@@ -1,6 +1,6 @@
-package com.nextfaze.poweradapters
+package com.nextfaze.poweradapters.rx
 
-import com.nextfaze.poweradapters.rx.RxCondition
+import com.nextfaze.poweradapters.Condition
 import rx.Observable
 
 fun Condition.value(): Observable<Boolean> = RxCondition.value(this)

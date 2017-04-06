@@ -1,6 +1,6 @@
-package com.nextfaze.poweradapters
+package com.nextfaze.poweradapters.rx
 
-import com.nextfaze.poweradapters.rx.*
+import com.nextfaze.poweradapters.PowerAdapter
 import rx.Observable
 
 fun PowerAdapter.itemCount(): Observable<Int> = RxPowerAdapter.itemCount(this)
