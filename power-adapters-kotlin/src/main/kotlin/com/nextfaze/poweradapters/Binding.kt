@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters
 import android.support.annotation.LayoutRes
 import android.view.View
 import com.nextfaze.poweradapters.binding.Binder
+import com.nextfaze.poweradapters.binding.Mappers.singletonMapper
 import com.nextfaze.poweradapters.binding.ViewHolder
 import com.nextfaze.poweradapters.binding.ViewHolderBinder
 
@@ -18,3 +19,5 @@ fun <T, H : ViewHolder> binder(@LayoutRes layoutResource: Int,
         ViewHolderBinder.create(layoutResource, createViewHolder) { container, item, h, holder ->
             h.bindViewHolder(container, item, holder)
         }
+
+fun Binder<*, *>.toMapper() = singletonMapper(this)
