@@ -15,3 +15,6 @@ operator fun PowerAdapter.plus(@LayoutRes layoutResource: Int) = append(layoutRe
 
 @JvmName("plusLayoutResources") operator fun PowerAdapter.plus(layoutResources: Iterable<Int>) =
         adapter { adapter(this@plus); layoutResources(layoutResources) }
+
+operator fun PowerAdapter.plusAssign(dataObserver: DataObserver) = registerDataObserver(dataObserver)
+operator fun PowerAdapter.minusAssign(dataObserver: DataObserver) = unregisterDataObserver(dataObserver)
