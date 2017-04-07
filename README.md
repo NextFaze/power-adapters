@@ -8,7 +8,10 @@
 - [Feature Summary](#feature-summary)
 - [Usage](#usage)
   - [Basic](#basic)
+  - [RxJava](#rxjava)
+  - [Kotlin](#kotlin)
   - [Adapter Composition](#adapter-composition)
+  - [Headers and Footers](#headers-and-footers)
   - [Data Type Binding](#data-type-binding)
     - [Binder](#binder)
     - [Mapper](#mapper)
@@ -49,6 +52,8 @@ This library provides the following features:
 * Backed up by **unit tests**, verifying the correct notifications are issued and state maintained
 * Minimal **dependencies**; doesn't include any unnecessary transitive dependencies
 * All adapters issue the correct insertion/removal/change notifications needed for full `RecyclerView` animation support
+* Kotlin extension modules, which add idiomatic Kotlin APIs
+* RxJava extension modules, adding easy integration with `Observable`s, etc
 
 Power adapters are compatible with the following collection view classes:
 * `android.support.v7.widget.RecyclerView`
@@ -97,6 +102,68 @@ ListBindingAdapter<Tweet> tweetsAdapter = new ListBindingAdapter<>(tweetBinder);
 // Assign to your RecyclerView
 recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 ```
+
+## RxJava
+
+RxJava modules are available. Simply append `-rx` to get the RxJava module:
+
+```groovy
+compile 'com.nextfaze.poweradapters:power-adapters-rx:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.12.1'
+```
+
+## Kotlin
+
+Kotlin modules are also provided for most modules. Append `-kotlin` to get the Kotlin module:
+
+```groovy
+compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.12.1'
+```
+
+Some of the Kotlin APIs include:
+
+- Extension functions:
+    ```kotlin
+    recyclerView.adapter = myPowerAdapter.toRecyclerAdapter()
+    ```
+- `PowerAdapter` and `Data` Factory methods: `adapterOf()`, `dataOf()`
+- `Binder` factory methods:
+    ```kotlin
+    val binder = binder<Item, ItemView>(R.layout.item) { container, item, holder ->
+        title = item.name
+        imageUri = item.imageUri
+    }
+    ```
+- Operator overloads:
+    ```kotlin
+    adapter.showOnlyWhile(empty and !anotherThing)
+    ```
+    ```
+    val adapter = itemsAdapter + anotherAdapter
+    ```
+    ```kotlin
+    data += dataObserver { updateViews() }
+    ```
+- Property delegates:
+    ```kotlin
+    val condition = ValueCondition()
+    var enabled by condition
+    val adapter = myAdapter.showOnlyWhile(condition)
+    // Reassign property to control visibility of adapter
+    enabled = false
+    ```
+- Type-safe builder: 
+    ```kotlin
+    adapter {
+        layoutResource(R.layout.header)
+        +myItemsAdapter
+        layoutResource(R.layout.footer)
+    }
+    ```
 
 ## Adapter Composition
 
