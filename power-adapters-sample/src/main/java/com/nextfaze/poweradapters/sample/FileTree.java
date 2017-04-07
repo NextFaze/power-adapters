@@ -2,12 +2,14 @@ package com.nextfaze.poweradapters.sample;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.TreeAdapter;
-import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ListBindingAdapter;
 import com.nextfaze.poweradapters.data.Data;
@@ -43,30 +45,18 @@ final class FileTree {
         Data<File> data = overrideData != null ? overrideData : new DirectoryData(file);
 
         // Binder for a file/directory item.
-        Binder<File, FileView> binder = new AbstractBinder<File, FileView>(R.layout.file_tree_file_item) {
-            @Override
-            public void bindView(@NonNull Container container,
-                                 @NonNull File file,
-                                 @NonNull FileView v,
-                                 @NonNull Holder holder) {
-                v.setFile(file);
-                v.setDepth(depth);
-                v.setClickable(file.isDirectory());
-                v.setOnClickListener(v1 -> {
-                    if (file.isDirectory()) {
-                        tree.toggle(file, Flag.EXPANDED);
-                    }
-                    container.scrollToPosition(holder.getPosition());
-                });
-                v.setOnPeekListener(file.isDirectory() ? () -> tree.togglePeek(file) : null);
-            }
-
-            @NonNull
-            @Override
-            public Object getViewType(@NonNull File file, int position) {
-                return VIEW_TYPE_FILE;
-            }
-        };
+        Binder<File, FileView> binder = Binder.create(R.layout.file_tree_file_item, ((container, f, v, holder) -> {
+            v.setFile(f);
+            v.setDepth(depth);
+            v.setClickable(f.isDirectory());
+            v.setOnClickListener(v1 -> {
+                if (f.isDirectory()) {
+                    tree.toggle(f, Flag.EXPANDED);
+                }
+                container.scrollToPosition(holder.getPosition());
+            });
+            v.setOnPeekListener(f.isDirectory() ? () -> tree.togglePeek(f) : null);
+        }));
 
         PowerAdapter adapter = new DataBindingAdapter<>(binder, data)
                 .compose(nest(position -> {
@@ -87,9 +77,18 @@ final class FileTree {
 
     @NonNull
     private static PowerAdapter createPeekAdapter(@NonNull File file, @NonNull Tree tree) {
-        Binder<File, FilePeekView> peekBinder = new AbstractBinder<File, FilePeekView>(R.layout.file_tree_peek_item) {
+        Binder<File, FilePeekView> peekBinder = new Binder<File, FilePeekView>() {
+            @NonNull
             @Override
-            public void bindView(@NonNull File file, @NonNull FilePeekView v, @NonNull Holder holder) {
+            public View newView(@NonNull ViewGroup parent) {
+                return LayoutInflater.from(parent.getContext()).inflate(R.layout.file_tree_peek_item, parent, false);
+            }
+
+            @Override
+            public void bindView(@NonNull Container container,
+                                 @NonNull File file,
+                                 @NonNull FilePeekView v,
+                                 @NonNull Holder holder) {
                 v.setFile(file);
             }
 
