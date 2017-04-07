@@ -1,6 +1,14 @@
 package com.nextfaze.poweradapters
 
 import android.support.annotation.LayoutRes
+import com.nextfaze.poweradapters.PowerAdapter.asAdapter
+import com.nextfaze.poweradapters.ViewFactories.asViewFactory
+
+fun adapterOf(vararg views: ViewFactory) = asAdapter(*views)
+@JvmName("adapterOfViews") fun adapterOf(views: Iterable<ViewFactory>) = asAdapter(views)
+fun adapterOf(@LayoutRes vararg layoutResources: Int) = asAdapter(*layoutResources)
+@JvmName("adapterOfResources") fun adapterOf(layoutResources: Iterable<Int>) =
+        asAdapter(layoutResources.map { asViewFactory(it) })
 
 operator fun PowerAdapter.plus(adapter: PowerAdapter) = append(adapter)
 
