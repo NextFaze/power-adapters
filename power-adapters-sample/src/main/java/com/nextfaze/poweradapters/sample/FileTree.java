@@ -45,18 +45,37 @@ final class FileTree {
         Data<File> data = overrideData != null ? overrideData : new DirectoryData(file);
 
         // Binder for a file/directory item.
-        Binder<File, FileView> binder = Binder.create(R.layout.file_tree_file_item, ((container, f, v, holder) -> {
-            v.setFile(f);
-            v.setDepth(depth);
-            v.setClickable(f.isDirectory());
-            v.setOnClickListener(v1 -> {
-                if (f.isDirectory()) {
-                    tree.toggle(f, Flag.EXPANDED);
-                }
-                container.scrollToPosition(holder.getPosition());
-            });
-            v.setOnPeekListener(f.isDirectory() ? () -> tree.togglePeek(f) : null);
-        }));
+        Binder<File, FileView> binder = new Binder<File, FileView>() {
+            @NonNull
+            @Override
+            public View newView(@NonNull ViewGroup parent) {
+                return LayoutInflater.from(parent.getContext()).inflate(R.layout.file_tree_file_item, parent, false);
+            }
+
+            @Override
+            public void bindView(@NonNull Container container,
+                                 @NonNull File f,
+                                 @NonNull FileView v,
+                                 @NonNull Holder holder) {
+                v.setFile(f);
+                v.setDepth(depth);
+                v.setClickable(f.isDirectory());
+                v.setOnClickListener(v1 -> {
+                    if (f.isDirectory()) {
+                        tree.toggle(f, Flag.EXPANDED);
+                    }
+                    container.scrollToPosition(holder.getPosition());
+                });
+                v.setOnPeekListener(f.isDirectory() ? () -> tree.togglePeek(f) : null);
+            }
+
+            @NonNull
+            @Override
+            public Object getViewType(@NonNull File file, int position) {
+                // Allow this binder to reuse views from all equivalent file binders
+                return VIEW_TYPE_FILE;
+            }
+        };
 
         PowerAdapter adapter = new DataBindingAdapter<>(binder, data)
                 .compose(nest(position -> {
