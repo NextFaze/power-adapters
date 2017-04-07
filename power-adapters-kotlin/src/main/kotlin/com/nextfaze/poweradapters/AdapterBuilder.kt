@@ -1,15 +1,15 @@
 package com.nextfaze.poweradapters
 
 import android.support.annotation.LayoutRes
-import android.support.annotation.StringRes
-import android.widget.TextView
 import com.nextfaze.poweradapters.ViewFactories.asViewFactory
 
 /** Creates a composite [PowerAdapter] using a type-safe builder interface. */
 fun adapter(init: AdapterBuilder.() -> Unit): PowerAdapter = AdapterBuilder().apply { init() }.build()
 
+@DslMarker annotation class AdapterMarker
+
 /** Used to build a composite [PowerAdapter]. */
-class AdapterBuilder internal constructor() {
+@AdapterMarker class AdapterBuilder internal constructor() {
 
     private val b = ConcatAdapterBuilder()
 
@@ -17,11 +17,7 @@ class AdapterBuilder internal constructor() {
 
     /* Layout resources */
 
-    fun layoutResource(@LayoutRes layoutResource: Int, @StringRes textStringResource: Int? = null) =
-            view(asViewFactory(layoutResource), textStringResource)
-
-    fun layoutResource(@LayoutRes layoutResource: Int, text: CharSequence? = null) =
-            view(asViewFactory(layoutResource), text)
+    fun layoutResource(@LayoutRes layoutResource: Int) = view(asViewFactory(layoutResource))
 
     fun layoutResources(layoutResources: Iterable<Int>) = layoutResources.forEach { +it }
 
@@ -31,15 +27,11 @@ class AdapterBuilder internal constructor() {
 
     /* Views */
 
-    fun view(view: ViewFactory, text: CharSequence? = null) {
-        b.add(view.apply { text?.let { applyToTextView { this.text = it } } })
+    fun view(view: ViewFactory) {
+        b.add(view)
     }
 
-    fun view(view: ViewFactory, @StringRes textStringResource: Int? = null) {
-        b.add(view.apply { textStringResource?.let { applyToTextView { setText(it) } } })
-    }
-
-    fun views(views: Iterable<ViewFactory>) = views.forEach { view(it, text = null) }
+    fun views(views: Iterable<ViewFactory>) = views.forEach { view(it) }
 
     fun views(vararg views: ViewFactory) = views(views.toList())
 
@@ -64,8 +56,4 @@ class AdapterBuilder internal constructor() {
     }
 
     @JvmName("addAdapters") operator fun Iterable<PowerAdapter>.unaryPlus() = forEach { +it }
-}
-
-private fun ViewFactory.applyToTextView(body: TextView.() -> Unit) = ViewFactory { parent ->
-    create(parent).apply { if (this is TextView) body() }
 }
