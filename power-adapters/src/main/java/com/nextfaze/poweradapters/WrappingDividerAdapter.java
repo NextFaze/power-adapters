@@ -1,11 +1,16 @@
 package com.nextfaze.poweradapters;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RestrictTo;
+import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import com.nextfaze.poweradapters.internal.WeakMap;
 
+import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
@@ -15,9 +20,6 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
     @NonNull
     private final WeakMap<Object, ViewTypeWrapper> mViewTypes = new WeakMap<>();
-
-    @NonNull
-    private final WeakMap<ViewGroup, DividerViewHolder> mViewMetadata = new WeakMap<>();
 
     @NonNull
     private final DividerAdapterBuilder.EmptyPolicy mEmptyPolicy;
@@ -101,10 +103,10 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         }
         ViewTypeWrapper viewTypeWrapper = (ViewTypeWrapper) viewType;
         // Must inflate in order to get the correct layout params.
-        ViewGroup viewGroup = (ViewGroup) layoutInflater(parent)
+        DividerLinearLayout viewGroup = (DividerLinearLayout) layoutInflater(parent)
                 .inflate(R.layout.power_adapters_divider_adapter_wrapper, parent, false);
         View childView = super.newView(viewGroup, viewTypeWrapper.viewType);
-        mViewMetadata.put(viewGroup, new DividerViewHolder(viewGroup, childView));
+        viewGroup.viewHolder = new DividerViewHolder(viewGroup, childView);
         return viewGroup;
     }
 
@@ -115,8 +117,8 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         if (innerItemCount == 0 && (isLeadingVisible(innerItemCount) || isTrailingVisible(innerItemCount))) {
             return;
         }
-        ViewGroup viewGroup = (ViewGroup) view;
-        DividerViewHolder dividerViewHolder = mViewMetadata.get(viewGroup);
+        DividerLinearLayout viewGroup = (DividerLinearLayout) view;
+        DividerViewHolder dividerViewHolder = viewGroup.viewHolder;
         dividerViewHolder.updateDividers(position);
         super.bindView(container, dividerViewHolder.mChildView, holder);
     }
@@ -330,6 +332,17 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
             if (mTrailingView != null) {
                 mTrailingView.setVisibility(position == getItemCount(innerItemCount) - 1 && isTrailingVisible(innerItemCount) ? VISIBLE : GONE);
             }
+        }
+    }
+
+    /** For internal use only. */
+    @RestrictTo(LIBRARY_GROUP)
+    public static final class DividerLinearLayout extends LinearLayout {
+
+        DividerViewHolder viewHolder;
+
+        public DividerLinearLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+            super(context, attrs);
         }
     }
 }

@@ -4,7 +4,8 @@
 .idea/workspace.xml
 .idea/modules.xml
 .idea/libraries
+.idea/kotlinc.xml
+.idea/gradle.xml
 .DS_Store
 .gradle
 *.iml
-*/build

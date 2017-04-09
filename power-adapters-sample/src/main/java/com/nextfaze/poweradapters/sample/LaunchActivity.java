@@ -8,9 +8,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.collect.ImmutableList;
-import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
-import com.nextfaze.poweradapters.binding.AbstractBinder;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.ListBindingAdapter;
 
@@ -33,13 +31,10 @@ public final class LaunchActivity extends AppCompatActivity {
     );
 
     @NonNull
-    private final Binder<Sample, TextView> mSampleBinder = new AbstractBinder<Sample, TextView>(android.R.layout.simple_list_item_1) {
-        @Override
-        public void bindView(@NonNull final Sample sample, @NonNull TextView v, @NonNull Holder holder) {
-            v.setText(sample.getName());
-            v.setOnClickListener(v1 -> onSampleClick(sample));
-        }
-    };
+    private final Binder<Sample, TextView> mSampleBinder = Binder.create(android.R.layout.simple_list_item_1, ((container, sample, v, holder) -> {
+        v.setText(sample.getName());
+        v.setOnClickListener(v1 -> onSampleClick(sample));
+    }));
 
     @NonNull
     private final PowerAdapter mAdapter = new ListBindingAdapter<>(singletonMapper(mSampleBinder), mSamples);

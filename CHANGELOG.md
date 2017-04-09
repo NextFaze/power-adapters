@@ -1,6 +1,35 @@
 Change Log
 ==========
 
+## Version 0.13.0
+
+_2017-04-07_
+
+* Add Kotlin modules, which add Kotlin-idiomatic extensions
+* Expand on RxJava bridging modules:
+    - Move many APIs from `power-adapters-data-rx` into new module `power-adapters-rx`
+    - Add `ObservableAdapterBuilder` and `ObservableDataBuilder`, for creating adapters and `Data` objects based on 
+        RxJava `Observable`s. Both use `DiffUtil` internally to dispatch fine-grained notifications, and thus have full
+        item animation support.
+    - Add `Observable`-based `Condition`s, available in the `RxCondition` class.
+* Add `Mapper` type param `T`, which lets callers specify an upper bound of types the `Mapper` handles.
+* Fix some `Binder` API generics variance problems, making them much more flexible.
+* `MapperBuilder` now evaluates rules from top to bottom. This can result in breaking changes if your usages relied on
+  the previous behavior of evaluating rules based on class.
+* Add `PowerAdapter.wrapItems`, for wrapping item views in another `ViewGroup` to apply extra layout effects.
+* Remove aggressive notification consistency verification, allowing for batches of notifications to be dispatched as
+  long as they are consistent by the time `RecyclerView` responds to them. This mainly affects custom `Data` or 
+  `PowerAdapter` implementations.
+* Deprecate `DataBindingAdapter(Data, Binder)`, `DataBindingAdapter(Data, Mapper)`, and add 
+  `DataBindingAdapter(Binder, Data)`, `DataBindingAdapter(Mapper, Data)` to be consistent with other APIs.
+* Add more helper conditions to `DataConditions`.
+* Removed `RecyclerView` and `ListView` converter adapter caching, as it caused a memory leak in certain use cases.
+  This means `RecyclerPowerAdapters.toRecyclerAdapter(adapter) != RecyclerPowerAdapters.toRecyclerAdapter(adapter)`, ie,
+  you can longer rely on the same instance being returned from `toRecyclerAdapter` for a given input adapter.
+* Remove many unnecessary methods by eliminating synthetic accessors to private members.
+* Remove Lombok annotations, replacing them with Android support annotations. Runtime `null` checks are still present.
+* Fix a few other misc memory leaks.
+
 ## Version 0.12.1
 
 _2016_11_30_

@@ -13,7 +13,7 @@ import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
 
     @NonNull
-    private EmptyPolicy mEmptyPolicy = EmptyPolicy.SHOW_LEADING;
+    private EmptyPolicy mEmptyPolicy = EmptyPolicy.DEFAULT;
 
     @Nullable
     private Item mLeadingItem;
@@ -26,7 +26,7 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
 
     /**
      * Set the policy that determines what dividers are shown if the wrapped adapter is empty. Defaults to {@link
-     * EmptyPolicy#SHOW_LEADING}.
+     * EmptyPolicy#DEFAULT}.
      */
     @NonNull
     public DividerAdapterBuilder emptyPolicy(@NonNull EmptyPolicy emptyPolicy) {
@@ -143,6 +143,8 @@ public final class DividerAdapterBuilder implements PowerAdapter.Transformer {
         },
         /** No dividers are shown if the wrapped adapter is empty. */
         SHOW_NOTHING;
+
+        public static final EmptyPolicy DEFAULT = SHOW_LEADING;
 
         boolean shouldShowLeading(int itemCount) {
             return itemCount > 0;

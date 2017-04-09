@@ -2,18 +2,30 @@ package com.nextfaze.poweradapters.sample;
 
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
-import com.nextfaze.poweradapters.binding.AbstractBinder;
+import com.nextfaze.poweradapters.binding.Binder;
 
-final class NewsSectionBinder extends AbstractBinder<NewsSection, TextView> {
+final class NewsSectionBinder extends Binder<NewsSection, TextView> {
 
     NewsSectionBinder() {
-        super(android.R.layout.simple_list_item_1);
+    }
+
+    @NonNull
+    @Override
+    public View newView(@NonNull ViewGroup parent) {
+        return LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
     }
 
     @Override
-    public void bindView(@NonNull NewsSection newsSection, @NonNull TextView v, @NonNull Holder holder) {
+    public void bindView(@NonNull Container container,
+                         @NonNull NewsSection newsSection,
+                         @NonNull TextView v,
+                         @NonNull Holder holder) {
         v.setTypeface(Typeface.DEFAULT_BOLD);
         v.setText(newsSection.getTitle());
     }

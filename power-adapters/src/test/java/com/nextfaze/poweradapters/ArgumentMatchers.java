@@ -11,7 +11,7 @@ public final class ArgumentMatchers {
     public static ArgumentMatcher<Holder> holderWithPosition(final int expectedPosition) {
         return new ArgumentMatcher<Holder>() {
             @Override
-            public boolean matches(Object o) {
+            public boolean matches(Holder o) {
                 Holder holder = (Holder) o;
                 return holder.getPosition() == expectedPosition;
             }

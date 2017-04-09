@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
+import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 
@@ -508,7 +509,8 @@ public abstract class PowerAdapter {
     }
 
     /**
-     * Returns an adapter that presents the items of this adapter only while the specified condition evaluates to true.
+     * Returns a new adapter that presents the items of this adapter only while the specified condition evaluates to
+     * {@code true}.
      * @param condition The condition dictating whether to show the items.
      * @return A new adapter.
      */
@@ -524,6 +526,30 @@ public abstract class PowerAdapter {
             }
         }
         return new ConditionalAdapter(this, condition);
+    }
+
+    /**
+     * Returns a new adapter that wraps each item {@link View} with the specified view. The {@link ViewGroup} must not
+     * contain any other child views.
+     * @param wrapperView The wrapper {@link ViewGroup} factory.
+     * @return A new adapter.
+     */
+    @CheckResult
+    @NonNull
+    public PowerAdapter wrapItems(@NonNull ViewFactory wrapperView) {
+        return new WrappingAdapter(this, wrapperView);
+    }
+
+    /**
+     * Returns a new adapter that wraps each item {@link View} with the {@link ViewGroup} inflated by the specified
+     * layout resource. The {@link ViewGroup} must not contain any other child views.
+     * @param wrapperLayoutResource The layout resource specifying a wrapper {@link ViewGroup}.
+     * @return A new adapter.
+     */
+    @CheckResult
+    @NonNull
+    public PowerAdapter wrapItems(@LayoutRes int wrapperLayoutResource) {
+        return wrapItems(asViewFactory(wrapperLayoutResource));
     }
 
     /** Creates a composite adapter containing the items of all of the specified adapters in order. */

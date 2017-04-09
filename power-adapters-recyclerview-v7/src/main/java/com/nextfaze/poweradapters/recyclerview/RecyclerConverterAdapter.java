@@ -25,9 +25,6 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     private final WeakMap<RecyclerView, RecyclerViewContainer> mRecyclerViewToContainer = new WeakMap<>();
 
     @NonNull
-    private final WeakMap<View, RecyclerViewContainer> mItemViewToContainer = new WeakMap<>();
-
-    @NonNull
     private final Set<AdapterDataObserver> mAdapterDataObservers = new HashSet<>();
 
     @NonNull
@@ -114,18 +111,12 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int itemViewType) {
         View itemView = mPowerAdapter.newView(parent, mViewTypeIntToObject.get(itemViewType));
-        mItemViewToContainer.put(itemView, getContainer((RecyclerView) parent));
-        return new ViewHolder(itemView);
+        return new ViewHolder(itemView, getContainer((RecyclerView) parent));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        RecyclerViewContainer container = mItemViewToContainer.get(holder.itemView);
-        if (container == null) {
-            // Should never happen, unless adapter contract was broken.
-            throw new AssertionError();
-        }
-        mPowerAdapter.bindView(container, holder.itemView, holder.holder);
+        mPowerAdapter.bindView(holder.container, holder.itemView, holder.holder);
     }
 
     @Override
@@ -209,8 +200,12 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
             }
         };
 
-        ViewHolder(View itemView) {
+        @NonNull
+        final RecyclerViewContainer container;
+
+        ViewHolder(View itemView, @NonNull RecyclerViewContainer container) {
             super(itemView);
+            this.container = container;
         }
     }
 
