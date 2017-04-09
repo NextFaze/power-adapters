@@ -67,8 +67,8 @@ Power adapters are compatible with the following collection view classes:
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.13.0'
 ```
 
 ## Basic
@@ -108,8 +108,8 @@ recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 RxJava modules are available. Simply append `-rx` to get the RxJava module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-rx:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-rx:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.13.0'
 ```
 
 ## Kotlin
@@ -117,11 +117,11 @@ compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.12.1'
 Kotlin modules are also provided for most modules. Append `-kotlin` to get the Kotlin module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.12.1'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.13.0'
 ```
 
 Some of the Kotlin APIs include:
@@ -326,7 +326,7 @@ change. This way you don't need to reload or parcel/unparcel all of your list re
 object comprises much of the repetitive asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-data:0.12.1'
+compile 'com.nextfaze.poweradapters:power-adapters-data:0.13.0'
 ```
 
 ### Basic Data Usage
