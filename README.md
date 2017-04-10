@@ -84,17 +84,11 @@ class TweetHolder extends ViewHolder {
         textView = (TextView) view.findViewById(R.id.text);
     }
 }
-Binder<Tweet, View> tweetBinder = new ViewHolderBinder<Tweet, TweetHolder>(R.layout.tweet) {
-     @Override
-     protected TweetHolder newViewHolder(View v) {
-         return new TweetHolder(v);
-     }
 
-     @Override
-     protected void bindViewHolder(Tweet tweet, TweetHolder tweetHolder, Holder holder) {
-         tweetHolder.textView.setText(tweet.getText());
-     }
-};
+Binder<Tweet, View> tweetBinder = 
+    ViewHolderBinder.create(R.layout.tweet, TweetHolder::new, (container, tweet, tweetHolder, holder) -> {
+    tweetHolder.textView.setText(tweet.getText());
+});
 
 // Construct your "core" adapter
 ListBindingAdapter<Tweet> tweetsAdapter = new ListBindingAdapter<>(tweetBinder);
@@ -218,19 +212,10 @@ Multiple types of commonly required binders are supplied. If you prefer the wide
 a `ViewHolderBinder`:
 
 ```java
-Binder<BlogPost, View> blogPostBinder = new ViewHolderBinder<BlogPost, BlogPostHolder>(android.R.layout.simple_list_item_1) {
-    @Override
-    protected BlogPostHolder newViewHolder(View v) {
-        return new BlogPostHolder(v);
-    }
-
-    @Override
-    protected void bindViewHolder(BlogPost blogPost,
-                                  BlogPostHolder blogPostHolder,
-                                  Holder holder) {
-        blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
-    }
-};
+Binder<BlogPost, View> blogPostBinder = 
+    ViewHolderBinder.create(android.R.layout.simple_list_item_1, BlogPostHolder::new, (container, blogPost, blogPostHolder, holder) -> {
+    blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
+});
 
 class BlogPostHolder extends ViewHolder {
 
@@ -243,20 +228,16 @@ class BlogPostHolder extends ViewHolder {
 }
 ```
 
-If you use custom views for each of your data models, use an `AbstractBinder`.
-The `AbstractBinder` constructor takes a layout resource or a `ViewFactory`.
-The view returned by the `ViewFactory` (or the root of the layout) is passed to subsequent `bindView` calls, saving you from writing a separate ViewHolder.
+If you use custom views for each of your data models, use `Binder.create`. It takes a layout resource or a `ViewFactory`.
+The view returned by the `ViewFactory` is passed to subsequent `bindView` calls, saving you from writing a separate `ViewHolder`.
 
 For example:
 
 ```java
-Binder<Tweet, TweetView> tweetBinder = new AbstractBinder<Tweet, TweetView>(R.layout.tweet_item) {
-    @Override
-    public void bindView(Tweet tweet, TweetView v, Holder holder) {
-        v.setTweet(tweet);
-        v.setOnClickListener(v -> onTweetClick(tweet));
-    }
-}
+Binder<Tweet, TweetView> tweetBinder = Binder.create(R.layout.tweet_item, ((container, sample, v, holder) -> {
+    v.setTweet(tweet);
+    v.setOnClickListener(v -> onTweetClick(tweet));
+}))
 ```
 
 

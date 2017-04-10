@@ -38,21 +38,9 @@ public final class MultipleBindingsFragment extends BaseFragment {
     };
 
     @NonNull
-    private final Binder<BlogPost, View> mBlogPostBinder = new ViewHolderBinder<BlogPost, BlogPostHolder>(android.R.layout.simple_list_item_1) {
-        @NonNull
-        @Override
-        protected BlogPostHolder newViewHolder(@NonNull View v) {
-            return new BlogPostHolder(v);
-        }
-
-        @Override
-        protected void bindViewHolder(@NonNull Container container,
-                                      @NonNull BlogPost blogPost,
-                                      @NonNull BlogPostHolder blogPostHolder,
-                                      @NonNull Holder holder) {
-            blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
-        }
-    };
+    private final Binder<BlogPost, View> mBlogPostBinder = ViewHolderBinder.create(android.R.layout.simple_list_item_1, BlogPostHolder::new, (container, blogPost, blogPostHolder, holder) -> {
+        blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
+    });
 
     @NonNull
     private final Mapper<Object> mMapper = new MapperBuilder<>()
