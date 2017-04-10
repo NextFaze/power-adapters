@@ -86,7 +86,7 @@ class TweetHolder extends ViewHolder {
 }
 
 Binder<Tweet, View> tweetBinder = 
-    ViewHolderBinder.create(R.layout.tweet, TweetHolder::new, (container, tweet, tweetHolder, holder) -> {
+        ViewHolderBinder.create(R.layout.tweet, TweetHolder::new, (container, tweet, tweetHolder, holder) -> {
     tweetHolder.textView.setText(tweet.getText());
 });
 
@@ -213,7 +213,7 @@ a `ViewHolderBinder`:
 
 ```java
 Binder<BlogPost, View> blogPostBinder = 
-    ViewHolderBinder.create(android.R.layout.simple_list_item_1, BlogPostHolder::new, (container, blogPost, blogPostHolder, holder) -> {
+        ViewHolderBinder.create(R.layout.post, BlogPostHolder::new, (container, blogPost, blogPostHolder, holder) -> {
     blogPostHolder.labelView.setText("Blog: " + blogPost.getTitle());
 });
 
