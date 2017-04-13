@@ -10,6 +10,7 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
+import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** Binds an object to a {@link View} in a {@link PowerAdapter}. */
@@ -91,5 +92,11 @@ public abstract class Binder<T, V extends View> {
      */
     public boolean hasStableIds() {
         return false;
+    }
+
+    /** Inflate the specified layout resource. */
+    @NonNull
+    protected View inflate(@NonNull ViewGroup parent, @LayoutRes int layoutResource) {
+        return layoutInflater(parent).inflate(layoutResource, parent, false);
     }
 }
