@@ -190,7 +190,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         return container;
     }
 
-    public static final class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         @NonNull
         final com.nextfaze.poweradapters.Holder holder = new com.nextfaze.poweradapters.Holder() {
@@ -203,13 +203,13 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         @NonNull
         final RecyclerViewContainer container;
 
-        ViewHolder(View itemView, @NonNull RecyclerViewContainer container) {
+        public ViewHolder(View itemView, @NonNull RecyclerViewContainer container) {
             super(itemView);
             this.container = container;
         }
     }
 
-    private final class RecyclerViewContainer extends Container {
+    protected final class RecyclerViewContainer extends Container {
 
         @NonNull
         private final OnAttachStateChangeListener mOnAttachStateChangeListener = new OnAttachStateChangeListener() {
@@ -227,7 +227,7 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         @NonNull
         private final RecyclerView mRecyclerView;
 
-        RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
+        protected RecyclerViewContainer(@NonNull RecyclerView recyclerView) {
             mRecyclerView = recyclerView;
         }
 
