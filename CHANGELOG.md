@@ -4,6 +4,7 @@ Change Log
 ## Version 0.14.0-SNAPSHOT
 
 * Remove `ArrayData.onClear()`
+* Make `ArrayData.asList()` `final`
 
 ## Version 0.13.0
 

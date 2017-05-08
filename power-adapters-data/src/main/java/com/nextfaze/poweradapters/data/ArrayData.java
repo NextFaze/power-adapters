@@ -48,15 +48,13 @@ public abstract class ArrayData<T> extends SimpleData<T, List<? extends T>> impl
         return mData.get(position);
     }
 
-    // TODO: Make asList() final
-
     /**
      * Returns this {@link ArrayData} as a mutable list. Operations performed on the returned {@link List} are reflected
      * in this {@link ArrayData}, and the correct notifications will be issued.
      */
     @NonNull
     @Override
-    public List<T> asList() {
+    public final List<T> asList() {
         return mData;
     }
 
