@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## Version 0.14.0-SNAPSHOT
+
+* Remove `ArrayData.onClear()`
+
 ## Version 0.13.0
 
 _2017-04-07_

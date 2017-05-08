@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.util.concurrent.RoboExecutorService;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.concurrent.RoboExecutorService;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,9 +17,11 @@ import static java.util.Arrays.asList;
 @Config(constants = BuildConfig.class, sdk = 21)
 public final class ArrayDataTest {
 
+    private RoboExecutorService mExecutor;
+
     @Before
     public void setUp() throws Exception {
-        Task.sExecutor = new RoboExecutorService();
+        mExecutor = new RoboExecutorService();
     }
 
     @Test
@@ -28,7 +30,7 @@ public final class ArrayDataTest {
         List<String> minusOneElement = asList("foo", "baz");
 
         final AtomicReference<List<String>> ref = new AtomicReference<>(initialContents);
-        ArrayData<String> data = new ArrayData<String>() {
+        ArrayData<String> data = new ArrayData<String>(mExecutor) {
             @NonNull
             @Override
             protected List<String> load() throws Throwable {
