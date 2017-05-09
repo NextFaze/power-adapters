@@ -50,7 +50,7 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     provided rootProject.ext.lombok
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha6'
+    compile 'com.android.support.constraint:constraint-layout:1.0.1'
 }
 
 println "Environmental variables:"

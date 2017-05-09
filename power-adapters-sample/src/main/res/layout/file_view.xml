@@ -3,7 +3,6 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_item_height"
         android:background="?attr/selectableItemBackground">
@@ -25,10 +24,9 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             app:srcCompat="@drawable/file_icon_dir"
-            app:layout_constraintCenterY_toCenterY="@id/constraint_layout"
-            app:layout_constraintLeft_toLeftOf="@+id/constraint_layout"
-            app:layout_constraintTop_toTopOf="@+id/constraint_layout"
-            app:layout_constraintBottom_toBottomOf="@+id/constraint_layout"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     <!-- Peek -->
 
@@ -39,10 +37,9 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="16dp"
             app:srcCompat="@drawable/file_peek"
-            app:layout_constraintCenterY_toCenterY="@id/constraint_layout"
-            app:layout_constraintTop_toTopOf="@+id/constraint_layout"
-            app:layout_constraintRight_toRightOf="@+id/constraint_layout"
-            app:layout_constraintBottom_toBottomOf="@+id/constraint_layout"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     <!-- Title -->
 
