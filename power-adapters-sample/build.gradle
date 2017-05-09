@@ -1,12 +1,15 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.kotlinPlugin
         classpath  'me.tatarka:gradle-retrolambda:3.2.5'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -35,14 +38,19 @@ android {
 }
 
 dependencies {
-    compile project(':power-adapters-recyclerview-v7')
-    compile project(':power-adapters-data')
-    compile project(':power-adapters-data-rx')
     compile project(':power-adapters')
+    compile project(':power-adapters-kotlin')
+    compile project(':power-adapters-data')
+    compile project(':power-adapters-data-kotlin')
+    compile project(':power-adapters-data-rx')
+    compile project(':power-adapters-data-rx-kotlin')
+    compile project(':power-adapters-rx-kotlin')
+    compile project(':power-adapters-recyclerview-v7')
     compile rootProject.ext.supportRecyclerView
     compile rootProject.ext.supportAppCompat
     compile rootProject.ext.supportCardview
     compile rootProject.ext.supportVectorDrawable
+    compile rootProject.ext.kotlinStdlib
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.jakewharton:butterknife:8.1.0'
     apt 'com.jakewharton:butterknife-compiler:8.1.0'
