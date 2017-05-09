@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
@@ -23,18 +22,6 @@ public final class DataTest {
     public MockitoRule mMockito = MockitoJUnit.rule();
 
     private Data<?> mData;
-
-    @Mock
-    private DataObserver mWrapperDataObserver;
-
-    @Mock
-    private LoadingObserver mWrapperLoadingObserver;
-
-    @Mock
-    private AvailableObserver mWrapperAvailableObserver;
-
-    @Mock
-    private ErrorObserver mWrapperErrorObserver;
 
     @Before
     public void setUp() throws Exception {
