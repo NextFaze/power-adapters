@@ -5,6 +5,8 @@ Change Log
 
 * Add `Data.fromList` and Kotlin method `data(() -> List<T>, ExecutorService)`, which create a `Data<T>` that presents 
   an asynchronously loaded list
+* Add `Data.fromCursor` and Kotlin method `cursorData(() -> Cursor, (Cursor) -> T, ExecutorService)`, which create a 
+  `Data<T>` that presents the contents of a asynchronously loaded database `Cursor`
 * Remove `ArrayData.onClear()`
 * Make `ArrayData.asList()` `final`
 
@@ -67,7 +69,8 @@ _2016-10-31_
 * `RecyclerConverterAdapter` now avoids some kinds of memory leaks by unregistering from the wrapped `PowerAdapter`
   while the `RecyclerView` is detached from the window. This means you no longer need to nullify the `RecyclerView`
   adapter manually to prevent leaks.
-* Add static factory methods to `Binder` and `ViewHolderBinder`. These reduce `Binder` declaration boilerplate for simple use cases.
+* Add static factory methods to `Binder` and `ViewHolderBinder`. These reduce `Binder` declaration boilerplate for 
+  simple use cases.
 * Fix bug where `RxData.available` and `RxData.loading` never emitted values.
 * Fix bug where `FilterData` (accessed via `Data.filter`) updated its index incorrectly in response to batch removals.
 * Deprecate `AbstractBinder`. Replace uses of this with `Binder`, which has been made an abstract class.

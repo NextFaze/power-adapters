@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
+import android.database.Cursor;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
@@ -8,6 +9,7 @@ import android.support.annotation.RestrictTo;
 import android.support.annotation.UiThread;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
+import com.nextfaze.poweradapters.RowMapper;
 import com.nextfaze.poweradapters.internal.DataObservable;
 
 import java.util.AbstractList;
@@ -535,6 +537,58 @@ public abstract class Data<T> implements Iterable<T> {
             }
         };
     }
+
+    /**
+     * Creates a {@linkplain Data} that presents elements of a {@link Cursor} retrieved by invoking the specified loader
+     * function in a worker thread. {@link T} instances are mapped using the specified row mapper function.
+     * The cursor's position will be pre-configured - callers don't need to set it.
+     * <p>
+     * Note that the returned {@linkplain Data} manages the {@linkplain Cursor} instances itself, and callers should
+     * never close cursors returned by the loader function.
+     * @param loader The function to be invoked to load the cursor.
+     * @param rowMapper The function to be invoked to map rows from the {@linkplain Cursor} to instances of {@link T}.
+     * @param <T> The type of element presented by the returned data.
+     * @return A {@linkplain Data} instance that will present the cursor elements.
+     */
+    @NonNull
+    public static <T> Data<T> fromCursor(@NonNull Callable<? extends Cursor> loader,
+                                         @NonNull RowMapper<T> rowMapper) {
+        return fromCursor(loader, rowMapper, DataExecutors.defaultExecutor());
+    }
+
+    /**
+     * Creates a {@linkplain Data} that presents elements of a {@link Cursor} retrieved by invoking the specified loader
+     * function in a worker thread with the specified {@link ExecutorService}. {@link T} instances are mapped using the
+     * specified row mapper function.
+     * The cursor's position will be pre-configured - callers don't need to set it.
+     * <p>
+     * Note that the returned {@linkplain Data} manages the {@linkplain Cursor} instances itself, and callers should
+     * never close cursors returned by the loader function.
+     * @param loader The function to be invoked to load the cursor.
+     * @param rowMapper The function to be invoked to map rows from the {@linkplain Cursor} to instances of {@link T}.
+     * @param executor The {@linkplain ExecutorService} used to invoke the cursor loader function.
+     * @param <T> The type of element presented by the returned data.
+     * @return A {@linkplain Data} instance that will present the cursor elements.
+     */
+    @NonNull
+    public static <T> Data<T> fromCursor(@NonNull final Callable<? extends Cursor> loader,
+                                         @NonNull final RowMapper<T> rowMapper,
+                                         @NonNull ExecutorService executor) {
+        return new CursorData<T>(executor) {
+            @NonNull
+            @Override
+            protected T map(@NonNull Cursor cursor) {
+                return rowMapper.map(cursor);
+            }
+
+            @NonNull
+            @Override
+            protected Cursor load() throws Throwable {
+                return loader.call();
+            }
+        };
+    }
+
     @NonNull
     public static <T> Data<T> emptyData() {
         return emptyImmutableData();

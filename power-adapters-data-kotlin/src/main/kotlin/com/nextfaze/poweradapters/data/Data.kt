@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data
 
+import android.database.Cursor
 import com.nextfaze.poweradapters.DataObserver
 import java.util.concurrent.ExecutorService
 
@@ -21,6 +22,26 @@ fun <T> data(
         load: () -> List<T>,
         executor: ExecutorService = DataExecutors.defaultExecutor()
 ): Data<T> = Data.fromList(load, executor)
+
+/**
+ * Creates a [Data] that presents elements of a [Cursor] retrieved by invoking the specified loader
+ * function in a worker thread with the specified [ExecutorService]. [T] instances are mapped using the
+ * specified row mapper function.
+ * The cursor's position will be pre-configured - callers don't need to set it.
+ * <p>
+ * Note that the returned [Data] manages the [Cursor] instances itself, and callers should
+ * never close cursors returned by the loader function.
+ * @param load The function to be invoked to load the cursor.
+ * @param mapRow The function to be invoked to map rows from the [Cursor] to instances of [T].
+ * @param executor The [ExecutorService] used to invoke the cursor loader function.
+ * @return A [Data] instance that will present the cursor elements.
+ * @see Data.fromCursor
+ */
+fun <T> cursorData(
+        load: () -> Cursor,
+        mapRow: (Cursor) -> T,
+        executor: ExecutorService = DataExecutors.defaultExecutor()
+): Data<T> = Data.fromCursor(load, mapRow, executor)
 
 /** Returns a [Data] containing the elements of this list. */
 fun <T> List<T>.toData(): Data<T> = ImmutableData.of(this)
