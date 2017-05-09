@@ -3,6 +3,8 @@ Change Log
 
 ## Version 0.14.0-SNAPSHOT
 
+* Add `Data.fromList` and Kotlin method `data(() -> List<T>, ExecutorService)`, which create a `Data<T>` that presents 
+  an asynchronously loaded list
 * Remove `ArrayData.onClear()`
 * Make `ArrayData.asList()` `final`
 

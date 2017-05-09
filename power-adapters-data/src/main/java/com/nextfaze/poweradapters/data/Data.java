@@ -14,6 +14,8 @@ import java.util.AbstractList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
@@ -493,6 +495,8 @@ public abstract class Data<T> implements Iterable<T> {
         return new LimitData<>(this, limit);
     }
 
+    // TODO: Document asList() as permitting mutability in subclasses.
+
     /** Returns this {@link Data} as an immutable list. */
     @CheckResult
     @NonNull
@@ -500,6 +504,37 @@ public abstract class Data<T> implements Iterable<T> {
         return mList;
     }
 
+    /**
+     * Creates a {@link Data} whose elements will be populated by invoking the specified loader function in a
+     * worker thread.
+     * @param loader The function to be invoked to load the list of elements.
+     * @param <T> The type of element presented by the returned data.
+     * @return A {@linkplain Data} instance that will present the elements retrieved via the loader function.
+     */
+    @NonNull
+    public static <T> Data<T> fromList(@NonNull Callable<List<? extends T>> loader) {
+        return fromList(loader, DataExecutors.defaultExecutor());
+    }
+
+    /**
+     * Creates a {@link Data} whose elements will be populated by invoking the specified loader function in a
+     * worker thread with the specified {@link ExecutorService}.
+     * @param loader The function to be invoked to load the list of elements.
+     * @param executor The {@linkplain ExecutorService} used to invoke the loader function.
+     * @param <T> The type of element presented by the returned data.
+     * @return A {@linkplain Data} instance that will present the elements retrieved via the loader function.
+     */
+    @NonNull
+    public static <T> Data<T> fromList(@NonNull final Callable<List<? extends T>> loader,
+                                       @NonNull ExecutorService executor) {
+        return new ArrayData<T>(executor) {
+            @NonNull
+            @Override
+            protected List<? extends T> load() throws Throwable {
+                return loader.call();
+            }
+        };
+    }
     @NonNull
     public static <T> Data<T> emptyData() {
         return emptyImmutableData();
