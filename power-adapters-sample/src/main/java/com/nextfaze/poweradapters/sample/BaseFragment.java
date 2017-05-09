@@ -24,7 +24,7 @@ import com.nextfaze.poweradapters.data.widget.DataLayout;
 import static android.os.Looper.getMainLooper;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
-abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
 
     private static final int SCROLL_TO_END_DELAY = 50;
     private static final int ANIMATION_DURATION = 150;
