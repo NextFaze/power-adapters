@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data
 
 import android.database.Cursor
+import android.database.DataSetObserver
 import com.nextfaze.poweradapters.DataObserver
 import java.util.concurrent.ExecutorService
 
@@ -29,13 +30,17 @@ fun <T> data(
  * specified row mapper function.
  * The cursor's position will be pre-configured - callers don't need to set it.
  * <p>
+ * The [Data] will respond to backend changes by invoking the loader function again, if the cursor
+ * dispatches notifications to the registered [DataSetObserver]s.
+ * <p>
  * Note that the returned [Data] manages the [Cursor] instances itself, and callers should
  * never close cursors returned by the loader function.
  * @param load The function to be invoked to load the cursor.
  * @param mapRow The function to be invoked to map rows from the [Cursor] to instances of [T].
  * @param executor The [ExecutorService] used to invoke the cursor loader function.
  * @return A [Data] instance that will present the cursor elements.
- * @see Data.fromCursor
+ * @see Cursor#registerDataSetObserver(DataSetObserver)
+ * @see DataSetObserver
  */
 fun <T> cursorData(
         load: () -> Cursor,

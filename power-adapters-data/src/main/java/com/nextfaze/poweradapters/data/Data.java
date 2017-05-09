@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
@@ -543,12 +544,17 @@ public abstract class Data<T> implements Iterable<T> {
      * function in a worker thread. {@link T} instances are mapped using the specified row mapper function.
      * The cursor's position will be pre-configured - callers don't need to set it.
      * <p>
+     * The {@linkplain Data} will respond to backend changes by invoking the loader function again, if the cursor
+     * dispatches notifications to the registered {@link DataSetObserver}s.
+     * <p>
      * Note that the returned {@linkplain Data} manages the {@linkplain Cursor} instances itself, and callers should
      * never close cursors returned by the loader function.
      * @param loader The function to be invoked to load the cursor.
      * @param rowMapper The function to be invoked to map rows from the {@linkplain Cursor} to instances of {@link T}.
      * @param <T> The type of element presented by the returned data.
      * @return A {@linkplain Data} instance that will present the cursor elements.
+     * @see Cursor#registerDataSetObserver(DataSetObserver)
+     * @see DataSetObserver
      */
     @NonNull
     public static <T> Data<T> fromCursor(@NonNull Callable<Cursor> loader,
@@ -562,6 +568,9 @@ public abstract class Data<T> implements Iterable<T> {
      * specified row mapper function.
      * The cursor's position will be pre-configured - callers don't need to set it.
      * <p>
+     * The {@linkplain Data} will respond to backend changes by invoking the loader function again, if the cursor
+     * dispatches notifications to the registered {@link DataSetObserver}s.
+     * <p>
      * Note that the returned {@linkplain Data} manages the {@linkplain Cursor} instances itself, and callers should
      * never close cursors returned by the loader function.
      * @param loader The function to be invoked to load the cursor.
@@ -569,6 +578,8 @@ public abstract class Data<T> implements Iterable<T> {
      * @param executor The {@linkplain ExecutorService} used to invoke the cursor loader function.
      * @param <T> The type of element presented by the returned data.
      * @return A {@linkplain Data} instance that will present the cursor elements.
+     * @see Cursor#registerDataSetObserver(DataSetObserver)
+     * @see DataSetObserver
      */
     @NonNull
     public static <T> Data<T> fromCursor(@NonNull final Callable<Cursor> loader,
