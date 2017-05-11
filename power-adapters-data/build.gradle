@@ -2,16 +2,20 @@ buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
         classpath rootProject.ext.androidMavenGradlePlugin
+        classpath rootProject.ext.kotlinPlugin
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'kotlin-android'
 
 dependencies {
     testCompile rootProject.ext.robolectric
     testCompile rootProject.ext.mockito
+    testCompile rootProject.ext.mockitoKotlin
     testCompile rootProject.ext.truth
+    testCompile rootProject.ext.kotlinStdlib
     compile project(':power-adapters')
     compile rootProject.ext.supportAnnotations
 }
@@ -32,6 +36,11 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 }
 
