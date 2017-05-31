@@ -1,17 +1,73 @@
-subprojects {
-    buildscript {
-        repositories {
-            jcenter()
-        }
-    }
+buildscript {
+    apply from: 'dependencies.gradle'
 
     repositories {
-        mavenLocal()
         jcenter()
+        google()
+    }
+
+    dependencies {
+        classpath rootProject.ext.kotlinPlugin
+        classpath rootProject.ext.androidPlugin
+        classpath rootProject.ext.androidMavenGradlePlugin
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
     }
 
     group = GROUP
     version = VERSION_NAME
 }
 
-apply from: rootProject.file('dependencies.gradle')
+apply from: 'dependencies.gradle'
+
+ext.configureLibrary = { project ->
+    delegate = project
+
+    apply plugin: 'com.android.library'
+    apply plugin: 'kotlin-android'
+    apply plugin: 'kotlin-kapt'
+
+    android {
+        compileSdkVersion project.compileSdkVersion
+        buildToolsVersion project.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion project.minSdkVersion
+            javaCompileOptions.annotationProcessorOptions.includeCompileClasspath false
+        }
+
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_7
+            targetCompatibility JavaVersion.VERSION_1_7
+        }
+
+        lintOptions {
+            abortOnError getBoolProperty('lintAbortOnError', false)
+        }
+
+//        resourcePrefix "${project.name.replace("-", "_")}_"
+    }
+
+    dependencies {
+        testImplementation rootProject.ext.robolectric
+        testImplementation project.junit
+        testImplementation project.truth
+        testImplementation project.mockito
+        testImplementation project.mockitoKotlin
+        testImplementation project.kotlinStdlib
+        testImplementation project.kotlinReflect
+        api rootProject.ext.supportAnnotations
+    }
+
+    apply plugin: 'com.github.dcendents.android-maven'
+    apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+}
+
+def getBoolProperty(String name, boolean defaultValue) {
+    return new Boolean(hasProperty(name) ? project.properties[name].toBoolean() : defaultValue)
+}

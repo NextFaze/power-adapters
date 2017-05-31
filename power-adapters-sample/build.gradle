@@ -1,17 +1,6 @@
-buildscript {
-    dependencies {
-        classpath rootProject.ext.androidPlugin
-        classpath rootProject.ext.kotlinPlugin
-        classpath  'me.tatarka:gradle-retrolambda:3.2.5'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-    }
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -23,6 +12,7 @@ android {
         versionCode 1
         versionName '1.0'
         vectorDrawables.useSupportLibrary = true
+        javaCompileOptions.annotationProcessorOptions.includeCompileClasspath false
     }
 
     compileOptions {
@@ -33,33 +23,35 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
-        disable 'DefaultLocale', 'RtlHardcoded', 'HardcodedText', 'GoogleAppIndexingWarning', 'MissingConstraints'
+        disable 'DefaultLocale', 'RtlHardcoded', 'HardcodedText', 'GoogleAppIndexingWarning', 'MissingConstraints', 'InvalidPackage'
+        abortOnError getBoolProperty('lintAbortOnError', false)
+    }
+
+    dexOptions {
+        preDexLibraries = getBoolProperty('dexPreDexLibraries', true)
     }
 }
 
 dependencies {
-    compile project(':power-adapters')
-    compile project(':power-adapters-kotlin')
-    compile project(':power-adapters-data')
-    compile project(':power-adapters-data-kotlin')
-    compile project(':power-adapters-data-rx')
-    compile project(':power-adapters-data-rx-kotlin')
-    compile project(':power-adapters-rx-kotlin')
-    compile project(':power-adapters-recyclerview-v7')
-    compile rootProject.ext.supportRecyclerView
-    compile rootProject.ext.supportAppCompat
-    compile rootProject.ext.supportCardview
-    compile rootProject.ext.supportVectorDrawable
-    compile rootProject.ext.kotlinStdlib
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.jakewharton:butterknife:8.1.0'
-    apt 'com.jakewharton:butterknife-compiler:8.1.0'
-    compile 'com.google.guava:guava:20.0'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    provided rootProject.ext.lombok
-    compile 'com.android.support.constraint:constraint-layout:1.0.1'
+    implementation project(':power-adapters')
+    implementation project(':power-adapters-kotlin')
+    implementation project(':power-adapters-data-kotlin')
+    implementation project(':power-adapters-data-rx-kotlin')
+    implementation project(':power-adapters-rx-kotlin')
+    implementation project(':power-adapters-recyclerview-v7')
+//    implementation rootProject.ext.supportRecyclerView
+    implementation rootProject.ext.supportAppCompat
+    implementation rootProject.ext.supportCardview
+    implementation rootProject.ext.supportVectorDrawable
+    implementation rootProject.ext.kotlinStdlib
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    kapt 'com.jakewharton:butterknife-compiler:8.5.1'
+    //noinspection GradleDependency
+    implementation 'com.google.guava:guava:20.0'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    implementation rootProject.ext.lombok
+    kapt rootProject.ext.lombok
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 }
-
-println "Environmental variables:"
-System.getenv().each { k, v -> println "${k}: ${v}" }

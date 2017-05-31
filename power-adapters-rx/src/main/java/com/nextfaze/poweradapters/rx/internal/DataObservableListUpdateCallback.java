@@ -10,7 +10,7 @@ import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** For internal use only. */
 @RestrictTo(LIBRARY_GROUP)
-public final class DataObservableListUpdateCallback implements ListUpdateCallback {
+final class DataObservableListUpdateCallback implements ListUpdateCallback {
 
     @NonNull
     private final DataObservable mDataObservable;
