@@ -551,7 +551,7 @@ public abstract class Data<T> implements Iterable<T> {
      * @return A {@linkplain Data} instance that will present the cursor elements.
      */
     @NonNull
-    public static <T> Data<T> fromCursor(@NonNull Callable<? extends Cursor> loader,
+    public static <T> Data<T> fromCursor(@NonNull Callable<Cursor> loader,
                                          @NonNull RowMapper<T> rowMapper) {
         return fromCursor(loader, rowMapper, DataExecutors.defaultExecutor());
     }
@@ -571,7 +571,7 @@ public abstract class Data<T> implements Iterable<T> {
      * @return A {@linkplain Data} instance that will present the cursor elements.
      */
     @NonNull
-    public static <T> Data<T> fromCursor(@NonNull final Callable<? extends Cursor> loader,
+    public static <T> Data<T> fromCursor(@NonNull final Callable<Cursor> loader,
                                          @NonNull final RowMapper<T> rowMapper,
                                          @NonNull ExecutorService executor) {
         return new CursorData<T>(executor) {
