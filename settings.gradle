@@ -11,6 +11,6 @@ include ':power-adapters-data-kotlin'
 include ':power-adapters-data-rx'
 include ':power-adapters-data-rx-kotlin'
 
-if (!"true".equals(System.getenv("TRAVIS")) && !"true".equals(System.getenv("JITPACK"))) {
+if (System.getenv("TRAVIS") != "true" && System.getenv("JITPACK") != "true") {
     include ':power-adapters-sample'
 }
