@@ -497,7 +497,6 @@ public abstract class Data<T> implements Iterable<T> {
         }
         return new LimitData<>(this, limit);
     }
-
     // TODO: Document asList() as permitting mutability in subclasses.
 
     /** Returns this {@link Data} as an immutable list. */
