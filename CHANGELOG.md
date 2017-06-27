@@ -1,7 +1,9 @@
 Change Log
 ==========
 
-## Version 0.14.0-SNAPSHOT
+## Version 0.14.0
+
+_2017-06-27_
 
 * Add `Data.fromList` and Kotlin method `data(() -> List<T>, ExecutorService)`, which create a `Data<T>` that presents 
   an asynchronously loaded list
@@ -9,6 +11,9 @@ Change Log
   `Data<T>` that presents the contents of a asynchronously loaded database `Cursor`
 * Remove `ArrayData.onClear()`
 * Make `ArrayData.asList()` `final`
+* Add `ArrayData` constructor that accepts an `ExecutorService` for performing the asynchronous load
+* Add `Binder.inflate(ViewGroup, @LayoutRes int)` convenience method
+* Add `DataExecutors` for accessing the default `ExecutorService`(s) used by the library
 
 ## Version 0.13.0
 
