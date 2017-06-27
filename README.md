@@ -67,8 +67,8 @@ Power adapters are compatible with the following collection view classes:
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.14.0'
 ```
 
 ## Basic
@@ -102,8 +102,8 @@ recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 RxJava modules are available. Simply append `-rx` to get the RxJava module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-rx:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-rx:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.14.0'
 ```
 
 ## Kotlin
@@ -111,15 +111,22 @@ compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.13.0'
 Kotlin modules are also provided for most modules. Append `-kotlin` to get the Kotlin module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.13.0'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.14.0'
+compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.14.0'
 ```
 
 Some of the Kotlin APIs include:
 
+- Top-level factory functions:
+    ```kotlin
+    val data = data { api.getPosts() }
+    ```
+    ```kotlin
+    val data = cursorData({ db.getUsers() }, ::User)
+    ```
 - Extension functions:
     ```kotlin
     recyclerView.adapter = myPowerAdapter.toRecyclerAdapter()
@@ -281,12 +288,10 @@ comprised of just another adapter - your children can themselves can be `TreeAda
 
 ```java
 PowerAdapter rootAdapter = new FileAdapter(new File("/"));
-TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, new TreeAdapter.ChildAdapterSupplier() {
-   @Override
-   public PowerAdapter get(int position) {
-       // Create a child adapter for this position in the root data set.
-       return createChildAdapter(position);
-   }
+TreeAdapter treeAdapter = new TreeAdapter(rootAdapter, position -> {
+    // Create a child adapter for this position in the root data set.
+    // Can be another TreeAdapter!
+   return createChildAdapter(position);
 });
 treeAdapter.setExpanded(15, true);
 ```
@@ -307,26 +312,23 @@ change. This way you don't need to reload or parcel/unparcel all of your list re
 object comprises much of the repetitive asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-data:0.13.0'
+compile 'com.nextfaze.poweradapters:power-adapters-data:0.14.0'
 ```
 
 ### Basic Data Usage
 
-The recommended usage pattern is to instantiate a `Data<T>` object in your retained `Fragment`. Subclassing `ArrayData` supports the simplest use case, fetching a list of things asynchronously:
+The recommended usage pattern is to instantiate a `Data<T>` object in your retained `Fragment`. The `Data.fromList` 
+factory method supports the simplest use case, fetching a list of items asynchronously:
 
 ```java
 public final class ProductListFragment extends Fragment {
 
-    private final Data<Product> products = new ArrayData<>() {
-        @Override
-        protected List<Product> load() throws Throwable {
-            return api.getProducts();
-        }
-    };
+    private final Data<Product> products = Data.fromList(() -> api.getProducts());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Retain this fragment so we don't need to reload the products after a config change
         setRetainInstance(true);
     }
 }
@@ -341,14 +343,6 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
     PowerAdapter adapter = new DataBindingAdapter(products, productBinder);
     recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(adapter));
 }
-
-@Override
-public void onDestroyView() {
-    super.onDestroyView();
-    // Must nullify adapter, otherwise after a config change, RecyclerView will
-    // be retained by a strong reference chain of observers.
-    recyclerView.setAdapter(null);
-}
 ```
 
 ### Invalidating and Reloading
@@ -362,8 +356,9 @@ items being reloaded from the source. See the `Data` javadoc for how they differ
 `DataLayout` aids in presenting the various states of a `Data` instance, by hiding and showing contents, empty, error,
 and loading child views.
 It's a `RelativeLayout` subclass, and it works by accepting a `Data` instance, then registering to receive change
-notifications. If the contents are empty, your marked empty view will be shown instead of the list view. If an error occurs,
-the error view will be shown until a reload is triggered. `DataLayout` has several extension points to customize this behaviour to suite the needs of your application.
+notifications. If the contents are empty, your marked empty view will be shown instead of the list view. If an error 
+occurs, the error view will be shown until a reload is triggered. `DataLayout` has several extension points to customize
+ this behaviour to suite the needs of your application.
 
 Here's an example of how to declare a `DataLayout` in XML. Notice the `layout_component` attributes:
 
@@ -404,7 +399,8 @@ Here's an example of how to declare a `DataLayout` in XML. Notice the `layout_co
 </com.nextfaze.poweradapters.data.widget.DataLayout>
 ```
 
-The `DataLayout` observes state changes of the `Data` to know when to update the view visibility. Connecting to your `DataLayout` and `RecyclerView` in Java code:
+The `DataLayout` observes state changes of the `Data` to know when to update the view visibility. Connecting to your 
+`DataLayout` and `RecyclerView` in Java code:
 
 ```java
 @Override
@@ -422,12 +418,7 @@ An RxJava module is provided: `power-adapters-data-rx`. This is a simple adapter
 for properties of `Data`:
 
 ```java
-RxData.inserts(products).subscribe(new Action1<InsertEvent>() {
-    @Override
-    public void call(InsertEvent event) {
-        ...
-    }
-});
+RxData.inserts(products).subscribe(event -> handleProductInsert(event));
 ```
 
 ### Data Views
@@ -436,22 +427,12 @@ RxData.inserts(products).subscribe(new Action1<InsertEvent>() {
 
 ```java
 Data<String> names = ...
-Data<Integer> lengths = names.transform(new Function<String, Integer>() {
-    @Override
-    public Integer apply(String name) {
-        return name.length;
-    }
-});
+Data<Integer> lengths = names.transform(name -> name.length);
 ```
 
 ```java
 Data<Post> allPosts = ...
-Data<Post> todaysPosts = names.filter(new Predicate<Post>() {
-    @Override
-    public boolean apply(Post post) {
-        return isToday(post.getDate());
-    }
-});
+Data<Post> todaysPosts = names.filter(post -> isToday(post.getDate()));
 ```
 
 ## Samples
