@@ -121,6 +121,10 @@ public class FakeData<T> extends Data<T> {
         mData.move(fromPosition, toPosition, itemCount);
     }
 
+    public void error(@NonNull Throwable e) {
+        super.notifyError(e);
+    }
+
     @SuppressWarnings("unused")
     @NonNull
     public NotificationType getNotificationType() {
