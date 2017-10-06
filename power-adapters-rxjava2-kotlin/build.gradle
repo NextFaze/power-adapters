@@ -1,0 +1,6 @@
+project.configureLibrary(this)
+
+dependencies {
+    api project(':power-adapters-rxjava2')
+    api rootProject.ext.kotlinStdlib
+}

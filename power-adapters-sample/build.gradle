@@ -36,8 +36,8 @@ dependencies {
     implementation project(':power-adapters')
     implementation project(':power-adapters-kotlin')
     implementation project(':power-adapters-data-kotlin')
-    implementation project(':power-adapters-data-rx-kotlin')
-    implementation project(':power-adapters-rx-kotlin')
+    implementation project(':power-adapters-data-rxjava2-kotlin')
+    implementation project(':power-adapters-rxjava2-kotlin')
     implementation project(':power-adapters-recyclerview-v7')
 //    implementation rootProject.ext.supportRecyclerView
     implementation rootProject.ext.supportAppCompat

@@ -1,8 +1,0 @@
-project.configureLibrary(this)
-
-dependencies {
-    api project(':power-adapters-data')
-    api project(':power-adapters-rx')
-    api rootProject.ext.rxAndroid
-    implementation rootProject.ext.supportRecyclerView
-}

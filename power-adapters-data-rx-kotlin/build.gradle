@@ -1,6 +1,0 @@
-project.configureLibrary(this)
-
-dependencies {
-    api project(':power-adapters-data-rx')
-    api rootProject.ext.kotlinStdlib
-}
