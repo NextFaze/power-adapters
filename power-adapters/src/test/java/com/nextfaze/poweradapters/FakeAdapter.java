@@ -15,6 +15,10 @@ public class FakeAdapter extends PowerAdapter {
     @NonNull
     private NotificationType mNotificationType = NotificationType.FINE;
 
+    public FakeAdapter() {
+        this(0);
+    }
+
     public FakeAdapter(int itemCount) {
         mItemCount = itemCount;
     }
