@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.view.View;
 import android.view.ViewGroup;
 import com.nextfaze.poweradapters.internal.NotificationType;
@@ -8,6 +9,7 @@ import com.nextfaze.poweradapters.internal.NotificationType;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 @SuppressWarnings("WeakerAccess")
+@VisibleForTesting
 public class FakeAdapter extends PowerAdapter {
 
     private int mItemCount;
