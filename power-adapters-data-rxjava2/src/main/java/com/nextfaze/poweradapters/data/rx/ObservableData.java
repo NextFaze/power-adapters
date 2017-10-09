@@ -113,8 +113,7 @@ final class ObservableData<T> extends Data<T> {
             mDisposables.add(mLoadingObservable.subscribe(new Consumer<Boolean>() {
                 @Override
                 public void accept(Boolean l) throws Exception {
-                    // Treat null as false
-                    setLoading(l != null && l);
+                    setLoading(l);
                 }
             }, onError, onCompleted));
 

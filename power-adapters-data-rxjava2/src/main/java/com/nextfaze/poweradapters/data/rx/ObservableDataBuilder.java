@@ -2,17 +2,19 @@ package com.nextfaze.poweradapters.data.rx;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.rxjava2.EqualityFunction;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.subjects.PublishSubject;
 
 import java.util.Collection;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+
+/**
+ * Builder class for constructing {@link Data} objects out of observable data sources.
+ * @param <T> The element type of the built data.
+ */
 public final class ObservableDataBuilder<T> {
 
     @Nullable
@@ -71,7 +73,8 @@ public final class ObservableDataBuilder<T> {
     }
 
     /**
-     * The {@link Data#available()} property will match the emissions of this observable.
+     * The {@link Data#available()} property will match the emissions of this observable, starting with
+     * {@code Integer.MAX_VALUE} until the first emission.
      * <p>
      * If not specified, the resulting data will assume there are no more elements available after the first emission
      * of any of the content observables.
@@ -86,7 +89,8 @@ public final class ObservableDataBuilder<T> {
     }
 
     /**
-     * The {@link Data#isLoading()} property will match the emissions of this observable.
+     * The {@link Data#isLoading()} property will match the emissions of this observable, starting with {@code false}
+     * until the first emission.
      * <p>
      * If not specified, the resulting data considers itself in a loading state until the first emission of any of the
      * content observables.
@@ -141,89 +145,40 @@ public final class ObservableDataBuilder<T> {
 
     @NonNull
     public Data<T> build() {
-        Observable<? extends Collection<? extends T>> contents = mContents;
-        Observable<? extends Collection<? extends T>> prepends = mPrepends;
-        Observable<? extends Collection<? extends T>> appends = mAppends;
+        Observable<? extends Collection<? extends T>> contents = mContents != null ? mContents.share() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> prepends = mPrepends != null ? mPrepends.share() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> appends = mAppends != null ? mAppends.share() : Observable.<Collection<T>>empty();
         Observable<Integer> available = mAvailable;
         Observable<Boolean> loading = mLoading;
         Observable<Throwable> errors = mErrors;
+        // Emits the first content emission, suppressing any errors, as they'll be reported anyway.
+        Observable<?> mergedContentSources = Observable.merge(contents, prepends, appends)
+                .onErrorResumeNext(Observable.<Collection<? extends T>>empty())
+                .take(1);
         if (available == null) {
             // If no available observable specified, assume no more available upon first emission of any content
             // observable.
-            PublishSubject<Integer> availableSubject = PublishSubject.create();
-            contents = changeToZeroAvailableUponFirstEmission(mContents, availableSubject);
-            prepends = changeToZeroAvailableUponFirstEmission(mPrepends, availableSubject);
-            appends = changeToZeroAvailableUponFirstEmission(mAppends, availableSubject);
-            available = availableSubject;
-
+            available = mergedContentSources.map(new Function<Object, Integer>() {
+                @Override
+                public Integer apply(Object o) throws Exception {
+                    return 0;
+                }
+            }).startWith(Integer.MAX_VALUE);
         }
         if (loading == null) {
             // If no loading observable specified, assume loading has completed upon first emission of any content
             // observable.
-            PublishSubject<Boolean> loadingSubject = PublishSubject.create();
-            contents = considerAsLoadingUntilFirstEmission(mContents, loadingSubject);
-            prepends = considerAsLoadingUntilFirstEmission(mPrepends, loadingSubject);
-            appends = considerAsLoadingUntilFirstEmission(mAppends, loadingSubject);
-            loading = loadingSubject;
+            loading = mergedContentSources.map(new Function<Object, Boolean>() {
+                @Override
+                public Boolean apply(Object o) throws Exception {
+                    return false;
+                }
+            }).startWith(true);
         }
         if (errors == null) {
             errors = Observable.empty();
         }
         return new ObservableData<>(contents, prepends, appends, available, loading, errors, mIdentityEqualityFunction,
                 mContentEqualityFunction, mDetectMoves);
-    }
-
-    @Nullable
-    private <E> Observable<E> considerAsLoadingUntilFirstEmission(@Nullable Observable<E> observable,
-                                                                  @NonNull final Observer<Boolean> observer) {
-        if (observable == null) {
-            return null;
-        }
-        return observable
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        observer.onNext(true);
-                    }
-                })
-                .doOnNext(new Consumer<E>() {
-                    @Override
-                    public void accept(E e) throws Exception {
-                        observer.onNext(false);
-                    }
-                })
-                .doOnTerminate(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        observer.onNext(false);
-                    }
-                });
-    }
-
-    @Nullable
-    private <E> Observable<E> changeToZeroAvailableUponFirstEmission(@Nullable Observable<E> observable,
-                                                                     @NonNull final Observer<Integer> observer) {
-        if (observable == null) {
-            return null;
-        }
-        return observable
-                .doOnSubscribe(new Consumer<Disposable>() {
-                    @Override
-                    public void accept(Disposable disposable) throws Exception {
-                        observer.onNext(Integer.MAX_VALUE);
-                    }
-                })
-                .doOnNext(new Consumer<E>() {
-                    @Override
-                    public void accept(E e) throws Exception {
-                        observer.onNext(0);
-                    }
-                })
-                .doOnTerminate(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        observer.onNext(0);
-                    }
-                });
     }
 }
