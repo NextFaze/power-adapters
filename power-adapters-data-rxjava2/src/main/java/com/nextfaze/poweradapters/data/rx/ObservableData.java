@@ -3,16 +3,18 @@ package com.nextfaze.poweradapters.data.rx;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.rxjava2.EqualityFunction;
 import com.nextfaze.poweradapters.rxjava2.internal.DiffList;
+
+import java.util.Collection;
+
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-
-import java.util.Collection;
 
 @SuppressWarnings("WeakerAccess")
 final class ObservableData<T> extends Data<T> {
@@ -137,7 +139,7 @@ final class ObservableData<T> extends Data<T> {
                 mDisposables.add(mContentsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
-                        return mList.overwrite(contents);
+                        return mList.overwrite(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -147,7 +149,7 @@ final class ObservableData<T> extends Data<T> {
                 mDisposables.add(mPrependsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
-                        return mList.prepend(contents);
+                        return mList.prepend(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -157,7 +159,7 @@ final class ObservableData<T> extends Data<T> {
                 mDisposables.add(mAppendsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
-                        return mList.append(contents);
+                        return mList.append(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }

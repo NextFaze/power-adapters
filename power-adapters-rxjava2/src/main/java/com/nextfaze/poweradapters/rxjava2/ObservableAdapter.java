@@ -3,16 +3,18 @@ package com.nextfaze.poweradapters.rxjava2;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
 import com.nextfaze.poweradapters.rxjava2.internal.DiffList;
+
+import java.util.Collection;
+
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-
-import java.util.Collection;
 
 @SuppressWarnings("WeakerAccess")
 final class ObservableAdapter<T> extends BindingAdapter<T> {
@@ -105,7 +107,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                 mDisposables.add(mContentsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) {
-                        return mList.overwrite(contents);
+                        return mList.overwrite(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -115,7 +117,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                 mDisposables.add(mPrependsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) {
-                        return mList.prepend(contents);
+                        return mList.prepend(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }
@@ -125,7 +127,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                 mDisposables.add(mAppendsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
                     @Override
                     public Observable<?> apply(Collection<? extends T> contents) {
-                        return mList.append(contents);
+                        return mList.append(contents).toObservable();
                     }
                 }).subscribe(onNext, onError, onCompleted));
             }

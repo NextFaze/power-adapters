@@ -5,18 +5,23 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
+
 import com.nextfaze.poweradapters.internal.DataObservable;
 import com.nextfaze.poweradapters.rxjava2.EqualityFunction;
-import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Function;
+
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
+import static com.nextfaze.poweradapters.rxjava2.internal.Utils.mainThreadCompletable;
 import static com.nextfaze.poweradapters.rxjava2.internal.Utils.mainThreadObservable;
 import static io.reactivex.schedulers.Schedulers.computation;
 import static java.lang.Math.min;
@@ -72,34 +77,32 @@ public final class DiffList<T> {
     }
 
     @NonNull
-    public Observable<?> prepend(@NonNull final Collection<? extends T> list) {
+    public Completable prepend(@NonNull final Collection<? extends T> list) {
         checkNotNull(list, "list");
-        return mainThreadObservable(new Callable<Void>() {
+        return mainThreadCompletable(new Action() {
             @Override
-            public Void call() throws Exception {
+            public void run() throws Exception {
                 mData.addAll(0, list);
                 mDataObservable.notifyItemRangeInserted(0, list.size());
-                return null;
             }
         });
     }
 
     @NonNull
-    public Observable<?> append(@NonNull final Collection<? extends T> list) {
+    public Completable append(@NonNull final Collection<? extends T> list) {
         checkNotNull(list, "list");
-        return mainThreadObservable(new Callable<Void>() {
+        return mainThreadCompletable(new Action() {
             @Override
-            public Void call() throws Exception {
+            public void run() throws Exception {
                 int oldSize = mData.size();
                 mData.addAll(list);
                 mDataObservable.notifyItemRangeInserted(oldSize, list.size());
-                return null;
             }
         });
     }
 
     @NonNull
-    public Observable<?> overwrite(@NonNull Collection<? extends T> collection) {
+    public Completable overwrite(@NonNull Collection<? extends T> collection) {
         checkNotNull(collection, "collection");
         if (mIdentityEqualityFunction == null || mContentEqualityFunction == null) {
             return overwriteBasic(collection);
@@ -113,10 +116,10 @@ public final class DiffList<T> {
     }
 
     @NonNull
-    Observable<?> overwriteBasic(@NonNull final Collection<? extends T> collection) {
-        return mainThreadObservable(new Callable<Void>() {
+    Completable overwriteBasic(@NonNull final Collection<? extends T> collection) {
+        return mainThreadCompletable(new Action() {
             @Override
-            public Void call() throws Exception {
+            public void run() throws Exception {
                 final List<T> existing = mData;
                 final int oldSize = existing.size();
                 existing.clear();
@@ -137,7 +140,6 @@ public final class DiffList<T> {
                 if (changed > 0) {
                     mDataObservable.notifyItemRangeChanged(0, changed);
                 }
-                return null;
             }
         });
     }
@@ -145,21 +147,21 @@ public final class DiffList<T> {
     // TODO: Fix race condition between async diff util overwrites and the others.
 
     @NonNull
-    Observable<?> overwriteUsingDiffUtil(@NonNull final List<? extends T> newContents,
+    Completable overwriteUsingDiffUtil(@NonNull final List<? extends T> newContents,
                                          @NonNull final EqualityFunction<? super T> identityEqualityFunction,
                                          @NonNull final EqualityFunction<? super T> contentEqualityFunction) {
         return copyContents().switchMap(new Function<List<? extends T>, Observable<?>>() {
             @Override
-            public Observable<?> apply(List<? extends T> existingContentsCopy) throws Exception {
+            public Observable<Object> apply(List<? extends T> existingContentsCopy) throws Exception {
                 return calculateDiff(existingContentsCopy, newContents, identityEqualityFunction, contentEqualityFunction)
-                        .switchMap(new Function<DiffUtil.DiffResult, Observable<?>>() {
+                        .switchMap(new Function<DiffUtil.DiffResult, Observable<Object>>() {
                             @Override
-                            public Observable<?> apply(DiffUtil.DiffResult diffResult) throws Exception {
-                                return applyNewContentsAndDispatchDiffNotifications(newContents, diffResult);
+                            public Observable<Object> apply(DiffUtil.DiffResult diffResult) throws Exception {
+                                return applyNewContentsAndDispatchDiffNotifications(newContents, diffResult).toObservable();
                             }
                         });
             }
-        });
+        }).ignoreElements();
     }
 
     @NonNull
@@ -186,15 +188,14 @@ public final class DiffList<T> {
     }
 
     @NonNull
-    Observable<Void> applyNewContentsAndDispatchDiffNotifications(@NonNull final List<? extends T> newContents,
-                                                                  @NonNull final DiffUtil.DiffResult diffResult) {
-        return mainThreadObservable(new Callable<Void>() {
+    Completable applyNewContentsAndDispatchDiffNotifications(@NonNull final List<? extends T> newContents,
+                                                             @NonNull final DiffUtil.DiffResult diffResult) {
+        return mainThreadCompletable(new Action() {
             @Override
-            public Void call() throws Exception {
+            public void run() throws Exception {
                 mData.clear();
                 mData.addAll(newContents);
                 diffResult.dispatchUpdatesTo(mListUpdateCallback);
-                return null;
             }
         });
     }
