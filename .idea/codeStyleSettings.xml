@@ -3,25 +3,40 @@
   <component name="ProjectCodeStyleSettingsManager">
     <option name="PER_PROJECT_SETTINGS">
       <value>
-        <option name="FIELD_NAME_PREFIX" value="m" />
-        <option name="STATIC_FIELD_NAME_PREFIX" value="s" />
-        <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="10" />
-        <option name="STATIC_FIELDS_ORDER_WEIGHT" value="2" />
-        <option name="FIELDS_ORDER_WEIGHT" value="1" />
-        <option name="CONSTRUCTORS_ORDER_WEIGHT" value="5" />
-        <option name="STATIC_METHODS_ORDER_WEIGHT" value="6" />
-        <option name="METHODS_ORDER_WEIGHT" value="7" />
-        <option name="STATIC_INNER_CLASSES_ORDER_WEIGHT" value="4" />
-        <option name="INNER_CLASSES_ORDER_WEIGHT" value="3" />
-        <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
-        <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
-        <option name="JD_ADD_BLANK_AFTER_DESCRIPTION" value="false" />
-        <option name="JD_DO_NOT_WRAP_ONE_LINE_COMMENTS" value="true" />
-        <option name="JD_PRESERVE_LINE_FEEDS" value="true" />
-        <option name="WRAP_COMMENTS" value="true" />
+        <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+        <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+        <option name="PACKAGES_TO_USE_IMPORT_ON_DEMAND">
+          <value />
+        </option>
+        <option name="IMPORT_LAYOUT_TABLE">
+          <value>
+            <package name="android" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="com" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="junit" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="net" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="org" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="java" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="javax" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="" withSubpackages="true" static="false" />
+            <emptyLine />
+            <package name="" withSubpackages="true" static="true" />
+            <emptyLine />
+          </value>
+        </option>
         <AndroidXmlCodeStyleSettings>
           <option name="USE_CUSTOM_SETTINGS" value="true" />
         </AndroidXmlCodeStyleSettings>
+        <JetCodeStyleSettings>
+          <option name="NAME_COUNT_TO_USE_STAR_IMPORT" value="2147483647" />
+          <option name="NAME_COUNT_TO_USE_STAR_IMPORT_FOR_MEMBERS" value="2147483647" />
+        </JetCodeStyleSettings>
         <Objective-C-extensions>
           <file>
             <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Import" />
@@ -48,16 +63,11 @@
           </extensions>
         </Objective-C-extensions>
         <XML>
-          <option name="XML_ATTRIBUTE_WRAP" value="2" />
           <option name="XML_KEEP_LINE_BREAKS" value="false" />
-          <option name="XML_KEEP_BLANK_LINES" value="1" />
           <option name="XML_ALIGN_ATTRIBUTES" value="false" />
           <option name="XML_SPACE_INSIDE_EMPTY_TAG" value="true" />
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
-        <codeStyleSettings language="Groovy">
-          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
-        </codeStyleSettings>
         <codeStyleSettings language="JAVA">
           <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
           <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
@@ -66,6 +76,8 @@
           <option name="SPACE_WITHIN_ARRAY_INITIALIZER_BRACES" value="true" />
           <option name="SPACE_BEFORE_ARRAY_INITIALIZER_LBRACE" value="true" />
           <option name="METHOD_PARAMETERS_WRAP" value="5" />
+          <option name="METHOD_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
+          <option name="METHOD_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
           <option name="RESOURCE_LIST_WRAP" value="1" />
           <option name="METHOD_CALL_CHAIN_WRAP" value="5" />
           <option name="BINARY_OPERATION_WRAP" value="1" />
@@ -82,6 +94,7 @@
           <option name="VARIABLE_ANNOTATION_WRAP" value="2" />
         </codeStyleSettings>
         <codeStyleSettings language="XML">
+          <option name="FORCE_REARRANGE_MODE" value="1" />
           <indentOptions>
             <option name="CONTINUATION_INDENT_SIZE" value="4" />
           </indentOptions>
@@ -90,7 +103,51 @@
               <section>
                 <rule>
                   <match>
-                    <NAME>xmlns:.*</NAME>
+                    <AND>
+                      <NAME>xmlns:android</NAME>
+                      <XML_NAMESPACE>^$</XML_NAMESPACE>
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>xmlns:.*</NAME>
+                      <XML_NAMESPACE>^$</XML_NAMESPACE>
+                    </AND>
+                  </match>
+                  <order>BY_NAME</order>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>.*:id</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>.*:name</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
+                    </AND>
+                  </match>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>name</NAME>
+                      <XML_NAMESPACE>^$</XML_NAMESPACE>
+                    </AND>
                   </match>
                 </rule>
               </section>
@@ -99,7 +156,7 @@
                   <match>
                     <AND>
                       <NAME>style</NAME>
-                      <XML_ATTRIBUTE />
+                      <XML_NAMESPACE>^$</XML_NAMESPACE>
                     </AND>
                   </match>
                 </rule>
@@ -108,8 +165,19 @@
                 <rule>
                   <match>
                     <AND>
-                      <NAME>layout</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*</NAME>
+                      <XML_NAMESPACE>^$</XML_NAMESPACE>
+                    </AND>
+                  </match>
+                  <order>BY_NAME</order>
+                </rule>
+              </section>
+              <section>
+                <rule>
+                  <match>
+                    <AND>
+                      <NAME>.*:layout_width</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
                 </rule>
@@ -118,8 +186,8 @@
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:id</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*:layout_height</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
                 </rule>
@@ -128,68 +196,52 @@
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:layout_width</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*:layout_.*</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
+                  <order>BY_NAME</order>
                 </rule>
               </section>
               <section>
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:layout_height</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*:width</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
+                  <order>BY_NAME</order>
                 </rule>
               </section>
               <section>
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:layout_weight</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*:height</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
+                  <order>BY_NAME</order>
                 </rule>
               </section>
               <section>
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:layout_margin*</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*</NAME>
+                      <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
                     </AND>
                   </match>
+                  <order>BY_NAME</order>
                 </rule>
               </section>
               <section>
                 <rule>
                   <match>
                     <AND>
-                      <NAME>android:layout_*</NAME>
-                      <XML_ATTRIBUTE />
-                    </AND>
-                  </match>
-                </rule>
-              </section>
-              <section>
-                <rule>
-                  <match>
-                    <AND>
-                      <NAME>android:orientation</NAME>
-                      <XML_ATTRIBUTE />
-                    </AND>
-                  </match>
-                </rule>
-              </section>
-              <section>
-                <rule>
-                  <match>
-                    <AND>
-                      <NAME>android:*</NAME>
-                      <XML_ATTRIBUTE />
+                      <NAME>.*</NAME>
+                      <XML_NAMESPACE>.*</XML_NAMESPACE>
                     </AND>
                   </match>
                   <order>BY_NAME</order>
@@ -197,6 +249,18 @@
               </section>
             </rules>
           </arrangement>
+        </codeStyleSettings>
+        <codeStyleSettings language="kotlin">
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="1" />
+          <option name="METHOD_PARAMETERS_WRAP" value="5" />
+          <option name="METHOD_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
+          <option name="METHOD_PARAMETERS_RPAREN_ON_NEXT_LINE" value="true" />
+          <option name="METHOD_ANNOTATION_WRAP" value="1" />
+          <option name="CLASS_ANNOTATION_WRAP" value="1" />
+          <option name="FIELD_ANNOTATION_WRAP" value="1" />
+          <option name="VARIABLE_ANNOTATION_WRAP" value="1" />
         </codeStyleSettings>
       </value>
     </option>
