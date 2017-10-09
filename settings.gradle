@@ -10,6 +10,7 @@ include ':power-adapters-data'
 include ':power-adapters-data-kotlin'
 include ':power-adapters-data-rxjava2'
 include ':power-adapters-data-rxjava2-kotlin'
+include ':power-adapters-test'
 
 if (System.getenv("TRAVIS") != "true" && System.getenv("JITPACK") != "true") {
     include ':power-adapters-sample'

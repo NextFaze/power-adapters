@@ -25,19 +25,19 @@ allprojects {
 
 apply from: 'dependencies.gradle'
 
-ext.configureLibrary = { project ->
-    delegate = project
+ext.configureLibrary = { proj ->
+    delegate = proj
 
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
     apply plugin: 'kotlin-kapt'
 
     android {
-        compileSdkVersion project.compileSdkVersion
-        buildToolsVersion project.buildToolsVersion
+        compileSdkVersion proj.compileSdkVersion
+        buildToolsVersion proj.buildToolsVersion
 
         defaultConfig {
-            minSdkVersion project.minSdkVersion
+            minSdkVersion proj.minSdkVersion
             javaCompileOptions.annotationProcessorOptions.includeCompileClasspath false
         }
 
@@ -50,18 +50,19 @@ ext.configureLibrary = { project ->
             abortOnError getBoolProperty('lintAbortOnError', false)
         }
 
-//        resourcePrefix "${project.name.replace("-", "_")}_"
+//        resourcePrefix "${proj.name.replace("-", "_")}_"
     }
 
     dependencies {
-        testImplementation rootProject.ext.robolectric
-        testImplementation project.junit
-        testImplementation project.truth
-        testImplementation project.mockito
-        testImplementation project.mockitoKotlin
-        testImplementation project.kotlinStdlib
-        testImplementation project.kotlinReflect
-        api rootProject.ext.supportAnnotations
+        testImplementation proj.robolectric
+        testImplementation proj.junit
+        testImplementation proj.truth
+        testImplementation proj.mockito
+        testImplementation proj.mockitoKotlin
+        testImplementation proj.kotlinStdlib
+        testImplementation proj.kotlinReflect
+        testImplementation project(':power-adapters-test')
+        api proj.supportAnnotations
     }
 
     apply plugin: 'com.github.dcendents.android-maven'

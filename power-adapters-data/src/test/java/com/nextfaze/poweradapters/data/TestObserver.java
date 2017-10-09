@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 
@@ -21,6 +22,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * </ul>
  */
 @SuppressWarnings("WeakerAccess")
+@Deprecated // TODO: Replace with single-threaded version, and only test using a single thread.
 final class TestObserver<T> implements DataObserver, LoadingObserver, AvailableObserver {
 
     private int mShadowSize;

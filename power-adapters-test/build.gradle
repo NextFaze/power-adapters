@@ -1,0 +1,33 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    buildToolsVersion rootProject.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 16
+        javaCompileOptions.annotationProcessorOptions.includeCompileClasspath false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    lintOptions {
+        abortOnError getBoolProperty('lintAbortOnError', false)
+    }
+}
+
+dependencies {
+    api project(':power-adapters')
+    api project(':power-adapters-kotlin')
+    api project(':power-adapters-data')
+    api project(':power-adapters-data-kotlin')
+    api rootProject.ext.kotlinStdlib
+    api rootProject.ext.kotlinReflect
+    api rootProject.ext.junit
+    api rootProject.ext.supportAnnotations
+}
