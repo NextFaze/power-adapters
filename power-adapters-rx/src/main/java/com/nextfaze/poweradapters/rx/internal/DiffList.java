@@ -65,7 +65,6 @@ public final class DiffList<T> {
     }
 
     public void clear() {
-        mData.clear();
         int size = mData.size();
         if (size > 0) {
             mData.clear();
