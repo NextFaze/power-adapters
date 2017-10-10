@@ -3,6 +3,9 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.nextfaze.poweradapters.test.FakeAdapter;
+
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -14,7 +17,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.*;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING_AND_TRAILING;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_NOTHING;
+import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_TRAILING;
 import static com.nextfaze.poweradapters.internal.NotificationType.COARSE;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;

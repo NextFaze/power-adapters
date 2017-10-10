@@ -1,9 +1,12 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+
 import com.google.common.collect.FluentIterable;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
+import com.nextfaze.poweradapters.data.test.FakeData;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,7 +21,11 @@ import org.robolectric.annotation.Config;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.internal.NotificationType.COARSE;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
@@ -26,9 +33,6 @@ public final class FilterDataTest {
 
     @Rule
     public MockitoRule mMockito = MockitoJUnit.rule();
-
-    @Mock
-    private Data<?> mMockData;
 
     private FakeData<String> mData;
     private FilterData<String> mFilterData;

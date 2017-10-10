@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.rxjava2
 
-import com.nextfaze.poweradapters.FakeAdapter
+import com.nextfaze.poweradapters.test.FakeAdapter
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

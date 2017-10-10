@@ -1,5 +1,7 @@
 package com.nextfaze.poweradapters;
 
+import com.nextfaze.poweradapters.test.FakeAdapter;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,7 +14,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)

@@ -3,6 +3,9 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import com.nextfaze.poweradapters.test.FakeAdapter;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,7 +24,13 @@ import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.Condition.always;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)

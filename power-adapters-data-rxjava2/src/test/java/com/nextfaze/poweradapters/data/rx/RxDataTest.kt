@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data.rx
 
-import com.nextfaze.poweradapters.data.FakeData
 import com.nextfaze.poweradapters.data.rxjava2.BuildConfig
+import com.nextfaze.poweradapters.data.test.FakeData
 import com.nextfaze.poweradapters.rxjava2.ChangeEvent
 import com.nextfaze.poweradapters.rxjava2.InsertEvent
 import com.nextfaze.poweradapters.rxjava2.MoveEvent
@@ -59,15 +59,15 @@ class RxDataTest {
 
     @Test fun loading() {
         val testObserver = RxData.loading(data).test()
-        data.isLoading = true
-        data.isLoading = false
+        data.loading = true
+        data.loading = false
         testObserver.assertNotTerminated().assertValues(false, true, false)
     }
 
     @Test fun available() {
-        data.setAvailable(0)
+        data.available = 0
         val testObserver = RxData.available(data).test()
-        data.setAvailable(5)
+        data.available = 5
         testObserver.assertNotTerminated().assertValues(0, 5)
     }
 

@@ -5,8 +5,11 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import com.google.common.collect.ImmutableList;
 import com.nextfaze.poweradapters.TreeAdapter.ChildAdapterSupplier;
+import com.nextfaze.poweradapters.test.FakeAdapter;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -27,11 +30,24 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.nextfaze.poweradapters.AdapterTestUtils.*;
+import static com.nextfaze.poweradapters.AdapterTestUtils.holder;
+import static com.nextfaze.poweradapters.AdapterTestUtils.verifyBindViewNeverCalled;
+import static com.nextfaze.poweradapters.AdapterTestUtils.verifyNewViewNeverCalled;
 import static com.nextfaze.poweradapters.AdapterVerifier.verifySubAdapterAllGetCalls;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.PowerAdapter.EMPTY;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)

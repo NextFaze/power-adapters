@@ -1,6 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+
+import com.nextfaze.poweradapters.data.test.FakeData;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

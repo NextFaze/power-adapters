@@ -1,8 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+
 import com.google.common.collect.Ordering;
 import com.nextfaze.poweradapters.DataObserver;
+import com.nextfaze.poweradapters.data.test.FakeData;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,7 +22,11 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Collections.sort;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
