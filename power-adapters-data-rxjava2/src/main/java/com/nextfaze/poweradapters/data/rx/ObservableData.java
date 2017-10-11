@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
@@ -23,13 +22,6 @@ final class ObservableData<T> extends Data<T> {
     private static final Consumer<Object> EMPTY_CONSUMER = new Consumer<Object>() {
         @Override
         public void accept(Object o) throws Exception {
-        }
-    };
-
-    @NonNull
-    private static final Action EMPTY_ACTION = new Action() {
-        @Override
-        public void run() throws Exception {
         }
     };
 
@@ -107,7 +99,6 @@ final class ObservableData<T> extends Data<T> {
                     notifyError(error);
                 }
             };
-            Action onCompleted = EMPTY_ACTION;
 
             // Loading must be subscribed to first
             mDisposables.add(mLoadingObservable.subscribe(new Consumer<Boolean>() {
@@ -115,7 +106,7 @@ final class ObservableData<T> extends Data<T> {
                 public void accept(Boolean l) throws Exception {
                     setLoading(l);
                 }
-            }, onError, onCompleted));
+            }, onError));
 
             // Available
             mDisposables.add(mAvailableObservable.subscribe(new Consumer<Integer>() {
@@ -123,7 +114,7 @@ final class ObservableData<T> extends Data<T> {
                 public void accept(Integer available) throws Exception {
                     setAvailable(available);
                 }
-            }, onError, onCompleted));
+            }, onError));
 
             // Errors
             mDisposables.add(mErrorObservable.subscribe(new Consumer<Throwable>() {
@@ -131,7 +122,7 @@ final class ObservableData<T> extends Data<T> {
                 public void accept(Throwable e) throws Exception {
                     notifyError(e);
                 }
-            }));
+            }, onError));
 
             // Content
             if (mContentsObservable != null) {
@@ -140,7 +131,7 @@ final class ObservableData<T> extends Data<T> {
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
                         return mList.overwrite(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(onNext, onError));
             }
 
             // Prepends
@@ -150,7 +141,7 @@ final class ObservableData<T> extends Data<T> {
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
                         return mList.prepend(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(onNext, onError));
             }
 
             // Appends
@@ -160,7 +151,7 @@ final class ObservableData<T> extends Data<T> {
                     public Observable<?> apply(Collection<? extends T> contents) throws Exception {
                         return mList.append(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(onNext, onError));
             }
         }
     }

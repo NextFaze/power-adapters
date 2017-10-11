@@ -3,7 +3,9 @@ package com.nextfaze.poweradapters.rxjava2;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.Condition;
+
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -13,12 +15,6 @@ import static android.os.Looper.myLooper;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 final class ObservableCondition extends Condition {
-
-    private static final Consumer<Throwable> EMPTY_ERROR_HANDLER = new Consumer<Throwable>() {
-        @Override
-        public void accept(Throwable throwable) {
-        }
-    };
 
     @NonNull
     private final Observable<Boolean> mObservable;
@@ -51,7 +47,7 @@ final class ObservableCondition extends Condition {
             public void accept(final Boolean value) {
                 setValue(value);
             }
-        }, EMPTY_ERROR_HANDLER);
+        });
     }
 
     @Override

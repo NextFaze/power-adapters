@@ -15,7 +15,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.plugins.RxJavaPlugins;
 
 @SuppressWarnings("WeakerAccess")
 final class ObservableAdapter<T> extends BindingAdapter<T> {
@@ -94,15 +93,6 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
 
     private void subscribeIfAppropriate() {
         if (getObserverCount() > 0 && mDisposables.size() <= 0) {
-            Consumer<Object> onNext = EMPTY_CONSUMER;
-            Consumer<Throwable> onError = new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable error) {
-                    RxJavaPlugins.onError(error);
-                }
-            };
-            Action onCompleted = EMPTY_ACTION;
-
             // Content
             if (mContentsObservable != null) {
                 mDisposables.add(mContentsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
@@ -110,7 +100,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                     public Observable<?> apply(Collection<? extends T> contents) {
                         return mList.overwrite(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(EMPTY_CONSUMER));
             }
 
             // Prepends
@@ -120,7 +110,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                     public Observable<?> apply(Collection<? extends T> contents) {
                         return mList.prepend(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(EMPTY_CONSUMER));
             }
 
             // Appends
@@ -130,7 +120,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
                     public Observable<?> apply(Collection<? extends T> contents) {
                         return mList.append(contents).toObservable();
                     }
-                }).subscribe(onNext, onError, onCompleted));
+                }).subscribe(EMPTY_CONSUMER));
             }
         }
     }
