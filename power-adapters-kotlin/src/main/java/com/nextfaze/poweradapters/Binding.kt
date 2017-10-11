@@ -42,10 +42,15 @@ fun <T, H : ViewHolder> binder(
 /** Returns this binder as a singleton [Mapper] that only maps using this binder. */
 fun Binder<*, *>.toMapper() = singletonMapper(this)
 
-/** Returns a new binder that uses the specified view type. */
+/** Returns a copy of this binder that uses the specified view type. */
 fun <T, V : View> Binder<T, V>.withViewType(viewType: Any) = withViewType { _, _ -> viewType }
 
-/** Returns a new binder that uses the view type returned from the supplied function on a per-item basis. */
+/** Returns a copy of this binder that uses the view type returned from the supplied function on a per-item basis. */
 fun <T, V : View> Binder<T, V>.withViewType(getViewType: (T, Int) -> Any) = object : BinderWrapper<T, V>(this) {
     override fun getViewType(t: T, position: Int) = getViewType(t, position)
+}
+
+/** Returns a copy of this binder that has a [Binder.hasStableIds] value of [hasStableIds]. */
+fun <T, V : View> Binder<T, V>.withStableIds(hasStableIds: Boolean) = object : BinderWrapper<T, V>(this) {
+    override fun hasStableIds() = hasStableIds
 }
