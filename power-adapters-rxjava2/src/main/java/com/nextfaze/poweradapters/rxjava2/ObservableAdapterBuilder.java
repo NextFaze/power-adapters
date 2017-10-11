@@ -3,16 +3,22 @@ package com.nextfaze.poweradapters.rxjava2;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
+
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.Mapper;
-import io.reactivex.Observable;
 
 import java.util.Collection;
+
+import io.reactivex.Observable;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
+/**
+ * Builder class for constructing {@link PowerAdapter}s out of observable data sources.
+ * @param <T> The element type of the built adapter.
+ */
 public final class ObservableAdapterBuilder<T> {
 
     @NonNull

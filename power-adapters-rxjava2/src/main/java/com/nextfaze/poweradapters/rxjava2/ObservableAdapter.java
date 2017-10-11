@@ -15,6 +15,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.plugins.RxJavaPlugins;
 
 @SuppressWarnings("WeakerAccess")
 final class ObservableAdapter<T> extends BindingAdapter<T> {
@@ -97,7 +98,7 @@ final class ObservableAdapter<T> extends BindingAdapter<T> {
             Consumer<Throwable> onError = new Consumer<Throwable>() {
                 @Override
                 public void accept(Throwable error) {
-                    // Ignore
+                    RxJavaPlugins.onError(error);
                 }
             };
             Action onCompleted = EMPTY_ACTION;
