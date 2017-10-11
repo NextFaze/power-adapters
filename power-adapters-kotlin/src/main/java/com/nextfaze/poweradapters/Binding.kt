@@ -3,6 +3,8 @@ package com.nextfaze.poweradapters
 import android.support.annotation.LayoutRes
 import android.view.View
 import com.nextfaze.poweradapters.binding.Binder
+import com.nextfaze.poweradapters.binding.BinderWrapper
+import com.nextfaze.poweradapters.binding.Mapper
 import com.nextfaze.poweradapters.binding.Mappers.singletonMapper
 import com.nextfaze.poweradapters.binding.ViewHolder
 import com.nextfaze.poweradapters.binding.ViewHolderBinder
@@ -15,9 +17,10 @@ import com.nextfaze.poweradapters.binding.ViewHolderBinder
  * @param V The type of `View` to which [T] instances will be bound.
  * @return A [Binder] capable of binding [T] instances to [V] `View` instances.
  */
-fun <T, V : View> binder(@LayoutRes layoutResource: Int,
-                         bind: V.(Container, T, Holder) -> Unit): Binder<T, V> =
-        Binder.create(layoutResource) { container, item, view, holder -> view.bind(container, item, holder) }
+fun <T, V : View> binder(
+        @LayoutRes layoutResource: Int,
+        bind: V.(Container, T, Holder) -> Unit
+): Binder<T, V> = Binder.create(layoutResource) { container, item, view, holder -> view.bind(container, item, holder) }
 
 /**
  * Creates a [ViewHolder]-based `Binder` that inflates its views from a layout resource.
@@ -28,11 +31,21 @@ fun <T, V : View> binder(@LayoutRes layoutResource: Int,
  * @param H The type of view holder to which [T] instances will be bound.
  * @return A [Binder] capable of binding [T] instances to `View` instances.
  */
-fun <T, H : ViewHolder> binder(@LayoutRes layoutResource: Int,
-                               createViewHolder: (View) -> H,
-                               bindViewHolder: H.(Container, T, Holder) -> Unit): Binder<T, View> =
-        ViewHolderBinder.create(layoutResource, createViewHolder) { container, item, h, holder ->
-            h.bindViewHolder(container, item, holder)
-        }
+fun <T, H : ViewHolder> binder(
+        @LayoutRes layoutResource: Int,
+        createViewHolder: (View) -> H,
+        bindViewHolder: H.(Container, T, Holder) -> Unit
+): Binder<T, View> = ViewHolderBinder.create(layoutResource, createViewHolder) { container, item, h, holder ->
+    h.bindViewHolder(container, item, holder)
+}
 
+/** Returns this binder as a singleton [Mapper] that only maps using this binder. */
 fun Binder<*, *>.toMapper() = singletonMapper(this)
+
+/** Returns a new binder that uses the specified view type. */
+fun <T, V : View> Binder<T, V>.withViewType(viewType: Any) = withViewType { _, _ -> viewType }
+
+/** Returns a new binder that uses the view type returned from the supplied function on a per-item basis. */
+fun <T, V : View> Binder<T, V>.withViewType(getViewType: (T, Int) -> Any) = object : BinderWrapper<T, V>(this) {
+    override fun getViewType(t: T, position: Int) = getViewType(t, position)
+}
