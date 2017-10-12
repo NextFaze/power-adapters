@@ -3,6 +3,8 @@ package com.nextfaze.poweradapters.data
 import android.database.Cursor
 import android.database.DataSetObserver
 import com.nextfaze.poweradapters.DataObserver
+import com.nextfaze.poweradapters.binding.Binder
+import com.nextfaze.poweradapters.binding.Mapper
 import java.util.concurrent.ExecutorService
 
 /** Returns a [Data] containing the specified elements. */
@@ -56,6 +58,10 @@ val Data<*>.size get() = size()
 
 /** Alias for [Data.available]. */
 val Data<*>.available get() = available()
+
+fun <T> Data<T>.toAdapter(binder: Binder<in T, *>) = DataBindingAdapter(binder, this)
+
+fun <T> Data<T>.toAdapter(mapper: Mapper<in T>) = DataBindingAdapter(mapper, this)
 
 /** @see Data.registerDataObserver */
 operator fun <T> Data<T>.plusAssign(dataObserver: DataObserver) = registerDataObserver(dataObserver)
