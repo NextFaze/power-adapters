@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.nextfaze.poweradapters.sample.HeaderView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-    android:textColor="?attr/colorPrimary"
-    android:textStyle="bold"
-    android:gravity="center_vertical"
-    android:background="?attr/selectableItemBackground" />
+    android:layout_height="wrap_content" />

@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.nextfaze.poweradapters.sample">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.nextfaze.poweradapters.sample">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-            android:largeHeap="true"
-            android:allowBackup="true"
-            android:label="Power Adapters Sample"
-            android:theme="@style/AppTheme"
-            android:name=".SampleApplication"
-            tools:ignore="MissingApplicationIcon">
+        android:name=".Application"
+        android:allowBackup="true"
+        android:label="Power Adapters"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="AllowBackup,MissingApplicationIcon">
 
-        <activity android:name=".LaunchActivity">
+        <activity android:name=".ShowcaseActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".SampleActivity"/>
 
     </application>
 

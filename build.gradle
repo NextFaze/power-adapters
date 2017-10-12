@@ -17,6 +17,7 @@ allprojects {
     repositories {
         jcenter()
         google()
+        maven { url 'http://dl.bintray.com/kotlin/kotlinx' }
     }
 
     group = GROUP

@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 26
         versionCode 1
         versionName '1.0'
         vectorDrawables.useSupportLibrary = true
@@ -33,25 +33,80 @@ android {
 }
 
 dependencies {
-    implementation project(':power-adapters')
+    // Power Adapters
     implementation project(':power-adapters-kotlin')
-    implementation project(':power-adapters-data-kotlin')
-    implementation project(':power-adapters-data-rxjava2-kotlin')
     implementation project(':power-adapters-rxjava2-kotlin')
-    implementation project(':power-adapters-recyclerview-v7')
-//    implementation rootProject.ext.supportRecyclerView
+    implementation project(':power-adapters-data-rxjava2-kotlin')
+    implementation project(':power-adapters-data-kotlin')
+    implementation project(':power-adapters-recyclerview-v7-kotlin')
+
+    // Kotlin
+    implementation rootProject.ext.kotlinStdlib
+
+    // Support
+    implementation rootProject.ext.supportTransition
     implementation rootProject.ext.supportAppCompat
     implementation rootProject.ext.supportCardview
     implementation rootProject.ext.supportVectorDrawable
-    implementation rootProject.ext.kotlinStdlib
+
+    // Architecture Components
+    def architectureComponentsVersion = '1.0.0-beta2'
+    implementation "android.arch.lifecycle:runtime:$architectureComponentsVersion"
+    implementation "android.arch.lifecycle:extensions:$architectureComponentsVersion"
+    implementation "android.arch.lifecycle:reactivestreams:$architectureComponentsVersion"
+    kapt "android.arch.lifecycle:compiler:$architectureComponentsVersion"
+
+    // ConstraintLayout
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    // RxJava
+    implementation rootProject.ext.rxJava2
+    implementation rootProject.ext.rxKotlin2
+    implementation rootProject.ext.rxAndroid2
+
+    // RxBinding 2
+    def rxBinding2Version = '2.0.0'
+    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxBinding2Version"
+    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxBinding2Version"
+    implementation "com.jakewharton.rxbinding2:rxbinding-recyclerview-v7-kotlin:$rxBinding2Version"
+
+    // RxReplayingShare 2
+    implementation 'com.jakewharton.rx2:replaying-share-kotlin:2.0.1'
+
+    // RxLifecycle 2
+    def rxLifecycle2Version = '2.2.0'
+    implementation "com.trello.rxlifecycle2:rxlifecycle:$rxLifecycle2Version"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-components:$rxLifecycle2Version"
+    implementation "com.trello.rxlifecycle2:rxlifecycle-kotlin:$rxLifecycle2Version"
+
+    // Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    // ButterKnife
     implementation 'com.jakewharton:butterknife:8.5.1'
     kapt 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    // Guava
     //noinspection GradleDependency
     implementation 'com.google.guava:guava:20.0'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+
+    // Kotlin immutable collections
+    implementation 'org.jetbrains.kotlinx:kotlinx-collections-immutable:0.1'
+
+    // LeakCanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+
+    // Lombok
     implementation rootProject.ext.lombok
     kapt rootProject.ext.lombok
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    // Tests
+    testImplementation rootProject.ext.robolectric
+    testImplementation rootProject.ext.junit
+    testImplementation rootProject.ext.truth
+    testImplementation rootProject.ext.mockito
+    testImplementation rootProject.ext.mockitoKotlin
+    testImplementation rootProject.ext.kotlinReflect
+    testImplementation project(':power-adapters-test')
 }
