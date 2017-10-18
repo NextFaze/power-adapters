@@ -99,11 +99,11 @@ recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 
 ## RxJava
 
-RxJava modules are available. Simply append `-rx` to get the RxJava module:
+RxJava modules are available. Simply append `-rxjava2` to get the RxJava module:
 
 ```groovy
-implementation 'com.nextfaze.poweradapters:power-adapters-rx:0.15.0'
-implementation 'com.nextfaze.poweradapters:power-adapters-data-rx:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2:0.15.0'
 ```
 
 ## Kotlin
@@ -113,8 +113,8 @@ Kotlin modules are also provided for most modules. Append `-kotlin` to get the K
 ```groovy
 implementation 'com.nextfaze.poweradapters:power-adapters-kotlin:0.15.0'
 implementation 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.15.0'
-implementation 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.15.0'
-implementation 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2-kotlin:0.15.0'
 implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.15.0'
 ```
 
@@ -419,7 +419,7 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
 
 ### RxJava Module
 
-An RxJava module is provided: `power-adapters-data-rx`. This is a simple adapter library that provides `Observable`s
+An RxJava module is provided: `power-adapters-data-rxjava2`. This is a simple adapter library that provides `Observable`s
 for properties of `Data`:
 
 ```java
