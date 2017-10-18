@@ -67,8 +67,8 @@ Power adapters are compatible with the following collection view classes:
 Get it from Maven Central, using Gradle:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.14.0'
+implementation 'com.nextfaze.poweradapters:power-adapters:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.15.0'
 ```
 
 ## Basic
@@ -102,8 +102,8 @@ recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 RxJava modules are available. Simply append `-rx` to get the RxJava module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-rx:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.14.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-rx:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rx:0.15.0'
 ```
 
 ## Kotlin
@@ -111,11 +111,11 @@ compile 'com.nextfaze.poweradapters:power-adapters-data-rx:0.14.0'
 Kotlin modules are also provided for most modules. Append `-kotlin` to get the Kotlin module:
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-kotlin:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.14.0'
-compile 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.14.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-rx-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rx-kotlin:0.15.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.15.0'
 ```
 
 Some of the Kotlin APIs include:
@@ -126,6 +126,11 @@ Some of the Kotlin APIs include:
     ```
     ```kotlin
     val data = cursorData({ db.getUsers() }, ::User)
+    ```
+    ```kotlin
+    val header = viewFactory<TextView>(R.layout.header) {
+        text = "News"
+    }
     ```
 - Extension functions:
     ```kotlin
@@ -312,7 +317,7 @@ change. This way you don't need to reload or parcel/unparcel all of your list re
 object comprises much of the repetitive asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 ```groovy
-compile 'com.nextfaze.poweradapters:power-adapters-data:0.14.0'
+implementation 'com.nextfaze.poweradapters:power-adapters-data:0.15.0'
 ```
 
 ### Basic Data Usage

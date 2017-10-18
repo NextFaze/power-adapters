@@ -1,6 +1,17 @@
 Change Log
 ==========
 
+## Version 0.15.0
+
+* Migrate to RxJava 2.x
+* Add `Binder.withStableIds()` Kotlin extension function
+* Add `Binder.withViewType()` Kotlin extension functions
+* Add `Data.toAdapter()` Kotlin extension functions
+* Add `List.toAdapter()` Kotlin extension functions
+* Add Kotlin top-level function `viewFactory()`
+* Bump minSdk to `14`
+* Fix bug in DiffList where clear() failed to dispatch a remove notification
+
 ## Version 0.14.0
 
 _2017-06-27_
