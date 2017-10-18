@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters.data.rx
+package com.nextfaze.poweradapters.data.rxjava2
 
 import com.nextfaze.poweradapters.data.Data
 import com.nextfaze.poweradapters.rxjava2.ChangeEvent

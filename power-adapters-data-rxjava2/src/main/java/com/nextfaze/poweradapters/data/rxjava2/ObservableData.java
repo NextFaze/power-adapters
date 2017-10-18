@@ -1,4 +1,4 @@
-package com.nextfaze.poweradapters.data.rx;
+package com.nextfaze.poweradapters.data.rxjava2;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;

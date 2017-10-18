@@ -1,6 +1,5 @@
-package com.nextfaze.poweradapters.data.rx
+package com.nextfaze.poweradapters.data.rxjava2
 
-import com.nextfaze.poweradapters.data.rxjava2.BuildConfig
 import com.nextfaze.poweradapters.data.test.FakeData
 import com.nextfaze.poweradapters.rxjava2.ChangeEvent
 import com.nextfaze.poweradapters.rxjava2.InsertEvent

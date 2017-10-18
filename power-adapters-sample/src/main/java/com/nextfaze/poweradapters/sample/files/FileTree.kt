@@ -5,7 +5,7 @@ import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter
 import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.binder
-import com.nextfaze.poweradapters.data.rx.ObservableDataBuilder
+import com.nextfaze.poweradapters.data.rxjava2.ObservableDataBuilder
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.rxjava2.showOnlyWhile
 import com.nextfaze.poweradapters.sample.R

@@ -1,9 +1,8 @@
 @file:Suppress("IllegalIdentifier")
 
-package com.nextfaze.poweradapters.data.rx
+package com.nextfaze.poweradapters.data.rxjava2
 
 import com.google.common.truth.Truth.assertThat
-import com.nextfaze.poweradapters.data.rxjava2.BuildConfig
 import com.nextfaze.poweradapters.data.test.test
 import com.nextfaze.poweradapters.test.ChangeEvent
 import com.nextfaze.poweradapters.test.InsertEvent
