@@ -6,7 +6,7 @@ ext {
     buildToolsVersion = '27.0.3'
     supportVersion = '26.1.0'
 
-    kotlinVersion = '1.2.0'
+    kotlinVersion = '1.2.50'
     kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
