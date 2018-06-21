@@ -34,7 +34,6 @@ import com.nextfaze.poweradapters.sample.rxjava.attached
 import com.nextfaze.poweradapters.sample.rxjava.not
 import com.nextfaze.poweradapters.sample.rxjava.takeWhile
 import com.nextfaze.poweradapters.viewFactory
-import com.trello.rxlifecycle2.components.support.RxFragment
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.header_view.view.*
@@ -75,7 +74,7 @@ class ShowcaseActivity : AppCompatActivity() {
     }
 }
 
-class ShowcaseFragment : RxFragment() {
+class ShowcaseFragment : Fragment() {
 
     private val sections = listOf(
             Section("Files") { createFileTreeAdapter(fileTreeViewModel) },
