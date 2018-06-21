@@ -6,7 +6,6 @@ import android.widget.FrameLayout
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.DataObserver
 import com.nextfaze.poweradapters.PowerAdapter
-import junit.framework.Assert
 import kotlin.properties.Delegates.observable
 
 /** An observer designed for testing [PowerAdapter] objects. */
@@ -50,14 +49,14 @@ class TestObserver(val adapter: PowerAdapter) : DataObserver {
 
     fun assertItemCount(expected: Int): TestObserver {
         verify(expected == adapter.itemCount) {
-            Assert.format("Item count does not match", expected, adapter.itemCount)
+            format("Item count does not match", expected, adapter.itemCount)
         }
         return this
     }
 
     fun assertChangeNotifications(vararg expected: Event): TestObserver {
         verify(expected.toList() == changeEvents) {
-            Assert.format("Change events do not match", expected.toList(), changeEvents)
+            format("Change events do not match", expected.toList(), changeEvents)
         }
         return this
     }

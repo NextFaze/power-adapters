@@ -10,8 +10,8 @@ import com.nextfaze.poweradapters.test.Event
 import com.nextfaze.poweradapters.test.InsertEvent
 import com.nextfaze.poweradapters.test.MoveEvent
 import com.nextfaze.poweradapters.test.RemoveEvent
+import com.nextfaze.poweradapters.test.format
 import com.nextfaze.poweradapters.test.verify
-import junit.framework.Assert
 import kotlin.properties.Delegates.observable
 
 /**
@@ -101,41 +101,41 @@ class TestDataObserver<T>(val data: Data<T>) : DataObserver, LoadingObserver, Av
 
     fun assertLoadingValues(vararg expected: Boolean): TestDataObserver<T> {
         verify(expected.toList() == loadingValues) {
-            Assert.format("Loading values do not match", expected.toList(), loadingValues)
+            format("Loading values do not match", expected.toList(), loadingValues)
         }
         return this
     }
 
     fun assertAvailableValues(vararg expected: Int): TestDataObserver<T> {
         verify(expected.toList() == availableValues) {
-            Assert.format("Available values do not match", expected.toList(), availableValues)
+            format("Available values do not match", expected.toList(), availableValues)
         }
         return this
     }
 
     fun assertElementValues(vararg expected: Iterable<T>): TestDataObserver<T> {
         verify(expected.toList() == elementValues) {
-            Assert.format("Element values do not match", expected.toList(), elementValues)
+            format("Element values do not match", expected.toList(), elementValues)
         }
         return this
     }
 
     fun assertElements(vararg expected: T): TestDataObserver<T> {
         verify(expected.toList() == data.asList()) {
-            Assert.format("Elements do not match", expected.toList(), data.asList())
+            format("Elements do not match", expected.toList(), data.asList())
         }
         return this
     }
 
     fun assertChangeNotifications(vararg expected: Event): TestDataObserver<T> {
         verify(expected.toList() == changeEvents) {
-            Assert.format("Change events do not match", expected.toList(), changeEvents)
+            format("Change events do not match", expected.toList(), changeEvents)
         }
         return this
     }
 
     fun assertErrors(vararg expected: Throwable): TestDataObserver<T> {
-        verify(expected.toList() == errors) { Assert.format("Errors do not match", expected.toList(), errors) }
+        verify(expected.toList() == errors) { format("Errors do not match", expected.toList(), errors) }
         return this
     }
 
@@ -145,7 +145,7 @@ class TestDataObserver<T>(val data: Data<T>) : DataObserver, LoadingObserver, Av
     }
 
     fun assertSize(expected: Int): TestDataObserver<T> {
-        verify(expected == data.size()) { Assert.format("Size does not match", expected, data.size()) }
+        verify(expected == data.size()) { format("Size does not match", expected, data.size()) }
         return this
     }
 
