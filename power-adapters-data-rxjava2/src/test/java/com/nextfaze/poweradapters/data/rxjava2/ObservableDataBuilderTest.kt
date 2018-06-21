@@ -102,6 +102,30 @@ class ObservableDataBuilderTest {
                 .assertLoadingValues(false, true, false, true)
     }
 
+    @Test fun `data stops loading upon content error`() {
+        ObservableDataBuilder<String>()
+                .contents(Observable.error(Exception()))
+                .build()
+                .test()
+                .assertLoadingValues(false, true, false)
+    }
+
+    @Test fun `data stops loading upon prepends error`() {
+        ObservableDataBuilder<String>()
+                .appends(Observable.error(Exception()))
+                .build()
+                .test()
+                .assertLoadingValues(false, true, false)
+    }
+
+    @Test fun `data stops loading upon appends error`() {
+        ObservableDataBuilder<String>()
+                .prepends(Observable.error(Exception()))
+                .build()
+                .test()
+                .assertLoadingValues(false, true, false)
+    }
+
     @Test fun `data emits same errors as errors observable`() {
         val errors = listOf(Throwable(), Throwable(), Throwable())
         ObservableDataBuilder<String>()

@@ -145,9 +145,12 @@ public final class ObservableDataBuilder<T> {
 
     @NonNull
     public Data<T> build() {
-        Observable<? extends Collection<? extends T>> contents = mContents != null ? mContents.replay(1).refCount() : Observable.<Collection<T>>empty();
-        Observable<? extends Collection<? extends T>> prepends = mPrepends != null ? mPrepends.share() : Observable.<Collection<T>>empty();
-        Observable<? extends Collection<? extends T>> appends = mAppends != null ? mAppends.share() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> contents =
+                mContents != null ? mContents.replay(1).refCount() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> prepends =
+                mPrepends != null ? mPrepends.share() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> appends =
+                mAppends != null ? mAppends.share() : Observable.<Collection<T>>empty();
         Observable<Integer> available = mAvailable;
         Observable<Boolean> loading = mLoading;
         Observable<Throwable> errors = mErrors;
@@ -158,22 +161,33 @@ public final class ObservableDataBuilder<T> {
         if (available == null) {
             // If no available observable specified, assume no more available upon first emission of any content
             // observable.
-            available = mergedContentSources.map(new Function<Object, Integer>() {
-                @Override
-                public Integer apply(Object o) throws Exception {
-                    return 0;
-                }
-            }).startWith(Integer.MAX_VALUE);
+            available = mergedContentSources
+                    .map(new Function<Object, Integer>() {
+                        @Override
+                        public Integer apply(Object o) {
+                            return 0;
+                        }
+                    })
+                    .startWith(Integer.MAX_VALUE);
         }
         if (loading == null) {
             // If no loading observable specified, assume loading has completed upon first emission of any content
-            // observable.
-            loading = mergedContentSources.map(new Function<Object, Boolean>() {
-                @Override
-                public Boolean apply(Object o) throws Exception {
-                    return false;
-                }
-            }).startWith(true);
+            // observable. Upon error, loading has stopped.
+            loading = mergedContentSources
+                    .map(new Function<Object, Boolean>() {
+                        @Override
+                        public Boolean apply(Object o) {
+                            return false;
+                        }
+                    })
+                    .onErrorReturn(new Function<Throwable, Boolean>() {
+                        @Override
+                        public Boolean apply(Throwable throwable) {
+                            return false;
+                        }
+                    })
+                    .concatWith(Observable.just(false))
+                    .startWith(true);
         }
         if (errors == null) {
             errors = Observable.empty();
