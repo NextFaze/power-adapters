@@ -12,7 +12,6 @@ import org.robolectric.annotation.Config;
 import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
 public final class SimpleDataObserverTest {
 
     @Rule

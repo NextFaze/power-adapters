@@ -14,7 +14,6 @@ import org.robolectric.annotation.Config
 import java.util.concurrent.ExecutorService
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(21))
 class ArrayDataTest {
 
     private lateinit var executor: ExecutorService

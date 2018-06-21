@@ -28,7 +28,6 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(21))
 class ObservableAdapterBuilderTest {
 
     private val context = RuntimeEnvironment.application

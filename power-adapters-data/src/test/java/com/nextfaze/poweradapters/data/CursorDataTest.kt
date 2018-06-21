@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit.SECONDS
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = intArrayOf(21))
 class CursorDataTest {
 
     private lateinit var executor: ExecutorService
