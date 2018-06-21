@@ -6,6 +6,7 @@
 .idea/libraries
 .idea/kotlinc.xml
 .idea/gradle.xml
+.idea/caches
 .DS_Store
 .gradle
 *.iml
