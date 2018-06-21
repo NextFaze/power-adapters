@@ -2,9 +2,6 @@ package com.nextfaze.poweradapters.sample.news;
 
 import android.support.annotation.NonNull;
 
-import lombok.experimental.Accessors;
-
-@Accessors(prefix = "m")
 public class NewsSection {
 
     @NonNull

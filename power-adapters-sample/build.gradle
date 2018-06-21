@@ -97,10 +97,6 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
-    // Lombok
-    implementation rootProject.ext.lombok
-    kapt rootProject.ext.lombok
-
     // Tests
     testImplementation rootProject.ext.robolectric
     testImplementation rootProject.ext.junit
