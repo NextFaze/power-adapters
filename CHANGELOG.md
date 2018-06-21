@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## Version 0.16.0
+
+* Fix bug where `ObservableDataBuilder` created `Data` with loading remaining `true` after content error
+* Fix bug where `ObservableDataBuilder` created multiple subscriptions to the content observable
+
 ## Version 0.15.0
 
 * Migrate to RxJava 2.x
