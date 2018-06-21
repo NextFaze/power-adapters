@@ -17,7 +17,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class ObservableDataBuilderTest {
@@ -136,7 +135,8 @@ class ObservableDataBuilderTest {
                 .assertLoadingValues(false, true, false)
     }
 
-    @Test fun `data available indicated as infinite until first content emission if no available observable specified`() {
+    @Test
+    fun `data available indicated as infinite until first content emission if no available observable specified`() {
         ObservableDataBuilder<String>()
                 .contents(Observable.just(listOf("a")))
                 .build()
@@ -144,7 +144,8 @@ class ObservableDataBuilderTest {
                 .assertAvailableValues(Int.MAX_VALUE, 0)
     }
 
-    @Test fun `data available indicated as infinite until first prepends emission if no available observable specified`() {
+    @Test
+    fun `data available indicated as infinite until first prepends emission if no available observable specified`() {
         ObservableDataBuilder<String>()
                 .prepends(Observable.just(listOf("a")))
                 .build()
@@ -152,7 +153,8 @@ class ObservableDataBuilderTest {
                 .assertAvailableValues(Int.MAX_VALUE, 0)
     }
 
-    @Test fun `data available indicated as infinite until first appends emission if no available observable specified`() {
+    @Test
+    fun `data available indicated as infinite until first appends emission if no available observable specified`() {
         ObservableDataBuilder<String>()
                 .appends(Observable.just(listOf("a")))
                 .build()
@@ -291,6 +293,16 @@ class ObservableDataBuilderTest {
                 listOf(),
                 listOf("a")
         )
+    }
+
+    @Test fun `data subscribes to content observable only once`() {
+        var subscribeCount = 0
+        val observable = Observable.defer { subscribeCount++; Observable.just(listOf("a")).concatWith(Observable.never()) }
+        val data = ObservableDataBuilder<String>()
+                .contents(observable)
+                .build()
+        data.test()
+        assertThat(subscribeCount).isEqualTo(1)
     }
 
     data class Item(val id: Int, val name: String)
