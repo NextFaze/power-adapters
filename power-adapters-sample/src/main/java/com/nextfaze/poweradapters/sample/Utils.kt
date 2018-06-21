@@ -74,7 +74,7 @@ fun <T> MutableSet<T>.toggle(element: T) {
 val Context.layoutInflater: LayoutInflater get() = LayoutInflater.from(this)
 
 fun Context.getDrawableForAttribute(@AttrRes attr: Int): Drawable = getResourceFromAttribute(attr) {
-    ContextCompat.getDrawable(this, it)
+    ContextCompat.getDrawable(this, it)!!
 }
 
 private fun <T> Context.getResourceFromAttribute(@AttrRes attr: Int, getResource: (Int) -> T): T {
