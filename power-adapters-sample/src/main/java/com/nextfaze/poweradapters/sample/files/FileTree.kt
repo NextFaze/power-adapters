@@ -62,7 +62,7 @@ class FileTreeViewModel : ViewModel() {
     fun files(file: File): Observable<List<File>> = dirContentsCache.getOrPut(file) { file.files().replayingShare() }
 
     private fun mutate(body: (MutableMap<File, ImmutableSet<Flag>>) -> Unit) =
-            fileToFlagSetSubject.onNext(fileToFlagSetSubject.value.mutate(body))
+            fileToFlagSetSubject.onNext(fileToFlagSetSubject.value!!.mutate(body))
 
     /** Enum of possible flags each [File] in a [FileTree] can have.  */
     enum class Flag { EXPANDED, PEEKING }

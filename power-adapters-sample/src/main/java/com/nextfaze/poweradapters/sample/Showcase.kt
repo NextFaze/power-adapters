@@ -62,7 +62,7 @@ class ShowcaseViewModel : ViewModel() {
     fun sectionCollapsed(section: String): Observable<Boolean> = collapsedSectionsSubject.map { section in it }
 
     private fun mutate(body: (MutableSet<String>) -> Unit) =
-            collapsedSectionsSubject.onNext(collapsedSectionsSubject.value.mutate(body))
+            collapsedSectionsSubject.onNext(collapsedSectionsSubject.value!!.mutate(body))
 }
 
 data class Section(val name: String, val createAdapter: () -> PowerAdapter)
