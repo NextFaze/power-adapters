@@ -145,7 +145,7 @@ public final class ObservableDataBuilder<T> {
 
     @NonNull
     public Data<T> build() {
-        Observable<? extends Collection<? extends T>> contents = mContents != null ? mContents.share() : Observable.<Collection<T>>empty();
+        Observable<? extends Collection<? extends T>> contents = mContents != null ? mContents.replay(1).refCount() : Observable.<Collection<T>>empty();
         Observable<? extends Collection<? extends T>> prepends = mPrepends != null ? mPrepends.share() : Observable.<Collection<T>>empty();
         Observable<? extends Collection<? extends T>> appends = mAppends != null ? mAppends.share() : Observable.<Collection<T>>empty();
         Observable<Integer> available = mAvailable;

@@ -100,30 +100,6 @@ final class ObservableData<T> extends Data<T> {
                 }
             };
 
-            // Loading must be subscribed to first
-            mDisposables.add(mLoadingObservable.subscribe(new Consumer<Boolean>() {
-                @Override
-                public void accept(Boolean l) throws Exception {
-                    setLoading(l);
-                }
-            }, onError));
-
-            // Available
-            mDisposables.add(mAvailableObservable.subscribe(new Consumer<Integer>() {
-                @Override
-                public void accept(Integer available) throws Exception {
-                    setAvailable(available);
-                }
-            }, onError));
-
-            // Errors
-            mDisposables.add(mErrorObservable.subscribe(new Consumer<Throwable>() {
-                @Override
-                public void accept(Throwable e) throws Exception {
-                    notifyError(e);
-                }
-            }, onError));
-
             // Content
             if (mContentsObservable != null) {
                 mDisposables.add(mContentsObservable.switchMap(new Function<Collection<? extends T>, Observable<?>>() {
@@ -153,6 +129,30 @@ final class ObservableData<T> extends Data<T> {
                     }
                 }).subscribe(onNext, onError));
             }
+
+            // Loading
+            mDisposables.add(mLoadingObservable.subscribe(new Consumer<Boolean>() {
+                @Override
+                public void accept(Boolean l) throws Exception {
+                    setLoading(l);
+                }
+            }, onError));
+
+            // Available
+            mDisposables.add(mAvailableObservable.subscribe(new Consumer<Integer>() {
+                @Override
+                public void accept(Integer available) throws Exception {
+                    setAvailable(available);
+                }
+            }, onError));
+
+            // Errors
+            mDisposables.add(mErrorObservable.subscribe(new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable e) throws Exception {
+                    notifyError(e);
+                }
+            }, onError));
         }
     }
 
