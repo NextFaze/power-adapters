@@ -8,9 +8,10 @@ import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter.asAdapter
 import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.binder
-import com.nextfaze.poweradapters.data.rxjava2.ObservableDataBuilder
+import com.nextfaze.poweradapters.data.rxjava2.DiffStrategy
 import com.nextfaze.poweradapters.data.rxjava2.availableChanges
 import com.nextfaze.poweradapters.data.rxjava2.loading
+import com.nextfaze.poweradapters.data.rxjava2.observableData
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.rxjava2.showOnlyWhile
 import com.nextfaze.poweradapters.sample.R
@@ -56,15 +57,15 @@ class CatsViewModel(application: Application) : AndroidViewModel(application) {
     // Subscribe to contents for the lifetime of the ViewModel to ensure pages don't start from the beginning
     private val disposable = contents.subscribe()
 
-    val data = ObservableDataBuilder<Cat>()
-            .contents(contents)
+    val data = observableData(
+            contents = { contents },
             // We're loading after each click, until the new content list comes through
-            .loading(loads.map { true }.startWith(true).mergeWith(contents.map { false }))
+            loading = { loads.map { true }.startWith(true).mergeWith(contents.map { false }) },
             // Number of available elements is based on the total reported by the page
-            .available(contents.map { it.total - it.size })
+            available = { contents.map { it.total - it.size } },
             // Cats are identified by name
-            .identityEquality { a, b -> a.name == b.name }
-            .build()
+            diffStrategy = DiffStrategy.FineGrained(identityEqual = { a, b -> a.name == b.name })
+    )
 
     /** Invoke this to trigger a load. */
     fun onLoadNextClick() = loads.onNext(Unit)
