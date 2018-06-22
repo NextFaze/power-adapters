@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## Version 0.17.0
+
+* Add Kotlin reactive `Data` top-level function `observableData`
+
 ## Version 0.16.0
 
 * Fix bug where `ObservableDataBuilder` created `Data` with loading remaining `true` after content error
