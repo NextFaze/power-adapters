@@ -10,6 +10,7 @@ import io.reactivex.Observable
 import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers.trampoline
+import io.reactivex.schedulers.TestScheduler
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -75,6 +76,26 @@ class ObservableDataTest {
         observableData(contents = { Observable.just(listOf("a")) })
                 .test()
                 .assertLoadingValues(false, true, false)
+    }
+
+    @Test fun `data ceases loading synchronously with first content emission if no loading observable specified`() {
+        val testScheduler = TestScheduler()
+        RxAndroidPlugins.setMainThreadSchedulerHandler { testScheduler}
+        val items = listOf(Item(1, "a"), Item(2, "b"))
+        observableData(
+                contents = { Observable.just(items) },
+                diffStrategy = DiffStrategy.FineGrained(
+                        identityEqual = { a, b -> a.id == b.id },
+                        contentEqual = { a, b -> a.name == b.name },
+                        detectMoves = false
+                )
+        ).test {
+            assertLoadingValues(false, true)
+            assertElementValues(emptyList())
+            testScheduler.triggerActions()
+            assertLoadingValues(false, true, false)
+            assertElementValues(emptyList(), items)
+        }
     }
 
     @Test
