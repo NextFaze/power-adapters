@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+## Version 0.18.0
+
+* Fix bug where Kotlin `observableData` default loading behavior emitted too early, making it appear that the data set
+was empty briefly, causing a visual glitch in many cases
+
 ## Version 0.17.0
 
 * Add Kotlin reactive `Data` top-level function `observableData`
