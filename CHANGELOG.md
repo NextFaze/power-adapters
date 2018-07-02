@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+## Version 0.19.0
+
+* Add Kotlin `observableData` diff strategy `None`
+
 ## Version 0.18.0
 
 * Fix bug where Kotlin `observableData` default loading behavior emitted too early, making it appear that the data set
