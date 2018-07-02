@@ -40,6 +40,9 @@ enum class LoadType {
 /** Determines how change detection is performed. */
 @Suppress("unused")
 sealed class DiffStrategy<out T : Any> {
+    /** No change detection is performed. Change callbacks still occur, but item animations likely won't work. */
+    object None : DiffStrategy<Nothing>()
+
     /** Basic change range detection is performed, often resulting in many unwanted changes. */
     object CoarseGrained : DiffStrategy<Nothing>()
 
@@ -79,6 +82,7 @@ private class KObservableData<T : Any>(
 
     private val computeChangeDispatch: (oldList: List<T>, newList: List<T>) -> KObservableData<T>.() -> Unit =
             when (diffStrategy) {
+                is DiffStrategy.None -> ::computeChangeDispatchNone
                 is DiffStrategy.CoarseGrained -> ::computeChangeDispatchCoarse
                 is DiffStrategy.FineGrained -> { oldList, newList ->
                     computeChangeDispatchFine(diffStrategy.detectMoves, oldList, newList)
@@ -193,6 +197,12 @@ private class KObservableData<T : Any>(
 
         override fun getNewListSize() = newList.size
     }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun computeChangeDispatchNone(
+            oldList: List<T>,
+            newList: List<T>
+    ): KObservableData<T>.() -> Unit = { notifyDataSetChanged() }
 
     private fun computeChangeDispatchCoarse(
             oldList: List<T>,
