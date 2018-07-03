@@ -3,23 +3,33 @@ Change Log
 
 ## Version 0.19.0
 
+_2018-7-02_
+
 * Add Kotlin `observableData` diff strategy `None`
 
 ## Version 0.18.0
+
+_2018-6-26_
 
 * Fix bug where Kotlin `observableData` default loading behavior emitted too early, making it appear that the data set
 was empty briefly, causing a visual glitch in many cases
 
 ## Version 0.17.0
 
+_2018-6-22_
+
 * Add Kotlin reactive `Data` top-level function `observableData`
 
 ## Version 0.16.0
+
+_2018-6-22_
 
 * Fix bug where `ObservableDataBuilder` created `Data` with loading remaining `true` after content error
 * Fix bug where `ObservableDataBuilder` created multiple subscriptions to the content observable
 
 ## Version 0.15.0
+
+_2017-10-18_
 
 * Migrate to RxJava 2.x
 * Add `Binder.withStableIds()` Kotlin extension function
@@ -75,7 +85,7 @@ _2017-04-07_
 
 ## Version 0.12.1
 
-_2016_11_30_
+_2016-11-30_
 
 * Fix bug where `ArrayData` and `IncrementalArrayData` emitted notifications that were not consistent with their 
   reported `size`
