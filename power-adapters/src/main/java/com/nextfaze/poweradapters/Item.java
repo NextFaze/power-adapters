@@ -21,8 +21,8 @@ final class Item implements ViewFactory {
     }
 
     @NonNull
-    Item withEnabled(boolean enabled) {
-        return mEnabled == enabled ? this : new Item(mViewFactory, enabled);
+    public Object getViewType() {
+        return mViewFactory;
     }
 
     @NonNull

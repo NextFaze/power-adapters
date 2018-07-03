@@ -4,17 +4,21 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nextfaze.poweradapters.internal.WeakMap;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
-import static java.util.Collections.singletonList;
 
 final class ItemAdapter extends PowerAdapter {
 
     @NonNull
     private final List<Item> mItems;
+
+    @NonNull
+    private final WeakMap<Object, Item> mViewTypeToItem = new WeakMap<>();
 
     @NonNull
     static List<Item> toItems(@NonNull Iterable<? extends ViewFactory> views) {
@@ -34,10 +38,6 @@ final class ItemAdapter extends PowerAdapter {
         return items;
     }
 
-    ItemAdapter(@NonNull Item item) {
-        mItems = singletonList(item);
-    }
-
     ItemAdapter(@NonNull Collection<? extends Item> items) {
         mItems = new ArrayList<>(items);
     }
@@ -50,7 +50,10 @@ final class ItemAdapter extends PowerAdapter {
     @NonNull
     @Override
     public Object getItemViewType(int position) {
-        return mItems.get(position);
+        Item item = mItems.get(position);
+        Object viewType = item.getViewType();
+        mViewTypeToItem.put(viewType, item);
+        return viewType;
     }
 
     @Override
@@ -61,7 +64,11 @@ final class ItemAdapter extends PowerAdapter {
     @NonNull
     @Override
     public View newView(@NonNull ViewGroup parent, @NonNull Object viewType) {
-        Item item = (Item) viewType;
+        Item item = mViewTypeToItem.get(viewType);
+        if (item == null) {
+            // Should never happen, as callers are expected to invoke getItemViewType(int) before invoking this method.
+            throw new AssertionError("No item associated with view type");
+        }
         // Note: cannot defensively remove view from parent first,
         // because AdapterView doesn't support removeView() in older versions.
         return item.create(parent);
