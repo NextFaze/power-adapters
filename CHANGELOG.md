@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.20.0
+
+_2018-7-03_
+
+* Allow comparing `PowerAdapter.getItemViewType()` to a `ViewFactory`
+
 ## Version 0.19.0
 
 _2018-7-02_
