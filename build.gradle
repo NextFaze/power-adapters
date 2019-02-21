@@ -35,7 +35,6 @@ ext.configureLibrary = { proj ->
 
     android {
         compileSdkVersion proj.compileSdkVersion
-        buildToolsVersion proj.buildToolsVersion
 
         defaultConfig {
             minSdkVersion proj.minSdkVersion
