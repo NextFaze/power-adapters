@@ -8,7 +8,7 @@ import android.support.annotation.Nullable;
  * its own back-channel observer via {@link #setViewPagerObserver(DataSetObserver)}.
  * @hide Not intended for public use.
  */
-public abstract class FixedPagerAdapter extends PagerAdapter {
+public abstract class PagerAdapterFixed extends PagerAdapter {
 
     @Nullable
     private DataSetObserver mRegisteredObserver;

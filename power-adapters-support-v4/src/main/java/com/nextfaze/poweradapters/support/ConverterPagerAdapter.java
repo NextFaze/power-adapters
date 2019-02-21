@@ -4,10 +4,11 @@ import android.database.DataSetObserver;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.view.FixedPagerAdapter;
+import android.support.v4.view.PagerAdapterFixed;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Holder;
@@ -24,7 +25,7 @@ import java.util.Set;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
-public class ConverterPagerAdapter extends FixedPagerAdapter {
+public class ConverterPagerAdapter extends PagerAdapterFixed {
 
     @NonNull
     private final WeakMap<ViewGroup, ViewPagerContainer> mParentViewToContainer = new WeakMap<>();
