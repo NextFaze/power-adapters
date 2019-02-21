@@ -80,7 +80,7 @@ class ObservableDataTest {
 
     @Test fun `data ceases loading synchronously with first content emission if no loading observable specified`() {
         val testScheduler = TestScheduler()
-        RxAndroidPlugins.setMainThreadSchedulerHandler { testScheduler}
+        RxAndroidPlugins.setMainThreadSchedulerHandler { testScheduler }
         val items = listOf(Item(1, "a"), Item(2, "b"))
         observableData(
                 contents = { Observable.just(items) },
@@ -93,9 +93,60 @@ class ObservableDataTest {
             assertLoadingValues(false, true)
             assertElementValues(emptyList())
             testScheduler.triggerActions()
+            assertNoErrors()
             assertLoadingValues(false, true, false)
             assertElementValues(emptyList(), items)
         }
+    }
+
+    @Test fun `notifications are dispatched based on existing data buffer when contents subscribed`() {
+        var items = listOf(Item(1, "a"))
+        val data = observableData(
+                contents = { Observable.defer { Observable.just(items) } },
+                diffStrategy = DiffStrategy.FineGrained(
+                        identityEqual = { a, b -> a.id == b.id },
+                        contentEqual = { a, b -> a.name == b.name },
+                        detectMoves = false
+                )
+        )
+        data.test { observing = false }
+        items = listOf(Item(1, "a"), Item(2, "b"))
+        data.test { assertChangeNotifications(InsertEvent(position = 1, count = 1)) }
+    }
+
+    @Test fun `source observables are subscribed on calling thread`() {
+        val mainThreadTestScheduler = TestScheduler()
+        val ioTestScheduler = TestScheduler()
+        val computationTestScheduler = TestScheduler()
+        RxAndroidPlugins.setMainThreadSchedulerHandler { mainThreadTestScheduler }
+        RxJavaPlugins.setIoSchedulerHandler { ioTestScheduler }
+        RxJavaPlugins.setComputationSchedulerHandler { computationTestScheduler }
+        var isContentSubscribed = false
+        var isLoadingSubscribed = false
+        var isAvailableSubscribed = false
+        observableData(
+                contents = {
+                    Observable.defer {
+                        isContentSubscribed = true
+                        Observable.just(listOf("a"))
+                    }
+                },
+                loading = {
+                    Observable.defer {
+                        isLoadingSubscribed = true
+                        Observable.just(true)
+                    }
+                },
+                available = {
+                    Observable.defer {
+                        isAvailableSubscribed = true
+                        Observable.just(0)
+                    }
+                }
+        ).test()
+        assertThat(isContentSubscribed).isTrue()
+        assertThat(isLoadingSubscribed).isTrue()
+        assertThat(isAvailableSubscribed).isTrue()
     }
 
     @Test

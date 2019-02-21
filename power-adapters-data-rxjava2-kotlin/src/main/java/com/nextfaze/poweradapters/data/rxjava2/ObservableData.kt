@@ -4,6 +4,7 @@ import android.support.v7.util.DiffUtil
 import android.support.v7.util.ListUpdateCallback
 import com.nextfaze.poweradapters.data.Data
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers.computation
@@ -105,9 +106,14 @@ private class KObservableData<T : Any>(
             // Content
             val changes = contentsSupplier(loadType)
                     .map { (it as? List<T>) ?: it.toList() }
-                    .scan(Change(list)) { (oldList, _), newList -> Change(newList, computeChangeDispatch(oldList, newList)) }
-                    .skip(1)
-                    .subscribeOn(computation())
+                    .startWith(list)
+                    .buffer(2, 1)
+                    // Filter out the completion emission, which may be of size 1
+                    .filter { it.size == 2 }
+                    .switchMapSingle { (prev, next) ->
+                        Single.fromCallable { Change(next, computeChangeDispatch(prev, next)) }
+                                .subscribeOn(computation())
+                    }
                     .observeOn(mainThread())
                     .replay(1)
                     .refCount()
