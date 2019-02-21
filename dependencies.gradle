@@ -30,9 +30,9 @@ ext {
     robolectric = 'org.robolectric:robolectric:4.0-alpha-2'
     mockito = 'org.mockito:mockito-core:2.19.0'
     mockitoKotlin = 'com.nhaarman:mockito-kotlin:1.5.0'
-    rxJava2 = 'io.reactivex.rxjava2:rxjava:2.1.16'
-    rxKotlin2 = 'io.reactivex.rxjava2:rxkotlin:2.1.0'
-    rxAndroid2 = 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    rxJava2 = 'io.reactivex.rxjava2:rxjava:2.2.6'
+    rxKotlin2 = 'io.reactivex.rxjava2:rxkotlin:2.3.0'
+    rxAndroid2 = 'io.reactivex.rxjava2:rxandroid:2.1.1'
     junit = 'junit:junit:4.12'
     truth = 'com.google.truth:truth:0.41'
 }
