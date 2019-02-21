@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+## Version 0.21.0
+
+_2019-02-21_
+
+* Update to support library 28
+* Target API 28
+* Fix bug where `observableData` subscribed on the computation scheduler
+* Fix `power-adapters-support-v4` failing to jetify properly
+
 ## Version 0.20.0
 
 _2018-7-03_
