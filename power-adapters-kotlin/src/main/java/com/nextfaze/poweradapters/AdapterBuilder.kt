@@ -4,7 +4,10 @@ import android.support.annotation.LayoutRes
 import com.nextfaze.poweradapters.ViewFactories.asViewFactory
 
 /** Creates a composite [PowerAdapter] using a type-safe builder interface. */
-fun adapter(init: AdapterBuilder.() -> Unit): PowerAdapter = AdapterBuilder().apply { init() }.build()
+fun buildAdapter(init: AdapterBuilder.() -> Unit): PowerAdapter = AdapterBuilder().apply { init() }.build()
+
+@Deprecated("Use more idiomatic buildAdapter()", ReplaceWith("buildAdapter(init)"))
+fun adapter(init: AdapterBuilder.() -> Unit): PowerAdapter = buildAdapter(init)
 
 @DslMarker annotation class AdapterMarker
 
