@@ -23,6 +23,7 @@ import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.R;
 import com.nextfaze.poweradapters.data.internal.DataWatcher;
@@ -389,6 +390,10 @@ public class DataLayout extends RelativeLayout {
         for (Data<?> data : datas) {
             mDatas.add(data);
         }
+        // Clear error message, because the caller expects the view state to be reset when all datas change
+        if (mDatas.isEmpty()) {
+            mErrorMessage = null;
+        }
         updateViews();
     }
 
@@ -401,6 +406,12 @@ public class DataLayout extends RelativeLayout {
     /** Adds a {@link Data} to be observed by this layout. */
     public final void addData(@NonNull Data<?> data) {
         checkNotNull(data, "data");
+        // Clear error message now, in case the caller recently replaced them.
+        // If they did, they'd expect the error message to be gone, because the
+        // view visibility state is reset.
+        if (mDatas.isEmpty()) {
+            mErrorMessage = null;
+        }
         mDatas.add(data);
         mDataWatcher.setDatas(mDatas);
         updateViews();
