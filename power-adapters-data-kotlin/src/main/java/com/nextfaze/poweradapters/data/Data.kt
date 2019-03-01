@@ -2,16 +2,17 @@ package com.nextfaze.poweradapters.data
 
 import android.database.Cursor
 import android.database.DataSetObserver
+import android.support.annotation.CheckResult
 import com.nextfaze.poweradapters.DataObserver
 import com.nextfaze.poweradapters.binding.Binder
 import com.nextfaze.poweradapters.binding.Mapper
 import java.util.concurrent.ExecutorService
 
 /** Returns a [Data] containing the specified elements. */
-fun <T> dataOf(vararg elements: T): Data<T> = ImmutableData.of(*elements)
+@CheckResult fun <T> dataOf(vararg elements: T): Data<T> = ImmutableData.of(*elements)
 
 /** Returns a [Data] containing the specified elements. */
-fun <T> dataOf(elements: Iterable<T>): Data<T> = ImmutableData.of(elements)
+@CheckResult fun <T> dataOf(elements: Iterable<T>): Data<T> = ImmutableData.of(elements)
 
 /**
  * Creates a [Data] whose elements will be populated by invoking the specified loader function in a
@@ -21,7 +22,7 @@ fun <T> dataOf(elements: Iterable<T>): Data<T> = ImmutableData.of(elements)
  * @return A [Data] instance that will present the elements retrieved via the loader function.
  * @see Data.fromList
  */
-fun <T> data(
+@CheckResult fun <T> data(
         load: () -> List<T>,
         executor: ExecutorService = DataExecutors.defaultExecutor()
 ): Data<T> = Data.fromList(load, executor)
@@ -44,14 +45,14 @@ fun <T> data(
  * @see Cursor#registerDataSetObserver(DataSetObserver)
  * @see DataSetObserver
  */
-fun <T> cursorData(
+@CheckResult fun <T> cursorData(
         load: () -> Cursor,
         mapRow: (Cursor) -> T,
         executor: ExecutorService = DataExecutors.defaultExecutor()
 ): Data<T> = Data.fromCursor(load, mapRow, executor)
 
 /** Returns a [Data] containing the elements of this list. */
-fun <T> List<T>.toData(): Data<T> = ImmutableData.of(this)
+@CheckResult fun <T> List<T>.toData(): Data<T> = ImmutableData.of(this)
 
 /** Alias for [Data.size]. */
 val Data<*>.size get() = size()
@@ -59,9 +60,9 @@ val Data<*>.size get() = size()
 /** Alias for [Data.available]. */
 val Data<*>.available get() = available()
 
-fun <T> Data<T>.toAdapter(binder: Binder<in T, *>) = DataBindingAdapter(binder, this)
+@CheckResult fun <T> Data<T>.toAdapter(binder: Binder<in T, *>) = DataBindingAdapter(binder, this)
 
-fun <T> Data<T>.toAdapter(mapper: Mapper<in T>) = DataBindingAdapter(mapper, this)
+@CheckResult fun <T> Data<T>.toAdapter(mapper: Mapper<in T>) = DataBindingAdapter(mapper, this)
 
 /** @see Data.registerDataObserver */
 operator fun <T> Data<T>.plusAssign(dataObserver: DataObserver) = registerDataObserver(dataObserver)

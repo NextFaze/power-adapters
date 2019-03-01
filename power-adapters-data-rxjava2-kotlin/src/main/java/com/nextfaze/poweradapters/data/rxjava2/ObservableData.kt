@@ -1,5 +1,6 @@
 package com.nextfaze.poweradapters.data.rxjava2
 
+import android.support.annotation.CheckResult
 import android.support.v7.util.DiffUtil
 import android.support.v7.util.ListUpdateCallback
 import com.nextfaze.poweradapters.data.Data
@@ -21,7 +22,7 @@ import kotlin.math.min
  * of the content observable.
  * @param diffStrategy The strategy used to detect changes in content.
  */
-fun <T : Any> observableData(
+@CheckResult fun <T : Any> observableData(
         contents: (loadType: LoadType) -> Observable<out Collection<T>>,
         available: ((loadType: LoadType) -> Observable<Int>)? = null,
         loading: ((loadType: LoadType) -> Observable<Boolean>)? = null,
@@ -58,8 +59,9 @@ sealed class DiffStrategy<out T : Any> {
     ) : DiffStrategy<T>()
 }
 
-fun <T : Any> Observable<out Collection<T>>.toData(diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained): Data<T> =
-        observableData(contents = { this }, diffStrategy = diffStrategy)
+@CheckResult fun <T : Any> Observable<out Collection<T>>.toData(
+        diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained
+): Data<T> = observableData(contents = { this }, diffStrategy = diffStrategy)
 
 private class KObservableData<T : Any>(
         private val contentsSupplier: (loadType: LoadType) -> Observable<out Collection<T>>,
