@@ -25,20 +25,21 @@ import com.nextfaze.poweradapters.binding.Mapper
 
 @CheckResult operator fun PowerAdapter.plus(adapter: PowerAdapter) = append(adapter)
 
-@CheckResult operator fun PowerAdapter.plus(adapters: Iterable<PowerAdapter>) = adapter { adapter(this@plus); adapters(adapters) }
+@CheckResult operator fun PowerAdapter.plus(adapters: Iterable<PowerAdapter>) =
+        buildAdapter { adapter(this@plus); adapters(adapters) }
 
 @CheckResult operator fun PowerAdapter.plus(view: ViewFactory) = append(view)
 
 @JvmName("plusViews")
 @CheckResult
-operator fun PowerAdapter.plus(views: Iterable<ViewFactory>) = adapter { adapter(this@plus); views(views) }
+operator fun PowerAdapter.plus(views: Iterable<ViewFactory>) = buildAdapter { adapter(this@plus); views(views) }
 
 @CheckResult operator fun PowerAdapter.plus(@LayoutRes layoutResource: Int) = append(layoutResource)
 
 @JvmName("plusLayoutResources")
 @CheckResult
 operator fun PowerAdapter.plus(layoutResources: Iterable<Int>) =
-        adapter { adapter(this@plus); layoutResources(layoutResources) }
+        buildAdapter { adapter(this@plus); layoutResources(layoutResources) }
 
 operator fun PowerAdapter.plusAssign(dataObserver: DataObserver) = registerDataObserver(dataObserver)
 

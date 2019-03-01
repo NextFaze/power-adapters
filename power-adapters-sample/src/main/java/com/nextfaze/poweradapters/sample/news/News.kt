@@ -6,9 +6,9 @@ import android.support.annotation.ColorInt
 import android.support.v7.app.AlertDialog
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.Holder
-import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.adapterOf
 import com.nextfaze.poweradapters.binding.BinderWrapper
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.DataConditions.isEmpty
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.sample.R
@@ -23,7 +23,7 @@ class NewsViewModel : ViewModel() {
     override fun onCleared() = data.close()
 }
 
-fun createNewsAdapter(viewModel: NewsViewModel) = adapter {
+fun createNewsAdapter(viewModel: NewsViewModel) = buildAdapter {
     val binder = NewsItemBinder(viewModel.data.asList())
 
     // Header

@@ -10,8 +10,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.constraint.ConstraintLayout
 import android.util.AttributeSet
-import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.binder
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.cursorData
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.sample.R
@@ -70,7 +70,7 @@ private class AppleDatabase(context: Context) {
 
 private val binder = binder<Apple, AppleView>(R.layout.apple_item) { _, apple, _ -> this.apple = apple }
 
-fun createApplesAdapter(viewModel: ApplesViewModel) = adapter {
+fun createApplesAdapter(viewModel: ApplesViewModel) = buildAdapter {
     +viewModel.data.toAdapter(binder)
     +loadingIndicator(viewModel.data)
     +emptyMessage(viewModel.data)

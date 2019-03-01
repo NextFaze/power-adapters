@@ -17,7 +17,7 @@ import android.view.ViewGroup
 import com.jakewharton.rxbinding2.view.clicks
 import com.nextfaze.poweradapters.AdapterBuilder
 import com.nextfaze.poweradapters.PowerAdapter
-import com.nextfaze.poweradapters.adapter
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.recyclerview.toRecyclerAdapter
 import com.nextfaze.poweradapters.rxjava2.showOnlyWhile
 import com.nextfaze.poweradapters.sample.apples.ApplesViewModel
@@ -102,7 +102,7 @@ class ShowcaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         showcaseViewModel.sections = sections
-        recyclerView.adapter = adapter {
+        recyclerView.adapter = buildAdapter {
             sections.forEach { section(it.name, it.createAdapter()) }
         }.toRecyclerAdapter()
     }

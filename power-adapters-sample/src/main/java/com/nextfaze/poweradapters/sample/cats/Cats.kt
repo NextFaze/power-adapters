@@ -6,8 +6,8 @@ import android.content.Context
 import android.view.View
 import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter.asAdapter
-import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.binder
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.rxjava2.DiffStrategy
 import com.nextfaze.poweradapters.data.rxjava2.availableChanges
 import com.nextfaze.poweradapters.data.rxjava2.loading
@@ -74,7 +74,7 @@ class CatsViewModel(application: Application) : AndroidViewModel(application) {
 }
 
 /** Creates an adapter that presents cats specified by [viewModel]. */
-fun createCatsAdapter(viewModel: CatsViewModel) = adapter {
+fun createCatsAdapter(viewModel: CatsViewModel) = buildAdapter {
     // Cat list
     val binder = binder<Cat, CatView>(R.layout.cat_binder_item) { _, cat, _ -> this.cat = cat }
     +viewModel.data.toAdapter(binder)

@@ -7,13 +7,13 @@ import android.widget.TextView
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING
 import com.nextfaze.poweradapters.Holder
-import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.adapterOf
 import com.nextfaze.poweradapters.addDividers
 import com.nextfaze.poweradapters.binder
 import com.nextfaze.poweradapters.binding.BinderWrapper
 import com.nextfaze.poweradapters.binding.MapperBuilder
 import com.nextfaze.poweradapters.binding.ViewHolder
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.DataConditions.isEmpty
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.sample.R
@@ -28,7 +28,7 @@ private val blogPostBinder = binder<BlogPost, BlogPostHolder>(android.R.layout.s
     labelView.text = "Blog: " + blogPost.title
 }
 
-fun createMultiTypeAdapter(viewModel: MultiTypeViewModel) = adapter {
+fun createMultiTypeAdapter(viewModel: MultiTypeViewModel) = buildAdapter {
     // Header
     +adapterOf(R.layout.news_header_item).showOnlyWhile(!isEmpty(viewModel.data))
 

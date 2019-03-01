@@ -3,8 +3,8 @@ package com.nextfaze.poweradapters.sample.files
 import android.arch.lifecycle.ViewModel
 import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter
-import com.nextfaze.poweradapters.adapter
 import com.nextfaze.poweradapters.binder
+import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.rxjava2.ObservableDataBuilder
 import com.nextfaze.poweradapters.data.toAdapter
 import com.nextfaze.poweradapters.rxjava2.showOnlyWhile
@@ -75,7 +75,7 @@ private fun createFileTreeAdapter(
         file: File,
         viewModel: FileTreeViewModel,
         depth: Int
-): PowerAdapter = adapter {
+): PowerAdapter = buildAdapter {
     // Binds a file to a view
     val fileBinder = binder<File, FileView>(R.layout.file_tree_file_item) { container, f, holder ->
         setFile(f)
@@ -98,7 +98,7 @@ private fun createFileTreeAdapter(
             .contentEquality { a, b -> a.name == b.name && a.size == b.size }
             .build()
     +data.toAdapter(fileBinder).nest {
-        adapter {
+        buildAdapter {
             val f = data[it]
             // Single-item peek adapter
             +peekAdapter(f, viewModel)
