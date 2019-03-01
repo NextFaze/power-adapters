@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+## Version 0.22.0
+
+_2019-03-01_
+
+* Add `@CheckResult` to various APIs
+* Add `buildAdapter` builder
+* Deprecate `adapter` builder
+* Fix bug where error message was not reset when `Data` changed on `DataLayout`
+
 ## Version 0.21.0
 
 _2019-02-21_
