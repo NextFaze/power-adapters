@@ -11,6 +11,7 @@ import io.reactivex.android.plugins.RxAndroidPlugins
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers.trampoline
 import io.reactivex.schedulers.TestScheduler
+import io.reactivex.subjects.PublishSubject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -73,7 +74,10 @@ class ObservableDataTest {
     }
 
     @Test fun `data is indicated as loading until first content emission if no loading observable specified`() {
-        observableData(contents = { Observable.just(listOf("a")) })
+        observableData(contents = { Observable.just<List<String>>(listOf("a")) })
+                .test()
+                .assertLoadingValues(false, true, false)
+        observableData(contents = { Observable.just<List<String>>(emptyList()) })
                 .test()
                 .assertLoadingValues(false, true, false)
     }
@@ -90,12 +94,10 @@ class ObservableDataTest {
                         detectMoves = false
                 )
         ).test {
-            assertLoadingValues(false, true)
-            assertElementValues(emptyList())
-            testScheduler.triggerActions()
-            assertNoErrors()
             assertLoadingValues(false, true, false)
             assertElementValues(emptyList(), items)
+            testScheduler.triggerActions()
+            assertNoErrors()
         }
     }
 
@@ -147,6 +149,20 @@ class ObservableDataTest {
         assertThat(isContentSubscribed).isTrue()
         assertThat(isLoadingSubscribed).isTrue()
         assertThat(isAvailableSubscribed).isTrue()
+    }
+
+    @Test fun `fine-grained notifications consistent when source content emits too fast`() {
+        val computationTestScheduler = TestScheduler()
+        RxJavaPlugins.setComputationSchedulerHandler { computationTestScheduler }
+        val contents = PublishSubject.create<List<String>>()
+        observableData(contents = { contents }).test {
+            contents.onNext(listOf("a", "b"))
+            computationTestScheduler.triggerActions()
+            contents.onNext(listOf("b"))
+            contents.onNext(listOf("b", "c"))
+            computationTestScheduler.triggerActions()
+            assertNotificationsConsistent()
+        }
     }
 
     @Test
@@ -297,6 +313,5 @@ class ObservableDataTest {
         assertThat(capturedLoadType).isEqualTo(LoadType.RELOAD)
     }
 
-    private data class Item(val id: Int, val name: String) {
-    }
+    private data class Item(val id: Int, val name: String)
 }

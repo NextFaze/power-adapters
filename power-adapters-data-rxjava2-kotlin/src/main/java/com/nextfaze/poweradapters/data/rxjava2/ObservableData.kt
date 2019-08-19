@@ -4,9 +4,8 @@ import android.support.annotation.CheckResult
 import android.support.v7.util.DiffUtil
 import android.support.v7.util.ListUpdateCallback
 import com.nextfaze.poweradapters.data.Data
+import io.reactivex.Maybe
 import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers.computation
 import kotlin.math.min
@@ -77,18 +76,29 @@ private class KObservableData<T : Any>(
     private var available = Integer.MAX_VALUE
 
     private val listUpdateCallback = object : ListUpdateCallback {
-        override fun onChanged(position: Int, count: Int, payload: Any?) = notifyItemRangeChanged(position, count)
-        override fun onMoved(fromPosition: Int, toPosition: Int) = notifyItemMoved(fromPosition, toPosition)
-        override fun onInserted(position: Int, count: Int) = notifyItemRangeInserted(position, count)
-        override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
+        override fun onChanged(position: Int, count: Int, payload: Any?) =
+                notifyItemRangeChanged(position, count)
+
+        override fun onMoved(fromPosition: Int, toPosition: Int) =
+                notifyItemMoved(fromPosition, toPosition)
+
+        override fun onInserted(position: Int, count: Int) =
+                notifyItemRangeInserted(position, count)
+
+        override fun onRemoved(position: Int, count: Int) =
+                notifyItemRangeRemoved(position, count)
     }
 
-    private val computeChangeDispatch: (oldList: List<T>, newList: List<T>) -> KObservableData<T>.() -> Unit =
+    private val computeChangeDispatch: ComputeChangeDispatch<T> =
             when (diffStrategy) {
                 is DiffStrategy.None -> ::computeChangeDispatchNone
                 is DiffStrategy.CoarseGrained -> ::computeChangeDispatchCoarse
                 is DiffStrategy.FineGrained -> { oldList, newList ->
-                    computeChangeDispatchFine(diffStrategy.detectMoves, oldList, newList)
+                    computeChangeDispatchFine(
+                            detectMoves = diffStrategy.detectMoves,
+                            oldList = oldList,
+                            newList = newList
+                    )
                 }
             }
 
@@ -110,13 +120,11 @@ private class KObservableData<T : Any>(
                     .map { (it as? List<T>) ?: it.toList() }
                     .startWith(list)
                     .buffer(2, 1)
-                    // Filter out the completion emission, which may be of size 1
+                    // Filter out the final buffer emission, which may not be of size 2
                     .filter { it.size == 2 }
-                    .switchMapSingle { (prev, next) ->
-                        Single.fromCallable { Change(next, computeChangeDispatch(prev, next)) }
-                                .subscribeOn(computation())
+                    .concatMapMaybe { (prev, next) ->
+                        computeChangeDispatch(prev, next).map { dispatch -> Change(next, dispatch) }
                     }
-                    .observeOn(mainThread())
                     .replay(1)
                     .refCount()
             disposables.add(changes.subscribe(::applyChange, ::notifyError))
@@ -194,7 +202,10 @@ private class KObservableData<T : Any>(
         subscribeIfAppropriate(LoadType.RELOAD)
     }
 
-    private fun diffUtilCallback(oldList: List<T>, newList: List<T>) = object : DiffUtil.Callback() {
+    private fun diffUtilCallback(
+            oldList: List<T>,
+            newList: List<T>
+    ) = object : DiffUtil.Callback() {
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                 (diffStrategy as DiffStrategy.FineGrained).identityEqual(oldList[oldItemPosition], newList[newItemPosition])
 
@@ -210,16 +221,16 @@ private class KObservableData<T : Any>(
     private fun computeChangeDispatchNone(
             oldList: List<T>,
             newList: List<T>
-    ): KObservableData<T>.() -> Unit = { notifyDataSetChanged() }
+    ): Maybe<ChangeDispatch<T>> = Maybe.just<ChangeDispatch<T>> { notifyDataSetChanged() }
 
     private fun computeChangeDispatchCoarse(
             oldList: List<T>,
             newList: List<T>
-    ): KObservableData<T>.() -> Unit {
+    ): Maybe<ChangeDispatch<T>> {
         val oldSize = oldList.size
         val newSize = newList.size
         val deltaSize = newSize - oldSize
-        return {
+        return Maybe.just<ChangeDispatch<T>> {
             if (deltaSize < 0) {
                 notifyItemRangeRemoved(oldSize + deltaSize, -deltaSize)
             } else if (deltaSize > 0) {
@@ -234,15 +245,39 @@ private class KObservableData<T : Any>(
             detectMoves: Boolean,
             oldList: List<T>,
             newList: List<T>
-    ): KObservableData<T>.() -> Unit {
-        val diffResult = DiffUtil.calculateDiff(diffUtilCallback(oldList, newList), detectMoves)
-        return { diffResult.dispatchUpdatesTo(listUpdateCallback) }
+    ): Maybe<ChangeDispatch<T>> = when {
+        // Same list instances, so skip the worker thread.
+        newList === oldList -> Maybe.empty()
+        // Different list instances
+        else -> when {
+            // Both empty, no change.
+            oldList.isEmpty() && newList.isEmpty() -> Maybe.empty()
+            // Insert initial list.
+            oldList.isEmpty() && newList.isNotEmpty() -> Maybe.fromCallable<ChangeDispatch<T>> {
+                return@fromCallable { notifyItemRangeInserted(0, newList.size) }
+            }
+            // Delete entire existing list.
+            oldList.isNotEmpty() && newList.isEmpty() -> Maybe.fromCallable<ChangeDispatch<T>> {
+                return@fromCallable { notifyItemRangeRemoved(0, oldList.size) }
+            }
+            // Different lists, so compute the change on a worker thread.
+            else -> Maybe.fromCallable<ChangeDispatch<T>> {
+                val diffResult = DiffUtil.calculateDiff(diffUtilCallback(oldList = oldList, newList = newList), detectMoves)
+                return@fromCallable { diffResult.dispatchUpdatesTo(listUpdateCallback) }
+            }.subscribeOn(computation())
+        }
     }
 
-    private fun applyChange(change: Change<T>) {
+    private fun applyChange(change: Change<T>) = runOnUiThread {
         list = change.list
         change.dispatch(this)
     }
 
-    private data class Change<T : Any>(val list: List<T>, val dispatch: KObservableData<T>.() -> Unit = {})
+    private data class Change<T : Any>(
+            val list: List<T>,
+            val dispatch: ChangeDispatch<T> = {}
+    )
 }
+
+private typealias ComputeChangeDispatch<T> = (oldList: List<T>, newList: List<T>) -> Maybe<ChangeDispatch<T>>
+private typealias ChangeDispatch<T> = KObservableData<T>.() -> Unit
