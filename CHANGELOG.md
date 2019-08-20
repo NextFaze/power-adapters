@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.23.0
+
+_2019-08-20_
+
+* Fix inconsistency error when using `observableData` or `Observable<out Collection<T>>.toData`
+
 ## Version 0.22.0
 
 _2019-03-01_
