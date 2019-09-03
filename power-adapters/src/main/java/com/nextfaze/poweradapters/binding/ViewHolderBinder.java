@@ -4,10 +4,13 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.ViewFactory;
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
@@ -42,10 +45,13 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Binder<T
             }
 
             @Override
-            protected void bindViewHolder(@NonNull Container container,
-                                          @NonNull T t,
-                                          @NonNull H h,
-                                          @NonNull Holder holder) {
+            protected void bindViewHolder(
+                    @NonNull Container container,
+                    @NonNull T t,
+                    @NonNull H h,
+                    @NonNull Holder holder,
+                    @NonNull List<Object> payloads
+            ) {
                 bindFunction.bindViewHolder(container, t, h, holder);
             }
         };
@@ -66,24 +72,35 @@ public abstract class ViewHolderBinder<T, H extends ViewHolder> extends Binder<T
     }
 
     @Override
-    public final void bindView(@NonNull Container container, @NonNull T t, @NonNull View v, @NonNull Holder holder) {
+    public final void bindView(
+            @NonNull Container container,
+            @NonNull T t,
+            @NonNull View v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         H h = mViewHolders.get(v);
         if (h == null) {
             h = newViewHolder(v);
             mViewHolders.put(v, h);
         }
-        //noinspection unchecked
-        bindViewHolder(container, t, h, holder);
+        bindViewHolder(container, t, h, holder, payloads);
     }
 
     @NonNull
     protected abstract H newViewHolder(@NonNull View v);
 
-    protected void bindViewHolder(@NonNull Container container, @NonNull T t, @NonNull H h, @NonNull Holder holder) {
+    protected void bindViewHolder(
+            @NonNull Container container,
+            @NonNull T t,
+            @NonNull H h,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         bindViewHolder(t, h, holder);
     }
 
-    /** Use {@link #bindViewHolder(Container, T, ViewHolder, Holder)} instead. */
+    /** Use {@link #bindViewHolder(Container, T, ViewHolder, Holder, List)} instead. */
     @Deprecated
     protected void bindViewHolder(@NonNull T t, @NonNull H h, @NonNull Holder holder) {
     }

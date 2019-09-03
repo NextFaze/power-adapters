@@ -21,12 +21,28 @@ import com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater
  */
 fun <T, V : View> binder(
         @LayoutRes layoutResource: Int,
-        bind: V.(Container, T, Holder) -> Unit
-) = object : Binder<T, V>() {
+        bind: V.(container: Container, item: T, holder: Holder) -> Unit
+): Binder<T, V> = binder(layoutResource) { container, item, holder, _ ->
+    bind(container, item, holder)
+}
+
+/**
+ * Creates a `Binder` that inflates its views from a layout resource.
+ * @param layoutResource The layout resource to inflate.
+ * @param bind A function that will be invoked to bind the object [T] to the `View` of type [V].
+ * @param T The type of object this binder is capable of binding to [V] `View` instances.
+ * @param V The type of `View` to which [T] instances will be bound.
+ * @return A [Binder] capable of binding [T] instances to [V] `View` instances.
+ */
+fun <T, V : View> binder(
+        @LayoutRes layoutResource: Int,
+        bind: V.(container: Container, item: T, holder: Holder, payloads: List<Any>) -> Unit
+): Binder<T, V> = object : Binder<T, V>() {
     // Optimization: allow any binders created with the same layout resource to share views.
     private val viewType: Any = layoutResource
     override fun newView(parent: ViewGroup) = layoutInflater(parent).inflate(layoutResource, parent, false)
-    override fun bindView(container: Container, t: T, v: V, holder: Holder) = v.bind(container, t, holder)
+    override fun bindView(container: Container, t: T, v: V, holder: Holder, payloads: List<Any>) =
+            v.bind(container, t, holder, payloads)
     override fun getViewType(t: T, position: Int) = viewType
 }
 
@@ -43,12 +59,29 @@ fun <T, H : ViewHolder> binder(
         @LayoutRes layoutResource: Int,
         createViewHolder: (View) -> H,
         bindViewHolder: H.(Container, T, Holder) -> Unit
-) = object : ViewHolderBinder<T, H>(layoutResource) {
+): Binder<T, View> = binder(layoutResource, createViewHolder) { container, item, holder, _ ->
+    bindViewHolder(container, item, holder)
+}
+
+/**
+ * Creates a [ViewHolder]-based `Binder` that inflates its views from a layout resource.
+ * @param layoutResource The layout resource to inflate.
+ * @param createViewHolder A factory function that will be invoked to create the view holders of type [H].
+ * @param bindViewHolder A function that will be invoked to bind the object [T] to the view holder of type [H].
+ * @param T The type of object this binder is capable of binding.
+ * @param H The type of view holder to which [T] instances will be bound.
+ * @return A [Binder] capable of binding [T] instances to `View` instances.
+ */
+fun <T, H : ViewHolder> binder(
+        @LayoutRes layoutResource: Int,
+        createViewHolder: (View) -> H,
+        bindViewHolder: H.(container: Container, item: T, holder: Holder, payloads: List<Any>) -> Unit
+): Binder<T, View> = object : ViewHolderBinder<T, H>(layoutResource) {
     // Optimization: allow any binders created with the same layout resource to share views.
     private val viewType: Any = layoutResource
     override fun newViewHolder(v: View) = createViewHolder(v)
-    override fun bindViewHolder(container: Container, t: T, h: H, holder: Holder) =
-            h.bindViewHolder(container, t, holder)
+    override fun bindViewHolder(container: Container, t: T, h: H, holder: Holder, payloads: List<Any>) =
+            h.bindViewHolder(container, t, holder, payloads)
     override fun getViewType(t: T, position: Int) = viewType
 }
 

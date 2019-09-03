@@ -60,7 +60,7 @@ public final class ListBindingAdapter<E> extends ListAdapter<E> {
             @NonNull Holder holder,
             @NonNull List<Object> payloads
     ) {
-        mEngine.bindView(container, view, holder);
+        mEngine.bindView(container, view, holder, payloads);
     }
 
     @NonNull

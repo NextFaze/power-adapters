@@ -20,7 +20,8 @@ class NewsItemBinder(private val newsItems: MutableList<in NewsItem>) : Binder<N
             container: Container,
             newsItem: NewsItem,
             v: NewsItemView,
-            holder: Holder
+            holder: Holder,
+            payloads: List<Any>
     ) {
         v.newsItem = newsItem
         v.tags = emptySet()

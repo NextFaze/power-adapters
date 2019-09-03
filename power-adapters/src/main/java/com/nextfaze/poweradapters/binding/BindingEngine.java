@@ -3,9 +3,12 @@ package com.nextfaze.poweradapters.binding;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 final class BindingEngine<T> {
 
@@ -38,10 +41,15 @@ final class BindingEngine<T> {
         return binder.newView(parent);
     }
 
-    void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         int position = holder.getPosition();
         T item = getItem(position);
-        binderOrThrow(item, position).bindView(container, item, view, holder);
+        binderOrThrow(item, position).bindView(container, item, view, holder, payloads);
     }
 
     @NonNull

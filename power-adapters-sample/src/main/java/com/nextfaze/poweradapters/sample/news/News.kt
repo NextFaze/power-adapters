@@ -46,8 +46,14 @@ fun createNewsAdapter(viewModel: NewsViewModel) = buildAdapter {
 }
 
 private fun NewsItemBinder.withColor(@ColorInt color: Int) = object : BinderWrapper<NewsItem, NewsItemView>(this) {
-    override fun bindView(container: Container, t: NewsItem, v: NewsItemView, holder: Holder) {
-        super.bindView(container, t, v, holder)
+    override fun bindView(
+            container: Container,
+            t: NewsItem,
+            v: NewsItemView,
+            holder: Holder,
+            payloads: List<Any>
+    ) {
+        super.bindView(container, t, v, holder, payloads)
         v.setBackgroundColor(color)
     }
 }

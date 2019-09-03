@@ -11,6 +11,8 @@ import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.binding.Binder;
 
+import java.util.List;
+
 public final class NewsSectionBinder extends Binder<NewsSection, TextView> {
 
     @NonNull
@@ -20,10 +22,13 @@ public final class NewsSectionBinder extends Binder<NewsSection, TextView> {
     }
 
     @Override
-    public void bindView(@NonNull Container container,
-                         @NonNull NewsSection newsSection,
-                         @NonNull TextView v,
-                         @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull NewsSection newsSection,
+            @NonNull TextView v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         v.setTypeface(Typeface.DEFAULT_BOLD);
         v.setText(newsSection.getTitle());
     }

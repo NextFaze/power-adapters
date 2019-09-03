@@ -4,8 +4,11 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
@@ -41,8 +44,14 @@ public abstract class BinderWrapper<T, V extends View> extends Binder<T, V> {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder) {
-        mBinder.bindView(container, t, v, holder);
+    public void bindView(
+            @NonNull Container container,
+            @NonNull T t,
+            @NonNull V v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
+        mBinder.bindView(container, t, v, holder, payloads);
     }
 
     @Override

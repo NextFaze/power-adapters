@@ -34,8 +34,14 @@ fun createMultiTypeAdapter(viewModel: MultiTypeViewModel) = buildAdapter {
 
     // Items
     val politicsNewsItemBinder = object : BinderWrapper<NewsItem, NewsItemView>(NewsItemBinder(viewModel.data.asList())) {
-        override fun bindView(container: Container, newsItem: NewsItem, v: NewsItemView, holder: Holder) {
-            super.bindView(container, newsItem, v, holder)
+        override fun bindView(
+                container: Container,
+                newsItem: NewsItem,
+                v: NewsItemView,
+                holder: Holder,
+                payloads: List<Any>
+        ) {
+            super.bindView(container, newsItem, v, holder, payloads)
             v.tags = setOf("Boring!")
         }
     }

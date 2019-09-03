@@ -10,6 +10,8 @@ import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 
+import java.util.List;
+
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
@@ -36,7 +38,13 @@ public abstract class Binder<T, V extends View> {
             }
 
             @Override
-            public void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder) {
+            public void bindView(
+                    @NonNull Container container,
+                    @NonNull T t,
+                    @NonNull V v,
+                    @NonNull Holder holder,
+                    @NonNull List<Object> payloads
+            ) {
                 function.bindView(container, t, v, holder);
             }
         };
@@ -46,7 +54,7 @@ public abstract class Binder<T, V extends View> {
      * Creates a {@link View} to be bound later by this binder instance. The view will be reused.
      * @param parent The destination parent view group of the view.
      * @return A new view capable of presenting the object that this binder expects later in its {@link
-     * #bindView(Container, T, View, Holder)} method.
+     * #bindView(Container, T, View, Holder, List)} method.
      * @see PowerAdapter#newView(ViewGroup, Object)
      */
     @NonNull
@@ -59,10 +67,17 @@ public abstract class Binder<T, V extends View> {
      * @param t The item object to be bound.
      * @param v The destination view.
      * @param holder A "holder" object which can be queried to determine the position of the item in the data set.
+     * @param payloads A list of merged payload objects. Can be empty if a full update is required.
      * @see Holder
      * @see PowerAdapter#bindView(Container, View, Holder, java.util.List)
      */
-    public abstract void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder);
+    public abstract void bindView(
+            @NonNull Container container,
+            @NonNull T t,
+            @NonNull V v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    );
 
     /** @see PowerAdapter#isEnabled(int) */
     public boolean isEnabled(@NonNull T t, int position) {

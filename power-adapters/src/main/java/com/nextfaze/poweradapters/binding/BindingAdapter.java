@@ -43,7 +43,7 @@ public abstract class BindingAdapter<T> extends PowerAdapter {
             @NonNull Holder holder,
             @NonNull List<Object> payloads
     ) {
-        mEngine.bindView(container, view, holder);
+        mEngine.bindView(container, view, holder, payloads);
     }
 
     @NonNull

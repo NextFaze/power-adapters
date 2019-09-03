@@ -25,7 +25,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class ObservableAdapterBuilderTest {
@@ -54,9 +53,9 @@ class ObservableAdapterBuilderTest {
                 .build()
                 .test()
                 .bind(context)
-        verify(binder).bindView(any(), eq("d"), any(), any())
-        verify(binder).bindView(any(), eq("e"), any(), any())
-        verify(binder).bindView(any(), eq("f"), any(), any())
+        verify(binder).bindView(any(), eq("d"), any(), any(), any())
+        verify(binder).bindView(any(), eq("e"), any(), any(), any())
+        verify(binder).bindView(any(), eq("f"), any(), any(), any())
     }
 
     @Test fun `data content changes match prepends observable`() {
@@ -70,10 +69,10 @@ class ObservableAdapterBuilderTest {
                 .build()
                 .test()
                 .bind(context)
-        verify(binder).bindView(any(), eq("b"), any(), any())
-        verify(binder).bindView(any(), eq("a"), any(), any())
-        verify(binder).bindView(any(), eq("x"), any(), any())
-        verify(binder).bindView(any(), eq("y"), any(), any())
+        verify(binder).bindView(any(), eq("b"), any(), any(), any())
+        verify(binder).bindView(any(), eq("a"), any(), any(), any())
+        verify(binder).bindView(any(), eq("x"), any(), any(), any())
+        verify(binder).bindView(any(), eq("y"), any(), any(), any())
     }
 
     @Test fun `data content changes match appends observable`() {
@@ -87,10 +86,10 @@ class ObservableAdapterBuilderTest {
                 .build()
                 .test()
                 .bind(context)
-        verify(binder).bindView(any(), eq("a"), any(), any())
-        verify(binder).bindView(any(), eq("b"), any(), any())
-        verify(binder).bindView(any(), eq("c"), any(), any())
-        verify(binder).bindView(any(), eq("d"), any(), any())
+        verify(binder).bindView(any(), eq("a"), any(), any(), any())
+        verify(binder).bindView(any(), eq("b"), any(), any(), any())
+        verify(binder).bindView(any(), eq("c"), any(), any(), any())
+        verify(binder).bindView(any(), eq("d"), any(), any(), any())
     }
 
     @Test fun `fine-grained notifications are dispatched if equality functions are supplied`() {
