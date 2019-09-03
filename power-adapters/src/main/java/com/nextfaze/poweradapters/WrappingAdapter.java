@@ -3,7 +3,10 @@ package com.nextfaze.poweradapters;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
@@ -49,10 +52,15 @@ final class WrappingAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         ViewGroup viewGroup = (ViewGroup) view;
         View childView = viewGroup.getChildAt(0);
-        super.bindView(container, childView, holder);
+        super.bindView(container, childView, holder, payloads);
     }
 
     private static final class ViewTypeWrapper {

@@ -7,11 +7,13 @@ import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.internal.WeakMap;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -116,12 +118,12 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        mPowerAdapter.bindView(holder.container, holder.itemView, holder.holder);
+        onBindViewHolder(holder, position, Collections.emptyList());
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
-        onBindViewHolder(holder, position);
+        mPowerAdapter.bindView(holder.container, holder.itemView, holder.holder, payloads);
     }
 
     @Override

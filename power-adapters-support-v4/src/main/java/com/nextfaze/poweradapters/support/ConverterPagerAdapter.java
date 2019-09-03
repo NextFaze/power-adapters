@@ -17,6 +17,7 @@ import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.internal.WeakMap;
 
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,7 +106,7 @@ public class ConverterPagerAdapter extends PagerAdapterFixed {
             mHolders.put(v, holder);
         }
         holder.position = position;
-        mAdapter.bindView(container, v, holder);
+        mAdapter.bindView(container, v, holder, Collections.emptyList());
         mViewTypes.put(v, viewType);
         parent.addView(v);
         return v;

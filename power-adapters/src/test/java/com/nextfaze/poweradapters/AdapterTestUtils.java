@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ final class AdapterTestUtils {
     }
 
     static void verifyBindViewNeverCalled(@NonNull PowerAdapter adapter) {
-        verify(adapter, never()).bindView(any(Container.class), any(View.class), any(Holder.class));
+        verify(adapter, never())
+                .bindView(any(Container.class), any(View.class), any(Holder.class), anyList());
     }
 }

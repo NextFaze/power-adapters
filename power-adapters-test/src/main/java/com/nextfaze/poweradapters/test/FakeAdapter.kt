@@ -28,7 +28,12 @@ class FakeAdapter @JvmOverloads constructor(private var itemCount: Int = 0) : Po
 
     override fun newView(parent: ViewGroup, viewType: Any) = View(parent.context)
 
-    override fun bindView(container: Container, view: View, holder: Holder) {
+    override fun bindView(
+            container: Container,
+            view: View,
+            holder: Holder,
+            payloads: MutableList<Any>
+    ) {
     }
 
     override fun hasStableIds() = false

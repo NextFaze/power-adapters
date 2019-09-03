@@ -4,6 +4,7 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
@@ -59,7 +60,7 @@ public abstract class Binder<T, V extends View> {
      * @param v The destination view.
      * @param holder A "holder" object which can be queried to determine the position of the item in the data set.
      * @see Holder
-     * @see PowerAdapter#bindView(Container, View, Holder)
+     * @see PowerAdapter#bindView(Container, View, Holder, java.util.List)
      */
     public abstract void bindView(@NonNull Container container, @NonNull T t, @NonNull V v, @NonNull Holder holder);
 

@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+
 import com.nextfaze.poweradapters.internal.WeakMap;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -107,7 +109,7 @@ final class ListAdapterConverterAdapter extends BaseAdapter {
             mHolders.put(convertView, holder);
         }
         holder.position = position;
-        mPowerAdapter.bindView(container, convertView, holder);
+        mPowerAdapter.bindView(container, convertView, holder, Collections.emptyList());
         return convertView;
     }
 

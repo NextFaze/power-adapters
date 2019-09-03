@@ -8,7 +8,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static android.view.View.GONE;
@@ -111,7 +114,12 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         int position = holder.getPosition();
         int innerItemCount = super.getItemCount();
         if (innerItemCount == 0 && (isLeadingVisible(innerItemCount) || isTrailingVisible(innerItemCount))) {
@@ -120,7 +128,7 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
         DividerLinearLayout viewGroup = (DividerLinearLayout) view;
         DividerViewHolder dividerViewHolder = viewGroup.viewHolder;
         dividerViewHolder.updateDividers(position);
-        super.bindView(container, dividerViewHolder.mChildView, holder);
+        super.bindView(container, dividerViewHolder.mChildView, holder, payloads);
     }
 
     @Override

@@ -3,9 +3,12 @@ package com.nextfaze.poweradapters.binding;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.Container;
 import com.nextfaze.poweradapters.Holder;
 import com.nextfaze.poweradapters.PowerAdapter;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
@@ -34,7 +37,12 @@ public abstract class BindingAdapter<T> extends PowerAdapter {
     }
 
     @Override
-    public final void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public final void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         mEngine.bindView(container, view, holder);
     }
 

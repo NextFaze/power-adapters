@@ -9,7 +9,7 @@ import android.view.ViewGroup;
  * adapter to access the context in which they are bound.
  * <p>
  * Since adapters may be used by multiple clients at once, the container is only accessible at bind time.
- * @see PowerAdapter#bindView(Container, View, Holder)
+ * @see PowerAdapter#bindView(Container, View, Holder, java.util.List)
  */
 public abstract class Container {
 

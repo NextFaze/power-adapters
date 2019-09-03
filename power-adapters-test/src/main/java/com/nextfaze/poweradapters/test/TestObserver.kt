@@ -75,7 +75,7 @@ class TestObserver(val adapter: PowerAdapter) : DataObserver {
         for (position in 0 until adapter.itemCount) {
             val viewType = adapter.getItemViewType(position)
             val view = adapter.newView(parent, viewType)
-            adapter.bindView(container, view, { position })
+            adapter.bindView(container, view, { position }, emptyList())
         }
         return this
     }

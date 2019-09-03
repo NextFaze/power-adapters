@@ -16,12 +16,13 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.AdapterTestUtils.holder;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.Condition.always;
+import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.argThat;
@@ -175,15 +176,15 @@ public final class ConditionalAdapterTest {
     @Test
     public void parentDelegatesBindViewToChildWhileConditionIsTrue() {
         setCondition(always());
-        mConditionalAdapter.bindView(mContainer, mItemView, holder(2));
-        verify(mFakeAdapter).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(2)));
+        mConditionalAdapter.bindView(mContainer, mItemView, holder(2), emptyList());
+        verify(mFakeAdapter).bindView(eq(mContainer), eq(mItemView), argThat(holderWithPosition(2)), anyList());
         assertItemCountConsistent();
     }
 
     @Test(expected = Throwable.class)
     public void parentThrowsFromBindViewWhileConditionIsFalse() {
         setCondition(Condition.never());
-        mConditionalAdapter.bindView(mContainer, mItemView, holder(5));
+        mConditionalAdapter.bindView(mContainer, mItemView, holder(5), emptyList());
         assertItemCountConsistent();
     }
 

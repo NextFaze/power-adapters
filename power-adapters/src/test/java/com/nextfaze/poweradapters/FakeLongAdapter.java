@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /** An adapter used for testing that has stable IDs. */
 public class FakeLongAdapter extends ListAdapter<Long> {
     @NonNull
@@ -13,7 +15,12 @@ public class FakeLongAdapter extends ListAdapter<Long> {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
     }
 
     @Override

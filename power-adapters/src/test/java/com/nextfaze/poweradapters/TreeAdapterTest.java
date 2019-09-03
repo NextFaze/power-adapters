@@ -22,7 +22,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +35,8 @@ import static com.nextfaze.poweradapters.AdapterTestUtils.verifyNewViewNeverCall
 import static com.nextfaze.poweradapters.AdapterVerifier.verifySubAdapterAllGetCalls;
 import static com.nextfaze.poweradapters.ArgumentMatchers.holderWithPosition;
 import static com.nextfaze.poweradapters.PowerAdapter.EMPTY;
+import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.argThat;
@@ -358,8 +359,8 @@ public final class TreeAdapterTest {
 
     @Test
     public void rootBindViewDelegated() {
-        mTreeAdapter.bindView(mContainer, mItemView, holder(8));
-        verify(mRootAdapter).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(2)));
+        mTreeAdapter.bindView(mContainer, mItemView, holder(8), emptyList());
+        verify(mRootAdapter).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(2)), anyList());
     }
 
     @Test
@@ -404,9 +405,9 @@ public final class TreeAdapterTest {
 
     @NonNull
     private Holder bindViewAndReturnInnerHolder(@NonNull PowerAdapter adapter, @NonNull Holder topLevelHolder) {
-        mTreeAdapter.bindView(mContainer, mItemView, topLevelHolder);
+        mTreeAdapter.bindView(mContainer, mItemView, topLevelHolder, emptyList());
         ArgumentCaptor<Holder> captor = ArgumentCaptor.forClass(Holder.class);
-        verify(adapter).bindView(any(Container.class), eq(mItemView), captor.capture());
+        verify(adapter).bindView(any(Container.class), eq(mItemView), captor.capture(), anyList());
         return captor.getValue();
     }
 
@@ -518,9 +519,9 @@ public final class TreeAdapterTest {
     private Container bindViewAndReturnInnerContainer(int treeAdapterPosition,
                                                       @NonNull PowerAdapter adapter,
                                                       @NonNull Container rootContainer) {
-        mTreeAdapter.bindView(rootContainer, mItemView, holder(treeAdapterPosition));
+        mTreeAdapter.bindView(rootContainer, mItemView, holder(treeAdapterPosition), emptyList());
         ArgumentCaptor<Container> captor = ArgumentCaptor.forClass(Container.class);
-        verify(adapter).bindView(captor.capture(), eq(mItemView), any(Holder.class));
+        verify(adapter).bindView(captor.capture(), eq(mItemView), any(Holder.class), anyList());
         return captor.getValue();
     }
 
@@ -741,10 +742,10 @@ public final class TreeAdapterTest {
 
     @Test
     public void childBindViewDelegated() {
-        mTreeAdapter.bindView(mContainer, mItemView, holder(10));
+        mTreeAdapter.bindView(mContainer, mItemView, holder(10), emptyList());
         verifyBindViewNeverCalled(mChildAdapters.get(0));
         verifyBindViewNeverCalled(mChildAdapters.get(1));
-        verify(mChildAdapters.get(2)).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(1)));
+        verify(mChildAdapters.get(2)).bindView(any(Container.class), eq(mItemView), argThat(holderWithPosition(1)), anyList());
     }
 
     @Test

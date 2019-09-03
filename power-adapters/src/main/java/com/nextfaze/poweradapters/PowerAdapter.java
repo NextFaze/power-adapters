@@ -8,9 +8,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.internal.DataObservable;
 
 import java.util.Collection;
+import java.util.List;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
@@ -62,7 +64,12 @@ public abstract class PowerAdapter {
         }
 
         @Override
-        public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+        public void bindView(
+                @NonNull Container container,
+                @NonNull View view,
+                @NonNull Holder holder,
+                @NonNull List<Object> payloads
+        ) {
             throw new UnsupportedOperationException();
         }
 
@@ -148,10 +155,16 @@ public abstract class PowerAdapter {
      * @param container The {@link Container} that owns the view to be bound.
      * @param view The view to bind.
      * @param holder The holder object representing this binding to the view.
+     * @param payloads A list of merged payload objects. Can be empty if a full update is required.
      * @see Holder#getPosition()
      * @see Container
      */
-    public abstract void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder);
+    public abstract void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    );
 
     /**
      * Registers an observer with this adapter, to be notified of data set changes.

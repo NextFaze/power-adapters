@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 final class ConditionalAdapter extends PowerAdapter {
 
     @NonNull
@@ -99,8 +101,13 @@ final class ConditionalAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View v, @NonNull Holder holder) {
-        adapter().bindView(container, v, holder);
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
+        adapter().bindView(container, v, holder, payloads);
     }
 
     @CallSuper

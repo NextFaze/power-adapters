@@ -2,7 +2,10 @@ package com.nextfaze.poweradapters;
 
 import android.support.annotation.NonNull;
 import android.view.View;
+
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 class SubAdapter extends PowerAdapterWrapper {
 
@@ -63,7 +66,12 @@ class SubAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         HolderWrapperImpl holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapperImpl(holder);
@@ -74,7 +82,7 @@ class SubAdapter extends PowerAdapterWrapper {
             containerWrapper = new ContainerWrapperImpl(container);
             mContainers.put(container, containerWrapper);
         }
-        getAdapter().bindView(containerWrapper, view, holderWrapper);
+        getAdapter().bindView(containerWrapper, view, holderWrapper, payloads);
     }
 
     private final class HolderWrapperImpl extends HolderWrapper {

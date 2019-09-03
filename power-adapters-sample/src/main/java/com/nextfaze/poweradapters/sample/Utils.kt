@@ -49,7 +49,12 @@ fun loadNextButton(data: Data<*>, onClick: () -> Unit): PowerAdapter {
         override fun newView(parent: ViewGroup, viewType: Any) =
                 parent.context.layoutInflater.inflate(R.layout.list_load_next_item, parent, false)
 
-        override fun bindView(container: Container, view: View, holder: Holder) {
+        override fun bindView(
+                container: Container,
+                view: View,
+                holder: Holder,
+                payloads: MutableList<Any>
+        ) {
             view.setOnClickListener {
                 onClick()
                 container.scrollToPosition(holder.position)

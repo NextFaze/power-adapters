@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /** Wraps another {@link PowerAdapter} optionally, delegating work to it. The wrapped adapter can be reassigned freely. */
 public final class DelegateAdapter extends PowerAdapter {
 
@@ -103,8 +105,13 @@ public final class DelegateAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View v, @NonNull Holder holder) {
-        delegateOrThrow().bindView(container, v, holder);
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View v,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
+        delegateOrThrow().bindView(container, v, holder, payloads);
     }
 
     @CallSuper

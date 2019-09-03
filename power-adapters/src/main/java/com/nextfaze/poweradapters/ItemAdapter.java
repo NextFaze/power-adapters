@@ -75,7 +75,12 @@ final class ItemAdapter extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         // Nothing to bind. Each item represents a unique view.
     }
 }

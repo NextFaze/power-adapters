@@ -4,7 +4,10 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.nextfaze.poweradapters.internal.WeakMap;
+
+import java.util.List;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
@@ -104,7 +107,12 @@ public class PowerAdapterWrapper extends PowerAdapter {
     }
 
     @Override
-    public void bindView(@NonNull Container container, @NonNull View view, @NonNull Holder holder) {
+    public void bindView(
+            @NonNull Container container,
+            @NonNull View view,
+            @NonNull Holder holder,
+            @NonNull List<Object> payloads
+    ) {
         HolderWrapper holderWrapper = mHolders.get(holder);
         if (holderWrapper == null) {
             holderWrapper = new HolderWrapper(holder) {
@@ -130,13 +138,13 @@ public class PowerAdapterWrapper extends PowerAdapter {
             };
             mContainers.put(container, containerWrapper);
         }
-        mAdapter.bindView(containerWrapper, view, holderWrapper);
+        mAdapter.bindView(containerWrapper, view, holderWrapper, payloads);
     }
 
     /**
      * Converts a {@code position} in this adapter's coordinate space to the coordinate space of the wrapped adapter.
      * By default, simply returns returns the position value unchanged. Must be overridden by subclasses that augment
-     * the items in this adapter, in order for the {@link #bindView(Container, View, Holder)} {@link Holder} position to be
+     * the items in this adapter, in order for the {@link PowerAdapter#bindView(Container, View, Holder, List)} {@link Holder} position to be
      * correct. This method is also called when forwarding calls that accept a {@code position} parameter.
      * @param outerPosition The {@code position} in this adapter's coordinate space.
      * @return The {@code position} converted into the coordinate space of the wrapped adapter.
