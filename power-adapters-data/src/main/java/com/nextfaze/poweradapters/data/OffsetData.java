@@ -1,8 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 final class OffsetData<T> extends DataWrapper<T> {
 
@@ -51,10 +54,10 @@ final class OffsetData<T> extends DataWrapper<T> {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
         if (innerPositionStart + innerItemCount > mOffset) {
             notifyItemRangeChanged(max(0, innerPositionStart - mOffset),
-                    min(innerItemCount, innerItemCount - mOffset + innerPositionStart));
+                    min(innerItemCount, innerItemCount - mOffset + innerPositionStart), payload);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.internal;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
@@ -11,12 +12,12 @@ public enum NotificationType {
     /** Only use {@link DataObservable#notifyDataSetChanged()}. */
     COARSE {
         @Override
-        public void notifyItemChanged(@NonNull DataObservable observable, int position) {
+        public void notifyItemChanged(@NonNull DataObservable observable, int position, @Nullable Object payload) {
             notifyDataSetChanged(observable);
         }
 
         @Override
-        public void notifyItemRangeChanged(@NonNull DataObservable observable, int positionStart, int itemCount) {
+        public void notifyItemRangeChanged(@NonNull DataObservable observable, int positionStart, int itemCount, @Nullable Object payload) {
             notifyDataSetChanged(observable);
         }
 
@@ -60,12 +61,12 @@ public enum NotificationType {
         observable.notifyDataSetChanged();
     }
 
-    public void notifyItemChanged(@NonNull DataObservable observable, int position) {
-        observable.notifyItemChanged(position);
+    public void notifyItemChanged(@NonNull DataObservable observable, int position, @Nullable Object payload) {
+        observable.notifyItemChanged(position, payload);
     }
 
-    public void notifyItemRangeChanged(@NonNull DataObservable observable, int positionStart, int itemCount) {
-        observable.notifyItemRangeChanged(positionStart, itemCount);
+    public void notifyItemRangeChanged(@NonNull DataObservable observable, int positionStart, int itemCount, @Nullable Object payload) {
+        observable.notifyItemRangeChanged(positionStart, itemCount, payload);
     }
 
     public void notifyItemInserted(@NonNull DataObservable observable, int position) {

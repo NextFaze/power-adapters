@@ -179,7 +179,7 @@ abstract class CursorData<T> extends SimpleData<T, Cursor> implements Closeable 
             updateCursorObserver();
             int changed = min(oldSize, newSize);
             if (changed > 0) {
-                notifyItemRangeChanged(0, changed);
+                notifyItemRangeChanged(0, changed, null);
             }
             if (deltaSize < 0) {
                 notifyItemRangeRemoved(oldSize + deltaSize, abs(deltaSize));

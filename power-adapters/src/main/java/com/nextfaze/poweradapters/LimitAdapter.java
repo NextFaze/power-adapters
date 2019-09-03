@@ -1,8 +1,11 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public final class LimitAdapter extends PowerAdapterWrapper {
 
@@ -90,9 +93,9 @@ public final class LimitAdapter extends PowerAdapterWrapper {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
         if (innerItemCount > 0 && innerPositionStart < mLimit) {
-            notifyItemRangeChanged(innerPositionStart, min(innerItemCount, mLimit - innerPositionStart));
+            notifyItemRangeChanged(innerPositionStart, min(innerItemCount, mLimit - innerPositionStart), payload);
         }
     }
 
@@ -102,7 +105,7 @@ public final class LimitAdapter extends PowerAdapterWrapper {
             int innerTotalPostInsert = super.getItemCount();
             int innerTotalPreInsert = innerTotalPostInsert - innerItemCount;
             if (innerTotalPreInsert >= mLimit) {
-                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart);
+                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart, null);
             } else {
                 int insertCount = min(mLimit - innerPositionStart, innerItemCount);
                 if (innerPositionStart <= innerTotalPreInsert) {
@@ -125,7 +128,7 @@ public final class LimitAdapter extends PowerAdapterWrapper {
             int innerTotalPostRemove = super.getItemCount();
             int innerTotalPreRemove = innerTotalPostRemove + innerItemCount;
             if (innerTotalPostRemove >= mLimit) {
-                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart);
+                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart, null);
             } else {
                 int removeCount = min(mLimit - innerPositionStart, innerItemCount);
                 mItemCount -= removeCount;

@@ -2,9 +2,12 @@ package com.nextfaze.poweradapters.rxjava2;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.SimpleDataObserver;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -55,8 +58,8 @@ public final class RxPowerAdapter {
                 verifyMainThread();
                 final DataObserver dataObserver = new Observer() {
                     @Override
-                    public void onItemRangeChanged(int positionStart, int itemCount) {
-                        emitter.onNext(new ChangeEvent(positionStart, itemCount));
+                    public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+                        emitter.onNext(new ChangeEvent(positionStart, itemCount, payload));
                     }
                 };
                 adapter.registerDataObserver(dataObserver);

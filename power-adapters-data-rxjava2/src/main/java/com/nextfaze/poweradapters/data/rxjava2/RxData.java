@@ -2,6 +2,8 @@ package com.nextfaze.poweradapters.data.rxjava2;
 
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.AvailableObserver;
@@ -12,6 +14,7 @@ import com.nextfaze.poweradapters.rxjava2.ChangeEvent;
 import com.nextfaze.poweradapters.rxjava2.InsertEvent;
 import com.nextfaze.poweradapters.rxjava2.MoveEvent;
 import com.nextfaze.poweradapters.rxjava2.RemoveEvent;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -73,8 +76,8 @@ public final class RxData {
                 verifyMainThread();
                 final DataObserver dataObserver = new Observer() {
                     @Override
-                    public void onItemRangeChanged(int positionStart, int itemCount) {
-                        emitter.onNext(new ChangeEvent(positionStart, itemCount));
+                    public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+                        emitter.onNext(new ChangeEvent(positionStart, itemCount, payload));
                     }
                 };
                 data.registerDataObserver(dataObserver);

@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,7 +59,7 @@ final class SortData<T> extends DataWrapper<T> {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
         for (int innerPosition = innerPositionStart; innerPosition < innerPositionStart + innerItemCount; innerPosition++) {
             T t = mData.get(innerPosition);
             int oldOuterPosition = mIndex.remove(innerPosition);

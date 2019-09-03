@@ -220,12 +220,12 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
         // Leading might turn into an inner.
         if (rangeIncludesFirstItem && innerTotalCountBefore > 0 && innerTotalCountAfter > 1) {
-            notifyItemChanged(innerPositionStart + innerItemCount);
+            notifyItemChanged(innerPositionStart + innerItemCount, null);
         }
 
         // Trailing might turn into an inner.
         if (rangeIncludesLastItem && innerTotalCountBefore > 0 && innerTotalCountAfter > 1) {
-            notifyItemChanged(innerPositionStart - 1);
+            notifyItemChanged(innerPositionStart - 1, null);
         }
     }
 
@@ -256,12 +256,12 @@ final class WrappingDividerAdapter extends PowerAdapterWrapper {
 
         // Inner might turn into a leading.
         if (rangeIncludesFirstItem && innerTotalCountAfter > 0 && innerTotalCountBefore > 1) {
-            notifyItemChanged(0);
+            notifyItemChanged(0, null);
         }
 
         // Inner might turn into a trailing.
         if (rangeIncludesLastItem && innerTotalCountAfter > 0 && innerTotalCountBefore > 1) {
-            notifyItemChanged(getItemCount(innerTotalCountAfter) - 1);
+            notifyItemChanged(getItemCount(innerTotalCountAfter) - 1, null);
         }
     }
 

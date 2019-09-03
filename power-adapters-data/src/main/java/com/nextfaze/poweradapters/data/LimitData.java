@@ -1,8 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 final class LimitData<T> extends DataWrapper<T> {
 
@@ -56,9 +59,9 @@ final class LimitData<T> extends DataWrapper<T> {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
         if (innerItemCount > 0 && innerPositionStart < mLimit) {
-            notifyItemRangeChanged(innerPositionStart, min(innerItemCount, mLimit - innerPositionStart));
+            notifyItemRangeChanged(innerPositionStart, min(innerItemCount, mLimit - innerPositionStart), payload);
         }
     }
 
@@ -68,7 +71,7 @@ final class LimitData<T> extends DataWrapper<T> {
             int innerTotalPostInsert = super.size();
             int innerTotalPreInsert = innerTotalPostInsert - innerItemCount;
             if (innerTotalPreInsert >= mLimit) {
-                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart);
+                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart, null);
             } else {
                 int insertCount = min(mLimit - innerPositionStart, innerItemCount);
                 if (innerPositionStart <= innerTotalPreInsert) {
@@ -89,7 +92,7 @@ final class LimitData<T> extends DataWrapper<T> {
             int innerTotalPostRemove = super.size();
             int innerTotalPreRemove = innerTotalPostRemove + innerItemCount;
             if (innerTotalPostRemove >= mLimit) {
-                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart);
+                notifyItemRangeChanged(innerPositionStart, mLimit - innerPositionStart, null);
             } else {
                 int removeCount = min(mLimit - innerPositionStart, innerItemCount);
                 notifyItemRangeRemoved(innerPositionStart, removeCount);

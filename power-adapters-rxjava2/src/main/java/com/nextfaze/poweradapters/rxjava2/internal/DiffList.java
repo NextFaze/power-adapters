@@ -138,7 +138,7 @@ public final class DiffList<T> {
                 // Finally, issue a change notification for the range of elements not accounted for above.
                 final int changed = min(oldSize, newSize);
                 if (changed > 0) {
-                    mDataObservable.notifyItemRangeChanged(0, changed);
+                    mDataObservable.notifyItemRangeChanged(0, changed, null);
                 }
             }
         });

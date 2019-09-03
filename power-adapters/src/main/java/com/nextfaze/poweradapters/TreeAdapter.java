@@ -30,9 +30,9 @@ public final class TreeAdapter extends PowerAdapter {
         }
 
         @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
             for (int i = positionStart; i < positionStart + itemCount; i++) {
-                notifyItemChanged(rootToOuter(i));
+                notifyItemChanged(rootToOuter(i), payload);
                 Entry entry = mEntries.get(i);
                 entry.setAdapter(entry.getAdapter() != null ? getChildAdapter(i) : null);
             }
@@ -379,8 +379,8 @@ public final class TreeAdapter extends PowerAdapter {
             }
 
             @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                notifyItemRangeChanged(positionStart, itemCount);
+            public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+                notifyItemRangeChanged(positionStart, itemCount, payload);
             }
 
             @Override

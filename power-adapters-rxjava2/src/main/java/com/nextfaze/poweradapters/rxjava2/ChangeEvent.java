@@ -1,14 +1,20 @@
 package com.nextfaze.poweradapters.rxjava2;
 
+import android.support.annotation.Nullable;
+
 public final class ChangeEvent {
 
     private final int mPosition;
 
     private final int mCount;
 
-    public ChangeEvent(int position, int count) {
+    @Nullable
+    private final Object mPayload;
+
+    public ChangeEvent(int position, int count, @Nullable Object payload) {
         mPosition = position;
         mCount = count;
+        mPayload = payload;
     }
 
     public int getPosition() {
@@ -17,6 +23,11 @@ public final class ChangeEvent {
 
     public int getCount() {
         return mCount;
+    }
+
+    @Nullable
+    public Object getPayload() {
+        return mPayload;
     }
 
     @Override

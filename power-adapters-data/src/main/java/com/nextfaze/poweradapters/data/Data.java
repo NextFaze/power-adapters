@@ -6,8 +6,10 @@ import android.os.Looper;
 import android.support.annotation.CallSuper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.UiThread;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.RowMapper;
@@ -258,10 +260,10 @@ public abstract class Data<T> implements Iterable<T> {
      * <p>
      * <p>This event does not specify what about the data set has changed, forcing
      * any observers to assume that all existing items and structure may no longer be valid.
-     * @see #notifyItemChanged(int)
+     * @see #notifyItemChanged(int, Object)
      * @see #notifyItemInserted(int)
      * @see #notifyItemRemoved(int)
-     * @see #notifyItemRangeChanged(int, int)
+     * @see #notifyItemRangeChanged(int, int, Object)
      * @see #notifyItemRangeInserted(int, int)
      * @see #notifyItemRangeRemoved(int, int)
      */
@@ -276,10 +278,11 @@ public abstract class Data<T> implements Iterable<T> {
      * reflection of the data at <code>position</code> is out of date and should be updated.
      * The item at <code>position</code> retains the same identity.</p>
      * @param position Position of the item that has changed
-     * @see #notifyItemRangeChanged(int, int)
+     * @param payload Provides optional change payload metadata. Use `null` to identify a "full" update.
+     * @see #notifyItemRangeChanged(int, int, Object)
      */
-    protected final void notifyItemChanged(int position) {
-        mDataObservable.notifyItemChanged(position);
+    protected final void notifyItemChanged(int position, @Nullable Object payload) {
+        mDataObservable.notifyItemChanged(position, payload);
     }
 
     /**
@@ -293,10 +296,11 @@ public abstract class Data<T> implements Iterable<T> {
      * Does nothing if {@code itemCount} is zero.
      * @param positionStart Position of the first item that has changed
      * @param itemCount Number of items that have changed
-     * @see #notifyItemChanged(int)
+     * @param payload Provides optional change payload metadata. Use `null` to identify a "full" update.
+     * @see #notifyItemChanged(int, Object)
      */
-    protected final void notifyItemRangeChanged(int positionStart, int itemCount) {
-        mDataObservable.notifyItemRangeChanged(positionStart, itemCount);
+    protected final void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+        mDataObservable.notifyItemRangeChanged(positionStart, itemCount, payload);
     }
 
     /**

@@ -43,7 +43,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
     @Override
     public E set(int index, @NonNull E object) {
         E e = mArray.set(index, checkNotNull(object, "object"));
-        mNotificationType.notifyItemChanged(mDataObservable, index);
+        mNotificationType.notifyItemChanged(mDataObservable, index, null);
         return e;
     }
 
@@ -140,7 +140,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
         }
 
         // Finally, issue a change notification for the range of elements not accounted for above.
-        mNotificationType.notifyItemRangeChanged(mDataObservable, 0, min(oldSize, mArray.size()));
+        mNotificationType.notifyItemRangeChanged(mDataObservable, 0, min(oldSize, mArray.size()), null);
     }
 
     public void setAll(int index, @NonNull Collection<? extends E> collection) {
@@ -150,7 +150,7 @@ public final class NotifyingArrayList<E> extends AbstractList<E> {
             mArray.set(index + i, e);
             i++;
         }
-        mNotificationType.notifyItemRangeChanged(mDataObservable, index, collection.size());
+        mNotificationType.notifyItemRangeChanged(mDataObservable, index, collection.size(), null);
     }
 
     public void remove(int index, int count) {

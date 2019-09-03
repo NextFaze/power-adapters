@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.DataObserver;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
@@ -18,8 +20,8 @@ public abstract class DataWrapper<T> extends Data<T> {
         }
 
         @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            forwardItemRangeChanged(positionStart, itemCount);
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            forwardItemRangeChanged(positionStart, itemCount, payload);
         }
 
         @Override
@@ -158,8 +160,8 @@ public abstract class DataWrapper<T> extends Data<T> {
         notifyDataSetChanged();
     }
 
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
-        notifyItemRangeChanged(innerToOuter(innerPositionStart), innerItemCount);
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
+        notifyItemRangeChanged(innerToOuter(innerPositionStart), innerItemCount, payload);
     }
 
     protected void forwardItemRangeInserted(int innerPositionStart, int innerItemCount) {

@@ -3,6 +3,7 @@ package com.nextfaze.poweradapters.rxjava2.internal;
 import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.support.v7.util.ListUpdateCallback;
+
 import com.nextfaze.poweradapters.internal.DataObservable;
 
 import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
@@ -36,6 +37,6 @@ final class DataObservableListUpdateCallback implements ListUpdateCallback {
 
     @Override
     public void onChanged(int position, int count, Object payload) {
-        mDataObservable.notifyItemRangeChanged(position, count);
+        mDataObservable.notifyItemRangeChanged(position, count, payload);
     }
 }

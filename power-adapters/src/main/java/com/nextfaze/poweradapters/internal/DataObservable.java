@@ -1,7 +1,9 @@
 package com.nextfaze.poweradapters.internal;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
+
 import com.nextfaze.poweradapters.DataObserver;
 
 import java.util.ArrayList;
@@ -43,14 +45,14 @@ public final class DataObservable {
         }
     }
 
-    public void notifyItemChanged(int position) {
-        notifyItemRangeChanged(position, 1);
+    public void notifyItemChanged(int position, @Nullable Object payload) {
+        notifyItemRangeChanged(position, 1, payload);
     }
 
-    public void notifyItemRangeChanged(int positionStart, int itemCount) {
+    public void notifyItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
         if (itemCount > 0) {
             for (int i = mObservers.size() - 1; i >= 0; i--) {
-                mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
+                mObservers.get(i).onItemRangeChanged(positionStart, itemCount, payload);
             }
         }
     }

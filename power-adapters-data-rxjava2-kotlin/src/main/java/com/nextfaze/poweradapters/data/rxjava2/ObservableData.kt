@@ -53,6 +53,8 @@ sealed class DiffStrategy<out T : Any> {
             val identityEqual: (a: T, b: T) -> Boolean,
             /** Function that evaluates whether two objects have the same contents. */
             val contentEqual: (a: T, b: T) -> Boolean = Any::equals,
+            /** Computes change payload metadata. */
+            val changePayload: (a: T, b: T) -> Any? = { _, _ -> null },
             /** Sets whether the content diff engine should also detect item moves, as well as other changes. */
             val detectMoves: Boolean = true
     ) : DiffStrategy<T>()
@@ -77,7 +79,7 @@ private class KObservableData<T : Any>(
 
     private val listUpdateCallback = object : ListUpdateCallback {
         override fun onChanged(position: Int, count: Int, payload: Any?) =
-                notifyItemRangeChanged(position, count)
+                notifyItemRangeChanged(position, count, payload)
 
         override fun onMoved(fromPosition: Int, toPosition: Int) =
                 notifyItemMoved(fromPosition, toPosition)
@@ -212,6 +214,9 @@ private class KObservableData<T : Any>(
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
                 (diffStrategy as DiffStrategy.FineGrained).contentEqual(oldList[oldItemPosition], newList[newItemPosition])
 
+        override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int) =
+                (diffStrategy as DiffStrategy.FineGrained).changePayload(oldList[oldItemPosition], newList[newItemPosition])
+
         override fun getOldListSize() = oldList.size
 
         override fun getNewListSize() = newList.size
@@ -237,7 +242,7 @@ private class KObservableData<T : Any>(
                 notifyItemRangeInserted(oldSize, deltaSize)
             }
             val changed = min(oldSize, newSize)
-            if (changed > 0) notifyItemRangeChanged(0, changed)
+            if (changed > 0) notifyItemRangeChanged(0, changed, null)
         }
     }
 

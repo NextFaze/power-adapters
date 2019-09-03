@@ -19,8 +19,8 @@ public final class DelegateAdapter extends PowerAdapter {
         }
 
         @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            notifyItemRangeChanged(positionStart, itemCount, payload);
         }
 
         @Override

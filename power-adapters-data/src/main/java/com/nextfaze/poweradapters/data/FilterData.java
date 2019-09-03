@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.Predicate;
 
 import java.util.ArrayList;
@@ -77,7 +79,7 @@ public final class FilterData<T> extends DataWrapper<T> {
         rebuild();
         int itemCount = mIndex.size();
         if (itemCount > 0) {
-            notifyItemRangeChanged(0, itemCount);
+            notifyItemRangeChanged(0, itemCount, null);
         }
     }
 
@@ -97,7 +99,7 @@ public final class FilterData<T> extends DataWrapper<T> {
     }
 
     @Override
-    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount) {
+    protected void forwardItemRangeChanged(int innerPositionStart, int innerItemCount, @Nullable Object payload) {
         changeIndexRange(innerPositionStart, innerItemCount, true, true, true);
     }
 
@@ -133,7 +135,7 @@ public final class FilterData<T> extends DataWrapper<T> {
                 if (include) {
                     // Item should be included. Notify of a change.
                     if (notifyChanges) {
-                        notifyItemChanged(i);
+                        notifyItemChanged(i, null);
                     }
                 } else {
                     // Item shouldn't be included. Remove mapping and notify of removal.

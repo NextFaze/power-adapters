@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
@@ -19,8 +21,8 @@ public final class DataBindingAdapter<T> extends BindingAdapter<T> {
         }
 
         @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            notifyItemRangeChanged(positionStart, itemCount, payload);
         }
 
         @Override

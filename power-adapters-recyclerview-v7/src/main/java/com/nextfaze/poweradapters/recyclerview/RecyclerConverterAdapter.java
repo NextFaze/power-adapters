@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters.recyclerview;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
@@ -43,8 +44,8 @@ public class RecyclerConverterAdapter extends RecyclerView.Adapter<RecyclerConve
         }
 
         @Override
-        public void onItemRangeChanged(int positionStart, int itemCount) {
-            notifyItemRangeChanged(positionStart, itemCount);
+        public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
+            notifyItemRangeChanged(positionStart, itemCount, payload);
         }
 
         @Override
