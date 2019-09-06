@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
@@ -87,7 +86,7 @@ public final class OffsetDataTest {
     public void changeWithinBounds() {
         mFakeData.change(6, "a", "b", "c");
         assertContains("5", "a", "b", "c", "9");
-        verify(mObserver).onItemRangeChanged(1, 3);
+        verify(mObserver).onItemRangeChanged(1, 3, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -95,7 +94,7 @@ public final class OffsetDataTest {
     public void changeBoundaryStraddling() {
         mFakeData.change(3, "a", "b", "c");
         assertContains("c", "6", "7", "8", "9");
-        verify(mObserver).onItemRangeChanged(0, 1);
+        verify(mObserver).onItemRangeChanged(0, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 

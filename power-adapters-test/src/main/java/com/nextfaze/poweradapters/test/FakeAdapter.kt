@@ -57,8 +57,8 @@ class FakeAdapter @JvmOverloads constructor(private var itemCount: Int = 0) : Po
         notificationType.notifyItemRangeRemoved(dataObservable, positionStart, itemCount)
     }
 
-    fun change(positionStart: Int, itemCount: Int) {
-        notificationType.notifyItemRangeChanged(dataObservable, positionStart, itemCount)
+    fun change(positionStart: Int, itemCount: Int, payload: Any? = null) {
+        notificationType.notifyItemRangeChanged(dataObservable, positionStart, itemCount, payload)
     }
 
     fun move(fromPosition: Int, toPosition: Int, itemCount: Int) {

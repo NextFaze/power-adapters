@@ -29,8 +29,8 @@ class TestObserver(val adapter: PowerAdapter) : DataObserver {
         shadowSize = adapter.itemCount
     }
 
-    override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-        changeEvents += ChangeEvent(positionStart, itemCount)
+    override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+        changeEvents += ChangeEvent(positionStart, itemCount, payload)
     }
 
     override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {

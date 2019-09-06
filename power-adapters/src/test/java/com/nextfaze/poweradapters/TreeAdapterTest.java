@@ -530,9 +530,9 @@ public final class TreeAdapterTest {
     public void rootChangeThenRemovalDoesNotThrow() {
         mTreeAdapter.setAllExpanded(false);
         DataObserver observer = registerMockDataObserver();
-        mRootAdapter.change(0, 1);
+        mRootAdapter.change(0, 1, null);
         mRootAdapter.remove(2, 1);
-        verify(observer).onItemRangeChanged(0, 1);
+        verify(observer).onItemRangeChanged(0, 1, null);
         verify(observer).onItemRangeRemoved(2, 1);
         verifyNoMoreInteractions(observer);
     }
@@ -542,15 +542,15 @@ public final class TreeAdapterTest {
         mTreeAdapter.setAllExpanded(false);
         mTreeAdapter.setExpanded(1, true);
         DataObserver observer = registerMockDataObserver();
-        mRootAdapter.change(2, 1);
-        verify(observer).onItemRangeChanged(5, 1);
+        mRootAdapter.change(2, 1, null);
+        verify(observer).onItemRangeChanged(5, 1, null);
         verifyNoMoreInteractions(observer);
     }
 
     @Test
     public void rootChangeInvokesGetChildAdapterAgain() {
         reset(mChildAdapterSupplier);
-        mRootAdapter.change(1, 1);
+        mRootAdapter.change(1, 1, null);
         verify(mChildAdapterSupplier).get(1);
         verifyNoMoreInteractions(mChildAdapterSupplier);
     }
@@ -571,7 +571,7 @@ public final class TreeAdapterTest {
         treeAdapter.registerDataObserver(mObserver);
         // Set to return a different child adapter now.
         childAdapterRef.getAndSet(EMPTY);
-        rootAdapter.change(0, 1);
+        rootAdapter.change(0, 1, null);
         // Verify that the same registered observer was later unregistered.
         ArgumentCaptor<DataObserver> captor = ArgumentCaptor.forClass(DataObserver.class);
         verify(oldChildAdapter).registerDataObserver(captor.capture());
@@ -592,8 +592,8 @@ public final class TreeAdapterTest {
         treeAdapter.registerDataObserver(mock(DataObserver.class));
         DataObserver observer = mock(DataObserver.class);
         treeAdapter.registerDataObserver(observer);
-        mRootAdapter.change(1, 1);
-        verify(observer).onItemRangeChanged(4, 1);
+        mRootAdapter.change(1, 1, null);
+        verify(observer).onItemRangeChanged(4, 1, null);
         verify(observer).onItemRangeRemoved(5, 3);
         verify(observer).onItemRangeInserted(5, 3);
         verifyNoMoreInteractions(observer);
@@ -601,9 +601,9 @@ public final class TreeAdapterTest {
 
     @Test
     public void rootChangeStateIsCorrect() {
-        mRootAdapter.change(1, 1);
-        mRootAdapter.change(0, 1);
-        mRootAdapter.change(2, 1);
+        mRootAdapter.change(1, 1, null);
+        mRootAdapter.change(0, 1, null);
+        mRootAdapter.change(2, 1, null);
         verifySubAdapterAllGetCalls()
                 .check(mRootAdapter, 0)
                 .check(mChildAdapters.get(0), 0)
@@ -789,8 +789,8 @@ public final class TreeAdapterTest {
     @Test
     public void childChangeIsTranslated() {
         DataObserver observer = registerMockDataObserver();
-        mChildAdapters.get(2).change(2, 1);
-        verify(observer).onItemRangeChanged(11, 1);
+        mChildAdapters.get(2).change(2, 1, null);
+        verify(observer).onItemRangeChanged(11, 1, null);
         verifyNoMoreInteractions(observer);
     }
 
@@ -798,7 +798,7 @@ public final class TreeAdapterTest {
     public void childChangeWhileNotExpandedIsIgnored() {
         mTreeAdapter.setAllExpanded(false);
         DataObserver observer = registerMockDataObserver();
-        mChildAdapters.get(2).change(2, 1);
+        mChildAdapters.get(2).change(2, 1, null);
         verifyZeroInteractions(observer);
     }
 

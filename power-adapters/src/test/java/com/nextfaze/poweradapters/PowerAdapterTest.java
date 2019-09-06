@@ -7,10 +7,13 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 public final class PowerAdapterTest {
@@ -96,8 +99,8 @@ public final class PowerAdapterTest {
     public void notifyChangeInvokesObservers() {
         DataObserver observer = mock(DataObserver.class);
         mAdapter.registerDataObserver(observer);
-        mAdapter.notifyItemRangeChanged(3, 5);
-        verify(observer).onItemRangeChanged(3, 5);
+        mAdapter.notifyItemRangeChanged(3, 5, null);
+        verify(observer).onItemRangeChanged(3, 5, null);
         verifyNoMoreInteractions(observer);
     }
 
@@ -132,7 +135,7 @@ public final class PowerAdapterTest {
     public void notifyZeroChangeDoesNothing() {
         DataObserver observer = mock(DataObserver.class);
         mAdapter.registerDataObserver(observer);
-        mAdapter.notifyItemRangeChanged(3, 0);
+        mAdapter.notifyItemRangeChanged(3, 0, null);
         verifyZeroInteractions(observer);
     }
 

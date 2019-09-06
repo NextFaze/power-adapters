@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
@@ -81,14 +80,14 @@ public final class LimitDataTest {
     @Test
     public void changeNormal() {
         mData.change(0, "y", "y", "y");
-        verify(mObserver).onItemRangeChanged(0, 3);
+        verify(mObserver).onItemRangeChanged(0, 3, null);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void changeBoundaryStraddlingClipped() {
         mData.change(3, "x", "x", "x");
-        verify(mObserver).onItemRangeChanged(3, 2);
+        verify(mObserver).onItemRangeChanged(3, 2, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -114,7 +113,7 @@ public final class LimitDataTest {
         configure(5, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         mData.addAll(0, newArrayList("x", "y", "z", "w"));
         assertThat(mLimitedData).containsExactly("x", "y", "z", "w", "0").inOrder();
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -123,7 +122,7 @@ public final class LimitDataTest {
         configure(5, "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         mData.addAll(4, newArrayList("x", "y"));
         assertThat(mLimitedData).containsExactly("0", "1", "2", "3", "x").inOrder();
-        verify(mObserver).onItemRangeChanged(4, 1);
+        verify(mObserver).onItemRangeChanged(4, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -162,7 +161,7 @@ public final class LimitDataTest {
         configure(5, "0", "1", "2", "3", "4");
         mData.addAll(0, newArrayList("a", "b", "c", "d", "e"));
         assertThat(mLimitedData).containsExactly("a", "b", "c", "d", "e").inOrder();
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -225,7 +224,7 @@ public final class LimitDataTest {
         configure(5, "0", "1", "2", "3", "4", "6", "7", "8", "9");
         mData.remove(0, 2);
         assertThat(mLimitedData).containsExactly("2", "3", "4", "6", "7").inOrder();
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 

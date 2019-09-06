@@ -9,7 +9,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class RxDataTest {
@@ -32,7 +31,7 @@ class RxDataTest {
         val testObserver = RxData.changes(data).test()
         data.add("a")
         data[0] = "b"
-        testObserver.assertNotTerminated().assertValues(ChangeEvent(0, 1))
+        testObserver.assertNotTerminated().assertValues(ChangeEvent(0, 1, null))
     }
 
     @Test fun inserts() {

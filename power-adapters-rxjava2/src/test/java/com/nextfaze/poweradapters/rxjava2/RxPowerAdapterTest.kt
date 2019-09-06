@@ -5,7 +5,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class RxPowerAdapterTest {
@@ -28,7 +27,7 @@ class RxPowerAdapterTest {
         val testObserver = RxPowerAdapter.changes(adapter).test()
         adapter.append(1)
         adapter.change(0, 1)
-        testObserver.assertNotTerminated().assertValues(ChangeEvent(0, 1))
+        testObserver.assertNotTerminated().assertValues(ChangeEvent(0, 1, null))
     }
 
     @Test fun inserts() {

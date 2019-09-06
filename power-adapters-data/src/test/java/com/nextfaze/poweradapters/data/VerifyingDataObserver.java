@@ -1,6 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.nextfaze.poweradapters.DataObserver;
 
 /**
@@ -25,7 +27,7 @@ final class VerifyingDataObserver implements DataObserver {
     }
 
     @Override
-    public void onItemRangeChanged(int positionStart, int itemCount) {
+    public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
     }
 
     @Override

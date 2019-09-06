@@ -202,7 +202,7 @@ class ObservableDataBuilderTest {
                 .assertChangeNotifications(
                         InsertEvent(0, 2),
                         InsertEvent(2, 1),
-                        ChangeEvent(0, 1),
+                        ChangeEvent(0, 1, null),
                         MoveEvent(1, 0, 1),
                         RemoveEvent(0, 2),
                         RemoveEvent(0, 1)

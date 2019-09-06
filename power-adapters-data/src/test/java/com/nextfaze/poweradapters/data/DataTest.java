@@ -1,7 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
 import android.support.annotation.NonNull;
+
 import com.nextfaze.poweradapters.DataObserver;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,10 +11,17 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public final class DataTest {
@@ -134,16 +143,16 @@ public final class DataTest {
     @Test
     public void notifyItemChanged() {
         DataObserver dataObserver = setUpDataObserver();
-        mData.notifyItemChanged(4);
-        verify(dataObserver).onItemRangeChanged(4, 1);
+        mData.notifyItemChanged(4, null);
+        verify(dataObserver).onItemRangeChanged(4, 1, null);
         verifyNoMoreInteractions(dataObserver);
     }
 
     @Test
     public void notifyItemRangeChanged() {
         DataObserver dataObserver = setUpDataObserver();
-        mData.notifyItemRangeChanged(3, 10);
-        verify(dataObserver).onItemRangeChanged(3, 10);
+        mData.notifyItemRangeChanged(3, 10, null);
+        verify(dataObserver).onItemRangeChanged(3, 10, null);
         verifyNoMoreInteractions(dataObserver);
     }
 

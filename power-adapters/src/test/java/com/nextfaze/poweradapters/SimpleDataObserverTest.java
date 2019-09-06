@@ -7,9 +7,10 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 public final class SimpleDataObserverTest {
@@ -26,8 +27,8 @@ public final class SimpleDataObserverTest {
 
     @Test
     public void onItemRangeChangedCallsOnChanged() {
-        mObserver.onItemRangeChanged(0, 1);
-        verify(mObserver).onItemRangeChanged(0, 1);
+        mObserver.onItemRangeChanged(0, 1, null);
+        verify(mObserver).onItemRangeChanged(0, 1, null);
         verify(mObserver).onChanged();
         verifyNoMoreInteractions(mObserver);
     }

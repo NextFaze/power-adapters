@@ -1,6 +1,7 @@
 package com.nextfaze.poweradapters;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Used to ensure that notifications emitted by the specified {@link PowerAdapter} are consistent with its {@link
@@ -24,7 +25,7 @@ final class VerifyingAdapterObserver implements DataObserver {
     }
 
     @Override
-    public void onItemRangeChanged(int positionStart, int itemCount) {
+    public void onItemRangeChanged(int positionStart, int itemCount, @Nullable Object payload) {
     }
 
     @Override

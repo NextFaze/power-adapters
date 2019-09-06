@@ -220,8 +220,8 @@ public final class ConditionalAdapterTest {
     @Test
     public void childChangeIsForwardedWhileConditionIsTrue() {
         setCondition(always());
-        mFakeAdapter.change(3, 5);
-        verify(mObserver).onItemRangeChanged(3, 5);
+        mFakeAdapter.change(3, 5, null);
+        verify(mObserver).onItemRangeChanged(3, 5, null);
         assertItemCountConsistent();
     }
 
@@ -252,7 +252,7 @@ public final class ConditionalAdapterTest {
     @Test
     public void childChangeIsSuppressedWhileConditionIsFalse() {
         setCondition(Condition.never());
-        mFakeAdapter.change(3, 5);
+        mFakeAdapter.change(3, 5, null);
         verifyZeroInteractions(mObserver);
         assertItemCountConsistent();
     }

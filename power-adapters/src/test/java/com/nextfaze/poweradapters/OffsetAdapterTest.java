@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
@@ -83,24 +82,24 @@ public final class OffsetAdapterTest {
 
     @Test
     public void changeOutOfBounds() {
-        mFakeAdapter.change(2, 1);
+        mFakeAdapter.change(2, 1, null);
         verifyState(5, 5);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void changeWithinBounds() {
-        mFakeAdapter.change(6, 3);
+        mFakeAdapter.change(6, 3, null);
         verifyState(5, 5);
-        verify(mObserver).onItemRangeChanged(1, 3);
+        verify(mObserver).onItemRangeChanged(1, 3, null);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void changeBoundaryStraddling() {
-        mFakeAdapter.change(3, 3);
+        mFakeAdapter.change(3, 3, null);
         verifyState(5, 5);
-        verify(mObserver).onItemRangeChanged(0, 1);
+        verify(mObserver).onItemRangeChanged(0, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 

@@ -193,8 +193,8 @@ public final class ConcatAdapterTest {
     @Test
     public void childChange() {
         DataObserver observer = registerMockDataObserver();
-        mChildAdapters.get(1).change(1, 3);
-        verify(observer).onItemRangeChanged(4, 3);
+        mChildAdapters.get(1).change(1, 3, null);
+        verify(observer).onItemRangeChanged(4, 3, null);
         verifyNoMoreInteractions(observer);
     }
 

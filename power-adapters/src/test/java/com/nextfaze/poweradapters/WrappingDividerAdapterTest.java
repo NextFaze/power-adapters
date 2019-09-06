@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING;
@@ -155,7 +154,7 @@ public final class WrappingDividerAdapterTest {
         mFakeAdapter.remove(0, 5);
         assertThat(mDividerAdapter.getItemCount()).isEqualTo(10);
         verify(mObserver).onItemRangeRemoved(0, 5);
-        verify(mObserver).onItemRangeChanged(0, 1);
+        verify(mObserver).onItemRangeChanged(0, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -165,7 +164,7 @@ public final class WrappingDividerAdapterTest {
         mFakeAdapter.remove(10, 5);
         assertThat(mDividerAdapter.getItemCount()).isEqualTo(10);
         verify(mObserver).onItemRangeRemoved(10, 5);
-        verify(mObserver).onItemRangeChanged(9, 1);
+        verify(mObserver).onItemRangeChanged(9, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -224,7 +223,7 @@ public final class WrappingDividerAdapterTest {
         mFakeAdapter.insert(0, 5);
         assertThat(mDividerAdapter.getItemCount()).isEqualTo(15);
         verify(mObserver).onItemRangeInserted(0, 5);
-        verify(mObserver).onItemRangeChanged(5, 1);
+        verify(mObserver).onItemRangeChanged(5, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -234,7 +233,7 @@ public final class WrappingDividerAdapterTest {
         mFakeAdapter.insert(10, 5);
         assertThat(mDividerAdapter.getItemCount()).isEqualTo(15);
         verify(mObserver).onItemRangeInserted(10, 5);
-        verify(mObserver).onItemRangeChanged(9, 1);
+        verify(mObserver).onItemRangeChanged(9, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 

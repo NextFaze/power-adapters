@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
@@ -96,24 +95,24 @@ public final class LimitAdapterTest {
 
     @Test
     public void changeOutOfBounds() {
-        mFakeAdapter.change(5, 1);
+        mFakeAdapter.change(5, 1, null);
         verifyState(5);
         verifyZeroInteractions(mObserver);
     }
 
     @Test
     public void changeNormal() {
-        mFakeAdapter.change(0, 3);
+        mFakeAdapter.change(0, 3, null);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(0, 3);
+        verify(mObserver).onItemRangeChanged(0, 3, null);
         verifyNoMoreInteractions(mObserver);
     }
 
     @Test
     public void changeBoundaryStraddlingClipped() {
-        mFakeAdapter.change(3, 3);
+        mFakeAdapter.change(3, 3, null);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(3, 2);
+        verify(mObserver).onItemRangeChanged(3, 2, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -139,7 +138,7 @@ public final class LimitAdapterTest {
         configure(5, 10);
         mFakeAdapter.insert(0, 4);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -148,7 +147,7 @@ public final class LimitAdapterTest {
         configure(5, 10);
         mFakeAdapter.insert(4, 2);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(4, 1);
+        verify(mObserver).onItemRangeChanged(4, 1, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -187,7 +186,7 @@ public final class LimitAdapterTest {
         configure(5, 5);
         mFakeAdapter.insert(0, 5);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 
@@ -250,7 +249,7 @@ public final class LimitAdapterTest {
         configure(5, 10);
         mFakeAdapter.remove(0, 2);
         verifyState(5);
-        verify(mObserver).onItemRangeChanged(0, 5);
+        verify(mObserver).onItemRangeChanged(0, 5, null);
         verifyNoMoreInteractions(mObserver);
     }
 

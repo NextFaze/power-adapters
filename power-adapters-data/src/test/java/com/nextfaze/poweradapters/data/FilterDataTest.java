@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
@@ -98,9 +97,9 @@ public final class FilterDataTest {
         DataObserver observer = registerMockObserver();
         mData.setNotificationType(COARSE);
         mData.append("bass");
-        verify(observer).onItemRangeChanged(0, 1);
-        verify(observer).onItemRangeChanged(1, 1);
-        verify(observer).onItemRangeChanged(2, 1);
+        verify(observer).onItemRangeChanged(0, 1, null);
+        verify(observer).onItemRangeChanged(1, 1, null);
+        verify(observer).onItemRangeChanged(2, 1, null);
         verify(observer).onItemRangeInserted(3, 1);
         verifyNoMoreInteractions(observer);
         verifyZeroInteractions(mFilterLoadingObserver, mFilterAvailableObserver, mFilterErrorObserver);
@@ -110,7 +109,7 @@ public final class FilterDataTest {
     public void changeIncludedElement() {
         DataObserver observer = registerMockObserver();
         mData.change(3, "boo");
-        verify(observer).onItemRangeChanged(1, 1);
+        verify(observer).onItemRangeChanged(1, 1, null);
         verifyNoMoreInteractions(observer);
     }
 

@@ -61,9 +61,9 @@ class TestDataObserver<T>(val data: Data<T>) : DataObserver, LoadingObserver, Av
         addElementValues()
     }
 
-    override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+    override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
         addElementValues()
-        changeEvents += ChangeEvent(positionStart, itemCount)
+        changeEvents += ChangeEvent(positionStart, itemCount, payload)
     }
 
     override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
