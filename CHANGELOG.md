@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.24.0
+
+_2019-09-06_
+
+* Add support for change notification payloads
+
 ## Version 0.23.0
 
 _2019-08-20_
