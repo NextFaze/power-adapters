@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+## Version 0.24.1
+
+_2019-09-09_
+
+* Add parameter to `observableData` and `toData` that allows the caller to specify the `Scheduler` on which diffs
+ are computed
+
 ## Version 0.24.0
 
 _2019-09-06_
