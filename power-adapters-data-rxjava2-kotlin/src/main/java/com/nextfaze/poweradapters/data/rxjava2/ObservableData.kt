@@ -6,8 +6,9 @@ import android.support.v7.util.ListUpdateCallback
 import com.nextfaze.poweradapters.data.Data
 import io.reactivex.Maybe
 import io.reactivex.Observable
+import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers.computation
+import io.reactivex.schedulers.Schedulers
 import kotlin.math.min
 
 /**
@@ -20,13 +21,18 @@ import kotlin.math.min
  * the first emission. If `null`, the resulting data considers itself in a loading state until the first emission
  * of the content observable.
  * @param diffStrategy The strategy used to detect changes in content.
+ * @param diffScheduler The [Scheduler] used to calculate some diffs. Changing this to
+ * [Schedulers.trampoline] may be useful for ensuring change notifications happen synchronously,
+ * which can facilitate certain animations.
+ * Uses the [computation scheduler][Schedulers.computation] by default.
  */
 @CheckResult fun <T : Any> observableData(
         contents: (loadType: LoadType) -> Observable<out Collection<T>>,
         available: ((loadType: LoadType) -> Observable<Int>)? = null,
         loading: ((loadType: LoadType) -> Observable<Boolean>)? = null,
-        diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained
-): Data<T> = KObservableData(contents, available, loading, diffStrategy)
+        diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained,
+        diffScheduler: Scheduler = Schedulers.computation()
+): Data<T> = KObservableData(contents, available, loading, diffStrategy, diffScheduler)
 
 /** Indicates the reason [Data] is subscribing to an `Observable` data source. */
 enum class LoadType {
@@ -61,14 +67,20 @@ sealed class DiffStrategy<out T : Any> {
 }
 
 @CheckResult fun <T : Any> Observable<out Collection<T>>.toData(
-        diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained
-): Data<T> = observableData(contents = { this }, diffStrategy = diffStrategy)
+        diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained,
+        diffScheduler: Scheduler = Schedulers.computation()
+): Data<T> = observableData(
+        contents = { this },
+        diffStrategy = diffStrategy,
+        diffScheduler = diffScheduler
+)
 
 private class KObservableData<T : Any>(
         private val contentsSupplier: (loadType: LoadType) -> Observable<out Collection<T>>,
         private val availableSupplier: ((loadType: LoadType) -> Observable<Int>)? = null,
         private val loadingSupplier: ((loadType: LoadType) -> Observable<Boolean>)? = null,
-        private val diffStrategy: DiffStrategy<T>
+        private val diffStrategy: DiffStrategy<T>,
+        private val diffScheduler: Scheduler
 ) : Data<T>() {
 
     private var list = emptyList<T>()
@@ -269,7 +281,7 @@ private class KObservableData<T : Any>(
             else -> Maybe.fromCallable<ChangeDispatch<T>> {
                 val diffResult = DiffUtil.calculateDiff(diffUtilCallback(oldList = oldList, newList = newList), detectMoves)
                 return@fromCallable { diffResult.dispatchUpdatesTo(listUpdateCallback) }
-            }.subscribeOn(computation())
+            }.subscribeOn(diffScheduler)
         }
     }
 
