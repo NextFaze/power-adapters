@@ -11,24 +11,17 @@ import com.nextfaze.poweradapters.sample.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 import static java.lang.Math.max;
 
 public final class FileView extends RelativeLayout {
 
-    @BindView(R.id.icon)
     ImageView mIconView;
 
-    @BindView(R.id.title)
     TextView mTitleView;
 
-    @BindView(R.id.subtitle)
     TextView mSubtitleView;
 
-    @BindView(R.id.peek_button)
     View mPeekButton;
 
     @Nullable
@@ -45,7 +38,11 @@ public final class FileView extends RelativeLayout {
     public FileView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.file_view, this);
-        ButterKnife.bind(this);
+        mIconView = findViewById(R.id.icon);
+        mTitleView = findViewById(R.id.title);
+        mSubtitleView = findViewById(R.id.subtitle);
+        mPeekButton = findViewById(R.id.peek_button);
+        mPeekButton.setOnClickListener(v -> onPeekClick());
         updatePeekButton();
     }
 
@@ -72,7 +69,6 @@ public final class FileView extends RelativeLayout {
         }
     }
 
-    @OnClick(R.id.peek_button)
     void onPeekClick() {
         if (mOnPeekListener != null) {
             mOnPeekListener.onPeek();

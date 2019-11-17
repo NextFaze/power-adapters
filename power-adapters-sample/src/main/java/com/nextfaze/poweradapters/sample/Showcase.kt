@@ -1,20 +1,21 @@
 package com.nextfaze.poweradapters.sample
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.support.constraint.ConstraintLayout
-import android.support.v4.app.Fragment
-import android.support.v4.view.ViewCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jakewharton.rxbinding2.view.clicks
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
+import com.jakewharton.rxbinding3.view.clicks
 import com.nextfaze.poweradapters.AdapterBuilder
 import com.nextfaze.poweradapters.PowerAdapter
 import com.nextfaze.poweradapters.buildAdapter
@@ -84,20 +85,23 @@ class ShowcaseFragment : Fragment() {
             Section("Multi-Type") { createMultiTypeAdapter(multiTypeViewModel) }
     )
 
-    private val showcaseViewModel by viewModel<ShowcaseViewModel>()
-    private val fileTreeViewModel by viewModel<FileTreeViewModel>()
-    private val catsViewModel by viewModel<CatsViewModel>()
-    private val applesViewModel by viewModel<ApplesViewModel>()
-    private val newsViewModel by viewModel<NewsViewModel>()
-    private val multiTypeViewModel by viewModel<MultiTypeViewModel>()
+    private val showcaseViewModel by viewModels<ShowcaseViewModel>()
+    private val fileTreeViewModel by viewModels<FileTreeViewModel>()
+    private val catsViewModel by viewModels<CatsViewModel>()
+    private val applesViewModel by viewModels<ApplesViewModel>()
+    private val newsViewModel by viewModels<NewsViewModel>()
+    private val multiTypeViewModel by viewModels<MultiTypeViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.showcase_fragment, container, false)
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View = inflater.inflate(R.layout.showcase_fragment, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -107,12 +111,14 @@ class ShowcaseFragment : Fragment() {
         }.toRecyclerAdapter()
     }
 
+    @SuppressLint("AutoDispose", "CheckResult")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.showcase, menu)
         menu.findItem(R.id.expandAll).clicks().subscribe { showcaseViewModel.setAllSectionsCollapsed(false) }
         menu.findItem(R.id.collapseAll).clicks().subscribe { showcaseViewModel.setAllSectionsCollapsed(true) }
     }
 
+    @SuppressLint("AutoDispose")
     private fun AdapterBuilder.section(name: String, adapter: PowerAdapter) {
         val sectionExpanded = !showcaseViewModel.sectionCollapsed(name)
 
@@ -145,6 +151,3 @@ class HeaderView @JvmOverloads constructor(
         ViewCompat.setBackground(this, context.getDrawableForAttribute(R.attr.selectableItemBackground))
     }
 }
-
-private inline fun <reified T : ViewModel> Fragment.viewModel() =
-        lazy { ViewModelProviders.of(this).get(T::class.java) }

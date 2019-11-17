@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.sample.news
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.ViewModel
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.ViewModel
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING
 import com.nextfaze.poweradapters.Holder

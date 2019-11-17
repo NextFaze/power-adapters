@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.sample.rxjava
 
-import android.support.v4.view.ViewCompat
 import android.util.Log
 import android.view.View
-import com.jakewharton.rxbinding2.view.ViewAttachAttachedEvent
-import com.jakewharton.rxbinding2.view.attachEvents
+import androidx.core.view.ViewCompat
+import com.jakewharton.rxbinding3.view.ViewAttachAttachedEvent
+import com.jakewharton.rxbinding3.view.attachEvents
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.Flowables
@@ -31,7 +31,6 @@ fun View.attached(): Observable<Boolean> = Observable.defer {
             .concatWith(attachEvents().map { it is ViewAttachAttachedEvent })
 }
 
-
 /** Mirror the source `Observable` while the specified `Observable`'s latest emitted value is true. */
 fun <T> Observable<T>.takeWhile(p: Observable<Boolean>): Observable<T> {
     val shared = p.distinctUntilChanged().share()
@@ -46,7 +45,10 @@ operator fun Observable<Boolean>.not(): Observable<Boolean> = map { !it }
 infix fun Observable<Boolean>.and(o: Observable<Boolean>) = expr(o) { a, b -> a && b }
 infix fun Observable<Boolean>.or(o: Observable<Boolean>) = expr(o) { a, b -> a || b }
 
-private inline fun Flowable<Boolean>.expr(o: Flowable<Boolean>, crossinline expression: (Boolean, Boolean) -> Boolean):
+private inline fun Flowable<Boolean>.expr(
+        o: Flowable<Boolean>,
+        crossinline expression: (Boolean, Boolean) -> Boolean
+):
         Flowable<Boolean> = Flowables.combineLatest(this, o) { a, b -> expression(a, b) }.distinctUntilChanged()
 
 private inline fun Observable<Boolean>.expr(

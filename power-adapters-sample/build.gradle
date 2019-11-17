@@ -7,8 +7,8 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 27
+        minSdkVersion 23
+        targetSdkVersion 29
         versionCode 1
         versionName '1.0'
         vectorDrawables.useSupportLibrary = true
@@ -30,6 +30,10 @@ android {
     dexOptions {
         preDexLibraries = getBoolProperty('dexPreDexLibraries', true)
     }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
@@ -43,20 +47,18 @@ dependencies {
     // Kotlin
     implementation rootProject.ext.kotlinStdlib
 
-    // Support
+    // AndroidX
     implementation rootProject.ext.androidXTransition
     implementation rootProject.ext.androidXCardView
     implementation rootProject.ext.androidXVectorDrawable
+    implementation "androidx.activity:activity-ktx:1.2.0-alpha04"
+    implementation "androidx.fragment:fragment-ktx:1.3.0-alpha04"
 
     // Architecture Components
-    def architectureComponentsVersion = '1.1.1'
-    implementation "android.arch.lifecycle:runtime:$architectureComponentsVersion"
-    implementation "android.arch.lifecycle:extensions:$architectureComponentsVersion"
-    implementation "android.arch.lifecycle:reactivestreams:$architectureComponentsVersion"
-    kapt "android.arch.lifecycle:compiler:$architectureComponentsVersion"
+    implementation "androidx.arch.core:core-runtime:2.1.0"
 
     // ConstraintLayout
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     // RxJava
     implementation rootProject.ext.rxJava2
@@ -70,20 +72,16 @@ dependencies {
     implementation "com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion"
 
     // RxReplayingShare 2
-    implementation 'com.jakewharton.rx2:replaying-share-kotlin:2.0.1'
+    implementation 'com.jakewharton.rx2:replaying-share-kotlin:2.1.0'
 
     // AutoDispose
-    def autoDisposeVersion = '0.8.0'
-    implementation "com.uber.autodispose:autodispose-kotlin:$autoDisposeVersion"
-    implementation "com.uber.autodispose:autodispose-android-kotlin:$autoDisposeVersion"
-    implementation "com.uber.autodispose:autodispose-android-archcomponents-kotlin:$autoDisposeVersion"
+    def autoDisposeVersion = '1.4.0'
+    implementation "com.uber.autodispose:autodispose:$autoDisposeVersion"
+    implementation "com.uber.autodispose:autodispose-android:$autoDisposeVersion"
+    implementation "com.uber.autodispose:autodispose-android-archcomponents:$autoDisposeVersion"
 
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
-
-    // ButterKnife
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    kapt 'com.jakewharton:butterknife-compiler:8.8.1'
 
     // Guava
     //noinspection GradleDependency

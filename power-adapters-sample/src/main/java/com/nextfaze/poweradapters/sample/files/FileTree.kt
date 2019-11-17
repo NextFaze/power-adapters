@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample.files
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter
 import com.nextfaze.poweradapters.binder

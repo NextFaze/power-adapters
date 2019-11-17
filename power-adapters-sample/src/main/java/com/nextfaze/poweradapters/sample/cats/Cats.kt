@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.sample.cats
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.AndroidViewModel
 import com.jakewharton.rx.replayingShare
 import com.nextfaze.poweradapters.PowerAdapter.asAdapter
 import com.nextfaze.poweradapters.binder
@@ -47,7 +47,7 @@ class CatsViewModel(application: Application) : AndroidViewModel(application) {
             // Emit a sequence of int ranges
             .scan(0 until PAGE_SIZE) { range, _ -> range.next(PAGE_SIZE) }
             // Load each range of cats into a page, in order
-            .concatMap{ cats(application, it).toObservable() }
+            .concatMap { cats(application, it).toObservable() }
             // Reduce pages into a single list
             .scan { list, page -> list + page }
             .observeOn(mainThread())
@@ -120,6 +120,9 @@ data class Cat(val name: String, val country: String)
  * A sub list of a greater collection of [T] elements.
  * @property total The total number of elements in the greater collection.
  */
-private data class Page<T>(private val contents: ImmutableList<T>, val total: Int) : ImmutableList<T> by contents {
+private data class Page<T>(
+        private val contents: ImmutableList<T>,
+        val total: Int
+) : ImmutableList<T> by contents {
     operator fun plus(page: Page<T>) = Page(contents + page.contents, total)
 }

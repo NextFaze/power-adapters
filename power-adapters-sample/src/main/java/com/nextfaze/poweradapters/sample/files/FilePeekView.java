@@ -1,7 +1,6 @@
 package com.nextfaze.poweradapters.sample.files;
 
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,11 +19,10 @@ import java.util.Random;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
-import static android.support.v7.widget.LinearLayoutManager.HORIZONTAL;
+import static androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL;
 import static com.nextfaze.poweradapters.binding.ViewHolderBinder.create;
 import static com.nextfaze.poweradapters.recyclerview.RecyclerPowerAdapters.toRecyclerAdapter;
 
@@ -42,10 +40,8 @@ public final class FilePeekView extends RelativeLayout {
         itemViewHolder.titleView.setText(file.getName());
     });
 
-    @BindView(R.id.data_layout)
     DataLayout mDataLayout;
 
-    @BindView(R.id.recycler)
     RecyclerView mRecyclerView;
 
     public FilePeekView(Context context) {
@@ -59,7 +55,8 @@ public final class FilePeekView extends RelativeLayout {
     public FilePeekView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.file_peek_view, this);
-        ButterKnife.bind(this);
+        mDataLayout = findViewById(R.id.data_layout);
+        mRecyclerView = findViewById(R.id.recycler);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context, HORIZONTAL, false));
     }
 
@@ -76,15 +73,14 @@ public final class FilePeekView extends RelativeLayout {
 
     static final class ItemViewHolder extends ViewHolder {
 
-        @BindView(R.id.image)
         ImageView imageView;
 
-        @BindView(R.id.title)
         TextView titleView;
 
         ItemViewHolder(@NonNull View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            imageView = view.findViewById(R.id.image);
+            titleView = view.findViewById(R.id.title);
         }
     }
 }

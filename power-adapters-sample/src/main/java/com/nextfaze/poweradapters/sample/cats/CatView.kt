@@ -2,8 +2,8 @@ package com.nextfaze.poweradapters.sample.cats
 
 import android.content.Context
 import android.net.Uri
-import android.support.v7.widget.CardView
 import android.util.AttributeSet
+import androidx.cardview.widget.CardView
 import com.nextfaze.poweradapters.sample.R
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.cat_view.view.*

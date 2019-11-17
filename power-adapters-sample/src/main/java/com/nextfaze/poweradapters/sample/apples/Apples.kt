@@ -2,14 +2,14 @@ package com.nextfaze.poweradapters.sample.apples
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
 import android.content.Context
 import android.content.res.AssetManager
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.support.constraint.ConstraintLayout
 import android.util.AttributeSet
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.AndroidViewModel
 import com.nextfaze.poweradapters.binder
 import com.nextfaze.poweradapters.buildAdapter
 import com.nextfaze.poweradapters.data.cursorData
