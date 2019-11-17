@@ -22,7 +22,7 @@ ext {
     robolectric = 'org.robolectric:robolectric:4.0-alpha-2'
     mockito = 'org.mockito:mockito-core:2.19.0'
     mockitoKotlin = 'com.nhaarman:mockito-kotlin:1.5.0'
-    rxJava2 = 'io.reactivex.rxjava2:rxjava:2.2.11'
+    rxJava2 = 'io.reactivex.rxjava2:rxjava:2.2.14'
     rxKotlin2 = 'io.reactivex.rxjava2:rxkotlin:2.4.0'
     rxAndroid2 = 'io.reactivex.rxjava2:rxandroid:2.1.1'
     junit = 'junit:junit:4.12'
