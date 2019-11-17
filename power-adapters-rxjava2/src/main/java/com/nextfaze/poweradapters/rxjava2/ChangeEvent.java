@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.rxjava2;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public final class ChangeEvent {
 

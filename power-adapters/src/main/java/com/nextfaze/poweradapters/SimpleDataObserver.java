@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /** Forwards fine-grained calls to {@link DataObserver#onChanged()} by default. */
 public abstract class SimpleDataObserver implements DataObserver {

@@ -1,7 +1,7 @@
 package com.nextfaze.poweradapters.data.internal;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 import com.nextfaze.poweradapters.data.Data;
@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;

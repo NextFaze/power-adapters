@@ -1,7 +1,8 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.util.SparseIntArray;
+
+import androidx.annotation.NonNull;
 
 final class RangeTable {
 

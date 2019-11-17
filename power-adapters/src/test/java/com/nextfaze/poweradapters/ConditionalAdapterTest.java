@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -16,6 +15,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+
+import androidx.annotation.NonNull;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.AdapterTestUtils.holder;

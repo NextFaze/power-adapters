@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.sample.news;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.nextfaze.poweradapters.data.IncrementalArrayData;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public final class NewsData extends IncrementalArrayData<NewsItem> {
 

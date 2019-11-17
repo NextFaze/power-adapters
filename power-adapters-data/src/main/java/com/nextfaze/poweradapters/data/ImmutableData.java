@@ -1,10 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.DataObserver;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 import static java.util.Collections.addAll;
 import static java.util.Collections.emptyList;

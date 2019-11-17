@@ -1,11 +1,11 @@
 package com.nextfaze.poweradapters.sample.news;
 
-import android.support.annotation.NonNull;
-
 import com.nextfaze.poweradapters.data.ArrayData;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 public final class NewsMultiTypeData extends ArrayData<Object> {
 

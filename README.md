@@ -56,7 +56,7 @@ This library provides the following features:
 * RxJava extension modules, adding easy integration with `Observable`s, etc
 
 Power adapters are compatible with the following collection view classes:
-* `android.support.v7.widget.RecyclerView`
+* `androidx.recyclerview.widget.RecyclerView`
 * `android.widget.ListView`
 * `android.widget.GridView`
 * `android.support.v4.view.ViewPager`

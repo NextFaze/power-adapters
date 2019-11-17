@@ -3,12 +3,6 @@ package com.nextfaze.poweradapters.data;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Looper;
-import android.support.annotation.CallSuper;
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.UiThread;
 
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
@@ -22,7 +16,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.CallSuper;
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.UiThread;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.data.ImmutableData.emptyImmutableData;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

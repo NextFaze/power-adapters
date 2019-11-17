@@ -1,9 +1,10 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

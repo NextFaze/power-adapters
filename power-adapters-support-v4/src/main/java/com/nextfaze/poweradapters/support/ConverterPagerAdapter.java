@@ -1,11 +1,6 @@
 package com.nextfaze.poweradapters.support;
 
 import android.database.DataSetObserver;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.view.PagerAdapterFixed;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -23,6 +18,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.viewpager.widget.PagerAdapterFixed;
+import androidx.viewpager.widget.ViewPager;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

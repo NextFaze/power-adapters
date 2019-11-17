@@ -1,8 +1,9 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 /**
  * Represents the abstract managing container of a single use of a {@link PowerAdapter}. This allows items in the

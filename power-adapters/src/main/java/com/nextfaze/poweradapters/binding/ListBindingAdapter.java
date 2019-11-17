@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters.binding;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -10,6 +9,8 @@ import com.nextfaze.poweradapters.ListAdapter;
 
 import java.util.Collections;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;

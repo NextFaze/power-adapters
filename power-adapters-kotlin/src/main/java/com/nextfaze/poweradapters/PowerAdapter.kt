@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters
 
 import android.annotation.SuppressLint
-import android.support.annotation.CheckResult
-import android.support.annotation.LayoutRes
+import androidx.annotation.CheckResult
+import androidx.annotation.LayoutRes
 import com.nextfaze.poweradapters.PowerAdapter.asAdapter
 import com.nextfaze.poweradapters.ViewFactories.asViewFactory
 import com.nextfaze.poweradapters.binding.Binder

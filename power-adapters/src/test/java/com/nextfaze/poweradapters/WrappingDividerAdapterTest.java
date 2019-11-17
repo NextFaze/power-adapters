@@ -1,9 +1,5 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.nextfaze.poweradapters.test.FakeAdapter;
 
 import org.junit.After;
@@ -14,6 +10,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.SHOW_LEADING;

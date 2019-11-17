@@ -1,14 +1,14 @@
 package com.nextfaze.poweradapters.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-
 import com.nextfaze.poweradapters.DataObserver;
 
 import java.util.ArrayList;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** For internal use only. */

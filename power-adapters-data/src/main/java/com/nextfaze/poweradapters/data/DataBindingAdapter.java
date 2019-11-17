@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.binding.Binder;
 import com.nextfaze.poweradapters.binding.BindingAdapter;
 import com.nextfaze.poweradapters.binding.Mapper;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.nextfaze.poweradapters.binding.Mappers.singletonMapper;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;

@@ -1,12 +1,13 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import org.mockito.InOrder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.truth.Truth.assertThat;

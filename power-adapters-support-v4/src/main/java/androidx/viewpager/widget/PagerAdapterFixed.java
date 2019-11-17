@@ -1,7 +1,8 @@
-package android.support.v4.view;
+package androidx.viewpager.widget;
 
 import android.database.DataSetObserver;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 /**
  * Hacks into {@link PagerAdapter} to ensure {@link #registerDataSetObserver} gets called when {@link ViewPager} sets

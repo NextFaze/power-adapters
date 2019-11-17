@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.sample.news;
 
-import android.support.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import androidx.annotation.NonNull;
 
 import static java.lang.String.format;
 

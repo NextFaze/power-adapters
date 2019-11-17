@@ -1,13 +1,13 @@
 package com.nextfaze.poweradapters.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-
 import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** Weak hash map with a weak value as well as key, which means values can hold strong references to their key. */

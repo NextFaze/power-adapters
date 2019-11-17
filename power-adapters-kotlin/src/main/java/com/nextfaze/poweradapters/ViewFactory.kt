@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters
 
-import android.support.annotation.CheckResult
-import android.support.annotation.LayoutRes
 import android.view.View
+import androidx.annotation.CheckResult
+import androidx.annotation.LayoutRes
 import com.nextfaze.poweradapters.internal.AdapterUtils
 
 @CheckResult fun ViewFactory.toAdapter(): PowerAdapter = PowerAdapter.asAdapter(this)

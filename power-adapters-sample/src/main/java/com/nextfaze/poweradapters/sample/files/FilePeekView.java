@@ -1,10 +1,7 @@
 package com.nextfaze.poweradapters.sample.files;
 
 import android.content.Context;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,6 +18,9 @@ import com.nextfaze.poweradapters.sample.R;
 import java.util.List;
 import java.util.Random;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 

@@ -2,8 +2,8 @@ package com.nextfaze.poweradapters.sample.news
 
 import android.arch.lifecycle.ViewModel
 import android.content.Context
-import android.support.annotation.ColorInt
 import android.support.v7.app.AlertDialog
+import androidx.annotation.ColorInt
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.Holder
 import com.nextfaze.poweradapters.adapterOf

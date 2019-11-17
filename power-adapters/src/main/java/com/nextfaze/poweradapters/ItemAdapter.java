@@ -1,6 +1,5 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -9,6 +8,8 @@ import com.nextfaze.poweradapters.internal.WeakMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 

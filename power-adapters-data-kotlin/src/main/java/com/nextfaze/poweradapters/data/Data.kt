@@ -2,7 +2,7 @@ package com.nextfaze.poweradapters.data
 
 import android.database.Cursor
 import android.database.DataSetObserver
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.nextfaze.poweradapters.DataObserver
 import com.nextfaze.poweradapters.binding.Binder
 import com.nextfaze.poweradapters.binding.Mapper

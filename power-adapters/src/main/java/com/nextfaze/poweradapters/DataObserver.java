@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public interface DataObserver {
     void onChanged();

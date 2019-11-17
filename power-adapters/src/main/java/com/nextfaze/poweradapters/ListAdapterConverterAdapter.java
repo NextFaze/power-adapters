@@ -2,7 +2,6 @@ package com.nextfaze.poweradapters;
 
 import android.database.DataSetObserver;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -15,6 +14,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 import static android.os.Looper.getMainLooper;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;

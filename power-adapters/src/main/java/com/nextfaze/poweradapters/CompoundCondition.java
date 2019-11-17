@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 
 import static java.util.Collections.addAll;
 

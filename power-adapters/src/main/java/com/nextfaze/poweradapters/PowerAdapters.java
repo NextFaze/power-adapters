@@ -1,11 +1,12 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

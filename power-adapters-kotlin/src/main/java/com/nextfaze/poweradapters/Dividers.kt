@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters
 
-import android.support.annotation.LayoutRes
+import androidx.annotation.LayoutRes
 import com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy
 import com.nextfaze.poweradapters.DividerAdapterBuilder.EmptyPolicy.DEFAULT
 

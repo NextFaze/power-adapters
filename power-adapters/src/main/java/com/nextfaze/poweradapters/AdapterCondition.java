@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 final class AdapterCondition extends Condition {
 

@@ -1,11 +1,5 @@
 package com.nextfaze.poweradapters.rxjava2.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.v7.util.DiffUtil;
-import android.support.v7.util.ListUpdateCallback;
-
 import com.nextfaze.poweradapters.internal.DataObservable;
 import com.nextfaze.poweradapters.rxjava2.EqualityFunction;
 
@@ -14,12 +8,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListUpdateCallback;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Function;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static com.nextfaze.poweradapters.rxjava2.internal.Utils.mainThreadCompletable;
 import static com.nextfaze.poweradapters.rxjava2.internal.Utils.mainThreadObservable;

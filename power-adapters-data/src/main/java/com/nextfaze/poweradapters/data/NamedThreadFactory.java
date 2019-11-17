@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
-
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import androidx.annotation.NonNull;
 
 import static java.lang.String.format;
 

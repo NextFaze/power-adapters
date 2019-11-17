@@ -1,12 +1,6 @@
 package com.nextfaze.poweradapters;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.CallSuper;
-import android.support.annotation.CheckResult;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,7 +9,14 @@ import com.nextfaze.poweradapters.internal.DataObservable;
 import java.util.Collection;
 import java.util.List;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.CallSuper;
+import androidx.annotation.CheckResult;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.ItemAdapter.toItems;
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;

@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.sample.news;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class NewsSection {
 

@@ -1,9 +1,10 @@
 package com.nextfaze.poweradapters.support;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.v4.view.PagerAdapter;
 import com.nextfaze.poweradapters.PowerAdapter;
+
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
 
 public final class SupportPowerAdapters {
 

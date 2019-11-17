@@ -1,10 +1,11 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.Predicate;
 import com.nextfaze.poweradapters.SimpleDataObserver;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

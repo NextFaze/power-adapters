@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.PowerAdapter.asAdapter;
 

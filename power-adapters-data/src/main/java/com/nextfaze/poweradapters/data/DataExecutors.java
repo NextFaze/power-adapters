@@ -1,9 +1,10 @@
 package com.nextfaze.poweradapters.data;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 
 import java.util.concurrent.ExecutorService;
+
+import androidx.annotation.NonNull;
 
 public final class DataExecutors {
 

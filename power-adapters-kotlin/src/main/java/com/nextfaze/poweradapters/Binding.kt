@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters
 
-import android.support.annotation.LayoutRes
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import com.nextfaze.poweradapters.binding.Binder
 import com.nextfaze.poweradapters.binding.BinderWrapper
 import com.nextfaze.poweradapters.binding.Mapper

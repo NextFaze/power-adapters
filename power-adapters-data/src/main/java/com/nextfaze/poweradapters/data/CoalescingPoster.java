@@ -1,11 +1,12 @@
 package com.nextfaze.poweradapters.data;
 
 import android.os.Handler;
-import android.support.annotation.NonNull;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import androidx.annotation.NonNull;
 
 import static android.os.Looper.getMainLooper;
 

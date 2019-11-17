@@ -1,13 +1,12 @@
 package com.nextfaze.poweradapters.rxjava2;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.nextfaze.poweradapters.DataObserver;
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.SimpleDataObserver;
 
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;

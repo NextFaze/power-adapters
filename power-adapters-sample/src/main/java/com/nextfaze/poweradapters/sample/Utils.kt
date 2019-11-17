@@ -2,12 +2,12 @@ package com.nextfaze.poweradapters.sample
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.support.annotation.AttrRes
 import android.support.v4.content.ContextCompat
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.AttrRes
 import com.nextfaze.poweradapters.Container
 import com.nextfaze.poweradapters.Holder
 import com.nextfaze.poweradapters.PowerAdapter

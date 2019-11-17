@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.sample.news;
 
-import android.support.annotation.NonNull;
-
 import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.data.DataBindingAdapter;
+
+import androidx.annotation.NonNull;
 
 public final class News {
     @NonNull

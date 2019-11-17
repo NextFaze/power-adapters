@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
-
 import java.util.Iterator;
+
+import androidx.annotation.NonNull;
 
 final class DataIterator<T> implements Iterator<T> {
 

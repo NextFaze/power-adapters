@@ -1,10 +1,5 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
-import android.support.annotation.WorkerThread;
 import com.nextfaze.poweradapters.internal.NotifyingArrayList;
 
 import java.io.Closeable;
@@ -16,6 +11,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+import androidx.annotation.WorkerThread;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 import static java.lang.Math.max;

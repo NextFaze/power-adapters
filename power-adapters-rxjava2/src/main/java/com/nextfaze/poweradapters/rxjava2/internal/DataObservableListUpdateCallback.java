@@ -1,12 +1,12 @@
 package com.nextfaze.poweradapters.rxjava2.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
-import android.support.v7.util.ListUpdateCallback;
-
 import com.nextfaze.poweradapters.internal.DataObservable;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
+import androidx.recyclerview.widget.ListUpdateCallback;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 
 /** For internal use only. */

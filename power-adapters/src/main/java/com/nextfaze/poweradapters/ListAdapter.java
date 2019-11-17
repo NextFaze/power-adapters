@@ -1,12 +1,13 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.internal.NotifyingArrayList;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

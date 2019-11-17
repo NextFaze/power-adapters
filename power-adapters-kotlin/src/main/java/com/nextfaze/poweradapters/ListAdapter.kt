@@ -1,5 +1,5 @@
 package com.nextfaze.poweradapters
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 
 @CheckResult fun PowerAdapter.toListAdapter() = PowerAdapters.toListAdapter(this)

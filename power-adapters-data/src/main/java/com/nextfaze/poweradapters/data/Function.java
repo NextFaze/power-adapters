@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public interface Function<F, T> {
     @NonNull

@@ -1,10 +1,11 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 /** An adapter used for testing that has stable IDs. */
 public class FakeLongAdapter extends ListAdapter<Long> {

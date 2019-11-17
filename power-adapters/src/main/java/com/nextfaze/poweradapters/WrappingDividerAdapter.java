@@ -1,9 +1,6 @@
 package com.nextfaze.poweradapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +10,13 @@ import com.nextfaze.poweradapters.internal.WeakMap;
 
 import java.util.List;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;
 
 /** Implements dividers by wrapping each item in another view, which then decorates the item with dividers. */

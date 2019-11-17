@@ -1,9 +1,9 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.UiThread;
-
 import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

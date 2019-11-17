@@ -1,11 +1,13 @@
 package com.nextfaze.poweradapters.binding;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
+
 import com.nextfaze.poweradapters.PowerAdapter;
 
 import java.util.Collection;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Used to determine which {@link Binder} should be used to bind an item to a {@link View} in a {@link PowerAdapter}.

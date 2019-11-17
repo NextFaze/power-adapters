@@ -1,15 +1,14 @@
 package com.nextfaze.poweradapters.rxjava2.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
-
 import java.util.concurrent.Callable;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Action;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
 
 /** For internal use only. */

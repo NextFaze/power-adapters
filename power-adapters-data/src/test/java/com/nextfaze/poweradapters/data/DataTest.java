@@ -1,7 +1,5 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
-
 import com.nextfaze.poweradapters.DataObserver;
 
 import org.junit.Before;
@@ -11,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
+
+import androidx.annotation.NonNull;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.anyInt;

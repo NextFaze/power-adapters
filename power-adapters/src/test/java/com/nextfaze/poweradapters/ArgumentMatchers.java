@@ -1,7 +1,8 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import org.mockito.ArgumentMatcher;
+
+import androidx.annotation.NonNull;
 
 public final class ArgumentMatchers {
     private ArgumentMatchers() {

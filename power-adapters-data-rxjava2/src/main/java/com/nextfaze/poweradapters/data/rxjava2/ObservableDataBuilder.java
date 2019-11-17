@@ -1,13 +1,12 @@
 package com.nextfaze.poweradapters.data.rxjava2;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.nextfaze.poweradapters.data.Data;
 import com.nextfaze.poweradapters.rxjava2.EqualityFunction;
 
 import java.util.Collection;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 

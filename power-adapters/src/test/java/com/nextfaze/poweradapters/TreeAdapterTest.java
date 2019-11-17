@@ -1,7 +1,6 @@
 package com.nextfaze.poweradapters;
 
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -26,6 +25,8 @@ import org.robolectric.RuntimeEnvironment;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import androidx.annotation.NonNull;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;

@@ -1,8 +1,9 @@
 package com.nextfaze.poweradapters;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Matchers.any;

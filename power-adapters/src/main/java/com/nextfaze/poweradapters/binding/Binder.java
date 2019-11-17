@@ -1,7 +1,5 @@
 package com.nextfaze.poweradapters.binding;
 
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,6 +9,9 @@ import com.nextfaze.poweradapters.PowerAdapter;
 import com.nextfaze.poweradapters.ViewFactory;
 
 import java.util.List;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 
 import static com.nextfaze.poweradapters.ViewFactories.asViewFactory;
 import static com.nextfaze.poweradapters.internal.AdapterUtils.layoutInflater;

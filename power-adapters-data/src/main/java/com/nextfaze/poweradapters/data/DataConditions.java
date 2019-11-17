@@ -1,8 +1,9 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.NonNull;
 import com.nextfaze.poweradapters.Condition;
 import com.nextfaze.poweradapters.Predicate;
+
+import androidx.annotation.NonNull;
 
 public final class DataConditions {
 

@@ -1,6 +1,6 @@
 package com.nextfaze.poweradapters.rxjava2
 
-import android.support.annotation.CheckResult
+import androidx.annotation.CheckResult
 import com.nextfaze.poweradapters.Condition
 import io.reactivex.Observable
 

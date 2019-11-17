@@ -1,13 +1,13 @@
 package com.nextfaze.poweradapters.data;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.io.InterruptedIOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static com.nextfaze.poweradapters.internal.Preconditions.checkNotNull;
 

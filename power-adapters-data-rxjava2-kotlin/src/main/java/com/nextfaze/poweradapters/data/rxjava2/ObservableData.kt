@@ -1,8 +1,8 @@
 package com.nextfaze.poweradapters.data.rxjava2
 
-import android.support.annotation.CheckResult
-import android.support.v7.util.DiffUtil
-import android.support.v7.util.ListUpdateCallback
+import androidx.annotation.CheckResult
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListUpdateCallback
 import com.nextfaze.poweradapters.data.Data
 import io.reactivex.Maybe
 import io.reactivex.Observable

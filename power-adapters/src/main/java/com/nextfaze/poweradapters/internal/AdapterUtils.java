@@ -1,11 +1,12 @@
 package com.nextfaze.poweradapters.internal;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.RestrictTo;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import static android.support.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+import androidx.annotation.NonNull;
+import androidx.annotation.RestrictTo;
+
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 @RestrictTo(LIBRARY_GROUP)
 public final class AdapterUtils {

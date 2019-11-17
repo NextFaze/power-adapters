@@ -1,10 +1,10 @@
 package com.nextfaze.poweradapters.sample.files;
 
-import android.support.annotation.NonNull;
-
 import com.nextfaze.poweradapters.data.ArrayData;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 @Deprecated
 final class DirectoryData extends ArrayData<File> {
