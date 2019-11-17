@@ -5,5 +5,5 @@ dependencies {
     api project(':power-adapters-rxjava2')
     api rootProject.ext.rxJava2
     api rootProject.ext.rxAndroid2
-    implementation rootProject.ext.supportRecyclerView
+    implementation rootProject.ext.androidXRecyclerView
 }

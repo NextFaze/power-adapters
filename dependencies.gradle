@@ -3,29 +3,21 @@ ext {
     androidMavenGradlePlugin = 'com.github.dcendents:android-maven-gradle-plugin:2.0'
     minSdkVersion = 14
     compileSdkVersion = 28
-    supportVersion = '28.0.0'
 
     kotlinVersion = '1.3.41'
     kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     kotlinStdlib = "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-    supportAnnotations = "com.android.support:support-annotations:$supportVersion"
-    supportRecyclerView = "com.android.support:recyclerview-v7:$supportVersion"
-    supportTransition = "com.android.support:transition:$supportVersion"
-    supportAppCompat = "com.android.support:appcompat-v7:$supportVersion"
-    supportV4 = "com.android.support:support-v4:$supportVersion"
-    supportCoreUtils = "com.android.support:support-core-utils:$supportVersion"
-    supportCoreUi = "com.android.support:support-core-ui:$supportVersion"
-    supportDesign = "com.android.support:design:$supportVersion"
-    supportCardview = "com.android.support:cardview-v7:$supportVersion"
-    supportVectorDrawable = "com.android.support:support-vector-drawable:$supportVersion"
+    androidXAnnotation = "androidx.annotation:annotation:1.1.0"
+    androidXRecyclerView = "androidx.recyclerview:recyclerview:1.0.0"
+    androidXViewPager = "androidx.viewpager:viewpager:1.0.0"
+    androidXTransition = "androidx.transition:transition:1.2.0"
+    androidXCardView = "androidx.cardview:cardview:1.0.0"
+    androidXVectorDrawable = "androidx.vectordrawable:vectordrawable:1.1.0"
 
-    testingSupportVersion = '3.0.2'
-    testingRulesVersion = '1.0.2'
-    supportTestRules = "com.android.support.test:rules:$testingRulesVersion"
-    supportTestRunner = "com.android.support.test:runner:$testingRulesVersion"
-    supportTestEspresso = "com.android.support.test.espresso:espresso-core:$testingSupportVersion"
+    androidXTestRules = "androidx.test:rules:1.2.0"
+    androidXTestRunner = "androidx.test:runner:1.2.0"
 
     robolectric = 'org.robolectric:robolectric:4.0-alpha-2'
     mockito = 'org.mockito:mockito-core:2.19.0'

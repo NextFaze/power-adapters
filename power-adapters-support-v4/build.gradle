@@ -2,5 +2,5 @@ project.configureLibrary(this)
 
 dependencies {
     api project(':power-adapters')
-    api rootProject.ext.supportCoreUi
+    api rootProject.ext.androidXViewPager
 }

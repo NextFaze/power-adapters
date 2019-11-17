@@ -62,7 +62,7 @@ ext.configureLibrary = { proj ->
         testImplementation proj.kotlinStdlib
         testImplementation proj.kotlinReflect
         testImplementation project(':power-adapters-test')
-        api proj.supportAnnotations
+        api proj.androidXAnnotation
     }
 
     apply plugin: 'com.github.dcendents.android-maven'

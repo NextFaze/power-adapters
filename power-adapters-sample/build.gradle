@@ -44,10 +44,9 @@ dependencies {
     implementation rootProject.ext.kotlinStdlib
 
     // Support
-    implementation rootProject.ext.supportTransition
-    implementation rootProject.ext.supportAppCompat
-    implementation rootProject.ext.supportCardview
-    implementation rootProject.ext.supportVectorDrawable
+    implementation rootProject.ext.androidXTransition
+    implementation rootProject.ext.androidXCardView
+    implementation rootProject.ext.androidXVectorDrawable
 
     // Architecture Components
     def architectureComponentsVersion = '1.1.1'
@@ -65,10 +64,10 @@ dependencies {
     implementation rootProject.ext.rxAndroid2
 
     // RxBinding 2
-    def rxBinding2Version = '2.1.1'
-    implementation "com.jakewharton.rxbinding2:rxbinding-kotlin:$rxBinding2Version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:$rxBinding2Version"
-    implementation "com.jakewharton.rxbinding2:rxbinding-recyclerview-v7-kotlin:$rxBinding2Version"
+    def rxBindingVersion = '3.0.0'
+    implementation "com.jakewharton.rxbinding3:rxbinding:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-appcompat:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-recyclerview:$rxBindingVersion"
 
     // RxReplayingShare 2
     implementation 'com.jakewharton.rx2:replaying-share-kotlin:2.0.1'

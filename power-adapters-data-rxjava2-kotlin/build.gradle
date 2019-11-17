@@ -3,5 +3,5 @@ project.configureLibrary(this)
 dependencies {
     api project(':power-adapters-data-rxjava2')
     api rootProject.ext.kotlinStdlib
-    implementation rootProject.ext.supportRecyclerView
+    implementation rootProject.ext.androidXRecyclerView
 }

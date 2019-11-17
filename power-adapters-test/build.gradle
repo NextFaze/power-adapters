@@ -28,5 +28,5 @@ dependencies {
     api rootProject.ext.kotlinStdlib
     api rootProject.ext.kotlinReflect
     api rootProject.ext.junit
-    api rootProject.ext.supportAnnotations
+    api rootProject.ext.androidXAnnotation
 }
