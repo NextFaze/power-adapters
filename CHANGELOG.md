@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.24.2
+
+_2020-04-08_
+
+* Fix bug where `observableData` default loading behavior didn't cease loading when an empty list was emitted
+
 ## Version 0.24.1
 
 _2019-09-09_

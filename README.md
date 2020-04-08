@@ -67,8 +67,8 @@ Power adapters are compatible with the following collection view classes:
 Get it from Maven Central, using Gradle:
 
 ```groovy
-implementation 'com.nextfaze.poweradapters:power-adapters:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.24.1'
+implementation 'com.nextfaze.poweradapters:power-adapters:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7:0.24.2'
 ```
 
 ## Basic
@@ -102,8 +102,8 @@ recyclerView.setAdapter(RecyclerPowerAdapters.toRecyclerAdapter(tweetsAdapter));
 RxJava modules are available. Simply append `-rxjava2` to get the RxJava module:
 
 ```groovy
-implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2:0.24.1'
+implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2:0.24.2'
 ```
 
 ## Kotlin
@@ -111,11 +111,11 @@ implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2:0.24.1'
 Kotlin modules are also provided for most modules. Append `-kotlin` to get the Kotlin module:
 
 ```groovy
-implementation 'com.nextfaze.poweradapters:power-adapters-kotlin:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2-kotlin:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2-kotlin:0.24.1'
-implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.24.1'
+implementation 'com.nextfaze.poweradapters:power-adapters-kotlin:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-kotlin:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-rxjava2-kotlin:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-data-rxjava2-kotlin:0.24.2'
+implementation 'com.nextfaze.poweradapters:power-adapters-recyclerview-v7-kotlin:0.24.2'
 ```
 
 Some of the Kotlin APIs include:
@@ -317,7 +317,7 @@ change. This way you don't need to reload or parcel/unparcel all of your list re
 object comprises much of the repetitive asynchronous UI "glue" code you'd otherwise have to write (and debug) yourself.
 
 ```groovy
-implementation 'com.nextfaze.poweradapters:power-adapters-data:0.24.1'
+implementation 'com.nextfaze.poweradapters:power-adapters-data:0.24.2'
 ```
 
 ### Basic Data Usage
