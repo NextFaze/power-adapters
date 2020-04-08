@@ -129,8 +129,10 @@ private class KObservableData<T : Any>(
 
     private fun subscribeIfAppropriate(loadType: LoadType) {
         if (dataObserverCount > 0 && disposables.size() <= 0) {
+            val content = contentsSupplier(loadType).replay(1).refCount()
+
             // Content
-            val changes = contentsSupplier(loadType)
+            val changes = content
                     .map { (it as? List<T>) ?: it.toList() }
                     .startWith(list)
                     .buffer(2, 1)
@@ -139,12 +141,10 @@ private class KObservableData<T : Any>(
                     .concatMapMaybe { (prev, next) ->
                         computeChangeDispatch(prev, next).map { dispatch -> Change(next, dispatch) }
                     }
-                    .replay(1)
-                    .refCount()
             disposables.add(changes.subscribe(::applyChange, ::notifyError))
 
             // Loading
-            val loading = loadingSupplier?.invoke(loadType) ?: changes
+            val loading = loadingSupplier?.invoke(loadType) ?: content
                     .onErrorResumeNext(Observable.empty())
                     .take(1)
                     .map { false }
@@ -153,7 +153,7 @@ private class KObservableData<T : Any>(
             disposables.add(loading.subscribe(::setLoading, ::notifyError))
 
             // Available
-            val available = availableSupplier?.invoke(loadType) ?: changes
+            val available = availableSupplier?.invoke(loadType) ?: content
                     .onErrorResumeNext(Observable.empty())
                     .take(1)
                     .map { 0 }

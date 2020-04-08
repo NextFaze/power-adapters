@@ -77,8 +77,13 @@ class ObservableDataTest {
         observableData(contents = { Observable.just<List<String>>(listOf("a")) })
                 .test()
                 .assertLoadingValues(false, true, false)
-        observableData(contents = { Observable.just<List<String>>(emptyList()) })
-                .test()
+        // Check that loading stops when an empty list is emitted
+        observableData(
+                // Never ending stream
+                contents = { Observable.just(emptyList<Item>()).concatWith(Observable.never()) },
+                // Explicitly verify behavior with fine-grained strategy
+                diffStrategy = Item.DIFF_STRATEGY
+        ).test()
                 .assertLoadingValues(false, true, false)
     }
 
@@ -88,11 +93,7 @@ class ObservableDataTest {
         val items = listOf(Item(1, "a"), Item(2, "b"))
         observableData(
                 contents = { Observable.just(items) },
-                diffStrategy = DiffStrategy.FineGrained(
-                        identityEqual = { a, b -> a.id == b.id },
-                        contentEqual = { a, b -> a.name == b.name },
-                        detectMoves = false
-                )
+                diffStrategy = Item.DIFF_STRATEGY
         ).test {
             assertLoadingValues(false, true, false)
             assertElementValues(emptyList(), items)
@@ -105,11 +106,7 @@ class ObservableDataTest {
         var items = listOf(Item(1, "a"))
         val data = observableData(
                 contents = { Observable.defer { Observable.just(items) } },
-                diffStrategy = DiffStrategy.FineGrained(
-                        identityEqual = { a, b -> a.id == b.id },
-                        contentEqual = { a, b -> a.name == b.name },
-                        detectMoves = false
-                )
+                diffStrategy = Item.DIFF_STRATEGY
         )
         data.test { observing = false }
         items = listOf(Item(1, "a"), Item(2, "b"))
@@ -205,11 +202,7 @@ class ObservableDataTest {
                             listOf(Item(2, "b"), Item(1, "a"))
                     )
                 },
-                diffStrategy = DiffStrategy.FineGrained(
-                        identityEqual = { a, b -> a.id == b.id },
-                        contentEqual = { a, b -> a.name == b.name },
-                        detectMoves = false
-                )
+                diffStrategy = Item.DIFF_STRATEGY
         ).test().assertChangeNotifications(
                 InsertEvent(0, 2),
                 RemoveEvent(1, 1),
@@ -313,5 +306,13 @@ class ObservableDataTest {
         assertThat(capturedLoadType).isEqualTo(LoadType.RELOAD)
     }
 
-    private data class Item(val id: Int, val name: String)
+    private data class Item(val id: Int, val name: String) {
+        companion object {
+            val DIFF_STRATEGY = DiffStrategy.FineGrained<Item>(
+                    identityEqual = { a, b -> a.id == b.id },
+                    contentEqual = { a, b -> a.name == b.name },
+                    detectMoves = false
+            )
+        }
+    }
 }
