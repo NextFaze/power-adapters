@@ -7,6 +7,8 @@ import com.nextfaze.poweradapters.data.Data
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Scheduler
+import io.reactivex.android.MainThreadDisposable.verifyMainThread
+import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlin.math.min
@@ -21,25 +23,27 @@ import kotlin.math.min
  * the first emission. If `null`, the resulting data considers itself in a loading state until the first emission
  * of the content observable.
  * @param diffStrategy The strategy used to detect changes in content.
- * @param diffScheduler The [Scheduler] used to calculate some diffs. Changing this to
- * [Schedulers.trampoline] may be useful for ensuring change notifications happen synchronously,
+ * @param diffComputation Determines which thread is used to compute diffs. Changing this to
+ * [DiffComputation.Synchronous] may be useful for ensuring change notifications happen synchronously,
  * which can facilitate certain animations.
- * Uses the [computation scheduler][Schedulers.computation] by default.
+ * Uses [DiffComputation.Asynchronous] by default.
  */
 @CheckResult fun <T : Any> observableData(
         contents: (loadType: LoadType) -> Observable<out Collection<T>>,
         available: ((loadType: LoadType) -> Observable<Int>)? = null,
         loading: ((loadType: LoadType) -> Observable<Boolean>)? = null,
         diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained,
-        diffScheduler: Scheduler = Schedulers.computation()
-): Data<T> = KObservableData(contents, available, loading, diffStrategy, diffScheduler)
+        diffComputation: DiffComputation = DiffComputation.Asynchronous()
+): Data<T> = KObservableData(contents, available, loading, diffStrategy, diffComputation)
 
 /** Indicates the reason [Data] is subscribing to an `Observable` data source. */
 enum class LoadType {
     /** The [Data] is subscribing because at least one observer is registered. */
     IMPLICIT,
+
     /** The [Data] is subscribing because [Data.refresh] was invoked. */
     REFRESH,
+
     /** The [Data] is subscribing because [Data.reload] was invoked. */
     RELOAD
 }
@@ -68,19 +72,28 @@ sealed class DiffStrategy<out T : Any> {
 
 @CheckResult fun <T : Any> Observable<out Collection<T>>.toData(
         diffStrategy: DiffStrategy<T> = DiffStrategy.CoarseGrained,
-        diffScheduler: Scheduler = Schedulers.computation()
+        diffComputation: DiffComputation = DiffComputation.Asynchronous()
 ): Data<T> = observableData(
         contents = { this },
         diffStrategy = diffStrategy,
-        diffScheduler = diffScheduler
+        diffComputation = diffComputation
 )
+
+/** Determines the thread used to compute diffs. */
+sealed class DiffComputation {
+    /** Compute diffs on the current thread. If used, the source [Observable] **must** emit on the main thread. */
+    object Synchronous : DiffComputation()
+
+    /** Compute diffs on a worker thread specified by [scheduler]. */
+    class Asynchronous(val scheduler: Scheduler = Schedulers.computation()) : DiffComputation()
+}
 
 private class KObservableData<T : Any>(
         private val contentsSupplier: (loadType: LoadType) -> Observable<out Collection<T>>,
         private val availableSupplier: ((loadType: LoadType) -> Observable<Int>)? = null,
         private val loadingSupplier: ((loadType: LoadType) -> Observable<Boolean>)? = null,
         private val diffStrategy: DiffStrategy<T>,
-        private val diffScheduler: Scheduler
+        private val diffComputation: DiffComputation
 ) : Data<T>() {
 
     private var list = emptyList<T>()
@@ -140,6 +153,14 @@ private class KObservableData<T : Any>(
                     .filter { it.size == 2 }
                     .concatMapMaybe { (prev, next) ->
                         computeChangeDispatch(prev, next).map { dispatch -> Change(next, dispatch) }
+                    }
+                    .run {
+                        when (diffComputation) {
+                            // Apply immediately
+                            is DiffComputation.Synchronous -> this
+                            // Apply in sequence on main thread
+                            is DiffComputation.Asynchronous -> observeOn(mainThread())
+                        }
                     }
             disposables.add(changes.subscribe(::applyChange, ::notifyError))
 
@@ -281,11 +302,19 @@ private class KObservableData<T : Any>(
             else -> Maybe.fromCallable<ChangeDispatch<T>> {
                 val diffResult = DiffUtil.calculateDiff(diffUtilCallback(oldList = oldList, newList = newList), detectMoves)
                 return@fromCallable { diffResult.dispatchUpdatesTo(listUpdateCallback) }
-            }.subscribeOn(diffScheduler)
+            }
+        }.run {
+            when (diffComputation) {
+                // Compute on current thread.
+                is DiffComputation.Synchronous -> this
+                // Compute on specified scheduler.
+                is DiffComputation.Asynchronous -> subscribeOn(diffComputation.scheduler)
+            }
         }
     }
 
-    private fun applyChange(change: Change<T>) = runOnUiThread {
+    private fun applyChange(change: Change<T>) {
+        verifyMainThread()
         list = change.list
         change.dispatch(this)
     }

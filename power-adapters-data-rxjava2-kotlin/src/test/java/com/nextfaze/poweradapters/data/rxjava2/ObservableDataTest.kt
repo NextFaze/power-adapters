@@ -73,7 +73,8 @@ class ObservableDataTest {
                 .assertLoadingValues(false, true, false)
     }
 
-    @Test fun `data is indicated as loading until first content emission if no loading observable specified`() {
+    @Test
+    fun `data is indicated as loading until first content emission if no loading observable specified`() {
         observableData(contents = { Observable.just<List<String>>(listOf("a")) })
                 .test()
                 .assertLoadingValues(false, true, false)
@@ -87,7 +88,8 @@ class ObservableDataTest {
                 .assertLoadingValues(false, true, false)
     }
 
-    @Test fun `data ceases loading synchronously with first content emission if no loading observable specified`() {
+    @Test
+    fun `data ceases loading synchronously with first content emission if no loading observable specified`() {
         val testScheduler = TestScheduler()
         RxAndroidPlugins.setMainThreadSchedulerHandler { testScheduler }
         val items = listOf(Item(1, "a"), Item(2, "b"))
@@ -96,13 +98,38 @@ class ObservableDataTest {
                 diffStrategy = Item.DIFF_STRATEGY
         ).test {
             assertLoadingValues(false, true, false)
-            assertElementValues(emptyList(), items)
             testScheduler.triggerActions()
             assertNoErrors()
         }
     }
 
-    @Test fun `notifications are dispatched based on existing data buffer when contents subscribed`() {
+    @Test fun `changes are applied immediately if sync diff computation used`() {
+        val items = listOf(Item(1, "a"), Item(2, "b"))
+        observableData(
+                contents = { Observable.just<List<Item>>(items) },
+                diffComputation = DiffComputation.Synchronous
+        ).test {
+            assertSize(2)
+        }
+    }
+
+    @Test
+    fun `changes are applied after being posted to main thread if async diff computation used`() {
+        val testScheduler = TestScheduler()
+        RxAndroidPlugins.setMainThreadSchedulerHandler { testScheduler }
+        val items = listOf(Item(1, "a"), Item(2, "b"))
+        observableData(
+                contents = { Observable.just<List<Item>>(items) },
+                diffComputation = DiffComputation.Asynchronous()
+        ).test {
+            assertSize(0)
+            testScheduler.triggerActions()
+            assertSize(2)
+        }
+    }
+
+    @Test
+    fun `notifications are dispatched based on existing data buffer when contents subscribed`() {
         var items = listOf(Item(1, "a"))
         val data = observableData(
                 contents = { Observable.defer { Observable.just(items) } },
@@ -169,7 +196,8 @@ class ObservableDataTest {
                 .assertAvailableValues(Int.MAX_VALUE, 0)
     }
 
-    @Test fun `fine-grained notifications are dispatched if fine-grained diff strategy is supplied`() {
+    @Test
+    fun `fine-grained notifications are dispatched if fine-grained diff strategy is supplied`() {
         observableData(
                 contents = {
                     Observable.just(
@@ -283,7 +311,8 @@ class ObservableDataTest {
         assertThat(subscribeCount).isEqualTo(1)
     }
 
-    @Test fun `data passes implicit load type to observable functions when first observer registers`() {
+    @Test
+    fun `data passes implicit load type to observable functions when first observer registers`() {
         var capturedLoadType: LoadType? = null
         val data = observableData<String>(contents = { capturedLoadType = it; Observable.empty() })
         data.test()
