@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.25.0
+
+_2020-04-27_
+
+* Update `observableData` to accept a `DiffComputation` arg to enforce either synchronous or asynchronous diff computation
+
 ## Version 0.24.2
 
 _2020-04-08_
