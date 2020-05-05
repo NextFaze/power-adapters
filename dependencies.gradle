@@ -10,7 +10,7 @@ ext {
     kotlinReflect = "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
     androidXAnnotation = "androidx.annotation:annotation:1.1.0"
-    androidXRecyclerView = "androidx.recyclerview:recyclerview:1.0.0"
+    androidXRecyclerView = "androidx.recyclerview:recyclerview:1.1.0"
     androidXViewPager = "androidx.viewpager:viewpager:1.0.0"
     androidXTransition = "androidx.transition:transition:1.2.0"
     androidXCardView = "androidx.cardview:cardview:1.0.0"
