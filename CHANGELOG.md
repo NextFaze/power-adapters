@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 0.26.0
+
+_2020-05-05_
+
+* Migrate to AndroidX
+
 ## Version 0.25.0
 
 _2020-04-27_
